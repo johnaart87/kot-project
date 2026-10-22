@@ -366,6 +366,45 @@ details.more summary::-webkit-details-marker{display:none}
 .famtab td{padding:2px 3px}
 .famtab input{width:100%;min-width:44px;font-size:12px}
 @media (max-width:760px){ .patwrap{grid-template-columns:1fr} .patgal{max-height:240px} .pated{max-height:none} }
+/* Revit «Переопределения видимости/графики» window */
+#vgDlg{z-index:70}
+.sheetd.vgwin{width:min(1180px,100%);gap:0;padding:0;overflow:hidden;position:relative}
+.vgtitle{padding:10px 14px;font-size:14px;border-bottom:1px solid var(--line);background:var(--chrome)}
+.vgtabs{display:flex;gap:2px;padding:8px 10px 0;background:var(--chrome);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.vgtabs button{border:1px solid var(--line);border-bottom:0;background:var(--chrome);color:var(--ink);font-size:12.5px;padding:4px 10px;border-radius:3px 3px 0 0;cursor:pointer;margin-bottom:-1px}
+.vgtabs button[aria-selected="true"]{background:var(--panel);font-weight:600}
+.vgpane{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.vgtop{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12.5px}
+.vghint{color:var(--muted)}
+.vgtop2{display:grid;grid-template-columns:auto minmax(140px,220px);gap:6px 10px;align-items:center;font-size:12.5px;justify-content:start}
+.vggrid{border:1px solid var(--line);overflow:auto;max-height:min(52vh,520px);background:var(--panel)}
+.vgt{border-collapse:collapse;width:100%;font-size:12.5px;min-width:900px}
+.vgt th{background:var(--chrome);font-weight:500;border:1px solid var(--line);padding:3px 6px;text-align:center;position:sticky;z-index:1}
+.vgt thead tr:first-child th{top:0}
+.vgt thead tr:nth-child(2) th{top:24px}
+.vgt td{border:1px solid var(--line-soft);padding:0 4px;height:22px;white-space:nowrap}
+.vgt td.na{background:repeating-linear-gradient(45deg,#cfcfcf 0 2px,#f2f2f2 2px 4px)}
+.vgt td.c{cursor:pointer;min-width:100px;position:relative}
+.vgt td.c:hover{background:var(--accent-soft)}
+.vgt td.c.sel{outline:2px solid var(--sel);outline-offset:-2px}
+.vgt td.c .ovb{position:absolute;inset:1px;border:1px solid var(--line);background:var(--chrome);font-size:11.5px;cursor:pointer;color:var(--ink);border-radius:2px}
+.vgt td.nm{min-width:240px}
+.vgt td.nm .tg{display:inline-block;width:14px;text-align:center;border:1px solid var(--line);font-size:10px;line-height:12px;margin-right:4px;cursor:pointer;color:var(--muted);background:var(--panel)}
+.vgt td.nm .tg.leaf{visibility:hidden}
+.vgt tr.child td.nm{padding-left:26px}
+.vgt tr.rs td{background:var(--accent-soft)}
+.vgt td select{font-size:12px;width:100%;border:0;background:transparent}
+.vgt .sw{display:inline-block;width:34px;vertical-align:middle;background:var(--c);height:var(--w)}
+.vgt canvas{vertical-align:middle;border:1px solid var(--line-soft)}
+.vgbtm{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center}
+.vgcat{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.vgfoot{display:flex;justify-content:flex-end;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--chrome)}
+.vgpop{position:absolute;z-index:5;min-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:6px;box-shadow:0 12px 40px var(--shade);padding:12px;display:flex;flex-direction:column;gap:8px;font-size:12.5px}
+.vgpop h4{margin:0 0 2px;font-size:13.5px}
+.vgpop .gr{display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center}
+.vgpop fieldset{border:1px solid var(--line);border-radius:4px;padding:6px 8px;margin:0}
+.vgpop legend{font-size:12px;color:var(--muted);padding:0 4px}
+.vgpop input[type=color]{width:42px;height:24px;padding:0;border:1px solid var(--line);border-radius:4px;background:none}
 /* «Видимость/графика» table */
 .vgtab td{white-space:nowrap}
 .vgtab .vgname,.vgtab .vgcell{border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;padding:2px 4px;border-radius:3px;text-align:left}
@@ -745,6 +784,22 @@ details.more summary::-webkit-details-marker{display:none}
       <div class="field2" style="margin-top:8px"><label for="aiKey">Ключ API</label><input id="aiKey" type="password" autocomplete="off" placeholder="sk-ant-…"></div>
       <div class="row" style="margin-top:8px"><button class="btn primary" id="aiSave">Сохранить ключ</button><button class="btn danger" id="aiForget">Удалить ключ</button></div>
     </div>
+  </div>
+</div>
+
+<div class="modal" id="vgDlg" hidden role="dialog" aria-modal="true" aria-labelledby="vgTitle">
+  <div class="sheetd vgwin">
+    <div class="vgtitle" id="vgTitle">Переопределения видимости/графики для: </div>
+    <div class="vgtabs" role="tablist"><button role="tab" data-vgt="model">Категории модели</button><button role="tab" data-vgt="anno">Категории аннотаций</button></div>
+    <div class="vgpane">
+      <div class="vgtop"><label class="pchk"><input type="checkbox" id="vgShow"> <span id="vgShowL">Показывать категории модели на этом виде</span></label><span class="vghint">Если категория не отмечена, то она будет невидимой.</span></div>
+      <div class="vgtop2"><label for="vgFind">Поиск по имени катег.:</label><input type="search" id="vgFind"><label for="vgDisc">Фильтр по дисциплинам:</label><select id="vgDisc"><option value="">&lt;показать все&gt;</option><option value="arch">Архитектура</option><option value="str">Конструкции</option><option value="int">Интерьер</option></select></div>
+      <div class="vggrid" id="vgGrid"></div>
+      <div class="vgbtm"><div class="row"><button class="btn sm" id="vgAll">Все</button><button class="btn sm" id="vgNone">Ничего</button><button class="btn sm" id="vgInv">Инвертировать</button><button class="btn sm" id="vgExp">Развернуть все</button></div>
+        <div class="vgcat">Переопределение категории <button class="btn sm" id="vgOvL" disabled>Линии…</button><button class="btn sm" id="vgOvP" disabled>Штриховки…</button><button class="btn sm" id="vgOvH" disabled>Полутона</button></div></div>
+    </div>
+    <div class="vgfoot"><button class="btn primary" id="vgOk">ОК</button><button class="btn" id="vgCancel">Отмена</button><button class="btn" id="vgApply">Применить</button></div>
+    <div class="vgpop" id="vgPop" hidden></div>
   </div>
 </div>
 
@@ -1930,7 +1985,7 @@ function sanOv(ov){
   return Object.fromEntries(Object.entries(ov || {}).filter(([k, v]) => typeof k === 'string' && v && typeof v === 'object').map(([k, v]) => [k.slice(0, 60), {
     ...(v.vis === false ? { vis:false } : {}), ...(v.half ? { half:true } : {}), ...(col(v.c) ? { c:v.c } : {}), ...(wt(v.w) ? { w:Math.round(+v.w) } : {}),
     ...(col(v.cc) ? { cc:v.cc } : {}), ...(wt(v.cw) ? { cw:Math.round(+v.cw) } : {}), ...(Number.isFinite(+v.tr) && +v.tr > 0 ? { tr:Math.min(+v.tr, 0.95) } : {}),
-    ...(pats(v.sp) ? { sp:pats(v.sp) } : {}), ...(pats(v.cp) ? { cp:pats(v.cp) } : {}) }]).filter(([, v]) => Object.keys(v).length));
+    ...(pats(v.sp) ? { sp:pats(v.sp) } : {}), ...(pats(v.cp) ? { cp:pats(v.cp) } : {}), ...(['coarse', 'medium', 'fine'].includes(v.dl) ? { dl:v.dl } : {}) }]).filter(([, v]) => Object.keys(v).length));
 }
 function sanitizeTpls(arr){
   if (!Array.isArray(arr)) return DEFAULT_TPLS();
@@ -1939,7 +1994,10 @@ function sanitizeTpls(arr){
     ...(t.look ? { look:sanitizeLook(t.look) } : t.id === 't-survey' ? { look:SURVEY_LOOK() } : {}) }));
 }
 const tplOfView = v => v && v.tpl && TPLS.find(t => t.id === v.tpl);
-const ovKeys = it => { if (!it) return []; const k = it.type === 'circle' ? 'line' : (it.type === 'adim' || it.type === 'rdim') ? 'dim' : it.type; if (it.type === 'fam'){ const f = famById(it.f); return ['f:' + it.f, ...(f ? ['cat:' + f.cat] : [])]; } return [k]; };
+// override keys, the most specific first; '_model' / '_anno' — «Показывать категории модели / аннотаций на этом виде»
+const ANNO_T = ['dim', 'adim', 'rdim', 'grid', 'line', 'circle', 'text'];
+const ovKeys = it => { if (!it) return []; const k = it.type === 'circle' ? 'line' : (it.type === 'adim' || it.type === 'rdim') ? 'dim' : it.type, all = ANNO_T.includes(it.type) ? '_anno' : '_model';
+  if (it.type === 'fam'){ const f = famById(it.f); return ['f:' + it.f, ...(f ? ['cat:' + f.cat] : []), all]; } return [k, all]; };
 // the template's overrides, then the view's own on top (Revit: view V/G over the template)
 function ovOf(it){
   const v = viewNow(), t = tplOfView(v), keys = ovKeys(it).reverse(); let o = null;
@@ -2215,8 +2273,10 @@ function rebuild(quiet){
   CUTS = computeCuts();
   for (const it of items){
     if (!shown(it) || (S.render && visState(it) === 'demo')) continue;
-    const B = BUILDERS[it.type], obj = B ? B(it) : null;
-    if (obj){ obj.position.y += baseY(it); applyOv(obj, ovOf(it)); if (S.reveal && viewHidden(it)) obj.traverse(o => { if (o.material) o.material = o.isMesh ? M.revealM : M.revealL; }); model.add(obj); }
+    // Revit «Уровень детализации» of a category (view / template override) for this element only
+    const ov0 = ovOf(it), dk = S.detail; if (ov0 && ov0.dl) S.detail = ov0.dl;
+    let obj; try { const B = BUILDERS[it.type]; obj = B ? B(it) : null; } finally { S.detail = dk; }
+    if (obj){ obj.position.y += baseY(it); applyOv(obj, ov0); if (S.reveal && viewHidden(it)) obj.traverse(o => { if (o.material) o.material = o.isMesh ? M.revealM : M.revealL; }); model.add(obj); }
   }
   for (const r of items) if (r.type === 'room' && isSel(r.id)){ const o = buildRoomFill(r); if (o){ o.position.y += baseY(r); model.add(o); } }
   // a floor plan looks at its own level: that level is brought to the ground so annotation stays on top;
@@ -5926,14 +5986,135 @@ function renderTpl(){
       q('win').onchange = e => { L.win = e.target.checked; done(); }; q('hc').onchange = e => { L.hc = e.target.value; done(); };
     }
   }
-  section('Категории модели', TPL_CATS);
-  section('Категории семейств', Object.entries(FAM_CATS).map(([k, n]) => ['cat:' + k, n]));
-  if (fams.length) section('Отдельные семейства', fams.map(f => ['f:' + f.id, `${f.name} (${FAM_CATS[f.cat]})`]));
-  section('Аннотации', TPL_ANNO, true);
+  if (t){
+    // Revit «Шаблоны видов»: parameters of the template; V/G of models and of annotations are edited in their own window
+    const cnt = pre => Object.keys(t.ov).filter(k => pre(k)).length, isAnno = k => k === '_anno' || TPL_ANNO.some(([a]) => a === k);
+    const h3 = document.createElement('h3'); h3.textContent = 'Параметры шаблона вида'; h3.style.cssText = 'font-size:14px;margin:12px 0 4px'; body.insertBefore(h3, body.children[1] || null);
+    const tb = document.createElement('table'); tb.className = 'stdtab'; tb.innerHTML = '<thead><tr><th>Параметр</th><th>Значение</th></tr></thead><tbody>'
+      + `<tr><td>Модели: переопределение видимости/графики</td><td><button class="btn sm" id="tpVGm">Изменить…</button> <span class="ph">${cnt(k => !isAnno(k)) || 'нет'} переопр.</span></td></tr>`
+      + `<tr><td>Аннотации: переопределение видимости/графики</td><td><button class="btn sm" id="tpVGa">Изменить…</button> <span class="ph">${cnt(isAnno) || 'нет'} переопр.</span></td></tr>`
+      + '</tbody>'; body.insertBefore(tb, h3.nextSibling);
+    const open = tab => openVGDlg({ title:`Переопределения видимости/графики для шаблона: ${t.name}`, tab, get:() => t.ov, set:o => { t.ov = o; } });
+    tb.querySelector('#tpVGm').onclick = () => open('model'); tb.querySelector('#tpVGa').onclick = () => open('anno');
+  } else {
+    section('Категории модели', TPL_CATS);
+    section('Категории семейств', Object.entries(FAM_CATS).map(([k, n]) => ['cat:' + k, n]));
+    if (fams.length) section('Отдельные семейства', fams.map(f => ['f:' + f.id, `${f.name} (${FAM_CATS[f.cat]})`]));
+    section('Аннотации', TPL_ANNO, true);
+  }
 }
 function openTpl(id){ VG_VIEW = null; TPL_CUR = id && TPLS.some(t => t.id === id) ? id : (TPLS[0] || {}).id || null; renderTpl(); tplDlg.hidden = false; }
 // Revit VV: visibility/graphics of the open view (its own overrides on top of the template)
-function openVG(v){ v = v || curView(); if (!v || v.kind === 'sheet'){ toast('Откройте план, разрез или 3D-вид'); return; } VG_VIEW = v; VG_OPEN = null; renderTpl(); tplDlg.hidden = false; }
+function openVG(v){
+  v = v || curView(); if (!v || v.kind === 'sheet'){ toast('Откройте план, разрез или 3D-вид'); return; }
+  const t = tplOfView(v);
+  openVGDlg({ title:`Переопределения видимости/графики для: ${v.name}${t ? ` (поверх шаблона «${t.name}»)` : ''}`, get:() => v.ov, set:o => { if (Object.keys(o).length) v.ov = o; else delete v.ov; } });
+}
+/* ---------- Revit «Переопределения видимости/графики для: …»: tabs, a tree of categories, overrides in cells ---------- */
+const vgDlg = $('#vgDlg');
+const VGD = { target:null, draft:{}, tab:'model', open:new Set(), cell:null };
+const VG_DISC = { wall:'arch', door:'arch', window:'arch', floor:'arch', ceiling:'arch', roof:'arch', column:'str', stair:'arch', box:'int', room:'arch' };
+const VG_NA = { room:['pl', 'pp', 'tr', 'cl', 'cp'], door:['cp'], window:['cp'] }; // cells that make no sense for the category (hatched, as in Revit)
+const vgName = (a, b) => a.n.localeCompare(b.n, 'ru');
+function vgRows(){
+  if (VGD.tab === 'anno') return TPL_ANNO.map(([k, n]) => ({ k, n, disc:'arch' })).sort(vgName);
+  const rows = TPL_CATS.map(([k, n]) => ({ k, n, disc:VG_DISC[k] || 'arch' }));
+  for (const [ck, n] of Object.entries(FAM_CATS)) rows.push({ k:'cat:' + ck, n, disc:'int', kids:fams.filter(f => f.cat === ck).map(f => ({ k:'f:' + f.id, n:f.name })).sort(vgName) });
+  return rows.sort(vgName);
+}
+function openVGDlg(target){
+  VGD.target = target; VGD.draft = JSON.parse(JSON.stringify(target.get() || {})); VGD.tab = target.tab || 'model'; VGD.cell = null; VGD.open.clear();
+  $('#vgFind').value = ''; $('#vgDisc').value = ''; $('#vgTitle').textContent = target.title; $('#vgPop').hidden = true; renderVG(); vgDlg.hidden = false;
+}
+function vgSet(k, field, val){
+  const D0 = VGD.draft, cur = { ...(D0[k] || {}) };
+  if (val === undefined || val === null || val === '' || (field === 'vis' && val === true) || (field === 'half' && !val) || (field === 'tr' && !val)) delete cur[field]; else cur[field] = val;
+  if (Object.keys(cur).length) D0[k] = cur; else delete D0[k];
+}
+function renderVG(){
+  document.querySelectorAll('[data-vgt]').forEach(b => b.setAttribute('aria-selected', b.dataset.vgt === VGD.tab));
+  const D0 = VGD.draft, all = VGD.tab === 'anno' ? '_anno' : '_model', anno = VGD.tab === 'anno';
+  $('#vgShow').checked = !(D0[all] && D0[all].vis === false); $('#vgShowL').textContent = anno ? 'Показывать категории аннотаций на этом виде' : 'Показывать категории модели на этом виде';
+  const q = ($('#vgFind').value || '').trim().toLowerCase(), disc = $('#vgDisc').value;
+  const rows = vgRows().filter(r => (!disc || r.disc === disc) && (!q || r.n.toLowerCase().includes(q) || (r.kids || []).some(c => c.n.toLowerCase().includes(q))));
+  const lineSw = (c2, w2) => c2 || w2 ? `<span class="sw" style="--c:${c2 || '#1b252c'};--w:${Math.max(1, Math.min(6, (w2 || 2) / 2))}px"></span>${w2 ? ' <small>' + w2 + '</small>' : ''}` : '';
+  const cols = anno ? ['pl'] : ['pl', 'pp', 'tr', 'cl', 'cp'];
+  const cellHTML = (r, col, o) => {
+    if ((VG_NA[r.k] || []).includes(col)) return `<td class="na"></td>`;
+    const sel = VGD.cell && VGD.cell.k === r.k && VGD.cell.col === col;
+    let inner = col === 'pl' ? lineSw(o.c, o.w) : col === 'cl' ? lineSw(o.cc, o.cw) : col === 'tr' ? (o.tr ? Math.round(o.tr * 100) + ' %' : '') : (patsOn(o[col === 'pp' ? 'sp' : 'cp']) ? `<canvas width="44" height="14" data-pv="${col}"></canvas>` : '');
+    return `<td class="c${sel ? ' sel' : ''}" data-col="${col}">${inner}${sel ? '<button class="ovb" data-ovb="1">Переопределить…</button>' : ''}</td>`;
+  };
+  const rowHTML = (r, child) => {
+    const o = D0[r.k] || {}, has = r.kids && r.kids.length, op = VGD.open.has(r.k);
+    return `<tr data-k="${r.k}" class="${child ? 'child' : ''}${VGD.cell && VGD.cell.k === r.k ? ' rs' : ''}"><td class="nm"><span class="tg${has ? '' : ' leaf'}" data-tg="1">${op ? '−' : '+'}</span><label class="pchk"><input type="checkbox" data-vis="1"${o.vis === false ? '' : ' checked'}> ${esc(r.n)}</label></td>`
+      + cols.map(col => cellHTML(r, col, o)).join('')
+      + `<td style="text-align:center">${(VG_NA[r.k] || []).length > 3 && !anno ? '' : `<input type="checkbox" data-half="1"${o.half ? ' checked' : ''} aria-label="Полутона">`}</td>`
+      + (anno ? '' : `<td><select data-dl="1"><option value="">По виду</option><option value="coarse"${o.dl === 'coarse' ? ' selected' : ''}>Низкий</option><option value="medium"${o.dl === 'medium' ? ' selected' : ''}>Средний</option><option value="fine"${o.dl === 'fine' ? ' selected' : ''}>Высокий</option></select></td>`) + `</tr>`
+      + (has && op ? r.kids.map(c => rowHTML(c, true)).join('') : '');
+  };
+  const head = anno ? `<thead><tr><th rowspan="2">Видимость</th><th>Проекция/Поверхность</th><th rowspan="2">Полутона</th></tr><tr><th>Линии</th></tr></thead>`
+    : `<thead><tr><th rowspan="2">Видимость</th><th colspan="3">Проекция/Поверхность</th><th colspan="2">Сечение</th><th rowspan="2">Полутона</th><th rowspan="2">Уровень детализации</th></tr><tr><th>Линии</th><th>Штриховки</th><th>Прозрачность</th><th>Линии</th><th>Штриховки</th></tr></thead>`;
+  const grid = $('#vgGrid'), top = grid.scrollTop;
+  grid.innerHTML = `<table class="vgt">${head}<tbody>${rows.map(r => rowHTML(r, false)).join('') || '<tr><td colspan="8" style="color:var(--muted)">Ничего не найдено</td></tr>'}</tbody></table>`;
+  grid.scrollTop = top;
+  grid.querySelectorAll('canvas[data-pv]').forEach(c => { const k = c.closest('tr').dataset.k, o = D0[k] || {}; prevPats(c, '#ffffff', c.dataset.pv === 'pp' ? o.sp : o.cp); });
+  grid.querySelectorAll('tr[data-k]').forEach(tr => {
+    const k = tr.dataset.k;
+    tr.querySelector('[data-tg]').onclick = () => { if (VGD.open.has(k)) VGD.open.delete(k); else VGD.open.add(k); renderVG(); };
+    tr.querySelector('[data-vis]').onchange = e => { vgSet(k, 'vis', e.target.checked ? true : false); };
+    const h = tr.querySelector('[data-half]'); if (h) h.onchange = e => vgSet(k, 'half', e.target.checked);
+    const dl = tr.querySelector('[data-dl]'); if (dl) dl.onchange = e => vgSet(k, 'dl', e.target.value || null);
+    tr.querySelectorAll('td.c').forEach(td => {
+      td.onclick = e => { if (e.target.dataset.ovb){ vgPop(k, td.dataset.col, td); return; } VGD.cell = { k, col:td.dataset.col }; renderVG(); };
+      td.ondblclick = () => vgPop(k, td.dataset.col, td);
+    });
+  });
+  for (const id of ['vgOvL', 'vgOvP', 'vgOvH']) $('#' + id).disabled = !VGD.cell;
+}
+// «Графика линий», «Графика штриховки», «Прозрачность»: small Revit-like editors over the table
+function vgPop(k, col, td){
+  const pop = $('#vgPop'), o = VGD.draft[k] || {}, win = vgDlg.querySelector('.vgwin').getBoundingClientRect(), r = td.getBoundingClientRect();
+  const wOpts = cur => `<option value="">&lt;Нет переопределения&gt;</option>` + STD.weights.map((w, i) => `<option value="${i + 1}"${cur === i + 1 ? ' selected' : ''}>${i + 1}</option>`).join('');
+  const fOpts = cur => `<option value="">&lt;Нет переопределения&gt;</option>` + STD.fills.filter(f => f.k !== 'none').map(f => `<option value="${f.id}"${f.id === cur ? ' selected' : ''}>${esc(f.n)}</option>`).join('');
+  const nm = (vgRows().flatMap(x => [x, ...(x.kids || [])]).find(x => x.k === k) || { n:k }).n;
+  let html = '', apply;
+  if (col === 'pl' || col === 'cl'){
+    const kc = col === 'pl' ? 'c' : 'cc', kw = col === 'pl' ? 'w' : 'cw';
+    html = `<h4>Графика линий — ${esc(nm)}${col === 'cl' ? ' (сечение)' : ''}</h4><div class="gr"><span>Цвет</span><span><label class="pchk"><input type="checkbox" id="vpcOn"${o[kc] ? ' checked' : ''}> переопределить</label> <input type="color" id="vpc" value="${o[kc] || '#1b252c'}"></span><span>Вес</span><select id="vpw">${wOpts(o[kw])}</select></div>`;
+    apply = () => { vgSet(k, kc, $('#vpcOn').checked ? $('#vpc').value : null); vgSet(k, kw, $('#vpw').value ? +$('#vpw').value : null); };
+  } else if (col === 'pp' || col === 'cp'){
+    const kp = col === 'pp' ? 'sp' : 'cp', pp = o[kp] || { fg:{ p:'', c:'#2b3439' }, bg:{ p:'', c:'#ffffff' } };
+    const lay = (L, lbl, id) => `<fieldset><legend>${lbl}</legend><div class="gr"><span>Видимый</span><label class="pchk"><input type="checkbox" id="${id}v"${L.p === 'none' ? '' : ' checked'}> показывать</label><span>Образец</span><select id="${id}p">${fOpts(L.p === 'none' ? '' : L.p)}</select><span>Цвет</span><input type="color" id="${id}c" value="${L.c || '#2b3439'}"></div></fieldset>`;
+    html = `<h4>Графика штриховки — ${esc(nm)}${col === 'cp' ? ' (сечение)' : ''}</h4>${lay(pp.fg, 'Передний план', 'vpf')}${lay(pp.bg, 'Фон', 'vpb')}`;
+    apply = () => { const L = id => ({ p:$('#' + id + 'v').checked ? $('#' + id + 'p').value : 'none', c:$('#' + id + 'c').value }); const v2 = { fg:L('vpf'), bg:L('vpb') }; vgSet(k, kp, patsOn(v2) ? v2 : null); };
+  } else {
+    html = `<h4>Прозрачность — ${esc(nm)}</h4><div class="gr"><span>Поверхность, %</span><span><input type="range" id="vpt" min="0" max="95" step="5" value="${Math.round((o.tr || 0) * 100)}"> <b id="vptv">${Math.round((o.tr || 0) * 100)}</b></span></div>`;
+    apply = () => vgSet(k, 'tr', +$('#vpt').value / 100);
+  }
+  pop.innerHTML = html + `<div class="row" style="justify-content:space-between;gap:6px"><button class="btn sm" id="vpClr">Очистить переопределения</button><span class="row" style="gap:6px"><button class="btn sm primary" id="vpOk">ОК</button><button class="btn sm" id="vpNo">Отмена</button></span></div>`;
+  pop.hidden = false;
+  const x = Math.min(Math.max(8, r.left - win.left), win.width - pop.offsetWidth - 8), y = Math.min(r.bottom - win.top + 4, win.height - pop.offsetHeight - 8); pop.style.left = x + 'px'; pop.style.top = Math.max(8, y) + 'px';
+  if ($('#vpt')) $('#vpt').oninput = e => { $('#vptv').textContent = e.target.value; };
+  $('#vpOk').onclick = () => { apply(); pop.hidden = true; renderVG(); };
+  $('#vpNo').onclick = () => { pop.hidden = true; };
+  $('#vpClr').onclick = () => { const f = { pl:['c', 'w'], cl:['cc', 'cw'], pp:['sp'], cp:['cp'], tr:['tr'] }[col]; for (const x2 of f) vgSet(k, x2, null); pop.hidden = true; renderVG(); };
+}
+function vgApply(){ VGD.target.set(JSON.parse(JSON.stringify(VGD.draft))); OVM.clear(); rebuild(); annoDirty = true; scheduleSave(); $('#propsBody').dataset.id = 'x'; updatePanel(); }
+document.querySelectorAll('[data-vgt]').forEach(b => b.onclick = () => { VGD.tab = b.dataset.vgt; VGD.cell = null; $('#vgPop').hidden = true; renderVG(); });
+$('#vgShow').onchange = e => { vgSet(VGD.tab === 'anno' ? '_anno' : '_model', 'vis', e.target.checked ? true : false); };
+$('#vgFind').oninput = renderVG; $('#vgDisc').onchange = renderVG;
+const vgEach = fn => { const q = ($('#vgFind').value || '').trim().toLowerCase(), disc = $('#vgDisc').value; for (const r of vgRows()){ if (disc && r.disc !== disc) continue; if (!q || r.n.toLowerCase().includes(q)) fn(r.k); for (const c of r.kids || []) if (!q || c.n.toLowerCase().includes(q)) fn(c.k); } renderVG(); };
+$('#vgAll').onclick = () => vgEach(k => vgSet(k, 'vis', true));
+$('#vgNone').onclick = () => vgEach(k => vgSet(k, 'vis', false));
+$('#vgInv').onclick = () => vgEach(k => vgSet(k, 'vis', (VGD.draft[k] || {}).vis === false ? true : false));
+$('#vgExp').onclick = () => { for (const r of vgRows()) if (r.kids && r.kids.length) VGD.open.add(r.k); renderVG(); };
+$('#vgOvL').onclick = () => { const c2 = VGD.cell; if (!c2) return; const td = $('#vgGrid').querySelector(`tr[data-k="${CSS.escape(c2.k)}"] td.c[data-col="pl"]`); if (td) vgPop(c2.k, 'pl', td); };
+$('#vgOvP').onclick = () => { const c2 = VGD.cell; if (!c2) return; const td = $('#vgGrid').querySelector(`tr[data-k="${CSS.escape(c2.k)}"] td.c[data-col="pp"]`); if (td) vgPop(c2.k, 'pp', td); };
+$('#vgOvH').onclick = () => { const c2 = VGD.cell; if (!c2) return; vgSet(c2.k, 'half', !(VGD.draft[c2.k] || {}).half); renderVG(); };
+$('#vgApply').onclick = vgApply;
+$('#vgOk').onclick = () => { vgApply(); vgDlg.hidden = true; if (!tplDlg.hidden) renderTpl(); };
+$('#vgCancel').onclick = () => { vgDlg.hidden = true; };
 $('#rbTpl').onclick = () => openTpl(curView().tpl);
 $('#rbVG').onclick = () => openVG();
 $('#tplSel').onchange = e => { TPL_CUR = e.target.value; renderTpl(); };
