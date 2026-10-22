@@ -162,6 +162,24 @@ main{display:grid;grid-template-columns:270px minmax(0,1fr) 330px;min-height:0;p
 #cursor.int{border-radius:0;transform:rotate(45deg);background:color-mix(in srgb,var(--temp) 35%,transparent)}
 #sheetWrap{position:absolute;inset:0;background:var(--bg);overflow:auto;z-index:2}
 #sheetCv{display:block;margin:16px auto;box-shadow:0 6px 24px var(--shade);touch-action:none;cursor:default}
+.dim.wt.el{border-radius:2px 8px 2px 8px}
+.dim.wt.fl{border-width:1px;border-style:dotted;font-weight:600}
+.dim.wt.rf{border-radius:8px 8px 2px 2px}
+.dim.rm{white-space:pre-line;text-align:center;line-height:1.25;font-size:12px;padding:2px 6px;background:color-mix(in srgb,var(--sheet) 88%,transparent);border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);border-radius:0}
+.dim.rm::first-line{font-weight:700}
+.dim.rm.sel{border-color:var(--sel);color:var(--sel)}
+.dim.rm.open{color:var(--bad);border-color:var(--bad)}
+.dim.lv{white-space:pre-line;line-height:1.2;font-size:11px;transform:translate(4px,-100%);text-align:left;border-bottom:1px solid var(--datum);border-radius:0;background:transparent}
+.dim.sx{pointer-events:auto;cursor:pointer;font-weight:700;font-size:13px;background:transparent;padding:0 2px}
+.dim.sx.ie{font-size:11px}
+.dim.sx.sel{color:var(--sel)}
+#handles{position:absolute;inset:0;pointer-events:none;z-index:5}
+.hnd{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;padding:0;pointer-events:auto;cursor:grab;touch-action:none;border:2px solid var(--sheet);background:var(--sel);clip-path:polygon(0 0,100% 50%,0 100%,22% 50%);transform:rotate(var(--a,0rad));box-shadow:none}
+.hnd:hover,.hnd:focus-visible{background:var(--accent);outline:none}
+.hnd.pt{clip-path:none;border-radius:50%;width:14px;height:14px;margin:-7px 0 0 -7px;transform:none}
+.hnd.flip{clip-path:none;border-radius:4px;width:24px;height:20px;margin:-10px 0 0 -12px;transform:none;color:#fff;font-size:13px;line-height:16px;font-weight:700;cursor:pointer}
+@media (pointer:coarse){.hnd{width:24px;height:24px;margin:-12px 0 0 -12px}.hnd.pt{width:22px;height:22px;margin:-11px 0 0 -11px}}
+.pchk{display:flex;align-items:center;gap:6px;font-size:12px}
 .dim.co{pointer-events:auto;cursor:pointer;color:var(--accent);border:1px solid var(--accent);background:var(--sheet);font-weight:500}
 .tree .add{all:unset;cursor:pointer;color:var(--accent);font-weight:600;padding:0 6px;border-radius:3px;margin-left:4px}
 .tree .add:hover{background:var(--accent-soft)}
@@ -313,7 +331,16 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" data-tool="door" title="Дверь (DR)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M2 17h4M14 17h4M6 17V5M6 5a12 12 0 0 1 12 12"/></svg>Дверь<span class="k">DR</span></button>
         <button class="rbtn" data-tool="window" title="Окно (WN)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="14" height="14"/><path d="M10 3v14M3 10h14"/></svg>Окно<span class="k">WN</span></button>
         <button class="rbtn" data-tool="box" title="Объём: мебель, крыльцо, блок (CM)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8"/></svg>Объём<span class="k">CM</span></button>
+        <button class="rbtn" data-tool="column" title="Колонна (CN)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="7" y="4" width="6" height="12"/><path d="M5 4h10M5 16h10"/></svg>Колонна<span class="k">CN</span></button>
+        <button class="rbtn" data-tool="floor" title="Пол / перекрытие (SB)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M2 11l8-4 8 4-8 4z M2 11v2l8 4 8-4v-2"/></svg>Пол<span class="k">SB</span></button>
+        <button class="rbtn" data-tool="ceiling" title="Потолок (CI)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M2 6l8-3 8 3-8 3z M4 9v8M16 9v8"/></svg>Потолок<span class="k">CI</span></button>
+        <button class="rbtn" data-tool="roof" title="Крыша по контуру (RF)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 11L10 4l8.5 7M4 9.5V17h12V9.5"/></svg>Крыша<span class="k">RF</span></button>
+        <button class="rbtn" data-tool="stair" title="Лестница (ST)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M2 17h4v-3h4v-3h4V8h4V4"/></svg>Лестница<span class="k">ST</span></button>
       </div><div class="grp-label">Построение</div></div>
+      <div class="grp"><div class="grp-items">
+        <button class="rbtn" data-tool="room" title="Помещение с маркой (RT)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13"/><path d="M6 9h8M7 12h6" stroke-width="1.1"/><path d="M5 6l10 8M15 6L5 14" stroke-width=".6" stroke-dasharray="1 1.4"/></svg>Помещение<span class="k">RT</span></button>
+        <button class="rbtn" id="rbAutoRooms" title="Расставить помещения во всех замкнутых контурах"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13"/><path d="M10 3.5v13M2.5 10H10"/><path d="M4.5 7h3M12 9h3" stroke-width="1.1"/></svg>Помещения<br>везде</button>
+      </div><div class="grp-label">Помещения</div></div>
       <div class="grp"><div class="grp-items">
         <button class="rbtn" data-tool="grid" title="Ось здания (GR)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="4" r="2.6"/><path d="M10 6.6V18" stroke-dasharray="3 1.5 1 1.5"/></svg>Ось<span class="k">GR</span></button>
       </div><div class="grp-label">База</div></div>
@@ -344,6 +371,9 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" data-view="plan" title="План этажа (1)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="14" height="14"/><path d="M3 10h7v7M10 3v4"/></svg>План</button>
         <button class="rbtn" data-view="d3" title="3D-вид (2)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8"/></svg>3D</button>
         <button class="rbtn" data-view="axo" title="Аксонометрия (3)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 3l7 3.5v7L10 17l-7-3.5v-7z M3 6.5L10 10l7-3.5M10 10v7"/></svg>Аксоно-<br>метрия</button>
+        <button class="rbtn" data-tool="section" title="Разрез: линия на плане (SC)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 10h14" stroke-dasharray="4 1.5 1 1.5"/><path d="M3 6v8M17 6v8" stroke-width="2.2"/><path d="M3 6h3M17 6h-3"/></svg>Разрез<span class="k">SC</span></button>
+        <button class="rbtn" data-tool="ielev" title="Развёртка стен помещения (EL)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2.5l2 3h-4zM10 17.5l2-3h-4zM2.5 10l3-2v4zM17.5 10l-3-2v4z" fill="currentColor" stroke="none"/></svg>Развёртка<span class="k">EL</span></button>
+        <button class="rbtn" id="rbBox" title="Границы 3D-вида: обрезать модель рамкой с ручками"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8" stroke-dasharray="2 1.3"/><rect x="8.5" y="1" width="3" height="3" fill="currentColor" stroke="none"/></svg>Границы<br>3D-вида</button>
         <button class="rbtn" data-tool="callout" title="Узел: обведите рамкой участок плана (CL)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="9" height="9" stroke-dasharray="2 1.5"/><path d="M12 12l4 4"/><circle cx="16" cy="16" r="2"/></svg>Узел<span class="k">CL</span></button>
         <button class="rbtn" id="rbSheet" title="Новый лист"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12"/><rect x="11" y="12" width="6.5" height="4"/></svg>Лист</button>
       </div><div class="grp-label">Создание</div></div>
@@ -417,6 +447,8 @@ details.more summary::-webkit-details-marker{display:none}
           <button>оси 4 по 6000 на 3 по 4500</button><button>комната 5 на 4</button><button>дверь в южной стене</button><button>два окна в северной стене</button>
           <button>окно 1500 в восточной стене</button><button>перегородка 3 метра вниз</button><button>начни в точке 8 0</button>
           <button>стена 3 метра вправо</button><button>замкни</button><button>шкаф 2 на 0,6 высотой 2,2</button>
+          <button>крыша двускатная уклон 30</button><button>пол по контуру</button><button>потолок на высоте 2,7</button><button>колонна 400 на 400 на пересечении осей 1 и А</button>
+          <button>лестница 3 метра вверх</button><button>расставь помещения</button><button>назови помещение 1 кухня</button><button>разрез</button><button>развертка помещения 2</button><button>включи границы 3д вида</button>
           <button>проставь размеры</button><button>высота стен 3 метра</button><button>покажи аксонометрию</button><button>отмени</button><button>отмени 3 шага</button><button>покажи журнал</button>
         </div>
         <label class="chk"><input type="checkbox" id="cAuto" checked> Выполнять сам после паузы 2 с (для голосового набора)</label>
@@ -530,7 +562,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const $ = s => document.querySelector(s);
 const V3 = THREE.Vector3;
 const vp = $('#viewport'), labelsEl = $('#labels'), cursorEl = $('#cursor'), lenInput = $('#lenInput');
-const S = { phase:'all', viewId:null, tool:'select', view:'axo', style:'shaded', detail:'medium', snap:0.1, wallH:2.7, boxH:0.9, grid:false, dims:false, axes:true, infer:true, tags:true, axoAz:45, axoEl:35.264,
+const S = { floorT:0.3, ceilH:2.7, colW:0.4, colD:0.4, colRound:false, stairW:1.0, stairH:2.7, roofKind:'gable', roofSlope:30, roofOver:0.5, slabMode:'room', roofMode:'outline', selView:null,
+  phase:'all', viewId:null, tool:'select', view:'axo', style:'shaded', detail:'medium', snap:0.1, wallH:2.7, boxH:0.9, grid:false, dims:false, axes:true, infer:true, tags:true, axoAz:45, axoEl:35.264,
   doorW:0.9, doorH:2.1, winW:1.2, winH:1.4, winSill:0.9, penOnly:false, wallType:'ext', loc:'center', chain:true, dimRef:'faces', dimMode:'aligned', lineMode:'line', textSize:14 };
 let items = [], nextId = 1, selId = null, types = [];
 let sel = new Set();
@@ -565,7 +598,8 @@ const MATS = {
   generic:{ n:'Кладка (общая)', c:'#cfd2cc' }, gas:{ n:'Газобетон D500', c:'#dcd5c4' }, brick:{ n:'Кирпич керамический', c:'#b8664b' },
   facade:{ n:'Кирпич облицовочный', c:'#9b4b37' }, concrete:{ n:'Железобетон', c:'#a7acb1' }, insul:{ n:'Минвата', c:'#e6cc5c' },
   eps:{ n:'Пенополистирол', c:'#e9eef2' }, plaster:{ n:'Штукатурка', c:'#ece4d6' }, gkl:{ n:'Гипсокартон', c:'#f2efe8' },
-  frame:{ n:'Металлокаркас / воздух', c:'#c8d2d7' }, wood:{ n:'Дерево (брус)', c:'#c39a6b' }, block:{ n:'Керамзитобетонный блок', c:'#bfb7a8' }
+  frame:{ n:'Металлокаркас / воздух', c:'#c8d2d7' }, wood:{ n:'Дерево (брус)', c:'#c39a6b' }, block:{ n:'Керамзитобетонный блок', c:'#bfb7a8' },
+  tile:{ n:'Металлочерепица', c:'#8e4436' }, screed:{ n:'Стяжка', c:'#c9c6bf' }, steel:{ n:'Сталь', c:'#8f9aa3' }
 };
 const DEFAULT_TYPES = [
   { id:'ext', name:'Наружная: газобетон 300 + утеплитель 100', layers:[{ m:'plaster', t:0.015 }, { m:'insul', t:0.1 }, { m:'gas', t:0.3 }, { m:'plaster', t:0.015 }] },
@@ -596,7 +630,8 @@ function readColors(){
 }
 
 /* ---------- three.js setup ---------- */
-const renderer = new THREE.WebGLRenderer({ antialias:true });
+const renderer = new THREE.WebGLRenderer({ antialias:true, stencil:true });
+renderer.localClippingEnabled = true;
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -652,11 +687,13 @@ const planCam = new THREE.OrthographicCamera(-H0, H0, H0, -H0, 0.1, 2000);
 planCam.up.set(0, 0, -1); planCam.position.set(0, 200, 0);
 const axoCam = new THREE.OrthographicCamera(-H0, H0, H0, -H0, 0.1, 2000);
 const perspCam = new THREE.PerspectiveCamera(42, 1, 0.05, 1000);
-const cams = { plan:planCam, axo:axoCam, d3:perspCam };
+const sectCam = new THREE.OrthographicCamera(-H0, H0, H0, -H0, 0.1, 4000);
+const cams = { plan:planCam, axo:axoCam, d3:perspCam, sect:sectCam };
 const cam = () => cams[S.view];
 function mkCtl(c){ const o = new OrbitControls(c, cv); o.enableDamping = true; o.dampingFactor = 0.14; o.enabled = false; return o; }
-const ctl = { plan:mkCtl(planCam), axo:mkCtl(axoCam), d3:mkCtl(perspCam) };
+const ctl = { plan:mkCtl(planCam), axo:mkCtl(axoCam), d3:mkCtl(perspCam), sect:mkCtl(sectCam) };
 ctl.plan.enableRotate = false; ctl.plan.screenSpacePanning = true;
+ctl.sect.enableRotate = false; ctl.sect.screenSpacePanning = true;
 ctl.d3.maxPolarAngle = Math.PI * 0.495;
 ctl.axo.screenSpacePanning = true;
 
@@ -664,7 +701,7 @@ function configControls(){
   const hand = S.tool === 'orbit', fingers = hand || S.penOnly;
   for (const [k, c] of Object.entries(ctl)) c.enabled = k === S.view;
   const c = ctl[S.view]; if (!c) return;
-  if (S.view === 'plan'){
+  if (S.view === 'plan' || S.view === 'sect'){
     c.mouseButtons = { LEFT: hand ? THREE.MOUSE.PAN : null, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.PAN };
     c.touches = { ONE: fingers ? THREE.TOUCH.PAN : null, TWO: THREE.TOUCH.DOLLY_PAN };
   } else {
@@ -677,7 +714,7 @@ function resize(){
   if (!w || !h) return;
   renderer.setSize(w, h, false);
   const a = w / h;
-  for (const oc of [planCam, axoCam]){ oc.left = -H0 * a; oc.right = H0 * a; oc.top = H0; oc.bottom = -H0; oc.updateProjectionMatrix(); }
+  for (const oc of [planCam, axoCam, sectCam]){ oc.left = -H0 * a; oc.right = H0 * a; oc.top = H0; oc.bottom = -H0; oc.updateProjectionMatrix(); }
   perspCam.aspect = a; perspCam.updateProjectionMatrix();
   annoDirty = true;
 }
@@ -722,13 +759,28 @@ function makeMaterials(){
   M.gX = new THREE.LineBasicMaterial({ color:C['ax-x'], depthTest:false });
   M.gY = new THREE.LineBasicMaterial({ color:C['ax-y'], depthTest:false });
   M.gAl = new THREE.LineDashedMaterial({ color:C.accent, dashSize:0.15, gapSize:0.1, depthTest:false });
+  M.selFlatT = new THREE.MeshBasicMaterial({ color:C.sel, transparent:true, opacity:0.22, depthWrite:false });
+  M.slabEdge = new THREE.LineBasicMaterial({ color:C['exist-edge'] || '#8a939a' });
+  M.stairDash = new THREE.LineDashedMaterial({ color:C.ink, dashSize:0.1, gapSize:0.07 });
+  M.roofPlan = new THREE.LineDashedMaterial({ color:C.datum, dashSize:0.25, gapSize:0.12 });
+  M.roomFill = new THREE.MeshBasicMaterial({ color:C.sel, transparent:true, opacity:0.12, depthWrite:false });
+  M.secLine = new THREE.LineDashedMaterial({ color:C.ink, dashSize:0.5, gapSize:0.12, depthTest:false });
+  M.secFar = new THREE.LineDashedMaterial({ color:C.sel, dashSize:0.2, gapSize:0.12, depthTest:false });
+  M.secMark = new THREE.MeshBasicMaterial({ color:C.ink, depthTest:false, side:THREE.DoubleSide });
+  M.secMarkSel = new THREE.MeshBasicMaterial({ color:C.sel, depthTest:false, side:THREE.DoubleSide });
+  M.level = new THREE.LineBasicMaterial({ color:C.datum, depthTest:false, transparent:true });
+  M.lvlDash = new THREE.LineDashedMaterial({ color:C.datum, dashSize:0.6, gapSize:0.15, depthTest:false, transparent:true });
+  M.boxEdge = new THREE.LineBasicMaterial({ color:C.sel, transparent:true, opacity:0.8 });
+  for (const k of MODEL_MATS) if (M[k]) M[k].clippingPlanes = CLIP;
 }
+// materials of the model itself follow the section box / section planes; annotation does not
+const MODEL_MATS = ['lines','poche','mass','massPlan','glass','glassFlat','door','selShade','selFlat','edge','edgeSel','existFlat','exist3D','existEdge','demoEdge','demo3D','stairDash'];
 function layerMat(m){
   const plan = S.view === 'plan';
   if (plan && S.detail === 'coarse') return M.poche;
   if (!plan && S.style === 'lines') return M.lines;
   const key = (plan ? 'p:' : 's:') + m;
-  if (!LM[key]){ const c = (MATS[m] || MATS.generic).c; LM[key] = plan ? new THREE.MeshBasicMaterial({ color:c, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 }) : new THREE.MeshStandardMaterial({ color:c, roughness:0.9, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 }); }
+  if (!LM[key]){ const c = (MATS[m] || MATS.generic).c; LM[key] = plan ? new THREE.MeshBasicMaterial({ color:c, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 }) : new THREE.MeshStandardMaterial({ color:c, roughness:0.9, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1, clippingPlanes:CLIP }); }
   return LM[key];
 }
 function matFor(kind, s){
@@ -937,28 +989,356 @@ function buildBox(it, prevMat, prevEdge){
   const em = s ? M.edgeSel : st === 'demo' ? M.demoEdge : st === 'exist' ? M.existEdge : M.edge;
   return part(new THREE.BoxGeometry(it.w, it.h, it.d), prevMat || pm || matFor('mass', s), prevEdge || em, it.id, it.x + it.w / 2, it.h / 2, it.z + it.d / 2);
 }
+/* ---------- more Revit categories: floor, ceiling, roof, column, stair, room ---------- */
+function polyArea(pts){ let a = 0; for (let i = 0; i < pts.length; i++){ const p = pts[i], q = pts[(i + 1) % pts.length]; a += p.x * q.z - q.x * p.z; } return a / 2; }
+const polyPerim = pts => pts.reduce((s, p, i) => { const q = pts[(i + 1) % pts.length]; return s + Math.hypot(q.x - p.x, q.z - p.z); }, 0);
+function ptInPoly(x, z, pts){ let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++){ const a = pts[i], b = pts[j]; if ((a.z > z) !== (b.z > z) && x < (b.x - a.x) * (z - a.z) / (b.z - a.z) + a.x) c = !c; } return c; }
+function polyCenter(pts){
+  const A = polyArea(pts); if (Math.abs(A) < 1e-9) return { x:pts.reduce((s, p) => s + p.x, 0) / pts.length, z:pts.reduce((s, p) => s + p.z, 0) / pts.length };
+  let cx = 0, cz = 0; for (let i = 0; i < pts.length; i++){ const p = pts[i], q = pts[(i + 1) % pts.length], f = p.x * q.z - q.x * p.z; cx += (p.x + q.x) * f; cz += (p.z + q.z) * f; }
+  return { x:cx / (6 * A), z:cz / (6 * A) };
+}
+const m2 = v => v.toLocaleString('ru-RU', { minimumFractionDigits:1, maximumFractionDigits:1 });
+// phase- and selection-aware materials for the new categories
+function stMats(it){
+  const s = !!(it.id && isSel(it.id)), st = it.id ? visState(it) : 'normal', plan = S.view === 'plan';
+  return { s, st, plan,
+    em: s ? M.edgeSel : st === 'demo' ? M.demoEdge : st === 'exist' ? M.existEdge : M.edge,
+    pm: s ? (plan || S.style === 'lines' ? M.selFlat : M.selShade) : st === 'demo' ? (plan ? M.pick : M.demo3D) : st === 'exist' ? (plan ? M.existFlat : (S.style === 'lines' ? M.lines : M.exist3D)) : null };
+}
+function buildFloor(it){
+  if (!it.pts || it.pts.length < 3) return null;
+  const { pm, em, plan, s } = stMats(it), off = it.off || 0;
+  if (plan){
+    // like Revit, a floor is picked on the plan by its edge (pickFlat), so clicks inside rooms stay free for window selection
+    const g = new THREE.Group();
+    if (s){ const geo = prism(it.pts, off - 0.01, off + 0.001); if (geo) g.add(new THREE.Mesh(geo, M.selFlatT)); }
+    g.add(lineOf([...it.pts, it.pts[0]].map(p => new V3(p.x, off + 0.004, p.z)), s ? M.edgeSel : em === M.edge ? M.slabEdge : em));
+    return g;
+  }
+  const geo = prism(it.pts, off - it.t, off); if (!geo) return null;
+  return part(geo, pm || layerMat(it.m || 'concrete'), em, it.id);
+}
+function buildCeiling(it){
+  if (!it.pts || it.pts.length < 3 || S.view === 'plan') return null;
+  const { pm, em } = stMats(it), geo = prism(it.pts, it.h, it.h + it.t); if (!geo) return null;
+  return part(geo, pm || layerMat(it.m || 'gkl'), em, it.id);
+}
+function buildColumn(it){
+  const { pm, em, plan } = stMats(it);
+  const geo = it.round ? new THREE.CylinderGeometry(it.w / 2, it.w / 2, it.h, 32) : new THREE.BoxGeometry(it.w, it.h, it.d);
+  const mat = pm || (plan && S.detail === 'coarse' ? M.poche : layerMat(it.m || 'concrete'));
+  return part(geo, mat, em, it.id, it.x, it.h / 2, it.z);
+}
+// straight run: n equal risers, n equal goings; the last riser reaches the upper floor
+function stairInfo(it){ const f = wallFrame(it), n = Math.max(3, Math.round(it.h / 0.17)); return { f, n, rise:it.h / n, go:f.L / n }; }
+function buildStair(it){
+  const { pm, em, plan, s, st } = stMats(it), { f, n, rise, go } = stairInfo(it); if (f.L < 0.2) return null;
+  const g = new THREE.Group(); g.position.copy(f.p1); g.rotation.y = f.rotY;
+  const w2 = it.w / 2, P = (x, z, y = 0.07) => new V3(x, y, z);
+  if (plan){
+    const pk = new THREE.Mesh(new THREE.BoxGeometry(f.L, 0.05, it.w), s ? M.selFlatT : M.pick); pk.position.set(f.L / 2, 0.025, 0); pk.userData.id = it.id; g.add(pk);
+    // Revit/GOST plan: treads below the 1.2 m cut plane solid, the ones above dashed, a break line and the walking line with an arrow
+    const cutK = Math.min(n - 1, Math.max(1, Math.floor(1.2 / rise))), cs = cutK * go + go * 0.5;
+    const sol = [P(0, -w2), P(0, w2), P(0, -w2), P(cs, -w2), P(0, w2), P(cs, w2)], das = [P(cs, -w2), P(f.L, -w2), P(cs, w2), P(f.L, w2), P(f.L, -w2), P(f.L, w2)];
+    for (let i = 1; i < n; i++){ const x = i * go; (x < cs ? sol : das).push(P(x, -w2), P(x, w2)); }
+    sol.push(P(cs - 0.12, -w2 - 0.05), P(cs + 0.12, w2 + 0.05));
+    g.add(lineOf(sol, em, true));
+    g.add(lineOf(das, s ? M.edgeSel : st === 'demo' ? M.demoEdge : M.stairDash, true));
+    const a = Math.min(0.18, f.L / 6);
+    g.add(lineOf([P(go * 0.4, 0), P(f.L - 0.03, 0), P(f.L - 0.03 - a, -a * 0.45), P(f.L - 0.03, 0), P(f.L - 0.03 - a, a * 0.45)], em));
+    return g;
+  }
+  for (let i = 0; i < n; i++){ const hh = (i + 1) * rise; g.add(part(new THREE.BoxGeometry(go, hh, it.w), pm || layerMat(it.m || 'concrete'), em, it.id, i * go + go / 2, hh / 2, 0)); }
+  return g;
+}
+// roofs on a rectangular footprint (walls' outer faces); top faces are built first, the slab is the top shifted down
+function roofFrame(it){
+  const o = it.over ?? 0.5, a = (it.kind === 'flat' ? 0 : (it.slope ?? 30)) * Math.PI / 180, tn = Math.tan(a), tv = it.t / Math.cos(a);
+  const alongX = it.ridge === 'x' ? true : it.ridge === 'z' ? false : it.w >= it.d;
+  const u0 = (alongX ? it.x : it.z) - o, u1 = (alongX ? it.x + it.w : it.z + it.d) + o;
+  const v0 = (alongX ? it.z : it.x) - o, v1 = (alongX ? it.z + it.d : it.x + it.w) + o;
+  const b = it.base ?? 2.7;
+  return { o, tn, tv, alongX, u0, u1, v0, v1, b, yE:b + tv - o * tn, map:(u, y, v) => alongX ? new V3(u, y, v) : new V3(v, y, u) };
+}
+function roofTop(it){
+  const F = roofFrame(it), { u0, u1, v0, v1, yE, tn, map } = F, kind = it.kind || 'gable';
+  const vc = (v0 + v1) / 2, half = (v1 - v0) / 2, yR = yE + half * tn;
+  let faces;
+  if (kind === 'flat'){ const y = F.b + it.t; faces = [[map(u0, y, v0), map(u1, y, v0), map(u1, y, v1), map(u0, y, v1)]]; }
+  else if (kind === 'shed'){ const yh = yE + (v1 - v0) * tn; faces = [[map(u0, yh, v0), map(u1, yh, v0), map(u1, yE, v1), map(u0, yE, v1)]]; }
+  else if (kind === 'hip'){
+    let ua = u0 + half, ub = u1 - half; if (ua > ub){ ua = ub = (u0 + u1) / 2; }
+    const yr = ua === ub ? yE + Math.min(half, (u1 - u0) / 2) * tn : yR;
+    faces = [[map(u0, yE, v0), map(u1, yE, v0), map(ub, yr, vc), map(ua, yr, vc)], [map(u0, yE, v1), map(ua, yr, vc), map(ub, yr, vc), map(u1, yE, v1)],
+      [map(u0, yE, v0), map(ua, yr, vc), map(u0, yE, v1)], [map(u1, yE, v0), map(u1, yE, v1), map(ub, yr, vc)]];
+  } else faces = [[map(u0, yE, v0), map(u1, yE, v0), map(u1, yR, vc), map(u0, yR, vc)], [map(u0, yR, vc), map(u1, yR, vc), map(u1, yE, v1), map(u0, yE, v1)]];
+  faces = faces.map(f => f.filter((p, i) => p.distanceTo(f[(i + 1) % f.length]) > 1e-6)).filter(f => f.length >= 3);
+  return { F, faces };
+}
+function newell(f){ const n = new V3(); for (let i = 0; i < f.length; i++){ const a = f[i], b = f[(i + 1) % f.length]; n.x += (a.y - b.y) * (a.z + b.z); n.y += (a.z - b.z) * (a.x + b.x); n.z += (a.x - b.x) * (a.y + b.y); } return n; }
+function solidFromTop(faces, tv){
+  const pos = [], key = p => `${Math.round(p.x * 1e4)},${Math.round(p.y * 1e4)},${Math.round(p.z * 1e4)}`;
+  const poly = (f, want) => { const n = newell(f); if (n.dot(want) < 0) f = [...f].reverse(); for (let i = 1; i < f.length - 1; i++) pos.push(f[0].x, f[0].y, f[0].z, f[i].x, f[i].y, f[i].z, f[i + 1].x, f[i + 1].y, f[i + 1].z); };
+  const down = p => new V3(p.x, p.y - tv, p.z);
+  const cnt = new Map();
+  for (const f of faces) for (let i = 0; i < f.length; i++){ const a = f[i], b = f[(i + 1) % f.length], k = [key(a), key(b)].sort().join('|'); cnt.set(k, (cnt.get(k) || 0) + 1); }
+  const inner = [], outer = [];
+  for (const f of faces){
+    poly(f, new V3(0, 1, 0)); poly(f.map(down), new V3(0, -1, 0));
+    const c = f.reduce((s, p) => s.add(p), new V3()).multiplyScalar(1 / f.length);
+    for (let i = 0; i < f.length; i++){
+      const a = f[i], b = f[(i + 1) % f.length], k = [key(a), key(b)].sort().join('|');
+      if (cnt.get(k) > 1){ inner.push(a, b); continue; }
+      outer.push(a, b);
+      const out = a.clone().add(b).multiplyScalar(0.5).sub(c); out.y = 0;
+      poly([a, b, down(b), down(a)], out);
+    }
+  }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.computeVertexNormals();
+  return { geo, inner, outer };
+}
+function buildRoof(it){
+  const { pm, em, plan, s, st } = stMats(it), { F, faces } = roofTop(it);
+  const { geo, inner, outer } = solidFromTop(faces, F.tv);
+  if (plan){
+    // a roof is above the plan's cut plane: only its outline and ridges, dashed
+    geo.dispose();
+    const Y = 28, lift = arr => arr.map(p => new V3(p.x, Y, p.z)), mat = s ? M.edgeSel : st === 'demo' ? M.demoEdge : M.roofPlan;
+    const g = new THREE.Group(); g.add(lineOf(lift(outer), mat, true)); if (inner.length) g.add(lineOf(lift(inner), mat, true)); return g;
+  }
+  const g = new THREE.Group();
+  g.add(part(geo, pm || layerMat(it.m || 'tile'), em, it.id));
+  // gable infill (фронтоны) between the wall tops and the underside of the roof
+  if (it.gab !== false && (it.kind === 'gable' || it.kind === 'shed' || !it.kind)){
+    const { u0, u1, v0, v1, b, tn, o, map } = F, w0 = v0 + o, w1 = v1 - o, vc = (v0 + v1) / 2, T = 0.3;
+    const yb = v => it.kind === 'shed' ? b + (w1 - v) * tn : b + ((v1 - v0) / 2 - Math.abs(v - vc) - o) * tn;
+    const prof = it.kind === 'shed' ? [[w0, b], [w1, b], [w0, yb(w0)]] : [[w0, b], [w1, b], [vc, yb(vc)]];
+    for (const u of [u0 + o + T / 2, u1 - o - T / 2]){
+      const sh = new THREE.Shape(prof.map(([v, y]) => new THREE.Vector2(v, y)));
+      const gg = new THREE.ExtrudeGeometry(sh, { depth:T, bevelEnabled:false }); gg.translate(0, 0, -T / 2);
+      // the shape lies in (v, y) and is extruded along u: ridge along X → turn it so v runs along Z
+      const m = part(gg, pm || layerMat('gas'), em, it.id);
+      if (F.alongX){ m.rotation.y = -Math.PI / 2; m.position.set(u, 0, 0); } else m.position.set(0, 0, u);
+      g.add(m);
+    }
+  }
+  return g;
+}
+
+/* rooms (Revit «Помещение»): the area enclosed by walls around a point, found on a fine raster; doors do not break the boundary */
+const RG = { key:'', g:null, cache:new Map() };
+function roomGrid(){
+  const walls = items.filter(w => w.type === 'wall' && shown(w)), cols = items.filter(c => c.type === 'column' && shown(c));
+  const key = JSON.stringify([walls.map(w => [w.x1, w.z1, w.x2, w.z2, w.t]), cols.map(c => [c.x, c.z, c.w, c.d, c.round])]);
+  if (RG.key === key && RG.g) return RG.g;
+  RG.key = key; RG.cache.clear();
+  if (!walls.length){ RG.g = null; return null; }
+  let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
+  for (const w of walls){ x0 = Math.min(x0, w.x1, w.x2); x1 = Math.max(x1, w.x1, w.x2); z0 = Math.min(z0, w.z1, w.z2); z1 = Math.max(z1, w.z1, w.z2); }
+  x0 -= 1.5; z0 -= 1.5; x1 += 1.5; z1 += 1.5;
+  const cs = Math.max(0.02, Math.max(x1 - x0, z1 - z0) / 700), nx = Math.ceil((x1 - x0) / cs), nz = Math.ceil((z1 - z0) / cs);
+  const blk = new Uint8Array(nx * nz), e = cs * 0.5;
+  const mark = (ax, az, bx, bz, test) => {
+    const i0 = clamp(Math.floor((ax - x0) / cs), 0, nx - 1), i1 = clamp(Math.ceil((bx - x0) / cs), 0, nx - 1), j0 = clamp(Math.floor((az - z0) / cs), 0, nz - 1), j1 = clamp(Math.ceil((bz - z0) / cs), 0, nz - 1);
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++){ const x = x0 + (i + 0.5) * cs, z = z0 + (j + 0.5) * cs; if (test(x, z)) blk[j * nx + i] = 1; }
+  };
+  const fx = [], fz = [];
+  for (const w of walls){
+    const f = wallFrame(w), h = w.t / 2;
+    mark(Math.min(w.x1, w.x2) - w.t, Math.min(w.z1, w.z2) - w.t, Math.max(w.x1, w.x2) + w.t, Math.max(w.z1, w.z2) + w.t, (x, z) => {
+      const vx = x - w.x1, vz = z - w.z1, s = vx * f.dir.x + vz * f.dir.z, n = vx * f.nrm.x + vz * f.nrm.z;
+      return s >= -h - e && s <= f.L + h + e && Math.abs(n) <= h + e;
+    });
+    if (Math.abs(w.z2 - w.z1) < 1e-6) fz.push(w.z1 - h, w.z1 + h); else if (Math.abs(w.x2 - w.x1) < 1e-6) fx.push(w.x1 - h, w.x1 + h);
+  }
+  for (const c of cols){
+    const hw = c.w / 2, hd = (c.round ? c.w : c.d) / 2;
+    mark(c.x - hw, c.z - hd, c.x + hw, c.z + hd, (x, z) => c.round ? Math.hypot(x - c.x, z - c.z) <= hw + e : Math.abs(x - c.x) <= hw + e && Math.abs(z - c.z) <= hd + e);
+    if (!c.round){ fx.push(c.x - hw, c.x + hw); fz.push(c.z - hd, c.z + hd); }
+  }
+  RG.g = { x0, z0, cs, nx, nz, blk, fx, fz };
+  return RG.g;
+}
+function floodGrid(G, seeds){
+  const fill = new Uint8Array(G.nx * G.nz), st = []; let border = false, n = 0;
+  for (const k of seeds) if (!G.blk[k] && !fill[k]){ fill[k] = 1; st.push(k); }
+  while (st.length){
+    const k = st.pop(), i = k % G.nx, j = (k - i) / G.nx; n++;
+    if (i === 0 || j === 0 || i === G.nx - 1 || j === G.nz - 1) border = true;
+    for (const q of [i > 0 ? k - 1 : -1, i < G.nx - 1 ? k + 1 : -1, j > 0 ? k - G.nx : -1, j < G.nz - 1 ? k + G.nx : -1]) if (q >= 0 && !G.blk[q] && !fill[q]){ fill[q] = 1; st.push(q); }
+  }
+  return { fill, border, n };
+}
+// outer boundary of a filled raster region, simplified and snapped to wall faces
+function gridContour(G, fill){
+  const { nx, nz } = G, nxt = new Map(), K = (i, j) => j * (nx + 1) + i;
+  const add = (a, b) => { if (!nxt.has(a)) nxt.set(a, []); nxt.get(a).push(b); };
+  const F = (i, j) => i >= 0 && j >= 0 && i < nx && j < nz && fill[j * nx + i];
+  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++){
+    if (!fill[j * nx + i]) continue;
+    if (!F(i, j - 1)) add(K(i + 1, j), K(i, j));
+    if (!F(i - 1, j)) add(K(i, j), K(i, j + 1));
+    if (!F(i, j + 1)) add(K(i, j + 1), K(i + 1, j + 1));
+    if (!F(i + 1, j)) add(K(i + 1, j + 1), K(i + 1, j));
+  }
+  let best = null, bestA = 0;
+  while (nxt.size){
+    const s = nxt.keys().next().value, loop = [s]; let cur = s;
+    for (let guard = 0; guard < 4e6; guard++){
+      const l = nxt.get(cur); if (!l || !l.length) break;
+      const nb = l.pop(); if (!l.length) nxt.delete(cur);
+      if (nb === s) break; loop.push(nb); cur = nb;
+    }
+    const pts = loop.map(k => ({ x:G.x0 + (k % (nx + 1)) * G.cs, z:G.z0 + Math.floor(k / (nx + 1)) * G.cs })), A = Math.abs(polyArea(pts));
+    if (A > bestA){ bestA = A; best = pts; }
+  }
+  if (!best) return null;
+  return simplifyPoly(best, G);
+}
+function simplifyPoly(pts, G){
+  const dist = (p, a, b) => { const dx = b.x - a.x, dz = b.z - a.z, L = Math.hypot(dx, dz) || 1e-9; return Math.abs((p.x - a.x) * dz - (p.z - a.z) * dx) / L; };
+  const prune = (arr, tol) => { let ch = true; while (ch && arr.length > 3){ ch = false; let bi = -1, bd = tol; for (let i = 0; i < arr.length; i++){ const d = dist(arr[i], arr[(i - 1 + arr.length) % arr.length], arr[(i + 1) % arr.length]); if (d <= bd){ bd = d; bi = i; } } if (bi >= 0){ arr.splice(bi, 1); ch = true; } } return arr; };
+  let p = prune(pts.slice(), 1e-6);
+  p = prune(p, G.cs * 1.3);
+  const sn = (v, list) => { let b = v, bd = G.cs * 1.8; for (const f of list){ const d = Math.abs(f - v); if (d < bd){ bd = d; b = f; } } return r4(b); };
+  p = p.map(q => ({ x:sn(q.x, G.fx), z:sn(q.z, G.fz) })).filter((q, i, A) => { const n = A[(i + 1) % A.length]; return Math.hypot(n.x - q.x, n.z - q.z) > 1e-4; });
+  return prune(p, 1e-4);
+}
+const cellAt = (G, x, z) => { const i = Math.floor((x - G.x0) / G.cs), j = Math.floor((z - G.z0) / G.cs); return i >= 0 && j >= 0 && i < G.nx && j < G.nz ? j * G.nx + i : -1; };
+// enclosed area around a point: { poly, area, perim, open }
+function regionAt(x, z){
+  const G = roomGrid(); if (!G) return { open:true };
+  const k = cellAt(G, x, z); if (k < 0) return { open:true };
+  const ck = k; if (RG.cache.has(ck)) return RG.cache.get(ck);
+  let seed = k;
+  if (G.blk[k]){ // a point inside a wall: take the nearest free cell
+    let found = -1; for (let r = 1; r < 12 && found < 0; r++) for (const d of [-r, r, -r * G.nx, r * G.nx]){ const q = k + d; if (q >= 0 && q < G.blk.length && !G.blk[q]){ found = q; break; } }
+    if (found < 0) return { open:true }; seed = found;
+  }
+  const fl = floodGrid(G, [seed]);
+  let res = { open:true };
+  if (!fl.border){ const poly = gridContour(G, fl.fill); if (poly && poly.length >= 3){ const A = Math.abs(polyArea(poly)); res = { poly, area:A, perim:polyPerim(poly), open:false, fill:fl.fill }; } }
+  RG.cache.set(ck, res); return res;
+}
+// outline of the whole building (outer faces of the outer walls)
+function buildingOutline(){
+  const G = roomGrid(); if (!G) return null;
+  const seeds = []; for (let i = 0; i < G.nx; i++){ seeds.push(i, (G.nz - 1) * G.nx + i); } for (let j = 0; j < G.nz; j++){ seeds.push(j * G.nx, j * G.nx + G.nx - 1); }
+  const out = floodGrid(G, seeds).fill, ins = new Uint8Array(out.length); let any = false;
+  for (let k = 0; k < out.length; k++) if (!out[k]){ ins[k] = 1; any = true; }
+  return any ? gridContour(G, ins) : null;
+}
+function roomData(r){ return regionAt(r.x, r.z); }
+function nextRoomNum(){ const used = new Set(items.filter(r => r.type === 'room').map(r => String(r.num))); let i = 1; while (used.has(String(i))) i++; return String(i); }
+function addRoom(x, z, name){ const it = { id:nextId++, type:'room', x:r4(x), z:r4(z), name:name || 'Помещение', num:nextRoomNum() }; items.push(it); return it; }
+// Revit «Расставить помещения автоматически»: one room in every closed area that has none
+function autoRooms(){
+  const G = roomGrid(); if (!G) return 0;
+  const seen = new Uint8Array(G.blk.length); let n = 0;
+  for (const r of items) if (r.type === 'room'){ const d = roomData(r); if (d.fill) for (let k = 0; k < d.fill.length; k++) if (d.fill[k]) seen[k] = 1; }
+  for (let k = 0; k < G.blk.length; k++){
+    if (G.blk[k] || seen[k]) continue;
+    const fl = floodGrid(G, [k]); for (let q = 0; q < fl.fill.length; q++) if (fl.fill[q]) seen[q] = 1;
+    if (fl.border || fl.n * G.cs * G.cs < 1) continue;
+    const poly = gridContour(G, fl.fill); if (!poly) continue;
+    let c = polyCenter(poly); const ck = cellAt(G, c.x, c.z);
+    if (ck < 0 || !fl.fill[ck]){ const i = k % G.nx, j = (k - i) / G.nx; c = { x:G.x0 + (i + 0.5) * G.cs, z:G.z0 + (j + 0.5) * G.cs }; }
+    addRoom(roundS(c.x), roundS(c.z)); n++;
+  }
+  return n;
+}
+function buildRoomFill(r){
+  const d = roomData(r); if (d.open || S.view !== 'plan') return null;
+  const geo = prism(d.poly, 0.006, 0.008); if (!geo) return null;
+  const g = new THREE.Group(), m = new THREE.Mesh(geo, M.roomFill); g.add(m);
+  g.add(lineOf([...d.poly, d.poly[0]].map(p => new V3(p.x, 0.01, p.z)), M.edgeSel));
+  return g;
+}
+
+/* ---------- clipping: 3D section box, sections and elevations; cut faces are capped with poche (stencil) ---------- */
+const CLIP = [];
+const capG = new THREE.Group(); scene.add(capG);
+let capMats = [];
+let RV = null; // the view being drawn into a sheet image (null: the open view)
+const viewNow = () => RV || curView();
+function clearCaps(){ for (const ch of [...capG.children]){ if (ch.userData.own) ch.geometry.dispose(); capG.remove(ch); } capMats.forEach(m => m.dispose()); capMats = []; }
+function sectFrame(v){
+  const p1 = new V3(v.p1.x, 0, v.p1.z), p2 = new V3(v.p2.x, 0, v.p2.z), L = Math.max(p1.distanceTo(p2), 1e-6);
+  const dir = p2.clone().sub(p1).divideScalar(L), nrm = new V3(-dir.z, 0, dir.x), d = v.flip ? nrm.clone().negate() : nrm;
+  return { p1, p2, L, dir, d, far:v.far || 5, y0:v.y0 ?? -0.5, y1:v.y1 ?? 4 };
+}
+function clipPlanesFor(v){
+  if (!v) return [];
+  const mode = KIND_MODE[v.kind];
+  const pl = (n, p) => new THREE.Plane().setFromNormalAndCoplanarPoint(n.clone().normalize(), p);
+  if ((mode === 'd3' || mode === 'axo') && v.box && v.box.on){
+    const b = v.box;
+    return [pl(new V3(1, 0, 0), new V3(b.x0, 0, 0)), pl(new V3(-1, 0, 0), new V3(b.x1, 0, 0)), pl(new V3(0, 1, 0), new V3(0, b.y0, 0)), pl(new V3(0, -1, 0), new V3(0, b.y1, 0)), pl(new V3(0, 0, 1), new V3(0, 0, b.z0)), pl(new V3(0, 0, -1), new V3(0, 0, b.z1))];
+  }
+  if (mode === 'sect'){
+    const f = sectFrame(v), out = [pl(f.d, f.p1), pl(f.d.clone().negate(), f.p1.clone().addScaledVector(f.d, f.far))];
+    if (v.crop !== false) out.push(pl(f.dir, f.p1), pl(f.dir.clone().negate(), f.p2), pl(new V3(0, 1, 0), new V3(0, f.y0, 0)), pl(new V3(0, -1, 0), new V3(0, f.y1, 0)));
+    return out;
+  }
+  return [];
+}
+const clipKeep = p => CLIP.every(pl => pl.distanceToPoint(p) >= -1e-4);
+function applyClip(){
+  clearCaps(); CLIP.length = 0;
+  if (S.view === 'plan' || S.view === 'sheet') return;
+  CLIP.push(...clipPlanesFor(viewNow()));
+  if (!CLIP.length) return;
+  model.updateMatrixWorld(true);
+  const meshes = []; model.traverse(o => { if (o.isMesh && !o.material.transparent && o.material !== M.pick && o.geometry) meshes.push(o); });
+  const so = THREE;
+  CLIP.forEach((plane, i) => {
+    const others = CLIP.filter(p => p !== plane);
+    const base = { depthWrite:false, depthTest:false, colorWrite:false, stencilWrite:true, stencilFunc:so.AlwaysStencilFunc, clippingPlanes:[plane] };
+    const back = new THREE.MeshBasicMaterial({ ...base, side:so.BackSide, stencilFail:so.IncrementWrapStencilOp, stencilZFail:so.IncrementWrapStencilOp, stencilZPass:so.IncrementWrapStencilOp });
+    const front = new THREE.MeshBasicMaterial({ ...base, side:so.FrontSide, stencilFail:so.DecrementWrapStencilOp, stencilZFail:so.DecrementWrapStencilOp, stencilZPass:so.DecrementWrapStencilOp });
+    const capM = new THREE.MeshBasicMaterial({ color:C.poche, side:so.DoubleSide, clippingPlanes:others, stencilWrite:true, stencilRef:0, stencilFunc:so.NotEqualStencilFunc, stencilFail:so.ReplaceStencilOp, stencilZFail:so.ReplaceStencilOp, stencilZPass:so.ReplaceStencilOp });
+    capMats.push(back, front, capM);
+    for (const m of meshes) for (const mat of [back, front]){ const c = new THREE.Mesh(m.geometry, mat); c.matrixAutoUpdate = false; c.matrix.copy(m.matrixWorld); c.renderOrder = 100 + i; capG.add(c); }
+    const cap = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), capM); cap.userData.own = true;
+    plane.coplanarPoint(cap.position); cap.quaternion.setFromUnitVectors(new V3(0, 0, 1), plane.normal); cap.renderOrder = 100.5 + i;
+    cap.onAfterRender = r => r.clearStencil();
+    capG.add(cap);
+  });
+}
+
 // building grids (datum lines) are shown in every view, on the ground
 function buildDatum(){
-  disposeGroup(datum);
+  disposeGroup(datum); SECT_LABELS = [];
+  if (S.view === 'sect'){ buildSectDatum(); return; }
   for (const gr of items){
     if (gr.type !== 'grid') continue;
     const l = lineOf([new V3(gr.x1, 0.006, gr.z1), new V3(gr.x2, 0.006, gr.z2)], isSel(gr.id) ? M.datumSel : M.datum);
     datum.add(l);
   }
 }
+const BUILDERS = { wall:it => buildWall(it), box:it => buildBox(it), floor:buildFloor, ceiling:buildCeiling, column:buildColumn, stair:buildStair, roof:buildRoof };
 function rebuild(quiet){
   disposeGroup(model);
   CUTS = computeCuts();
   for (const it of items){
     if (!shown(it)) continue;
-    const obj = it.type === 'wall' ? buildWall(it) : it.type === 'box' ? buildBox(it) : null;
+    const B = BUILDERS[it.type], obj = B ? B(it) : null;
     if (obj) model.add(obj);
   }
+  for (const r of items) if (r.type === 'room' && isSel(r.id)){ const o = buildRoomFill(r); if (o) model.add(o); }
   buildDatum();
-  shadowGround.visible = S.view !== 'plan' && S.style === 'shaded';
+  shadowGround.visible = S.view !== 'plan' && S.view !== 'sect' && S.style === 'shaded';
   const za = axesG.getObjectByName('zaxis'); if (za) za.visible = S.view !== 'plan';
+  if (!RV) axesG.visible = S.axes && S.view !== 'sect';
+  // sections and elevations: light from the viewer, no shadows (the roof would darken every interior wall)
+  sun.castShadow = S.view !== 'sect';
+  if (S.view === 'sect'){ const v = viewNow(), f = sectFrame(v), c = f.p1.clone().addScaledVector(f.dir, f.L / 2).setY((f.y0 + f.y1) / 2); sun.position.copy(c).addScaledVector(f.d, -25).add(new V3(f.dir.x * 6, 10, f.dir.z * 6)); sun.target.position.copy(c); sun.target.updateMatrixWorld(); }
+  else if (sun.userData.sect){ const b = bounds().getCenter(new V3()); sun.position.set(b.x + 10, 18, b.z + 7); sun.target.position.set(b.x, 0, b.z); sun.target.updateMatrixWorld(); }
+  sun.userData.sect = S.view === 'sect';
   annoDirty = true;
   updateCrop();
+  applyClip();
   if (quiet) return;
   if (S.tool === 'select' && optSel !== [...sel].join(',')){ optSel = [...sel].join(','); renderOptbar(); }
   updateRibbonState(); updatePanel(); renderTree(); scheduleSave();
@@ -970,7 +1350,7 @@ let annoDirty = true, annoZoom = 0;
 const tickGeo = new THREE.BoxGeometry(1, 0.001, 1);
 // RENDER is set while a view is drawn into an image for a sheet: projection and pixel sizes then follow that image
 let RENDER = null;
-const wpp = () => { const c = RENDER && RENDER.cam.isOrthographicCamera ? RENDER.cam : planCam; return (c.top - c.bottom) / c.zoom / ((RENDER ? RENDER.h : cv.clientHeight) || 1); };
+const wpp = () => { const c = RENDER && RENDER.cam.isOrthographicCamera ? RENDER.cam : S.view === 'sect' ? sectCam : planCam; return (c.top - c.bottom) / c.zoom / ((RENDER ? RENDER.h : cv.clientHeight) || 1); };
 function refPoint(r){
   if (!r) return null;
   if (r.k === 'p') return { x:r.x, z:r.z };
@@ -1050,7 +1430,8 @@ function rebuildAnno(){
   disposeGroup(anno); annoZoom = planCam.zoom; annoDirty = false;
   if (S.view !== 'plan') return;
   for (const d of items) if (d.type === 'dim' && dimShown(d)) addDimGeom(d, isSel(d.id) ? M.dimSel : M.dim, isSel(d.id) ? M.dimTickSel : M.dimTick);
-  if ((RENDER ? RENDER.view : curView()).kind === 'plan') for (const v of views) if (v.kind === 'detail' && v.region){ const r = v.region, Y = 29.5; anno.add(lineOf([new V3(r.x0, Y, r.z0), new V3(r.x1, Y, r.z0), new V3(r.x1, Y, r.z1), new V3(r.x0, Y, r.z1), new V3(r.x0, Y, r.z0)], M.callout)); }
+  if (viewNow().kind === 'plan') for (const v of views) if (v.kind === 'detail' && v.region){ const r = v.region, Y = 29.5; anno.add(lineOf([new V3(r.x0, Y, r.z0), new V3(r.x1, Y, r.z0), new V3(r.x1, Y, r.z1), new V3(r.x0, Y, r.z1), new V3(r.x0, Y, r.z0)], M.callout)); }
+  drawViewMarks();
   for (const d of tempDims()) addDimGeom(d, M.dimTmp, M.dimTickTmp);
   for (const it of items){
     const m = isSel(it.id) ? M.edgeSel : M.detail;
@@ -1062,6 +1443,91 @@ function rebuildAnno(){
     if (refs.length >= 2) addDimGeom({ refs, off:DD.off, dir:DD.dir, mode:S.dimMode }, M.dimTmp, M.dimTickTmp);
   }
 }
+// section marks (GOST: thick strokes at the ends, arrows to the viewing side, a number) and interior elevation markers
+function strip(a, b, w, mat){
+  const d = b.clone().sub(a), L = d.length(); if (L < 1e-6) return null;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(L, w), mat); m.position.copy(a).add(b).multiplyScalar(0.5);
+  m.rotation.x = -Math.PI / 2; m.rotation.z = -Math.atan2(d.z, d.x); m.renderOrder = 20; return m;
+}
+function tri(p, dir, len, wid, mat){
+  const n = new V3(-dir.z, 0, dir.x), a = p.clone().addScaledVector(dir, len), b = p.clone().addScaledVector(n, wid / 2), c = p.clone().addScaledVector(n, -wid / 2);
+  const g = new THREE.BufferGeometry().setFromPoints([a, b, c]); const m = new THREE.Mesh(g, mat); m.renderOrder = 20; return m;
+}
+function drawViewMarks(){
+  const host = viewNow(); if (host.kind !== 'plan' && host.kind !== 'detail') return;
+  const k = wpp(), Y = 30.5, at = (p, y = Y) => new V3(p.x, y, p.z), mks = new Map();
+  for (const v of views){
+    if (v.kind === 'ielev' && v.mk){ if (!mks.has(v.mk.id)) mks.set(v.mk.id, []); mks.get(v.mk.id).push(v); continue; }
+    if (v.kind !== 'section') continue;
+    const f = sectFrame(v), sel = S.selView === v.id && !RV, mat = sel ? M.secMarkSel : M.secMark;
+    const A = at(f.p1), B = at(f.p2), sl = Math.min(12 * k, f.L / 3);
+    for (const [P, u] of [[A, f.dir], [B, f.dir.clone().negate()]]){
+      const s = strip(P, P.clone().addScaledVector(u, sl), 2.2 * k, mat); if (s) anno.add(s);
+      const q = P.clone().addScaledVector(u, -0 * k);
+      anno.add(lineOf([q, q.clone().addScaledVector(f.d, 9 * k)], sel ? M.edgeSel : M.dim));
+      anno.add(tri(q.clone().addScaledVector(f.d, 9 * k), f.d, 4.5 * k, 3.6 * k, mat));
+    }
+    if (sel){
+      anno.add(lineOf([A, B], M.secLine));
+      const C1 = A.clone().addScaledVector(f.d, f.far), C2 = B.clone().addScaledVector(f.d, f.far);
+      anno.add(lineOf([A, C1, C2, B], M.secFar));
+    } else if (S.view === 'plan' && !RV) anno.add(lineOf([A, B], M.secLine));
+  }
+  for (const [, list] of mks){
+    const m0 = list[0].mk, c = at(m0), r = 7 * k, pts = [];
+    for (let i = 0; i <= 40; i++){ const a = i / 40 * Math.PI * 2; pts.push(new V3(c.x + Math.cos(a) * r, Y, c.z + Math.sin(a) * r)); }
+    const sel = list.some(v => v.id === S.selView) && !RV;
+    anno.add(lineOf(pts, sel ? M.edgeSel : M.dim));
+    for (const v of list){ const d = sectFrame(v).d; anno.add(tri(c.clone().addScaledVector(d, r * 0.95), d, 5 * k, 8 * k, S.selView === v.id && !RV ? M.secMarkSel : M.secMark)); }
+    if (sel){ const v = list.find(x => x.id === S.selView); const f = sectFrame(v); anno.add(lineOf([at(f.p1), at(f.p2), at(f.p2).addScaledVector(f.d, f.far), at(f.p1).addScaledVector(f.d, f.far), at(f.p1)], M.secFar)); }
+  }
+}
+function viewMarkLabels(out){
+  const host = viewNow(); if (host.kind !== 'plan' && host.kind !== 'detail') return;
+  const k = wpp(), mks = new Map();
+  for (const v of views){
+    if (v.kind === 'section'){
+      const f = sectFrame(v);
+      for (const [P, u] of [[f.p1, f.dir], [f.p2, f.dir.clone().negate()]]){ const q = P.clone().addScaledVector(f.d, 7 * k).addScaledVector(u, -5 * k); out.push({ x:q.x, y:0, z:q.z, t:v.code, cls:'sx' + (S.selView === v.id ? ' sel' : ''), open:v.id }); }
+    } else if (v.kind === 'ielev' && v.mk){
+      const d = sectFrame(v).d, q = new V3(v.mk.x, 0, v.mk.z).addScaledVector(d, 15 * k);
+      out.push({ x:q.x, y:0, z:q.z, t:v.code, cls:'sx ie' + (S.selView === v.id ? ' sel' : ''), open:v.id });
+    }
+  }
+}
+// pick a section line or an elevation marker on the plan (they are views, not model elements)
+function pickViewMark(px, py){
+  if (S.view !== 'plan') return null;
+  let best = null, bd = coarsePtr ? 14 : 9;
+  for (const v of views){
+    if (v.kind === 'section'){ const f = sectFrame(v), A = toScreen(f.p1.x, 0, f.p1.z), B = toScreen(f.p2.x, 0, f.p2.z), d = segDist(px, py, A, B); if (d < bd){ bd = d; best = v.id; } }
+    else if (v.kind === 'ielev' && v.mk){ const c = toScreen(v.mk.x, 0, v.mk.z), d = sectFrame(v).d, t = toScreen(v.mk.x + d.x * 8 * wpp(), 0, v.mk.z + d.z * 8 * wpp()), dd = Math.hypot(t.x - px, t.y - py) - 2; if (Math.hypot(c.x - px, c.y - py) < 12 && dd < bd){ bd = dd; best = v.id; } }
+  }
+  return best;
+}
+// section and elevation views: grids cut by the view and level lines, as in Revit
+function buildSectDatum(){
+  const v = viewNow(), f = sectFrame(v), out = [], eps = 0.02;
+  const on = (s, y) => f.p1.clone().addScaledVector(f.dir, s).setY(y).addScaledVector(f.d, -eps);
+  const s0 = v.crop === false ? -3 : -0.6, s1 = v.crop === false ? f.L + 3 : f.L + 0.6;
+  for (const gr of items){
+    if (gr.type !== 'grid') continue;
+    const g = wallFrame(gr), p = xLines(f.p1, f.dir, g.p1, g.dir); if (!p) continue;
+    const s = p.clone().sub(f.p1).dot(f.dir); if (s < -0.01 || s > f.L + 0.01) continue;
+    datum.add(lineOf([on(s, f.y0), on(s, f.y1 - 0.75)], M.lvlDash));
+    out.push({ x:on(s, 0).x, y:f.y1 - 0.45, z:on(s, 0).z, t:gr.name, cls:'gb' });
+  }
+  const top = Math.max(0, ...items.filter(w => w.type === 'wall' && shown(w)).map(w => w.h));
+  const lv = [{ y:0, n:'Этаж 1' }]; if (top > 0) lv.push({ y:top, n:'Верх стен' });
+  for (const L of lv){
+    if (L.y < f.y0 - 0.01 || L.y > f.y1 + 0.01) continue;
+    datum.add(lineOf([on(s0, L.y), on(s1, L.y)], M.lvlDash));
+    const q = on(Math.max(0, f.L - 1.6), L.y);
+    out.push({ x:q.x, y:L.y, z:q.z, t:`${L.y ? '+' : '±'}${(L.y).toLocaleString('ru-RU', { minimumFractionDigits:3, maximumFractionDigits:3 })}\n${L.n}`, cls:'lv' });
+  }
+  SECT_LABELS = out;
+}
+let SECT_LABELS = [];
 function dimTexts(d, cls, out){
   const G = dimGeom(d); if (!G) return;
   const { u, n, o, arr, off } = G, k = wpp();
@@ -1078,7 +1544,11 @@ const segDist = (px, py, A, B) => { const dx = B.x - A.x, dy = B.y - A.y, L2 = d
 function pickFlat(px, py){
   let best = null, bd = coarsePtr ? 12 : 7;
   const take = (id, d) => { if (d < bd){ bd = d; best = id; } };
+  if (S.view === 'sect') return null;
   for (const it of items){
+    if (S.view === 'plan' && it.type === 'room'){ const c = toScreen(it.x, 0, it.z); if (Math.abs(c.x - px) < 46 && Math.abs(c.y - py) < 20) take(it.id, 1); continue; }
+    if (S.view === 'plan' && it.type === 'floor' && shown(it)){ const P = it.pts.map(p => toScreen(p.x, 0, p.z)); for (let i = 0; i < P.length; i++) take(it.id, segDist(px, py, P[i], P[(i + 1) % P.length]) + 2); continue; }
+    if (S.view === 'plan' && it.type === 'roof' && shown(it)){ const F = roofFrame(it), P = [F.map(F.u0, 0, F.v0), F.map(F.u1, 0, F.v0), F.map(F.u1, 0, F.v1), F.map(F.u0, 0, F.v1)].map(p => toScreen(p.x, 0, p.z)); for (let i = 0; i < 4; i++) take(it.id, segDist(px, py, P[i], P[(i + 1) % 4])); continue; }
     if (it.type === 'grid'){ const A = toScreen(it.x1, 0, it.z1), B = toScreen(it.x2, 0, it.z2); take(it.id, segDist(px, py, A, B)); for (const e of gridBubbles(it)) take(it.id, Math.hypot(e.sx - px, e.sy - py) - 10); continue; }
     if (S.view !== 'plan') continue;
     if (it.type === 'dim'){
@@ -1164,6 +1634,7 @@ function redo(n = 1){
 function elWord(it){
   if (!it) return 'элемент';
   if (TAGGED.includes(it.type) && it.tag) return `${CAT[it.type].toLowerCase()} ${it.tag}`;
+  if (it.type === 'room') return `помещение ${it.num} «${it.name}»`;
   return { grid:'ось ' + (it.name || ''), dim:'размер', line:'линия', circle:'окружность', text:'текст «' + String(it.s || '').slice(0, 14) + '»' }[it.type] || it.type;
 }
 // "Добавлено: окно Д", "Удалено: стена Б", "Изменено: дверь А, окно Б"…
@@ -1197,9 +1668,9 @@ function historyList(max = 10){
 /* ---------- wall letters: A…Z, then AA, AB, AC… (kept for the life of a wall, so voice commands stay valid) ---------- */
 // Russian letters without Ё, Й, Ъ, Ы, Ь (hard to say on their own); each category counts from А: walls А, Б…; doors А, Б…; windows А, Б…
 const RU = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ';
-const TAGGED = ['wall', 'door', 'window', 'box'];
+const TAGGED = ['wall', 'door', 'window', 'box', 'floor', 'ceiling', 'roof', 'column', 'stair'];
 const TAG_RE = new RegExp('^[' + RU + ']{1,3}$');
-const CAT = { wall:'Стена', door:'Дверь', window:'Окно', box:'Объём' };
+const CAT = { wall:'Стена', door:'Дверь', window:'Окно', box:'Объём', floor:'Пол', ceiling:'Потолок', roof:'Крыша', column:'Колонна', stair:'Лестница', room:'Помещение' };
 function tagOf(n){ let s = ''; n++; while (n > 0){ const r = (n - 1) % RU.length; s = RU[r] + s; n = Math.floor((n - 1) / RU.length); } return s; }
 function nextTag(type){ const used = new Set(items.filter(i => i.type === type && i.tag).map(i => i.tag)); let i = 0; while (used.has(tagOf(i))) i++; return tagOf(i); }
 const nextWallTag = () => nextTag('wall');
@@ -1214,12 +1685,12 @@ const byTag = (type, t) => items.find(i => i.type === type && i.tag === String(t
 const wallByTag = t => byTag('wall', t);
 const tagName = it => it && it.tag ? `${CAT[it.type] || ''} ${it.tag}`.trim() : (it ? '№' + it.id : '');
 const tagNameL = it => it && it.tag ? `${(CAT[it.type] || '').toLowerCase()} ${it.tag}`.trim() : (it ? '№' + it.id : '');
-const fem = it => it && (it.type === 'wall' || it.type === 'door');
+const fem = it => it && ['wall', 'door', 'roof', 'column', 'stair'].includes(it.type);
 
 /* ---------- phases (Revit "Стадии"): each element has a phase it was built in and, optionally, a phase it is demolished in ---------- */
 const PHASES = [{ k:'obmer', n:'Обмер' }, { k:'demontazh', n:'Демонтаж' }, { k:'montazh', n:'Монтаж' }, { k:'mebel', n:'Мебель' }];
 const PH_IDX = Object.fromEntries(PHASES.map((p, i) => [p.k, i]));
-const PHASED = ['wall', 'door', 'window', 'box'];
+const PHASED = ['wall', 'door', 'window', 'box', 'floor', 'ceiling', 'roof', 'column', 'stair'];
 const phName = k => k === 'all' ? 'Показать все' : (PHASES.find(p => p.k === k) || { n:'—' }).n;
 const newPhase = () => S.phase === 'all' ? 'montazh' : S.phase;
 // 'normal' — drawn as usual; 'exist' — built in an earlier phase (grey); 'demo' — demolished in this phase (red dashed); 'hide'
@@ -1278,6 +1749,20 @@ function addOp(type, wall, pos, w, h, sill = 0, extra = {}){
   const it = { id:nextId++, type, wall, pos:r4(pos), w, h, sill:type === 'door' ? 0 : sill, flip:false, hand:false, ...extra, tag:nextTag(type), ph:extra.ph || newPhase() };
   items.push(it); return it;
 }
+const ptsOf = arr => arr.map(p => ({ x:r4(p.x), z:r4(p.z) }));
+function addFloor(pts, extra = {}){ const it = { id:nextId++, type:'floor', pts:ptsOf(pts), t:extra.t ?? S.floorT, off:extra.off ?? 0, m:extra.m || 'concrete', tag:nextTag('floor'), ph:extra.ph || newPhase() }; items.push(it); return it; }
+function addCeiling(pts, extra = {}){ const it = { id:nextId++, type:'ceiling', pts:ptsOf(pts), h:extra.h ?? S.ceilH, t:extra.t ?? 0.03, m:extra.m || 'gkl', tag:nextTag('ceiling'), ph:extra.ph || newPhase() }; items.push(it); return it; }
+function addColumn(p, extra = {}){ const it = { id:nextId++, type:'column', x:r4(p.x), z:r4(p.z), w:extra.w ?? S.colW, d:extra.d ?? S.colD, h:extra.h ?? S.wallH, round:extra.round ?? S.colRound, m:extra.m || 'concrete', tag:nextTag('column'), ph:extra.ph || newPhase() }; items.push(it); return it; }
+function addStair(a, b, extra = {}){ const it = { id:nextId++, type:'stair', x1:r4(a.x), z1:r4(a.z), x2:r4(b.x), z2:r4(b.z), w:extra.w ?? S.stairW, h:extra.h ?? S.stairH, m:extra.m || 'concrete', tag:nextTag('stair'), ph:extra.ph || newPhase() }; items.push(it); return it; }
+// roof over a footprint rectangle (outer faces of the walls); the base is the top of the highest wall
+function addRoof(rect, extra = {}){
+  const wh = Math.max(0, ...items.filter(w => w.type === 'wall' && shown(w)).map(w => w.h));
+  const it = { id:nextId++, type:'roof', x:r4(rect.x0), z:r4(rect.z0), w:r4(rect.x1 - rect.x0), d:r4(rect.z1 - rect.z0), kind:extra.kind || S.roofKind, slope:extra.slope ?? S.roofSlope, over:extra.over ?? S.roofOver,
+    t:extra.t ?? 0.25, base:extra.base ?? (wh || S.wallH), ridge:extra.ridge || 'auto', gab:true, m:extra.m || 'tile', tag:nextTag('roof'), ph:extra.ph || newPhase() };
+  items.push(it); return it;
+}
+const rectOf = pts => ({ x0:Math.min(...pts.map(p => p.x)), x1:Math.max(...pts.map(p => p.x)), z0:Math.min(...pts.map(p => p.z)), z1:Math.max(...pts.map(p => p.z)) });
+const rectPts = (a, b) => { const x0 = Math.min(a.x, b.x), x1 = Math.max(a.x, b.x), z0 = Math.min(a.z, b.z), z1 = Math.max(a.z, b.z); return [{ x:x0, z:z0 }, { x:x1, z:z0 }, { x:x1, z:z1 }, { x:x0, z:z1 }]; };
 function loadSample(){
   items = []; nextId = 1; types = JSON.parse(JSON.stringify(DEFAULT_TYPES));
   addGrid(new V3(-3,0,-3.9), new V3(-3,0,3.9), '1'); addGrid(new V3(0.8,0,-3.9), new V3(0.8,0,3.9), '2'); addGrid(new V3(3,0,-3.9), new V3(3,0,3.9), '3');
@@ -1298,10 +1783,15 @@ function loadSample(){
   addOp('window', n.id, 5.1, 1.0, 1.4, 0.9, { ph:'obmer' });
   addOp('window', e.id, 3.25, 1.2, 1.4, 0.9, { ph:'obmer' });
   addOp('window', w.id, 1.75, 1.5, 1.4, 0.9, { ph:'obmer' });
-  items.push({ id:nextId++, type:'text', x:-2.6, z:1.6, s:'Кухня-гостиная', size:14 });
-  items.push({ id:nextId++, type:'text', x:1.2, z:1.6, s:'Спальня', size:14 });
   autoDims();
   for (const it of items) if (!it.ph && PHASED.includes(it.type)) it.ph = 'obmer';
+  // floor slab under the house, gable roof on the outer walls, rooms with tags; ceilings come with the renovation
+  const keepPh = S.phase; S.phase = 'montazh';
+  const out = buildingOutline();
+  if (out){ addFloor(out, { ph:'obmer' }); addRoof(rectOf(out), { ph:'obmer', kind:'gable', slope:30, over:0.5 }); }
+  addRoom(-1.5, 0.9, 'Кухня-гостиная'); addRoom(1.9, 0.9, 'Спальня');
+  for (const [x, z] of [[-1.5, 0.9], [1.9, 0.9]]){ const d = regionAt(x, z); if (!d.open) addCeiling(d.poly, { h:2.6, ph:'montazh' }); }
+  S.phase = keepPh;
   views = SAMPLE_VIEWS();
 }
 // the example project shows a typical renovation set: one plan per phase, a detail and sheets
@@ -1320,20 +1810,34 @@ function SAMPLE_VIEWS(){
     sh('s-2', 'А102', 'План демонтажа', [{ id:'vp2', view:'v-p-dem', x:35, y:20, scale:50, w:150, h:110 }]),
     sh('s-3', 'А103', 'План монтажа и узел 1', [{ id:'vp3', view:'v-p-mont', x:30, y:20, scale:50, w:150, h:110 }, { id:'vp4', view:'v-d1', x:250, y:20, scale:20, w:100, h:100 }]),
     sh('s-4', 'А104', 'План мебели и 3D-вид', [{ id:'vp5', view:'v-p-meb', x:30, y:20, scale:50, w:150, h:110 }, { id:'vp6', view:'v-3d', x:250, y:20, scale:100, w:140, h:105 }]));
+  // section 1-1 across the ridge, a 3D view cut by its section box, interior elevations of the bedroom
+  const bb = bounds();
+  v.push({ id:'v-s1', kind:'section', code:'1', name:'Разрез 1-1', p1:{ x:-1.6, z:3.9 }, p2:{ x:-1.6, z:-3.9 }, flip:false, crop:true, far:5.4, y0:-0.6, y1:r4(Math.max(bb.max.y, 4) + 0.6), phase:'montazh' });
+  v.push({ id:'v-3dcut', kind:'d3', name:'3D — границы вида', phase:'mebel', box:{ on:true, x0:-3.6, x1:3.6, y0:-0.5, y1:1.6, z0:-2.9, z1:3.8 } });
+  const keepPh = S.phase; S.phase = 'montazh';
+  const ie = ielevDefs(new V3(1.9, 0, 1.3)) || []; ie.forEach((x, i) => { x.id = 'v-ie' + (i + 1); x.phase = 'mebel'; }); v.push(...ie);
+  S.phase = keepPh;
+  v.push(sh('s-5', 'А105', 'Разрез 1-1 и 3D', [{ id:'vp7', view:'v-s1', x:30, y:20, scale:50, w:150, h:110 }, { id:'vp8', view:'v-3dcut', x:240, y:20, scale:100, w:150, h:110 }]));
+  if (ie.length) v.push(sh('s-6', 'А106', 'Развёртки стен: Спальня', ie.map((x, i) => ({ id:'vp-ie' + i, view:x.id, x:30 + (i % 2) * 120, y:15 + Math.floor(i / 2) * 120, scale:50, w:100, h:100 }))));
   return v;
 }
 function markEdited(){ if (proj.sample){ proj.sample = false; } }
 
 /* ---------- selection transforms: move, copy, rotate, delete ---------- */
 function translateItem(it, dx, dz){
-  if (it.type === 'wall' || it.type === 'grid' || it.type === 'line'){ it.x1 = r4(it.x1 + dx); it.z1 = r4(it.z1 + dz); it.x2 = r4(it.x2 + dx); it.z2 = r4(it.z2 + dz); }
+  if (it.pts){ it.pts = it.pts.map(p => ({ x:r4(p.x + dx), z:r4(p.z + dz) })); return; }
+  if (it.type === 'roof' || it.type === 'column' || it.type === 'room'){ it.x = r4(it.x + dx); it.z = r4(it.z + dz); return; }
+  if (it.type === 'wall' || it.type === 'grid' || it.type === 'line' || it.type === 'stair'){ it.x1 = r4(it.x1 + dx); it.z1 = r4(it.z1 + dz); it.x2 = r4(it.x2 + dx); it.z2 = r4(it.z2 + dz); }
   else if (it.type === 'box' || it.type === 'circle' || it.type === 'text'){ it.x = r4(it.x + dx); it.z = r4(it.z + dz); }
   else if (it.type === 'dim') for (const r of it.refs) if (r.k === 'p'){ r.x = r4(r.x + dx); r.z = r4(r.z + dz); }
 }
 function rotateItem(it, cx, cz){
   // 90° anticlockwise on the plan (east turns to north)
   const R = (x, z) => ({ x:r4(cx + (z - cz)), z:r4(cz - (x - cx)) });
-  if (it.type === 'wall' || it.type === 'grid' || it.type === 'line'){ const a = R(it.x1, it.z1), b = R(it.x2, it.z2); Object.assign(it, { x1:a.x, z1:a.z, x2:b.x, z2:b.z }); }
+  if (it.pts){ it.pts = it.pts.map(p => R(p.x, p.z)); return; }
+  if (it.type === 'column' || it.type === 'room'){ const a = R(it.x, it.z); it.x = a.x; it.z = a.z; if (it.type === 'column'){ const w = it.w; it.w = it.d; it.d = w; } return; }
+  if (it.type === 'roof'){ const a = R(it.x, it.z), b = R(it.x + it.w, it.z + it.d); Object.assign(it, { x:Math.min(a.x, b.x), z:Math.min(a.z, b.z), w:it.d, d:it.w, ridge:it.ridge === 'x' ? 'z' : it.ridge === 'z' ? 'x' : 'auto' }); return; }
+  if (it.type === 'wall' || it.type === 'grid' || it.type === 'line' || it.type === 'stair'){ const a = R(it.x1, it.z1), b = R(it.x2, it.z2); Object.assign(it, { x1:a.x, z1:a.z, x2:b.x, z2:b.z }); }
   else if (it.type === 'box'){ const a = R(it.x, it.z), b = R(it.x + it.w, it.z + it.d); Object.assign(it, { x:Math.min(a.x, b.x), z:Math.min(a.z, b.z), w:it.d, d:it.w }); }
   else if (it.type === 'circle' || it.type === 'text'){ const a = R(it.x, it.z); it.x = a.x; it.z = a.z; }
   else if (it.type === 'dim'){
@@ -1350,7 +1854,11 @@ function selKeyPoints(ids){
 }
 function itemPts(it){
   if (it.type === 'wall'){ const f = wallFrame(it); const o = f.nrm.clone().multiplyScalar(it.t / 2); return [new V3(it.x1, 0, it.z1).add(o), new V3(it.x2, 0, it.z2).add(o), new V3(it.x1, 0, it.z1).sub(o), new V3(it.x2, 0, it.z2).sub(o)]; }
-  if (it.type === 'grid' || it.type === 'line') return [new V3(it.x1, 0, it.z1), new V3(it.x2, 0, it.z2)];
+  if (it.type === 'grid' || it.type === 'line' || it.type === 'stair') return [new V3(it.x1, 0, it.z1), new V3(it.x2, 0, it.z2)];
+  if (it.pts) return it.pts.map(p => new V3(p.x, 0, p.z));
+  if (it.type === 'column') return [new V3(it.x - it.w / 2, 0, it.z - it.d / 2), new V3(it.x + it.w / 2, 0, it.z + it.d / 2)];
+  if (it.type === 'room') return [new V3(it.x, 0, it.z)];
+  if (it.type === 'roof') return [new V3(it.x, 0, it.z), new V3(it.x + it.w, 0, it.z + it.d)];
   if (it.type === 'box') return [new V3(it.x, 0, it.z), new V3(it.x + it.w, 0, it.z + it.d)];
   if (it.type === 'circle') return [new V3(it.x - it.r, 0, it.z - it.r), new V3(it.x + it.r, 0, it.z + it.r)];
   if (it.type === 'text') return [new V3(it.x, 0, it.z)];
@@ -1366,7 +1874,7 @@ function copyItems(ids, dx, dz){
     if (c.type === 'grid') c.name = nextGridName(Math.abs(c.z2 - c.z1) >= Math.abs(c.x2 - c.x1));
     if (TAGGED.includes(c.type)) c.tag = null;
     if (c.type === 'dim' && c.refs.some(r => r.k !== 'p')) continue;
-    translateItem(c, dx, dz); items.push(c); if (TAGGED.includes(c.type)) c.tag = nextTag(c.type); map.set(id, c.id); made.push(c.id);
+    translateItem(c, dx, dz); items.push(c); if (TAGGED.includes(c.type)) c.tag = nextTag(c.type); if (c.type === 'room') c.num = nextRoomNum(); map.set(id, c.id); made.push(c.id);
     if (it.type === 'wall') for (const o of items.filter(o => isOp(o) && o.wall === it.id)){ const co = { ...o, id:nextId++, wall:c.id, tag:null }; co.tag = nextTag(o.type); items.push(co); }
   }
   return made;
@@ -1393,10 +1901,10 @@ const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new 
 function setRay(px, py){ ndc.set(px / cv.clientWidth * 2 - 1, -(py / cv.clientHeight) * 2 + 1); ray.setFromCamera(ndc, cam()); }
 function groundAt(px, py){ setRay(px, py); const p = new V3(); return ray.ray.intersectPlane(groundPlane, p) ? p : null; }
 function pick(px, py){
-  const f = pickFlat(px, py); if (f) return f;
+  const f = pickFlat(px, py); if (f && byId(f)?.type !== 'floor') return f;
   setRay(px, py);
-  const h = ray.intersectObjects(model.children, true).find(x => x.object.isMesh && x.object.userData.id);
-  return h ? h.object.userData.id : null;
+  const h = ray.intersectObjects(model.children, true).find(x => x.object.isMesh && x.object.userData.id && clipKeep(x.point));
+  return h ? h.object.userData.id : f;
 }
 function toScreen(x, y, z){ const c = RENDER ? RENDER.cam : cam(), W = RENDER ? RENDER.w : cv.clientWidth, H = RENDER ? RENDER.h : cv.clientHeight; const v = new V3(x, y, z).project(c); return { x:(v.x + 1) / 2 * W, y:(1 - v.y) / 2 * H, ok:v.z > -1 && v.z < 1 }; }
 // world size of a few screen pixels at the cursor (works in plan, axonometry and perspective)
@@ -1408,9 +1916,11 @@ function candidates(){
     if (!shown(it)) continue;
     if (it.type === 'wall'){ out.push({ x:it.x1, z:it.z1, k:'end' }, { x:it.x2, z:it.z2, k:'end' }); }
     else if (it.type === 'box'){ out.push({ x:it.x, z:it.z, k:'end' }, { x:it.x + it.w, z:it.z, k:'end' }, { x:it.x, z:it.z + it.d, k:'end' }, { x:it.x + it.w, z:it.z + it.d, k:'end' }); }
-    else if (it.type === 'line'){ out.push({ x:it.x1, z:it.z1, k:'end' }, { x:it.x2, z:it.z2, k:'end' }); }
-    else if (it.type === 'circle') out.push({ x:it.x, z:it.z, k:'end' });
+    else if (it.type === 'line' || it.type === 'stair'){ out.push({ x:it.x1, z:it.z1, k:'end' }, { x:it.x2, z:it.z2, k:'end' }); }
+    else if (it.type === 'circle' || it.type === 'column') out.push({ x:it.x, z:it.z, k:'end' });
+    else if (it.pts) for (const p of it.pts) out.push({ x:p.x, z:p.z, k:'end' });
   }
+  if (D.poly) for (const p of D.poly) out.push({ x:p.x, z:p.z, k:'end' });
   for (let i = 0; i < grs.length; i++) for (let j = i + 1; j < grs.length; j++){
     const a = grs[i], b = grs[j], fa = wallFrame(a), fb = wallFrame(b), p = xLines(fa.p1, fa.dir, fb.p1, fb.dir);
     if (!p) continue;
@@ -1509,7 +2019,7 @@ function overlaps(wallId, pos, w, skipId){ return items.some(o => isOp(o) && o.w
 function opSpec(){ return S.tool === 'door' ? { type:'door', w:S.doorW, h:S.doorH, sill:0 } : { type:'window', w:S.winW, h:S.winH, sill:S.winSill }; }
 function opTarget(px, py){
   let wall = null;
-  if (S.view !== 'plan'){ setRay(px, py); const h = ray.intersectObjects(model.children, true).find(x => x.object.isMesh && x.object.userData.id); const it = h && byId(h.object.userData.id); if (it) wall = it.type === 'wall' ? it : isOp(it) ? byId(it.wall) : null; }
+  if (S.view !== 'plan'){ setRay(px, py); const h = ray.intersectObjects(model.children, true).find(x => x.object.isMesh && x.object.userData.id && clipKeep(x.point)); const it = h && byId(h.object.userData.id); if (it) wall = it.type === 'wall' ? it : isOp(it) ? byId(it.wall) : null; }
   if (!wall){
     const g = groundAt(px, py);
     if (g){
@@ -1533,11 +2043,12 @@ function opTarget(px, py){
 }
 
 /* ---------- drawing ---------- */
-const D = { start:null, first:null, cur:null, kind:null, op:null, flip:false, prevWall:null, firstWall:null };
+const D = { start:null, first:null, cur:null, kind:null, op:null, flip:false, prevWall:null, firstWall:null, poly:null };
 const DD = { refs:[], hover:null, off:0.8, dir:null };
-const drawing = () => ['wall','rect','box','grid','line','move','copy'].includes(S.tool);
+const drawing = () => ['wall','rect','box','grid','line','move','copy','floor','ceiling','roof','stair','section'].includes(S.tool);
+const pointTool = () => ['column','room','ielev'].includes(S.tool);
 const placing = () => S.tool === 'door' || S.tool === 'window';
-function endDraw(){ D.start = D.first = D.op = D.prevWall = D.firstWall = null; DD.refs = []; DD.hover = null; DD.dir = null; GUIDES = []; disposeGroup(preview); lenInput.value = ''; annoDirty = true; updateHint(); }
+function endDraw(){ D.start = D.first = D.op = D.prevWall = D.firstWall = D.poly = null; DD.refs = []; DD.hover = null; DD.dir = null; GUIDES = []; disposeGroup(preview); lenInput.value = ''; annoDirty = true; updateHint(); }
 function addPreview(obj){ if (!obj) return; obj.traverse(o => o.renderOrder = 5); preview.add(obj); }
 function locOffset(t, flip){ const s = flip ? -1 : 1; return S.loc === 'ext' ? s * t / 2 : S.loc === 'int' ? -s * t / 2 : 0; }
 function drawnWallSpec(a, b){
@@ -1565,8 +2076,24 @@ function updatePreview(){
     addPreview(g); return;
   }
   if (S.tool === 'dim'){ annoDirty = true; return; }
+  const Yp = S.view === 'plan' ? 32 : 0.02;
+  if (S.tool === 'column' && D.cur){
+    const geo = S.colRound ? new THREE.CylinderGeometry(S.colW / 2, S.colW / 2, S.wallH, 24) : new THREE.BoxGeometry(S.colW, S.wallH, S.colD);
+    addPreview(part(geo, M.prev, M.edgePrev, null, D.cur.x, S.wallH / 2, D.cur.z)); return;
+  }
+  if (D.poly && D.cur){ const pts = [...D.poly, D.cur].map(p => new V3(p.x, Yp, p.z)); addPreview(lineOf(pts, M.edgePrev)); if (D.poly.length >= 2) addPreview(lineOf([pts[pts.length - 1], pts[0]], M.gAl)); return; }
   if (!D.start || !D.cur) return;
-  const a = D.start, b = D.cur, Y = S.view === 'plan' ? 32 : 0.02;
+  const a = D.start, b = D.cur, Y = Yp;
+  if (S.tool === 'stair'){ if (a.distanceTo(b) > 0.2){ const o = buildStair({ type:'stair', x1:a.x, z1:a.z, x2:b.x, z2:b.z, w:S.stairW, h:S.stairH }); if (o) addPreview(o); } return; }
+  if (S.tool === 'section'){
+    const d = b.clone().sub(a); if (d.lengthSq() < 1e-6) return; d.normalize(); const n = new V3(d.z, 0, -d.x), k = wpp() * 14;
+    addPreview(lineOf([new V3(a.x, Y, a.z), new V3(b.x, Y, b.z)], M.edgePrev));
+    for (const p of [a, b]) addPreview(lineOf([new V3(p.x, Y, p.z), new V3(p.x + n.x * k * 2, Y, p.z + n.z * k * 2)], M.edgePrev));
+    return;
+  }
+  if ((S.tool === 'floor' || S.tool === 'ceiling' || S.tool === 'roof') && Math.abs(a.x - b.x) > 1e-3 && Math.abs(a.z - b.z) > 1e-3){
+    const pts = rectPts(a, b).map(p => new V3(p.x, Y, p.z)); addPreview(lineOf([...pts, pts[0]], M.edgePrev)); return;
+  }
   if (S.tool === 'wall'){ const sp = drawnWallSpec(a, b); if (sp) addPreview(buildWall({ type:'wall', x1:sp.a.x, z1:sp.a.z, x2:sp.b.x, z2:sp.b.z, t:sp.t, h:S.wallH, wt:S.wallType, flipL:D.flip }, null, M.edgePrev)); }
   else if (S.tool === 'grid' || S.tool === 'move' || S.tool === 'copy' || (S.tool === 'line' && S.lineMode === 'line')) addPreview(lineOf([new V3(a.x, Y, a.z), new V3(b.x, Y, b.z)], M.edgePrev));
   else if (S.tool === 'line' && S.lineMode === 'circle'){ const r = a.distanceTo(b), pts = []; for (let k = 0; k <= 72; k++){ const t = k / 72 * Math.PI * 2; pts.push(new V3(a.x + Math.cos(t) * r, Y, a.z + Math.sin(t) * r)); } addPreview(lineOf(pts, M.edgePrev)); }
@@ -1632,9 +2159,36 @@ function click(px, py, shift, ctrl){
     rebuild(); D.op = coarsePtr ? null : opTarget(px, py); updatePreview();
     return;
   }
+  if (pointTool()){
+    const s = snap(px, py, null, false); if (!s) return; const p = s.p;
+    if (S.tool === 'column'){ pushUndo(); markEdited(); const c = addColumn(p); rebuild(); toast(`Колонна ${c.tag}: ${mm(c.w)}×${mm(c.round ? c.w : c.d)} мм`); return; }
+    if (S.tool === 'room'){
+      const d = regionAt(p.x, p.z), G = roomGrid();
+      if (!d.open && items.some(r => r.type === 'room' && d.fill[cellAt(G, r.x, r.z)])){ toast('В этом контуре уже есть помещение'); return; }
+      pushUndo(); markEdited(); const r = addRoom(p.x, p.z); setSel([r.id]); rebuild();
+      toast(d.open ? `Помещение ${r.num} «Не окружено»: вокруг нет замкнутого контура стен` : `Помещение ${r.num}: ${m2(d.area)} м²`); return;
+    }
+    makeInteriorElevations(p); return;
+  }
+  const slabTool = S.tool === 'floor' || S.tool === 'ceiling';
+  if ((slabTool && (S.slabMode === 'room' || S.slabMode === 'outline')) || (S.tool === 'roof' && S.roofMode === 'outline')){
+    const g = groundAt(px, py); if (!g) return;
+    if (S.tool === 'roof' || S.slabMode === 'outline'){ const pts = buildingOutline(); if (!pts){ toast('Нет замкнутого контура наружных стен'); return; } createFromOutline(S.tool, pts); }
+    else { const d = regionAt(g.x, g.z); if (d.open){ toast('Щёлкните внутри помещения, окружённого стенами'); return; } createFromOutline(S.tool, d.poly); }
+    return;
+  }
   if (!drawing()) return;
   const s = snap(px, py, D.start, shift); if (!s) return;
   const p = s.p;
+  if (slabTool && S.slabMode === 'poly'){
+    if (!D.poly){ D.poly = [p.clone()]; D.start = p.clone(); }
+    else {
+      if (D.poly.length >= 3 && p.distanceTo(D.poly[0]) < 1e-3){ finishPoly(); return; }
+      if (p.distanceTo(D.start) < 1e-3) return;
+      D.poly.push(p.clone()); D.start = p.clone();
+    }
+    D.cur = p.clone(); updatePreview(); updateHint(); return;
+  }
   if (S.tool === 'move' || S.tool === 'copy'){
     if (!D.start){ D.start = p.clone(); D.cur = p.clone(); updateHint(); return; }
     const dx = r4(p.x - D.start.x), dz = r4(p.z - D.start.z);
@@ -1667,7 +2221,10 @@ function click(px, py, shift, ctrl){
     else {
       if (S.tool === 'grid'){ if (p.distanceTo(D.start) < 0.1) return; pushUndo(); const g = addGrid(D.start, p); markEdited(); rebuild(); endDraw(); toast(`Ось «${g.name}»`); return; }
       if (S.tool === 'line' && S.lineMode === 'circle'){ const r = r4(p.distanceTo(D.start)); if (r < 0.01) return; pushUndo(); items.push({ id:nextId++, type:'circle', x:D.start.x, z:D.start.z, r }); markEdited(); rebuild(); endDraw(); return; }
+      if (S.tool === 'stair'){ if (p.distanceTo(D.start) < 0.5) return; pushUndo(); const st = addStair(D.start, p); markEdited(); rebuild(); endDraw(); const I = stairInfo(st); toast(`Лестница ${st.tag}: ${I.n} подступенков по ${mm(I.rise)} мм, проступь ${mm(I.go)} мм`); return; }
+      if (S.tool === 'section'){ if (p.distanceTo(D.start) < 0.5) return; const a = D.start.clone(); endDraw(); makeSection(a, p); setTool('select'); return; }
       if (Math.abs(p.x - D.start.x) < 1e-3 || Math.abs(p.z - D.start.z) < 1e-3) return;
+      if (S.tool === 'floor' || S.tool === 'ceiling' || S.tool === 'roof'){ const a = D.start.clone(); endDraw(); createFromOutline(S.tool, rectPts(a, p)); return; }
       pushUndo();
       if (S.tool === 'line'){ const a = D.start, q = [[a.x, a.z], [p.x, a.z], [p.x, p.z], [a.x, p.z]]; for (let i = 0; i < 4; i++){ const u = q[i], v = q[(i + 1) % 4]; items.push({ id:nextId++, type:'line', x1:u[0], z1:u[1], x2:v[0], z2:v[1] }); } }
       else if (S.tool === 'rect'){ const r = rectSpec(D.start, p); if (r) addRect(r.a, r.b, S.wallH, { wt:S.wallType, flipL:D.flip }); }
@@ -1707,6 +2264,57 @@ function applyTyped(){
   else addBox(a, b);
   rebuild(); endDraw();
   markEdited(); lenInput.value = ''; updatePreview(); updateHint();
+}
+function createFromOutline(tool, pts, opt = {}){
+  if (!pts || pts.length < 3 || Math.abs(polyArea(pts)) < 0.01){ if (opt.voice) throw new Error('Контур слишком мал'); toast('Контур слишком мал'); return null; }
+  if (!opt.voice){ pushUndo(); markEdited(); }
+  let it, msg;
+  if (opt.voice){
+    it = tool === 'floor' ? addFloor(pts, opt.extra) : tool === 'ceiling' ? addCeiling(pts, opt.extra) : addRoof(rectOf(pts), opt.extra);
+    return it;
+  }
+  if (tool === 'floor'){ it = addFloor(pts); msg = `Пол ${it.tag}: ${m2(Math.abs(polyArea(it.pts)))} м², толщина ${mm(it.t)} мм`; }
+  else if (tool === 'ceiling'){ it = addCeiling(pts); msg = `Потолок ${it.tag} на высоте ${mm(it.h)} мм: ${m2(Math.abs(polyArea(it.pts)))} м²`; }
+  else { it = addRoof(rectOf(pts)); msg = `Крыша ${it.tag}: ${ROOF_KINDS[it.kind].toLowerCase()}, уклон ${it.slope}°, свес ${mm(it.over)} мм`; }
+  setSel([it.id]); rebuild(); toast(msg); return it;
+}
+const ROOF_KINDS = { gable:'Двускатная', hip:'Вальмовая', shed:'Односкатная', flat:'Плоская' };
+function finishPoly(){
+  const pts = D.poly; endDraw();
+  if (!pts || pts.length < 3){ toast('Нужно хотя бы три точки'); return; }
+  createFromOutline(S.tool, pts);
+}
+// Revit sections: the line is drawn on the plan; the view looks to one side of it, as far as the far clip
+function makeSection(a, b, extra = {}){
+  const n = views.filter(v => v.kind === 'section').length + 1;
+  let k = n; while (views.some(v => v.kind === 'section' && v.code === String(k))) k++;
+  const v = { id:vid('v'), kind:'section', code:String(k), name:`Разрез ${k}-${k}`, p1:{ x:r4(a.x), z:r4(a.z) }, p2:{ x:r4(b.x), z:r4(b.z) }, flip:true, crop:true, phase:S.phase, ...extra };
+  const f = sectFrame({ ...v, far:1 }), bb = bounds();
+  let far = 1; for (const x of [bb.min.x, bb.max.x]) for (const z of [bb.min.z, bb.max.z]) far = Math.max(far, new V3(x, 0, z).sub(f.p1).dot(f.d) + 0.5);
+  v.far = extra.far ?? r4(Math.min(far, 60)); v.y0 = extra.y0 ?? -0.6; v.y1 = extra.y1 ?? r4(bb.max.y + 1);
+  views.push(v); renderTree(); annoDirty = true; scheduleSave();
+  if (!extra.quiet) toast(`${v.name} создан. Откройте его в диспетчере проекта или щелчком по стрелке разреза`);
+  return v;
+}
+// Revit interior elevations (развёртки): a marker inside a room, four views towards its walls, cropped to the room
+function makeInteriorElevations(p, quiet){
+  const made = ielevDefs(p);
+  if (!made){ toast('Поставьте марку развёртки внутри помещения, окружённого стенами'); return []; }
+  views.push(...made); renderTree(); annoDirty = true; scheduleSave();
+  if (!quiet) toast(`${made[0].name.replace(/ — 1 \(север\)$/, '')}: 4 вида (север, восток, юг, запад) — в диспетчере проекта`);
+  return made;
+}
+function ielevDefs(p){
+  const d = regionAt(p.x, p.z); if (d.open) return null;
+  const R = rectOf(d.poly), G = roomGrid(), room = items.find(r => r.type === 'room' && d.fill[cellAt(G, r.x, r.z)]);
+  const rn = room ? room.name : 'Помещение', mk = vid('mk'), e = 0.1, H = Math.max(S.wallH, ...items.filter(w => w.type === 'wall' && shown(w)).map(w => w.h));
+  const defs = [
+    { s:'север', p1:{ x:R.x0 - e, z:p.z }, p2:{ x:R.x1 + e, z:p.z }, far:p.z - R.z0 + 0.25 },
+    { s:'восток', p1:{ x:p.x, z:R.z0 - e }, p2:{ x:p.x, z:R.z1 + e }, far:R.x1 - p.x + 0.25 },
+    { s:'юг', p1:{ x:R.x1 + e, z:p.z }, p2:{ x:R.x0 - e, z:p.z }, far:R.z1 - p.z + 0.25 },
+    { s:'запад', p1:{ x:p.x, z:R.z1 + e }, p2:{ x:p.x, z:R.z0 - e }, far:p.x - R.x0 + 0.25 }];
+  return defs.map((q, i) => ({ id:vid('v'), kind:'ielev', code:String(i + 1), name:`Развёртка: ${rn} — ${i + 1} (${q.s})`, p1:{ x:r4(q.p1.x), z:r4(q.p1.z) }, p2:{ x:r4(q.p2.x), z:r4(q.p2.z) }, flip:true, crop:true,
+    far:r4(q.far), y0:-0.15, y1:r4(H + 0.15), phase:S.phase, mk:{ id:mk, x:r4(p.x), z:r4(p.z), i } }));
 }
 // run a drawing click at an exact model point (typed lengths)
 // Revit "Demolish": the element stays in the model and is marked as demolished in the current phase
@@ -1788,11 +2396,14 @@ cv.addEventListener('pointerdown', e => {
   down = { x, y, b:e.button, type:e.pointerType, hadStart:!!D.start, moved:false, ctrl };
   if (drawing() || placing() || S.tool === 'dim') hover(x, y, e.shiftKey);
   if (S.tool === 'select' && e.button === 0){
+    const vm = pickViewMark(x, y);
+    if (vm){ S.selView = vm; clearSel(); rebuild(); down = null; return; }
+    if (S.selView){ S.selView = null; annoDirty = true; $('#propsBody').dataset.id = 'x'; updatePanel(); }
     const id = pick(x, y);
     if (id){
       if (!ctrl && !isSel(id)){ setSel([id], id); rebuild(); }
       else if (!ctrl){ selId = id; }
-      if (!ctrl) startDrag(id, x, y);
+      if (!ctrl && S.view !== 'sect') startDrag(id, x, y);
     } else box = { x0:x, y0:y, ctrl };
   }
   if (S.tool === 'callout' && e.button === 0 && S.view === 'plan') box = { x0:x, y0:y, callout:true };
@@ -1841,7 +2452,11 @@ cv.addEventListener('pointerup', e => {
 cv.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); down = null; drag = null; box = null; $('#selbox').hidden = true; clearTimeout(lpT); });
 cv.addEventListener('pointerleave', e => { if (e.pointerType === 'touch') return; mouse.inside = false; cursorEl.hidden = true; if (placing()){ D.op = null; updatePreview(); } });
 cv.addEventListener('contextmenu', e => e.preventDefault());
-cv.addEventListener('dblclick', () => { if (S.tool === 'dim' && DD.refs.length >= 2) placeDim(); });
+cv.addEventListener('dblclick', e => {
+  if (S.tool === 'dim' && DD.refs.length >= 2){ placeDim(); return; }
+  if (D.poly){ finishPoly(); return; }
+  if (S.tool === 'select'){ const { x, y } = local(e), vm = pickViewMark(x, y); if (vm) openView(vm); }
+});
 // window selection (left→right: fully inside) and crossing selection (right→left: touching), like Revit
 function boxSelect(b, x, y){
   const L = Math.min(b.x0, x), R = Math.max(b.x0, x), T = Math.min(b.y0, y), B = Math.max(b.y0, y), crossing = x < b.x0;
@@ -1864,6 +2479,7 @@ function boxSelect(b, x, y){
 }
 function finishAction(){
   if (S.tool === 'dim'){ if (DD.refs.length >= 2) placeDim(); else endDraw(); return; }
+  if (D.poly){ finishPoly(); return; }
   if (D.start){ endDraw(); toast('Готово'); if (S.tool === 'move' || S.tool === 'copy') setTool('select'); }
 }
 function hover(px, py, shift){
@@ -1884,8 +2500,8 @@ function hover(px, py, shift){
     cv.style.cursor = D.op ? (D.op.valid ? 'copy' : 'not-allowed') : 'crosshair';
     updatePreview(); return;
   }
-  if (drawing() || S.tool === 'text'){
-    const s = snap(px, py, D.start, shift);
+  if (drawing() || pointTool() || S.tool === 'text'){
+    const s = snap(px, py, pointTool() ? null : D.start, shift);
     if (!s){ cursorEl.hidden = true; return; }
     D.cur = s.p; D.kind = s.kind;
     cursorEl.hidden = false; cursorEl.className = s.kind === 'end' ? 'end' : s.kind === 'int' ? 'int' : '';
@@ -1912,11 +2528,11 @@ function buildLabels(){
       else if (it.type === 'box' && !plan) out.push({ x:it.x + it.w / 2, y:it.h + 0.18, z:it.z + it.d / 2, t:`${mm(it.w)}×${mm(it.d)}×${mm(it.h)}` });
     }
   }
-  if (S.axes && !RENDER){
+  if (S.axes && !RENDER && S.view !== 'sect'){
     out.push({ x:1.45, y:0, z:0, t:'X', cls:'ax x' }, { x:0, y:0, z:-1.45, t:'Y', cls:'ax y' });
     if (!plan) out.push({ x:0, y:1.45, z:0, t:'Z', cls:'ax z' });
   }
-  for (const gr of items) if (gr.type === 'grid') for (const b of gridBubbles(gr)) if (b.ok) out.push({ sx:b.sx, sy:b.sy, t:gr.name, cls:'gb' + (isSel(gr.id) ? ' sel' : '') });
+  if (S.view !== 'sect') for (const gr of items) if (gr.type === 'grid') for (const b of gridBubbles(gr)) if (b.ok) out.push({ sx:b.sx, sy:b.sy, t:gr.name, cls:'gb' + (isSel(gr.id) ? ' sel' : '') });
   if (S.tags && plan) for (const w of items){
     if (!w.tag || !shown(w)) continue;
     const sc = isSel(w.id) ? ' sel' : '';
@@ -1932,10 +2548,21 @@ function buildLabels(){
       const inSide = Math.sign(c.clone().sub(mid).dot(f.nrm)) || 1;
       const p = mid.addScaledVector(f.nrm, inSide * (wl.t / 2 + 0.32)); out.push({ x:p.x, y:0, z:p.z, t:w.tag, cls:(w.type === 'door' ? 'wt dr' : 'wt wn') + sc });
     } else if (w.type === 'box') out.push({ x:w.x + w.w / 2, y:0, z:w.z + w.d / 2, t:w.tag, cls:'wt bx' + sc });
+    else if (w.type === 'column') out.push({ x:w.x + w.w / 2 + 0.22, y:0, z:w.z - (w.round ? w.w : w.d) / 2 - 0.22, t:w.tag, cls:'wt el' + sc });
+    else if (w.type === 'stair'){ const f = wallFrame(w), p = f.p1.clone().addScaledVector(f.dir, f.L * 0.25).addScaledVector(f.nrm, w.w / 2 + 0.25); out.push({ x:p.x, y:0, z:p.z, t:w.tag, cls:'wt el' + sc }); }
+    else if (w.type === 'floor'){ const c = polyCenter(w.pts), p = w.pts[0], q = { x:p.x + (c.x - p.x) * 0.12, z:p.z + (c.z - p.z) * 0.12 }; out.push({ x:q.x, y:0, z:q.z, t:w.tag, cls:'wt fl' + sc }); }
+    else if (w.type === 'roof'){ const F = roofFrame(w), p = F.map(F.u1 - 0.35, 0, F.v0 + 0.35); out.push({ x:p.x, y:0, z:p.z, t:w.tag, cls:'wt rf' + sc }); }
   }
+  if (plan) for (const r of items){
+    if (r.type !== 'room') continue;
+    const d = roomData(r);
+    out.push({ x:r.x, y:0, z:r.z, t:`${r.name}\n${r.num}  ·  ${d.open ? 'Не окружено' : m2(d.area) + ' м²'}`, cls:'rm' + (isSel(r.id) ? ' sel' : '') + (d.open ? ' open' : '') });
+  }
+  if (plan) viewMarkLabels(out);
+  if (S.view === 'sect') out.push(...SECT_LABELS);
   if (plan){
     for (const d of items) if (d.type === 'dim' && dimShown(d)) dimTexts(d, isSel(d.id) ? 'dl sel' : 'dl', out);
-    if ((RENDER ? RENDER.view : curView()).kind === 'plan') for (const v of views) if (v.kind === 'detail' && v.region) out.push({ x:v.region.x1, y:0, z:v.region.z0, t:v.name + ' · 1:' + (v.scale || 20), cls:'co', open:v.id });
+    if (viewNow().kind === 'plan') for (const v of views) if (v.kind === 'detail' && v.region) out.push({ x:v.region.x1, y:0, z:v.region.z0, t:v.name + ' · 1:' + (v.scale || 20), cls:'co', open:v.id });
     for (const d of tempDims()) dimTexts(d, 'temp', out);
     if (S.tool === 'dim' && DD.refs.length){ const refs = DD.hover ? [...DD.refs, DD.hover] : DD.refs; if (refs.length >= 2) dimTexts({ refs, off:DD.off, dir:DD.dir, mode:S.dimMode }, 'dl live', out); }
     for (const it of items) if (it.type === 'text') out.push({ x:it.x, y:0, z:it.z, t:it.s, cls:'tx' + (isSel(it.id) ? ' sel' : ''), size:it.size });
@@ -1961,7 +2588,7 @@ function buildLabels(){
 }
 function updateLabels(){
   if (S.view === 'sheet'){ for (const el of pool){ el.hidden = true; el._edit = el._open = null; } return; }
-  const out = buildLabels(), vw = curView(), reg = vw && vw.kind === 'detail' ? vw.region : null;
+  const out = buildLabels(), vw = curView(), reg = vw && (vw.kind === 'detail' || vw.crop) && S.view === 'plan' ? vw.region : null;
   const W = cv.clientWidth, H = cv.clientHeight; let n = 0;
   for (const L of out){
     if (reg && (L.x == null ? /^gb/.test(L.cls) : (L.x < reg.x0 - 0.05 || L.x > reg.x1 + 0.05 || L.z < reg.z0 - 0.05 || L.z > reg.z1 + 0.05))) continue;
@@ -1975,7 +2602,7 @@ function updateLabels(){
     el.style.transform = L.rot ? `translate(-50%,-50%) rotate(${L.rot}deg)` : '';
     el.style.fontSize = L.size ? L.size + 'px' : '';
     el._edit = L.edit || null; el._val = L.val; el._open = L.open || null;
-    if (L.edit) el.title = 'Нажмите, чтобы ввести размер'; else if (L.open) el.title = 'Открыть узел'; else el.removeAttribute('title');
+    if (L.edit) el.title = 'Нажмите, чтобы ввести размер'; else if (L.open) el.title = 'Открыть вид: ' + (views.find(x => x.id === L.open) || { name:'' }).name; else el.removeAttribute('title');
   }
   for (let i = n; i < pool.length; i++){ pool[i].hidden = true; pool[i]._edit = pool[i]._open = null; }
   if (!cursorEl.hidden && D.cur){ const s = toScreen(D.cur.x, 0, D.cur.z); cursorEl.style.left = s.x + 'px'; cursorEl.style.top = s.y + 'px'; }
@@ -2007,13 +2634,19 @@ function bounds(){
     else if (it.type === 'box'){ b.expandByPoint(new V3(it.x, 0, it.z)); b.expandByPoint(new V3(it.x + it.w, it.h, it.z + it.d)); }
     else if (it.type === 'grid' || it.type === 'line'){ b.expandByPoint(new V3(it.x1, 0, it.z1)); b.expandByPoint(new V3(it.x2, 0, it.z2)); }
     else if (it.type === 'circle'){ b.expandByPoint(new V3(it.x - it.r, 0, it.z - it.r)); b.expandByPoint(new V3(it.x + it.r, 0, it.z + it.r)); }
+    else if (it.pts) for (const p of it.pts) b.expandByPoint(new V3(p.x, it.type === 'ceiling' ? it.h + it.t : 0, p.z));
+    else if (it.type === 'column'){ b.expandByPoint(new V3(it.x - it.w / 2, 0, it.z - it.d / 2)); b.expandByPoint(new V3(it.x + it.w / 2, it.h, it.z + it.d / 2)); }
+    else if (it.type === 'stair'){ b.expandByPoint(new V3(it.x1, 0, it.z1)); b.expandByPoint(new V3(it.x2, it.h, it.z2)); }
+    else if (it.type === 'roof'){ const F = roofFrame(it), top = Math.max(...roofTop(it).faces.flat().map(p => p.y)); b.expandByPoint(F.map(F.u0, 0, F.v0)); b.expandByPoint(F.map(F.u1, top, F.v1)); }
   }
   if (b.isEmpty()) b.set(new V3(-5, 0, -5), new V3(5, 2.7, 5));
   return b;
 }
 function axoDir(){ const az = S.axoAz * Math.PI / 180, el = S.axoEl * Math.PI / 180; return new V3(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)); }
+// a 3D view with a section box fits to the box, like Revit
+function viewBounds(v){ const x = v && v.box; return x && x.on && (KIND_MODE[v.kind] === 'd3' || KIND_MODE[v.kind] === 'axo') ? new THREE.Box3(new V3(x.x0, x.y0, x.z0), new V3(x.x1, x.y1, x.z1)).intersect(bounds()) : bounds(); }
 function fit(view = S.view){
-  const b = bounds(), c = b.getCenter(new V3()), sz = b.getSize(new V3()), diag = sz.length();
+  const b = view === 'plan' ? bounds() : viewBounds(curView()), c = b.getCenter(new V3()), sz = b.getSize(new V3()), diag = sz.length();
   const a = (cv.clientWidth / cv.clientHeight) || 1;
   if (view === 'plan'){
     planCam.position.set(c.x, 200, c.z); ctl.plan.target.set(c.x, 0, c.z);
@@ -2024,7 +2657,8 @@ function fit(view = S.view){
     ctl.axo.target.copy(c); axoCam.position.copy(c).addScaledVector(dir, 200);
     axoCam.zoom = 2 * H0 * Math.min(a, 1) / (diag * 1.2 + 0.5);
     axoCam.updateProjectionMatrix(); ctl.axo.update();
-  } else {
+  } else if (view === 'sect'){ fitSect(curView()); return; }
+  else {
     const dir = new V3(0.85, 0.7, 1.15).normalize();
     const dist = (diag / 2) / Math.tan(perspCam.fov * Math.PI / 360) * 1.15 / Math.min(a, 1);
     ctl.d3.target.copy(c); perspCam.position.copy(c).addScaledVector(dir, dist); ctl.d3.update();
@@ -2057,7 +2691,7 @@ function setView(v){
   document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === v));
   $('#viewtag').textContent = viewTitle(curView());
   if (!OPENING) renderTree();
-  $('#vcube').hidden = $('#vhome').hidden = v === 'plan';
+  $('#vcube').hidden = $('#vhome').hidden = v === 'plan' || v === 'sect';
   configControls(); rebuild();
   if (!fitted[v]) fit(v);
   updateHint(); renderVbar();
@@ -2065,14 +2699,17 @@ function setView(v){
 function setTool(t){
   if (['dim', 'line', 'text', 'callout'].includes(t) && S.view !== 'plan'){ setView('plan'); toast(t === 'callout' ? 'Узел обводится на плане' : 'Аннотации ставятся на плане'); }
   if (t === 'demolish' && S.view === 'sheet') setView('plan');
+  if (['section', 'ielev', 'room'].includes(t) && S.view !== 'plan'){ setView('plan'); toast('Это ставится на плане'); }
+  if (S.view === 'sect' && !['select', 'orbit', 'demolish'].includes(t)) setView('plan');
   if (t === 'demolish' && (S.phase === 'all' || S.phase === 'obmer')){ setPhase('demontazh'); }
   if ((t === 'move' || t === 'copy') && !sel.size){ toast('Сначала выберите элементы (рамкой или щелчком)'); t = 'select'; }
   endDraw(); S.tool = t;
   document.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tool === t));
-  if (['wall','rect','door','window','box','orbit','grid','move','copy'].includes(t)) showTab('rbArch'); else if (['dim', 'line', 'text'].includes(t)) showTab('rbAnno');
+  if (['wall','rect','door','window','box','orbit','grid','move','copy','floor','ceiling','roof','column','stair','room'].includes(t)) showTab('rbArch'); else if (['dim', 'line', 'text'].includes(t)) showTab('rbAnno');
+  else if (['section', 'ielev', 'callout'].includes(t)) showTab('rbView');
   configControls();
   cursorEl.hidden = true;
-  cv.style.cursor = drawing() || placing() || ['dim', 'text'].includes(t) ? 'crosshair' : t === 'orbit' ? 'grab' : 'default';
+  cv.style.cursor = drawing() || placing() || pointTool() || ['dim', 'text'].includes(t) ? 'crosshair' : t === 'orbit' ? 'grab' : 'default';
   renderOptbar(); updateHint(); updatePanel();
 }
 function setStyle(s){ S.style = s; rebuild(); renderVbar(); }
@@ -2083,7 +2720,7 @@ function renderVbar(){
   $('#vbDetail').hidden = S.view !== 'plan'; $('#vbStyle').hidden = S.view === 'plan';
 }
 function updateScale(){
-  if (S.view !== 'plan'){ $('#scale').textContent = S.view === 'axo' ? 'Аксонометрия' : 'Перспектива'; return; }
+  if (S.view !== 'plan' && S.view !== 'sect'){ $('#scale').textContent = S.view === 'axo' ? 'Аксонометрия' : 'Перспектива'; return; }
   const sc = wpp() * 1000 / 0.2646;
   const nice = [1, 2, 5, 10, 20, 25, 50, 75, 100, 150, 200, 250, 500, 1000, 2000, 5000];
   const best = nice.reduce((p, n) => Math.abs(Math.log(n / sc)) < Math.abs(Math.log(p / sc)) ? n : p);
@@ -2092,12 +2729,35 @@ function updateScale(){
 function updateRibbonState(){ const has = [...sel].some(id => movable(byId(id))); for (const id of ['rbRotate', 'rbDelete']) $('#' + id).disabled = id === 'rbDelete' ? !sel.size : !has; document.querySelectorAll('[data-tool=move],[data-tool=copy]').forEach(b => b.disabled = !has); }
 
 /* ---------- views, details and sheets (Revit Project Browser) ---------- */
-const KIND_MODE = { plan:'plan', detail:'plan', d3:'d3', axo:'axo', elev:'axo', sheet:'sheet' };
-const KIND_NAME = { plan:'План этажа', detail:'Узел', d3:'3D-вид', axo:'Аксонометрия', elev:'Фасад', sheet:'Лист' };
+const KIND_MODE = { plan:'plan', detail:'plan', d3:'d3', axo:'axo', elev:'axo', sheet:'sheet', section:'sect', ielev:'sect' };
+const KIND_NAME = { plan:'План этажа', detail:'Узел', d3:'3D-вид', axo:'Аксонометрия', elev:'Фасад', sheet:'Лист', section:'Разрез', ielev:'Развёртка' };
+// orthographic camera looking along a section: the crop rectangle fills the view
+function sectCamFor(v, cm, aspect){
+  const f = sectFrame(v), mid = f.p1.clone().addScaledVector(f.dir, f.L / 2); mid.y = (f.y0 + f.y1) / 2;
+  cm.up.set(0, 1, 0); cm.position.copy(mid).addScaledVector(f.d, -300); cm.lookAt(mid);
+  return { mid, W:f.L, H:f.y1 - f.y0 };
+}
+function fitSect(v){
+  if (!v || KIND_MODE[v.kind] !== 'sect') return;
+  const a = (cv.clientWidth / cv.clientHeight) || 1, r = sectCamFor(v, sectCam, a);
+  ctl.sect.target.copy(r.mid); sectCam.zoom = Math.min(2 * H0 * a / (r.W * 1.15 + 0.4), 2 * H0 / (r.H * 1.15 + 0.4));
+  sectCam.updateProjectionMatrix(); ctl.sect.update(); fitted.sect = true; annoDirty = true;
+}
+function defaultBox(){ const b = bounds(); return { on:true, x0:r4(b.min.x - 0.3), x1:r4(b.max.x + 0.3), y0:-0.5, y1:r4(b.max.y + 0.3), z0:r4(b.min.z - 0.3), z1:r4(b.max.z + 0.3) }; }
+function toggleBox(force){
+  let v = curView();
+  if (KIND_MODE[v.kind] !== 'd3' && KIND_MODE[v.kind] !== 'axo'){ const t = views.find(x => x.kind === 'd3') || views.find(x => x.kind === 'axo'); if (!t) return; openView(t.id); v = curView(); }
+  const on = force != null ? force : !(v.box && v.box.on);
+  if (on && !v.box) v.box = defaultBox(); else if (v.box) v.box.on = on;
+  if (on && v.box && v.box.x1 - v.box.x0 < 0.1) v.box = defaultBox();
+  rebuild(); toast(on ? 'Границы 3D-вида включены: тяните синие ручки, чтобы обрезать модель' : 'Границы 3D-вида выключены');
+  $('#propsBody').dataset.id = 'x'; updatePanel(); scheduleSave();
+}
 const ELEV_DIR = { S:new V3(0, 0, 1), N:new V3(0, 0, -1), E:new V3(1, 0, 0), W:new V3(-1, 0, 0) };
 const SHEET_SIZES = { A3:[420, 297], A4:[297, 210], A4p:[210, 297], A2:[594, 420], A1:[841, 594] };
 const SHEET_SIZE_NAME = { A3:'А3 альбомный', A4:'А4 альбомный', A4p:'А4 книжный', A2:'А2 альбомный', A1:'А1 альбомный' };
 const VP_SCALES = [5, 10, 20, 25, 50, 75, 100, 150, 200, 250, 500];
+const SCALED = v => v && (KIND_MODE[v.kind] === 'plan' || KIND_MODE[v.kind] === 'sect');
 const vid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 function DEFAULT_VIEWS(){
   return [
@@ -2119,7 +2779,15 @@ function sanitizeViews(arr){
     const o = { id:v.id.slice(0, 40), kind:v.kind, name:String(v.name || KIND_NAME[v.kind]).slice(0, 80), phase:PH_IDX[v.phase] != null || v.phase === 'all' ? v.phase : 'all' };
     if (v.cam && Array.isArray(v.cam.p) && Array.isArray(v.cam.t)) o.cam = { p:v.cam.p.map(Number), t:v.cam.t.map(Number), z:Number(v.cam.z) || 1 };
     if (v.kind === 'elev') o.side = ELEV_DIR[v.side] ? v.side : 'S';
-    if (v.kind === 'detail' && v.region){ const r = v.region; o.region = { x0:+r.x0, z0:+r.z0, x1:+r.x1, z1:+r.z1 }; o.scale = VP_SCALES.includes(+v.scale) ? +v.scale : 20; }
+    const N = x => Number.isFinite(+x) && x !== null && x !== '';
+    if ((v.kind === 'detail' || v.kind === 'plan') && v.region){ const r = v.region; o.region = { x0:+r.x0, z0:+r.z0, x1:+r.x1, z1:+r.z1 }; if (v.kind === 'detail') o.scale = VP_SCALES.includes(+v.scale) ? +v.scale : 20; }
+    if (v.kind === 'plan') o.crop = !!v.crop && !!o.region;
+    if ((v.kind === 'd3' || v.kind === 'axo') && v.box && ['x0','x1','y0','y1','z0','z1'].every(k => N(v.box[k]))){ o.box = { on:!!v.box.on }; for (const k of ['x0','x1','y0','y1','z0','z1']) o.box[k] = +v.box[k]; }
+    if (v.kind === 'section' || v.kind === 'ielev'){
+      if (!v.p1 || !v.p2 || ![v.p1.x, v.p1.z, v.p2.x, v.p2.z].every(N)) continue;
+      Object.assign(o, { code:String(v.code || '1').slice(0, 6), p1:{ x:+v.p1.x, z:+v.p1.z }, p2:{ x:+v.p2.x, z:+v.p2.z }, flip:v.flip !== false, crop:v.crop !== false, far:N(v.far) ? clamp(+v.far, 0.1, 200) : 5, y0:N(v.y0) ? +v.y0 : -0.5, y1:N(v.y1) ? +v.y1 : 4 });
+      if (v.mk && N(v.mk.x) && N(v.mk.z)) o.mk = { id:String(v.mk.id || 'mk'), x:+v.mk.x, z:+v.mk.z, i:clamp(Math.round(+v.mk.i) || 0, 0, 3) };
+    }
     if (v.kind === 'sheet'){
       Object.assign(o, { num:String(v.num || 'А101').slice(0, 12), size:SHEET_SIZES[v.size] ? v.size : 'A3', author:String(v.author || '').slice(0, 40), checker:String(v.checker || '').slice(0, 40), stage:String(v.stage || 'П').slice(0, 4) });
       o.vps = (Array.isArray(v.vps) ? v.vps : []).filter(p => p && typeof p.view === 'string').map(p => ({ id:String(p.id || vid('vp')), view:p.view, x:+p.x || 25, y:+p.y || 10, scale:VP_SCALES.includes(+p.scale) ? +p.scale : 100, w:+p.w || 150, h:+p.h || 110 }));
@@ -2146,7 +2814,8 @@ function openView(id){
     const c = ctl[mode], cm = cams[mode];
     if (v.cam){ cm.position.fromArray(v.cam.p); c.target.fromArray(v.cam.t); if (cm.isOrthographicCamera) cm.zoom = v.cam.z; cm.updateProjectionMatrix(); c.update(); }
     else if (v.kind === 'elev'){ const dir = ELEV_DIR[v.side]; const d = new V3(dir.x + 0.0001, dir.y, dir.z + 0.0001); axoCam.position.copy(ctl.axo.target).addScaledVector(d.normalize(), 200); ctl.axo.update(); fit('axo'); }
-    else if (v.kind === 'detail' && v.region) fitRegion(v.region);
+    else if ((v.kind === 'detail' || v.crop) && v.region) fitRegion(v.region);
+    else if (mode === 'sect') fitSect(v);
     else fit(mode);
   }
   syncPhaseUI(); rebuild(); renderOptbar(); updateHint(); renderVbar();
@@ -2178,12 +2847,108 @@ function setPhase(k){
 const cropG = new THREE.Group(); scene.add(cropG);
 function updateCrop(){
   disposeGroup(cropG);
-  const v = curView(); if (S.view !== 'plan' || v.kind !== 'detail' || !v.region || RENDER) return;
+  const v = curView(); if (S.view !== 'plan' || !(v.kind === 'detail' || v.crop) || !v.region || RENDER || RV) return;
   const r = v.region, s = new THREE.Shape([new THREE.Vector2(-3000, -3000), new THREE.Vector2(3000, -3000), new THREE.Vector2(3000, 3000), new THREE.Vector2(-3000, 3000)]);
   s.holes.push(new THREE.Path([new THREE.Vector2(r.x0, -r.z0), new THREE.Vector2(r.x0, -r.z1), new THREE.Vector2(r.x1, -r.z1), new THREE.Vector2(r.x1, -r.z0)]));
   const geo = new THREE.ShapeGeometry(s); geo.rotateX(-Math.PI / 2);
   const m = new THREE.Mesh(geo, M.crop); m.position.y = 60; m.renderOrder = 1000; cropG.add(m);
   const l = lineOf([new V3(r.x0, 61, r.z0), new V3(r.x1, 61, r.z0), new V3(r.x1, 61, r.z1), new V3(r.x0, 61, r.z1), new V3(r.x0, 61, r.z0)], M.cropEdge); l.renderOrder = 1001; cropG.add(l);
+}
+/* blue handles of crop regions, section boxes and section lines (Revit «границы»): drag to close or open the model */
+const hndEl = document.createElement('div'); hndEl.id = 'handles'; vp.append(hndEl);
+const hndPool = new Map();
+let HDRAG = null;
+function handleSpecs(){
+  const v = curView(), out = [];
+  if (!v || S.view === 'sheet' || RENDER || S.tool !== 'select') return out;
+  const mode = KIND_MODE[v.kind];
+  const ax = (key, pos, axis, tgt, apply, title) => out.push({ key, pos, axis, tgt, apply, title });
+  if ((mode === 'd3' || mode === 'axo') && v.box && v.box.on){
+    const b = v.box, cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2, cz = (b.z0 + b.z1) / 2;
+    const mn = 0.2;
+    ax('x0', new V3(b.x0, cy, cz), new V3(-1, 0, 0), b, (s, t) => { b.x0 = r4(Math.min(s.x0 - t, b.x1 - mn)); }, 'Запад');
+    ax('x1', new V3(b.x1, cy, cz), new V3(1, 0, 0), b, (s, t) => { b.x1 = r4(Math.max(s.x1 + t, b.x0 + mn)); }, 'Восток');
+    ax('z0', new V3(cx, cy, b.z0), new V3(0, 0, -1), b, (s, t) => { b.z0 = r4(Math.min(s.z0 - t, b.z1 - mn)); }, 'Север');
+    ax('z1', new V3(cx, cy, b.z1), new V3(0, 0, 1), b, (s, t) => { b.z1 = r4(Math.max(s.z1 + t, b.z0 + mn)); }, 'Юг');
+    ax('y0', new V3(cx, b.y0, cz), new V3(0, -1, 0), b, (s, t) => { b.y0 = r4(Math.min(s.y0 - t, b.y1 - mn)); }, 'Низ');
+    ax('y1', new V3(cx, b.y1, cz), new V3(0, 1, 0), b, (s, t) => { b.y1 = r4(Math.max(s.y1 + t, b.y0 + mn)); }, 'Верх');
+  }
+  if (mode === 'sect' && v.crop !== false){
+    const f = sectFrame(v), ym = (f.y0 + f.y1) / 2, P = (s, y) => f.p1.clone().addScaledVector(f.dir, s).setY(y);
+    ax('l', P(0, ym), f.dir.clone().negate(), v, (s, t) => { const L = f.L; if (L + t < 0.3 && t < 0) return; v.p1 = { x:r4(s.p1.x - f.dir.x * t), z:r4(s.p1.z - f.dir.z * t) }; if (sectFrame(v).L < 0.3) v.p1 = s.p1; }, 'Боковая граница');
+    ax('r', P(f.L, ym), f.dir.clone(), v, (s, t) => { v.p2 = { x:r4(s.p2.x + f.dir.x * t), z:r4(s.p2.z + f.dir.z * t) }; if (sectFrame(v).L < 0.3) v.p2 = s.p2; }, 'Боковая граница');
+    ax('t', P(f.L / 2, f.y1), new V3(0, 1, 0), v, (s, t) => { v.y1 = r4(Math.max(s.y1 + t, v.y0 + 0.3)); }, 'Верх');
+    ax('b', P(f.L / 2, f.y0), new V3(0, -1, 0), v, (s, t) => { v.y0 = r4(Math.min(s.y0 - t, v.y1 - 0.3)); }, 'Низ');
+  }
+  if (mode === 'plan' && v.region && (v.kind === 'detail' || v.crop)){
+    const r = v.region, cx = (r.x0 + r.x1) / 2, cz = (r.z0 + r.z1) / 2;
+    ax('px0', new V3(r.x0, 0, cz), new V3(-1, 0, 0), r, (s, t) => { r.x0 = r4(Math.min(s.x0 - t, r.x1 - 0.3)); }, 'Граница вида');
+    ax('px1', new V3(r.x1, 0, cz), new V3(1, 0, 0), r, (s, t) => { r.x1 = r4(Math.max(s.x1 + t, r.x0 + 0.3)); }, 'Граница вида');
+    ax('pz0', new V3(cx, 0, r.z0), new V3(0, 0, -1), r, (s, t) => { r.z0 = r4(Math.min(s.z0 - t, r.z1 - 0.3)); }, 'Граница вида');
+    ax('pz1', new V3(cx, 0, r.z1), new V3(0, 0, 1), r, (s, t) => { r.z1 = r4(Math.max(s.z1 + t, r.z0 + 0.3)); }, 'Граница вида');
+  }
+  const sv = S.selView && views.find(x => x.id === S.selView);
+  if (mode === 'plan' && sv && (sv.kind === 'section' || sv.kind === 'ielev')){
+    const f = sectFrame(sv), mid = f.p1.clone().addScaledVector(f.dir, f.L / 2);
+    out.push({ key:'e1', pos:f.p1.clone(), ground:true, tgt:sv, apply:(s, p) => { sv.p1 = { x:p.x, z:p.z }; if (sectFrame(sv).L < 0.3) sv.p1 = s.p1; }, title:'Конец линии' });
+    out.push({ key:'e2', pos:f.p2.clone(), ground:true, tgt:sv, apply:(s, p) => { sv.p2 = { x:p.x, z:p.z }; if (sectFrame(sv).L < 0.3) sv.p2 = s.p2; }, title:'Конец линии' });
+    ax('far', mid.clone().addScaledVector(f.d, f.far), f.d.clone(), sv, (s, t) => { sv.far = r4(Math.max(0.2, s.far + t)); }, 'Глубина вида (дальняя граница)');
+    out.push({ key:'flip', pos:mid.clone().addScaledVector(f.d, -0.45), click:() => { sv.flip = !sv.flip; viewChanged(sv); toast('Направление вида изменено'); }, title:'Развернуть направление вида', cls:'flip' });
+  }
+  return out;
+}
+function viewChanged(v){
+  if (S.view === 'plan'){ updateCrop(); annoDirty = true; } else { buildDatum(); applyClip(); }
+  scheduleSave();
+}
+function updateHandles(){
+  const specs = handleSpecs(), seen = new Set(), W = cv.clientWidth, H = cv.clientHeight;
+  for (const sp of specs){
+    const s = toScreen(sp.pos.x, sp.pos.y, sp.pos.z); if (!s.ok || s.x < -20 || s.y < -20 || s.x > W + 20 || s.y > H + 20) continue;
+    let el = hndPool.get(sp.key);
+    if (!el){
+      el = document.createElement('button'); el.className = 'hnd'; el.type = 'button'; hndEl.append(el); hndPool.set(sp.key, el);
+      el.addEventListener('pointerdown', ev => {
+        ev.preventDefault(); ev.stopPropagation();
+        const cur = el._spec; if (!cur) return;
+        if (cur.click){ cur.click(); return; }
+        try { el.setPointerCapture(ev.pointerId); } catch(e){}
+        HDRAG = { spec:cur, x0:ev.clientX, y0:ev.clientY, pos0:cur.pos.clone(), start:JSON.parse(JSON.stringify(cur.tgt)) };
+      });
+      el.addEventListener('pointermove', ev => {
+        if (!HDRAG || !el._spec || HDRAG.spec.key !== el._spec.key) return;
+        const sp2 = HDRAG.spec, dx = ev.clientX - HDRAG.x0, dy = ev.clientY - HDRAG.y0;
+        if (sp2.ground){ const r = cv.getBoundingClientRect(), g = groundAt(ev.clientX - r.left, ev.clientY - r.top); if (g) sp2.apply(HDRAG.start, { x:roundS(g.x), z:roundS(g.z) }); }
+        else {
+          const a = toScreen(HDRAG.pos0.x, HDRAG.pos0.y, HDRAG.pos0.z), b = toScreen(HDRAG.pos0.x + sp2.axis.x, HDRAG.pos0.y + sp2.axis.y, HDRAG.pos0.z + sp2.axis.z);
+          const ux = b.x - a.x, uy = b.y - a.y, L2 = ux * ux + uy * uy; if (L2 < 1e-6) return;
+          const t = roundS((dx * ux + dy * uy) / L2); sp2.apply(HDRAG.start, t);
+        }
+        viewChanged(curView());
+      });
+      const end = () => { if (HDRAG){ HDRAG = null; scheduleSave(); $('#propsBody').dataset.id = 'x'; updatePanel(); } };
+      el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+    }
+    el._spec = sp; el.hidden = false; el.title = sp.title || '';
+    el.className = 'hnd' + (sp.ground ? ' pt' : sp.cls ? ' ' + sp.cls : '');
+    el.textContent = sp.cls === 'flip' ? '⇄' : '';
+    if (sp.axis && !sp.ground){ const b = toScreen(sp.pos.x + sp.axis.x, sp.pos.y + sp.axis.y, sp.pos.z + sp.axis.z); el.style.setProperty('--a', Math.atan2(b.y - s.y, b.x - s.x) + 'rad'); }
+    el.style.left = s.x + 'px'; el.style.top = s.y + 'px';
+    seen.add(sp.key);
+  }
+  for (const [k, el] of hndPool) if (!seen.has(k)){ el.hidden = true; el._spec = null; }
+}
+// the 3D section box outline
+const boxG = new THREE.Group(); scene.add(boxG);
+let boxKey = '';
+function updateBoxLines(){
+  const v = curView(), on = v && (S.view === 'd3' || S.view === 'axo') && v.box && v.box.on && !RENDER;
+  const key = on ? JSON.stringify(v.box) : '';
+  if (key === boxKey) return; boxKey = key; disposeGroup(boxG); if (!on) return;
+  const b = v.box, P = (x, y, z) => new V3(x, y, z), c = [];
+  for (const y of [b.y0, b.y1]) c.push(P(b.x0, y, b.z0), P(b.x1, y, b.z0), P(b.x1, y, b.z0), P(b.x1, y, b.z1), P(b.x1, y, b.z1), P(b.x0, y, b.z1), P(b.x0, y, b.z1), P(b.x0, y, b.z0));
+  for (const x of [b.x0, b.x1]) for (const z of [b.z0, b.z1]) c.push(P(x, b.y0, z), P(x, b.y1, z));
+  boxG.add(lineOf(c, M.boxEdge, true));
 }
 function makeCallout(a, b){
   const r = { x0:r4(Math.min(a.x, b.x)), x1:r4(Math.max(a.x, b.x)), z0:r4(Math.min(a.z, b.z)), z1:r4(Math.max(a.z, b.z)) };
@@ -2195,6 +2960,7 @@ function makeCallout(a, b){
 }
 function newView(kind){
   if (kind === 'detail'){ setTool('callout'); return; }
+  if (kind === 'section' || kind === 'ielev'){ setTool(kind); return; }
   const same = views.filter(v => v.kind === kind);
   let v;
   if (kind === 'plan'){ let n = same.length + 1; while (views.some(x => x.name === 'План ' + n)) n++; v = { id:vid('v'), kind:'plan', name:'План ' + n, phase:S.phase }; }
@@ -2231,7 +2997,7 @@ async function ensureVpImages(v, force){
     const sig = strHash(snapshot());
     for (const vp of v.vps){
       const view = views.find(x => x.id === vp.view); if (!view) continue;
-      const key = [sig, vp.scale, vp.w, vp.h, view.phase, JSON.stringify(view.cam || ''), JSON.stringify(view.region || '')].join('|');
+      const key = [sig, vp.scale, vp.w, vp.h, view.phase, JSON.stringify(view.cam || ''), JSON.stringify(view.region || ''), view.crop, JSON.stringify(view.box || ''), JSON.stringify([view.p1, view.p2, view.far, view.flip, view.y0, view.y1]), strHash(JSON.stringify(views.filter(x => x.kind === 'section' || x.kind === 'ielev' || x.kind === 'detail').map(x => [x.p1, x.p2, x.region, x.name])))].join('|');
       const c = vpImgs.get(vp.id); if (c && c.key === key && !force) continue;
       await new Promise(r => setTimeout(r, 0));
       if (curView() !== v) break;
@@ -2245,20 +3011,23 @@ async function ensureVpImages(v, force){
 function renderViewImage(v, vp){
   const mode = KIND_MODE[v.kind];
   const keep = { view:S.view, phase:S.phase, sel:[...sel], selId, axes:axesG.visible, grid:grids.visible, C, bg:scene.background, tool:S.tool, dims:S.dims };
-  S.view = mode; S.phase = v.phase || 'all'; clearSel(); S.tool = 'select'; S.dims = false;
+  S.view = mode; S.phase = v.phase || 'all'; clearSel(); S.tool = 'select'; S.dims = false; RV = v; const keepSV = S.selView; S.selView = null;
   C = { ...C, ...LIGHT }; makeMaterials(); scene.background = new THREE.Color('#ffffff');
-  axesG.visible = false; grids.visible = false; preview.visible = false;
+  axesG.visible = false; grids.visible = false; preview.visible = false; boxG.visible = false;
   rebuild(true);
   const PX = 6; let camR, wmm, hmm;
-  if (mode === 'plan'){
-    let r = v.kind === 'detail' && v.region ? v.region : null;
+  if (mode === 'sect'){
+    const f = sectFrame(v); wmm = f.L * 1000 / vp.scale; hmm = (f.y1 - f.y0) * 1000 / vp.scale;
+    camR = new THREE.OrthographicCamera(-f.L / 2, f.L / 2, (f.y1 - f.y0) / 2, -(f.y1 - f.y0) / 2, 0.1, 4000); sectCamFor(v, camR, f.L / (f.y1 - f.y0));
+  } else if (mode === 'plan'){
+    let r = (v.kind === 'detail' || v.crop) && v.region ? v.region : null;
     if (!r){ const b = bounds(); r = { x0:b.min.x - 2, x1:b.max.x + 2, z0:b.min.z - 2, z1:b.max.z + 2 }; }
     const W = r.x1 - r.x0, Hh = r.z1 - r.z0; wmm = W * 1000 / vp.scale; hmm = Hh * 1000 / vp.scale;
     camR = new THREE.OrthographicCamera(-W / 2, W / 2, Hh / 2, -Hh / 2, 0.1, 2000); camR.up.set(0, 0, -1);
     camR.position.set((r.x0 + r.x1) / 2, 200, (r.z0 + r.z1) / 2); camR.lookAt((r.x0 + r.x1) / 2, 0, (r.z0 + r.z1) / 2);
   } else {
     wmm = vp.w || 150; hmm = vp.h || 110; const asp = wmm / hmm;
-    const b = bounds(), c = b.getCenter(new V3()), diag = b.getSize(new V3()).length();
+    const b = viewBounds(v), c = b.getCenter(new V3()), diag = b.getSize(new V3()).length();
     let dir = v.cam ? new V3().fromArray(v.cam.p).sub(new V3().fromArray(v.cam.t)).normalize() : v.kind === 'elev' ? ELEV_DIR[v.side].clone() : v.kind === 'axo' ? axoDir() : new V3(0.85, 0.7, 1.15).normalize();
     if (Math.abs(dir.y) > 0.999) dir = new V3(0.0001, Math.sign(dir.y), 0.0001);
     if (mode === 'd3'){ camR = new THREE.PerspectiveCamera(42, asp, 0.05, 1000); camR.position.copy(c).addScaledVector(dir, (diag / 2) / Math.tan(42 * Math.PI / 360) * 1.1 / Math.min(asp, 1)); }
@@ -2272,8 +3041,8 @@ function renderViewImage(v, vp){
   annoDirty = true; rebuildAnno(); renderer.render(scene, camR);
   const can = document.createElement('canvas'); can.width = w; can.height = h; const g = can.getContext('2d');
   g.drawImage(cv, 0, 0, w, h);
-  if (mode === 'plan') drawImageLabels(g, PX);
-  RENDER = null;
+  if (mode === 'plan' || mode === 'sect') drawImageLabels(g, PX);
+  RENDER = null; RV = null; S.selView = keepSV; boxG.visible = true;
   C = keep.C; makeMaterials(); scene.background = keep.bg; axesG.visible = keep.axes; grids.visible = keep.grid; preview.visible = true;
   S.view = keep.view; S.phase = keep.phase; S.tool = keep.tool; S.dims = keep.dims; setSel(keep.sel, keep.selId);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); resize(); if (S.view !== 'sheet') rebuild(true); annoDirty = true;
@@ -2287,6 +3056,14 @@ function drawImageLabels(g, PX){
     if (/^dl/.test(cls)){ g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(2.5 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
     else if (/^gb/.test(cls)){ g.beginPath(); g.arc(0, 0, 3.6 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.25 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(3 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.2 * PX); }
     else if (/^wt/.test(cls)){ g.font = font(2.2 * PX, true); const tw = g.measureText(L.t).width + 1.2 * PX, th = 3.2 * PX; g.fillStyle = '#fff'; g.strokeStyle = '#1b252c'; g.lineWidth = 0.2 * PX; if (/dr/.test(cls)){ g.beginPath(); g.ellipse(0, 0, Math.max(tw, th) / 2, th / 2, 0, 0, Math.PI * 2); g.fill(); g.stroke(); } else { g.fillRect(-tw / 2, -th / 2, tw, th); g.strokeRect(-tw / 2, -th / 2, tw, th); } g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.1 * PX); }
+    else if (/^rm/.test(cls)){
+      const ln = String(L.t).split('\n'); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = /open/.test(cls) ? '#c62828' : '#1b252c';
+      g.font = font(2.8 * PX, true); const w0 = g.measureText(ln[0]).width; g.font = font(2.4 * PX); const w1 = g.measureText(ln[1] || '').width, w = Math.max(w0, w1) + 2 * PX;
+      g.font = font(2.8 * PX, true); g.fillText(ln[0], 0, -1.6 * PX); g.font = font(2.4 * PX); g.fillText(ln[1] || '', 0, 1.6 * PX);
+      g.strokeStyle = g.fillStyle; g.lineWidth = 0.3 * PX; g.beginPath(); g.moveTo(-w / 2, -3.6 * PX); g.lineTo(w / 2, -3.6 * PX); g.moveTo(-w / 2, 3.6 * PX); g.lineTo(w / 2, 3.6 * PX); g.stroke();
+    }
+    else if (/^lv/.test(cls)){ const ln = String(L.t).split('\n'); g.fillStyle = '#1b252c'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.font = font(2.4 * PX, true); g.fillText(ln[0], 1 * PX, -3 * PX); g.font = font(2.2 * PX); g.fillText(ln[1] || '', 1 * PX, -0.4 * PX); }
+    else if (/^sx/.test(cls)){ g.font = font(3.2 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
     else if (/^tx/.test(cls)){ g.font = font((L.size || 14) / 14 * 3 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText(L.t, 0, 0); }
     g.restore();
   }
@@ -2298,7 +3075,7 @@ function paintSheet(g, v){
   g.strokeStyle = '#111'; g.lineWidth = 0.6; g.strokeRect(20, 5, Wm - 25, Hm - 10);
   v.vps.forEach((vp, i) => {
     const im = vpImgs.get(vp.id), view = views.find(x => x.id === vp.view);
-    const w = im ? im.wmm : (view && KIND_MODE[view.kind] === 'plan' ? 100 : vp.w), h = im ? im.hmm : (view && KIND_MODE[view.kind] === 'plan' ? 70 : vp.h);
+    const w = im ? im.wmm : (view && SCALED(view) ? 100 : vp.w), h = im ? im.hmm : (view && SCALED(view) ? 70 : vp.h);
     vp._w = w; vp._h = h;
     if (im && im.img.complete && im.img.naturalWidth) g.drawImage(im.img, vp.x, vp.y, w, h);
     else { g.fillStyle = '#f1f3f4'; g.fillRect(vp.x, vp.y, w, h); g.fillStyle = '#777'; g.font = '4px "Golos Text", Arial'; g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillText('Рисую вид…', vp.x + 4, vp.y + 8); }
@@ -2307,7 +3084,7 @@ function paintSheet(g, v){
     g.fillStyle = '#111'; g.font = '600 3.4px "Golos Text", Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(i + 1), vp.x + 4, cy + 0.1);
     g.textAlign = 'left'; g.font = '600 3.6px "Golos Text", Arial'; g.fillText(title, vp.x + 10, cy - 1.3);
     const tw = g.measureText(title).width;
-    g.font = '2.8px "Golos Text", Arial'; g.fillText(view ? (KIND_MODE[view.kind] === 'plan' || view.kind === 'elev' ? 'М 1:' + vp.scale : KIND_NAME[view.kind]) + (view.phase && view.phase !== 'all' ? ' · ' + phName(view.phase) : '') : '', vp.x + 10, cy + 2.7);
+    g.font = '2.8px "Golos Text", Arial'; g.fillText(view ? (SCALED(view) || view.kind === 'elev' ? 'М 1:' + vp.scale : KIND_NAME[view.kind]) + (view.phase && view.phase !== 'all' ? ' · ' + phName(view.phase) : '') : '', vp.x + 10, cy + 2.7);
     g.lineWidth = 0.5; g.beginPath(); g.moveTo(vp.x + 8, cy + 0.6); g.lineTo(vp.x + 12 + Math.max(36, tw), cy + 0.6); g.stroke();
     if (SHEET.sel === vp.id){ g.strokeStyle = '#1a73e8'; g.lineWidth = 0.6; g.setLineDash([2, 1.2]); g.strokeRect(vp.x - 1.5, vp.y - 1.5, w + 3, h + 3); g.setLineDash([]); }
   });
@@ -2367,7 +3144,7 @@ new ResizeObserver(() => { if (S.view === 'sheet') drawSheet(); }).observe($('#s
 function placeOnSheet(viewId){
   const v = curView(); if (v.kind !== 'sheet') return;
   const view = views.find(x => x.id === viewId); if (!view) return;
-  const n = v.vps.length, isPlan = KIND_MODE[view.kind] === 'plan';
+  const n = v.vps.length, isPlan = SCALED(view);
   const vp = { id:vid('vp'), view:viewId, x:25 + (n % 3) * 10, y:12 + (n % 3) * 10, scale:view.kind === 'detail' ? (view.scale || 20) : 100, w:150, h:110 };
   if (!isPlan && view.kind !== 'elev'){ vp.w = 140; vp.h = 105; }
   v.vps.push(vp); SHEET.sel = vp.id; drawSheet(); ensureVpImages(v); renderOptbar(); scheduleSave();
@@ -2421,7 +3198,9 @@ function showTab(id){
   document.querySelectorAll('.rb-panel').forEach(p => p.hidden = p.id !== id);
 }
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => showTab(b.dataset.tab));
-const TOOL_NAMES = { select:'Изменить', wall:'Изменить | Разместить стену', rect:'Изменить | Комната из стен', door:'Изменить | Разместить дверь', window:'Изменить | Разместить окно', box:'Изменить | Разместить объём', dim:'Изменить | Разместить размеры', orbit:'Обзор', grid:'Изменить | Разместить ось', line:'Изменить | Линии детализации', text:'Изменить | Текст', move:'Переместить', copy:'Копировать', callout:'Изменить | Узел (выносной вид)', demolish:'Изменить | Снос элементов' };
+const TOOL_NAMES = { select:'Изменить', wall:'Изменить | Разместить стену', rect:'Изменить | Комната из стен', door:'Изменить | Разместить дверь', window:'Изменить | Разместить окно', box:'Изменить | Разместить объём', dim:'Изменить | Разместить размеры', orbit:'Обзор', grid:'Изменить | Разместить ось', line:'Изменить | Линии детализации', text:'Изменить | Текст', move:'Переместить', copy:'Копировать', callout:'Изменить | Узел (выносной вид)', demolish:'Изменить | Снос элементов',
+  floor:'Изменить | Создать границу пола', ceiling:'Изменить | Разместить потолок', roof:'Изменить | Крыша по контуру', column:'Изменить | Разместить колонну', stair:'Изменить | Лестница', room:'Изменить | Помещение',
+  section:'Изменить | Разрез', ielev:'Изменить | Развёртка (фасад помещения)' };
 function typeOptions(s){ return types.map(t => `<option value="${esc(t.id)}"${t.id === s ? ' selected' : ''}>${esc(t.name)} — ${mm(typeT(t))}</option>`).join(''); }
 function renderSheetOptbar(ob){
   const v = curView(), vp = v.vps.find(p => p.id === SHEET.sel), placed = new Set(v.vps.map(p => p.view));
@@ -2432,7 +3211,7 @@ function renderSheetOptbar(ob){
     + `<label for="shSize">Формат<select id="shSize">${Object.keys(SHEET_SIZES).map(k => `<option value="${k}"${k === v.size ? ' selected' : ''}>${SHEET_SIZE_NAME[k]}</option>`).join('')}</select></label>`
     + `<label for="shAdd">Разместить вид<select id="shAdd"><option value="">— выберите —</option>${avail.map(x => `<option value="${x.id}">${esc(KIND_NAME[x.kind] + ': ' + x.name)}</option>`).join('')}</select></label>`;
   if (vp){
-    const view = views.find(x => x.id === vp.view), isPlan = view && (KIND_MODE[view.kind] === 'plan');
+    const view = views.find(x => x.id === vp.view), isPlan = view && (SCALED(view));
     h += isPlan ? `<label for="shScale">Масштаб<select id="shScale">${VP_SCALES.map(s => `<option value="${s}"${s === vp.scale ? ' selected' : ''}>1:${s}</option>`).join('')}</select></label>`
       : `<label for="shW">Ширина, мм<input id="shW" class="n2" type="number" min="40" max="800" value="${vp.w}"></label>`;
     h += `<button class="btn sm" id="shOpen">Открыть вид</button><button class="btn sm danger" id="shDel">Убрать с листа</button>`;
@@ -2473,11 +3252,21 @@ function renderOptbar(){
   else if (t === 'dim') h += `<label for="oDimRef">Привязка к<select id="oDimRef"><option value="faces">Граням стен</option><option value="axis">Осям стен</option></select></label>`
       + `<label for="oDimMode">Размер<select id="oDimMode"><option value="aligned">Параллельный</option><option value="h">Горизонтальный</option><option value="v">Вертикальный</option></select></label>`
       + `<span class="tip">Укажите точки, грани или оси, затем щёлкните место для размерной линии</span>`;
+  else if (t === 'floor' || t === 'ceiling') h += `<label for="oSm">Контур<select id="oSm"><option value="room">По помещению (щелчок внутри)</option><option value="outline">По наружному контуру здания</option><option value="rect">Прямоугольник</option><option value="poly">Многоугольник (по точкам)</option></select></label>`
+      + (t === 'floor' ? num('oFT', 'Толщина', S.floorT, 10) : num('oCH', 'Высота низа', S.ceilH, 50));
+  else if (t === 'roof') h += `<label for="oRm">Контур<select id="oRm"><option value="outline">По стенам здания (щелчок)</option><option value="rect">Прямоугольник</option></select></label>`
+      + `<label for="oRk">Тип<select id="oRk">${Object.entries(ROOF_KINDS).map(([k, n]) => `<option value="${k}"${k === S.roofKind ? ' selected' : ''}>${n}</option>`).join('')}</select></label>`
+      + `<label for="oRs">Уклон, °<input id="oRs" class="n2" type="number" min="1" max="70" value="${S.roofSlope}"></label>` + num('oRo', 'Свес', S.roofOver, 50);
+  else if (t === 'column') h += `<label for="oCr">Сечение<select id="oCr"><option value="0">Прямоугольное</option><option value="1">Круглое</option></select></label>` + num('oCW', S.colRound ? 'Диаметр' : 'Ширина', S.colW, 50) + (S.colRound ? '' : num('oCD', 'Глубина', S.colD, 50)) + `<span class="tip">Щелчок — колонна; точки липнут к пересечениям осей</span>`;
+  else if (t === 'stair') h += num('oSW', 'Ширина марша', S.stairW, 50) + num('oSH', 'Высота подъёма', S.stairH, 50) + `<span class="tip">Укажите начало (низ) и конец марша</span>`;
+  else if (t === 'room') h += `<span class="tip">Щёлкните внутри контура стен — появится помещение с маркой (имя, номер, площадь)</span><button class="btn sm" id="oAutoRm">Расставить автоматически</button>`;
+  else if (t === 'section') h += `<span class="tip">Укажите начало и конец линии разреза. Разрез смотрит в сторону стрелок; направление и глубину меняйте синими ручками</span>`;
+  else if (t === 'ielev') h += `<span class="tip">Щёлкните внутри помещения: появятся 4 развёртки стен (север, восток, юг, запад)</span>`;
   else if (t === 'callout') h += `<span class="tip">Обведите рамкой часть плана — получится узел (выносной вид) в масштабе 1:20. Он появится в диспетчере проекта.</span>`;
   else if (t === 'demolish') h += `<span class="tip">${S.phase === 'all' || S.phase === 'obmer' ? 'Сначала выберите стадию «Демонтаж» или позже — снос отмечается в текущей стадии.' : `Щёлкните стену, дверь, окно или объём — он будет снесён на стадии «${phName(S.phase)}». Повторный щелчок отменяет снос.`}</span>`;
   else if (t === 'move' || t === 'copy') h += `<span class="tip">Выбрано: ${sel.size}. Укажите базовую точку, затем новое место (или длину в мм и Enter)</span>`;
   else if (t === 'select'){ h += `<span class="tip">${sel.size > 1 ? 'Выбрано элементов: ' + sel.size + '. Переместить (MV), копировать (CO), повернуть (RO), удалить (Delete).' : sel.size ? 'Выбран элемент №' + selId + '. Синие размеры можно нажать и ввести новое значение.' : 'Щёлкните элемент или обведите рамкой. Слева направо — только целиком внутри, справа налево — пересечение. Ctrl — добавить к выбору.'}</span>`; }
-  if (['wall','rect','box','grid','line','move','copy'].includes(t)) h += `<label for="oSnap">Шаг привязки<select id="oSnap">${[[0.01,'10 мм'],[0.05,'50 мм'],[0.1,'100 мм'],[0.25,'250 мм'],[0.5,'500 мм'],[1,'1000 мм']].map(([v,l]) => `<option value="${v}"${v === S.snap ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`;
+  if (['wall','rect','box','grid','line','move','copy','floor','ceiling','roof','stair','column','section'].includes(t)) h += `<label for="oSnap">Шаг привязки<select id="oSnap">${[[0.01,'10 мм'],[0.05,'50 мм'],[0.1,'100 мм'],[0.25,'250 мм'],[0.5,'500 мм'],[1,'1000 мм']].map(([v,l]) => `<option value="${v}"${v === S.snap ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`;
   ob.innerHTML = h;
   const on = (id, ev, fn) => { const el = ob.querySelector('#' + id); if (el) el.addEventListener(ev, fn); };
   const mmv = (id, key) => on(id, 'change', e => { const v = Number(e.target.value); if (v > 0){ S[key] = v / 1000; updatePreview(); scheduleSave(); } });
@@ -2490,6 +3279,13 @@ function renderOptbar(){
   const lm = ob.querySelector('#oLm'); if (lm){ lm.value = S.lineMode; lm.onchange = e => { S.lineMode = e.target.value; endDraw(); }; }
   const ts = ob.querySelector('#oTs'); if (ts){ ts.value = String(S.textSize); ts.onchange = e => { S.textSize = Number(e.target.value); }; }
   on('oSnap', 'change', e => { S.snap = Number(e.target.value); scheduleSave(); });
+  const sm = ob.querySelector('#oSm'); if (sm){ sm.value = S.slabMode; sm.onchange = e => { S.slabMode = e.target.value; endDraw(); updateHint(); }; }
+  const rm = ob.querySelector('#oRm'); if (rm){ rm.value = S.roofMode; rm.onchange = e => { S.roofMode = e.target.value; endDraw(); updateHint(); }; }
+  on('oRk', 'change', e => { S.roofKind = e.target.value; });
+  on('oRs', 'change', e => { const v = +e.target.value; if (v >= 1 && v <= 70) S.roofSlope = v; });
+  mmv('oRo', 'roofOver'); mmv('oFT', 'floorT'); mmv('oCH', 'ceilH'); mmv('oCW', 'colW'); mmv('oCD', 'colD'); mmv('oSW', 'stairW'); mmv('oSH', 'stairH');
+  const cr = ob.querySelector('#oCr'); if (cr){ cr.value = S.colRound ? '1' : '0'; cr.onchange = e => { S.colRound = e.target.value === '1'; renderOptbar(); }; }
+  on('oAutoRm', 'click', () => { pushUndo(); markEdited(); const n = autoRooms(); rebuild(); toast(n ? `Расставлено помещений: ${n}` : 'Новых замкнутых контуров нет'); });
   on('oGmake', 'click', () => {
     const nx = clamp(Math.round(+ob.querySelector('#oGnx').value) || 1, 1, 30), ny = clamp(Math.round(+ob.querySelector('#oGny').value) || 1, 1, 30);
     const sx = (+ob.querySelector('#oGsx').value || 6000) / 1000, sy = (+ob.querySelector('#oGsy').value || 4500) / 1000;
@@ -2498,14 +3294,43 @@ function renderOptbar(){
 }
 function counts(list = items){
   const c = t => list.filter(i => i.type === t).length;
-  return { walls:c('wall'), doors:c('door'), windows:c('window'), boxes:c('box'), dims:c('dim'), grids:c('grid'), lines:c('line') + c('circle') + c('text') };
+  return { walls:c('wall'), doors:c('door'), windows:c('window'), boxes:c('box'), dims:c('dim'), grids:c('grid'), lines:c('line') + c('circle') + c('text'),
+    floors:c('floor'), ceilings:c('ceiling'), roofs:c('roof'), columns:c('column'), stairs:c('stair'), rooms:c('room') };
+}
+const NEWCAT = ['floor', 'ceiling', 'roof', 'column', 'stair', 'room'];
+function elSummary(it){
+  const t = it.type === 'floor' || it.type === 'ceiling' ? `${m2(Math.abs(polyArea(it.pts)))} м² · ${mm(it.t)} мм` : it.type === 'roof' ? `${ROOF_KINDS[it.kind]} · ${it.kind === 'flat' ? 'плоская' : it.slope + '°'}`
+    : it.type === 'column' ? (it.round ? `⌀ ${mm(it.w)}` : `${mm(it.w)} × ${mm(it.d)}`) + ` · h ${mm(it.h)}` : it.type === 'stair' ? `${stairInfo(it).n} ступеней · ${mm(it.w)} мм` : it.type === 'room' ? esc(it.name) : '';
+  return `<span class="tsub">${t}</span>`;
+}
+// view-specific properties (Revit: «Границы 3D-вида», «Обрезать вид», «Дальняя граница»…)
+function viewRows(v){
+  const mode = KIND_MODE[v.kind], ck = (id, on, label) => `<label class="pchk"><input type="checkbox" id="${id}"${on ? ' checked' : ''}> ${label}</label>`;
+  if (mode === 'd3' || mode === 'axo') return prow('Границы 3D-вида', ck('pBox', v.box && v.box.on, 'включить')) + (v.box && v.box.on ? `<div class="pbtns"><button class="btn sm" id="pBoxReset">Границы по модели</button></div>` : '');
+  if (v.kind === 'plan') return prow('Обрезать вид', ck('pCrop', v.crop, 'по рамке'));
+  if (mode === 'sect') return prow('Имя вида', `<input id="pVName" type="text" maxlength="80" value="${esc(v.name)}">`)
+    + prow('Глубина (дальняя граница), мм', pnum('pVFar', v.far, 'min="100" step="100"'))
+    + prow('Низ границы, мм', `<input id="pVY0" type="number" step="100" value="${Math.round(v.y0 * 1000)}">`) + prow('Верх границы, мм', `<input id="pVY1" type="number" step="100" value="${Math.round(v.y1 * 1000)}">`)
+    + prow('Обрезать вид', ck('pVCrop', v.crop !== false, 'по рамке')) + `<div class="pbtns"><button class="btn sm" id="pVFlip">Развернуть направление</button></div>`;
+  return '';
+}
+function bindViewRows(v, q){
+  const done = () => { viewChanged(v); $('#propsBody').dataset.id = 'x'; updatePanel(); renderTree(); };
+  if (q('pBox')) q('pBox').onchange = e => toggleBox(e.target.checked);
+  if (q('pBoxReset')) q('pBoxReset').onclick = () => { v.box = defaultBox(); rebuild(); done(); };
+  if (q('pCrop')) q('pCrop').onchange = e => { v.crop = e.target.checked; if (v.crop && !v.region){ const b = bounds(); v.region = { x0:r4(b.min.x - 1), x1:r4(b.max.x + 1), z0:r4(b.min.z - 1), z1:r4(b.max.z + 1) }; } rebuild(); done(); toast(v.crop ? 'Вид обрезан рамкой: тяните синие ручки' : 'Обрезка вида снята'); };
+  if (q('pVName')) q('pVName').onchange = e => { const n = e.target.value.trim(); if (n){ v.name = n.slice(0, 80); if (S.viewId === v.id) $('#viewtag').textContent = viewTitle(v); done(); } };
+  const num = (id, fn) => { const f = q(id); if (f) f.onchange = () => { const x = Number(f.value) / 1000; if (Number.isFinite(x)){ fn(x); done(); } }; };
+  num('pVFar', x => { if (x > 0.05) v.far = r4(x); }); num('pVY0', x => { if (x < v.y1 - 0.2) v.y0 = r4(x); }); num('pVY1', x => { if (x > v.y0 + 0.2) v.y1 = r4(x); });
+  if (q('pVCrop')) q('pVCrop').onchange = e => { v.crop = e.target.checked; done(); };
+  if (q('pVFlip')) q('pVFlip').onclick = () => { v.flip = !v.flip; done(); if (S.viewId === v.id) fitSect(v); };
 }
 const prow = (label, inner) => `<div class="prow"><span>${label}</span><div>${inner}</div></div>`;
 const pnum = (id, v, extra = '') => `<input id="${id}" type="number" value="${Math.round(v * 1000)}" ${extra}>`;
 const TYPE_RU = { wall:'Стены', door:'Двери', window:'Окна', box:'Объёмы', dim:'Размеры', grid:'Оси', line:'Линии', circle:'Окружности', text:'Тексты' };
 function updatePanel(){
   const el = $('#propsBody'), it = sel.size === 1 ? byId(selId) : null;
-  const key = sel.size > 1 ? 'm' + [...sel].join(',') : (it ? String(it.id) : '');
+  const key = sel.size > 1 ? 'm' + [...sel].join(',') : (it ? String(it.id) : 'v:' + (S.selView || S.viewId) + ':' + S.tool);
   if (el.contains(document.activeElement) && el.dataset.id === key) return;
   el.dataset.id = key;
   let h = '';
@@ -2525,13 +3350,22 @@ function updatePanel(){
       h += `<div class="typesel"><span class="tname">Стена</span><select id="pType">${typeOptions(S.wallType)}</select><span class="tsub">Толщина ${mm(typeT(ty))} мм · слоёв ${ty ? ty.layers.length : 1}</span><button class="btn sm" id="pTypeEdit">Изменить тип…</button></div>`;
     }
     const c = counts(), total = items.filter(i => i.type === 'wall').reduce((s, w) => s + Math.hypot(w.x2 - w.x1, w.z2 - w.z1), 0);
-    h += `<div class="pgrp">Вид</div>` + prow('Вид', `<span class="val">${esc(KIND_NAME[curView().kind] + ': ' + curView().name)}</span>`)
+    const sv = S.selView && views.find(x => x.id === S.selView);
+    if (sv){
+      el.innerHTML = `<div class="typesel"><span class="tname">${esc(KIND_NAME[sv.kind])}</span><span class="tsub">${esc(sv.name)}</span></div>` + viewRows(sv)
+        + `<div class="pbtns"><button class="btn sm" id="pVOpen">Открыть вид</button><button class="btn sm danger" id="pVDel">Удалить</button></div><p class="pnote">Синие ручки на плане: концы линии, глубина вида и ⇄ — направление.</p>`;
+      bindViewRows(sv, id => el.querySelector('#' + id));
+      el.querySelector('#pVOpen').onclick = () => openView(sv.id);
+      el.querySelector('#pVDel').onclick = () => { S.selView = null; deleteView(sv.id); annoDirty = true; };
+      return;
+    }
+    h += `<div class="pgrp">Вид</div>` + prow('Вид', `<span class="val">${esc(KIND_NAME[curView().kind] + ': ' + curView().name)}</span>`) + viewRows(curView())
       + prow('Стадия', `<select id="pVPhase">${[...PHASES, { k:'all', n:'Показать все' }].map(p => `<option value="${p.k}"${p.k === S.phase ? ' selected' : ''}>${p.n}</option>`).join('')}</select>`)
       + prow('Масштаб', `<span class="val">${$('#scale').textContent}</span>`)
       + prow('Детализация', `<select id="pDetail"><option value="medium">Средняя (слои)</option><option value="coarse">Низкая (заливка)</option></select>`)
       + prow('Стиль 3D', `<select id="pStyle"><option value="shaded">Тонированный</option><option value="lines">Скрытые линии</option></select>`)
       + `<div class="pgrp">Проект</div>` + prow('Стены', `<span class="val">${c.walls} · ${m1(total)} м</span>`) + prow('Двери / окна', `<span class="val">${c.doors} / ${c.windows}</span>`)
-      + prow('Объёмы', `<span class="val">${c.boxes}</span>`) + prow('Оси', `<span class="val">${c.grids}</span>`) + prow('Размеры', `<span class="val">${c.dims}</span>`) + prow('Линии и текст', `<span class="val">${c.lines}</span>`)
+      + prow('Объёмы', `<span class="val">${c.boxes}</span>`) + prow('Полы / потолки', `<span class="val">${c.floors} / ${c.ceilings}</span>`) + prow('Крыши, колонны, лестницы', `<span class="val">${c.roofs} · ${c.columns} · ${c.stairs}</span>`) + prow('Помещения', `<span class="val">${c.rooms}</span>`) + prow('Оси', `<span class="val">${c.grids}</span>`) + prow('Размеры', `<span class="val">${c.dims}</span>`) + prow('Линии и текст', `<span class="val">${c.lines}</span>`)
       + (proj.sample ? `<p class="pnote">Открыт пример: дом 6 × 4,5 м по осям 1–3 и А–Б. Свой проект: «Файл → Новый проект».</p>` : '')
       + `<div class="pbtns"><button class="btn sm" id="pLib">Мои проекты</button><button class="btn sm" id="pClear">Очистить лист</button></div>`;
   } else if (it.type === 'wall'){
@@ -2580,6 +3414,31 @@ function updatePanel(){
     h += `<div class="typesel"><span class="tname">Текст №${it.id}</span></div>` + prow('Текст', `<input id="sTx" type="text" maxlength="200" value="${esc(it.s)}">`)
       + prow('Размер', `<select id="sTs"><option value="11">Мелкий</option><option value="14">Обычный</option><option value="18">Крупный</option><option value="24">Заголовок</option></select>`)
       + `<div class="pbtns"><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
+  } else if (NEWCAT.includes(it.type)){
+    const matSel = (id, cur, list) => `<select id="${id}">${list.map(k => `<option value="${k}"${k === cur ? ' selected' : ''}>${esc(MATS[k].n)}</option>`).join('')}</select>`;
+    const tagRow = it.type === 'room' ? '' : prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`);
+    const head = it.type === 'room' ? `Помещение ${esc(it.num)}` : `${CAT[it.type]} ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span>`;
+    h += `<div class="typesel"><span class="tname">${head}</span>${elSummary(it)}</div>` + tagRow;
+    if (it.type === 'floor') h += `<div class="pgrp">Размеры</div>` + prow('Толщина, мм', pnum('sFT', it.t, 'min="10" step="10"')) + prow('Смещение от уровня, мм', `<input id="sFO" type="number" step="10" value="${Math.round((it.off || 0) * 1000)}">`) + prow('Материал', matSel('sM', it.m, ['concrete', 'screed', 'wood', 'generic']))
+      + prow('Площадь', `<span class="val">${m2(Math.abs(polyArea(it.pts)))} м²</span>`) + prow('Периметр', `<span class="val">${mm(polyPerim(it.pts))} мм</span>`);
+    else if (it.type === 'ceiling') h += `<div class="pgrp">Размеры</div>` + prow('Высота низа от уровня, мм', pnum('sCH', it.h, 'min="100" step="50"')) + prow('Толщина, мм', pnum('sFT', it.t, 'min="5" step="5"')) + prow('Материал', matSel('sM', it.m, ['gkl', 'plaster', 'wood', 'concrete']))
+      + prow('Площадь', `<span class="val">${m2(Math.abs(polyArea(it.pts)))} м²</span>`);
+    else if (it.type === 'roof') h += `<div class="pgrp">Крыша</div>` + prow('Тип', `<select id="sRK">${Object.entries(ROOF_KINDS).map(([k, n]) => `<option value="${k}"${k === it.kind ? ' selected' : ''}>${n}</option>`).join('')}</select>`)
+      + (it.kind === 'flat' ? '' : prow('Уклон, °', `<input id="sRS" type="number" min="1" max="70" value="${it.slope}">`) + prow('Конёк вдоль', `<select id="sRR"><option value="auto">длинной стороны</option><option value="x">оси X</option><option value="z">оси Y</option></select>`))
+      + prow('Свес, мм', pnum('sRO', it.over, 'min="0" step="50"')) + prow('Толщина, мм', pnum('sFT', it.t, 'min="20" step="10"')) + prow('Низ (верх стен), мм', pnum('sRB', it.base, 'min="0" step="50"'))
+      + prow('Основание X × Y, мм', `<span class="val">${mm(it.w)} × ${mm(it.d)}</span>`) + prow('Материал', matSel('sM', it.m, ['tile', 'wood', 'concrete', 'steel']))
+      + (it.kind === 'gable' || it.kind === 'shed' ? prow('Фронтоны', `<label class="pchk"><input type="checkbox" id="sRG"${it.gab !== false ? ' checked' : ''}> заполнить</label>`) : '');
+    else if (it.type === 'column') h += `<div class="pgrp">Размеры</div>` + prow('Сечение', `<select id="sCR2"><option value="0">Прямоугольное</option><option value="1">Круглое</option></select>`)
+      + prow(it.round ? 'Диаметр, мм' : 'Ширина (X), мм', pnum('sW', it.w, 'min="20" step="10"')) + (it.round ? '' : prow('Глубина (Y), мм', pnum('sD', it.d, 'min="20" step="10"'))) + prow('Высота, мм', pnum('sH', it.h, 'min="50" step="50"'))
+      + prow('Материал', matSel('sM', it.m, ['concrete', 'steel', 'wood', 'brick']));
+    else if (it.type === 'stair'){ const I = stairInfo(it); h += `<div class="pgrp">Марш</div>` + prow('Ширина марша, мм', pnum('sW', it.w, 'min="300" step="50"')) + prow('Высота подъёма, мм', pnum('sH', it.h, 'min="200" step="50"'))
+      + prow('Длина марша, мм', pnum('sSL', I.f.L, 'min="300" step="50"')) + prow('Подступенков', `<span class="val">${I.n} по ${mm(I.rise)} мм</span>`) + prow('Проступь', `<span class="val">${mm(I.go)} мм</span>`)
+      + (I.rise > 0.19 || I.go < 0.25 ? `<p class="pnote">По СП 1.13130 подступенок не выше 190 мм, проступь не меньше 250 мм — сделайте марш длиннее.</p>` : '')
+      + `<div class="pbtns"><button class="btn sm" id="sSF">Развернуть направление</button></div>`; }
+    else if (it.type === 'room'){ const d = roomData(it); h += prow('Номер', `<input id="sRN" type="text" maxlength="10" value="${esc(it.num)}">`) + prow('Имя', `<input id="sRNm" type="text" maxlength="60" value="${esc(it.name)}">`)
+      + prow('Площадь', `<span class="val">${d.open ? 'Не окружено' : m2(d.area) + ' м²'}</span>`) + (d.open ? '' : prow('Периметр', `<span class="val">${mm(d.perim)} мм</span>`))
+      + (d.open ? `<p class="pnote">Вокруг марки нет замкнутого контура стен. Сдвиньте её внутрь помещения или замкните стены.</p>` : `<div class="pbtns"><button class="btn sm" id="sRF">Пол в помещении</button><button class="btn sm" id="sRC">Потолок</button><button class="btn sm" id="sRE">Развёртки</button></div>`); }
+    h += `<div class="pbtns"><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else {
     h += `<div class="typesel"><span class="tname">Объём ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span></div>`
       + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
@@ -2617,7 +3476,7 @@ function updatePanel(){
     const pe = q('pTypeEdit'); if (pe) pe.onclick = () => openTypes(S.wallType);
     q('pDetail').value = S.detail; q('pDetail').onchange = e => setDetail(e.target.value);
     q('pStyle').value = S.style; q('pStyle').onchange = e => setStyle(e.target.value);
-    q('pLib').onclick = openLib;
+    q('pLib').onclick = openLib; bindViewRows(curView(), q);
     q('pClear').onclick = () => { pushUndo(); markEdited(); items = []; clearSel(); endDraw(); rebuild(); toast('Лист очищен. Отменить: Ctrl+Z'); };
     return;
   }
@@ -2642,6 +3501,21 @@ function updatePanel(){
   else if (it.type === 'text'){
     q('sTx').onchange = e => { const v = e.target.value.trim(); if (v){ pushUndo(); markEdited(); it.s = v.slice(0, 200); el.dataset.id = 'x'; rebuild(); } };
     q('sTs').value = String(it.size); q('sTs').onchange = e => { pushUndo(); markEdited(); it.size = Number(e.target.value); el.dataset.id = 'x'; rebuild(); };
+  } else if (NEWCAT.includes(it.type)){
+    const chg = (id, fn) => { const f = q(id); if (f) f.onchange = e => { pushUndo(); markEdited(); fn(e.target); el.dataset.id = 'x'; rebuild(); }; };
+    bind('sFT', v => it.t = v); bind('sCH', v => it.h = v); bind('sRO', v => it.over = v, true); bind('sRB', v => it.base = v, true);
+    bind('sW', v => it.w = v); bind('sD', v => it.d = v); bind('sH', v => it.h = v);
+    bind('sSL', L => { const f = wallFrame(it); it.x2 = r4(it.x1 + f.dir.x * L); it.z2 = r4(it.z1 + f.dir.z * L); });
+    const fo = q('sFO'); if (fo) fo.onchange = () => { const v = Number(fo.value) / 1000; if (Number.isFinite(v)){ pushUndo(); markEdited(); it.off = r4(v); el.dataset.id = 'x'; rebuild(); } };
+    chg('sM', t => it.m = t.value); chg('sRK', t => it.kind = t.value); chg('sRS', t => { const v = +t.value; if (v >= 1 && v <= 70) it.slope = v; });
+    if (q('sRR')) q('sRR').value = it.ridge || 'auto'; chg('sRR', t => it.ridge = t.value); chg('sRG', t => it.gab = t.checked);
+    if (q('sCR2')) q('sCR2').value = it.round ? '1' : '0'; chg('sCR2', t => { it.round = t.value === '1'; if (it.round) it.d = it.w; });
+    const sf = q('sSF'); if (sf) sf.onclick = () => { pushUndo(); markEdited(); [it.x1, it.x2, it.z1, it.z2] = [it.x2, it.x1, it.z2, it.z1]; el.dataset.id = 'x'; rebuild(); };
+    chg('sRN', t => { const v = t.value.trim(); if (v) it.num = v.slice(0, 10); }); chg('sRNm', t => { const v = t.value.trim(); if (v) it.name = v.slice(0, 60); });
+    const rd = it.type === 'room' ? roomData(it) : null;
+    if (q('sRF')) q('sRF').onclick = () => { const f = createFromOutline('floor', rd.poly); if (f) toast(`Пол ${f.tag} в помещении «${it.name}»: ${m2(rd.area)} м²`); };
+    if (q('sRC')) q('sRC').onclick = () => { const f = createFromOutline('ceiling', rd.poly); if (f) toast(`Потолок ${f.tag} в помещении «${it.name}» на ${mm(f.h)} мм`); };
+    if (q('sRE')) q('sRE').onclick = () => makeInteriorElevations(new V3(it.x, 0, it.z));
   } else { bind('sW', v => it.w = v); bind('sD', v => it.d = v); bind('sH', v => it.h = v); }
   const tgEl = q('sTag');
   if (tgEl) tgEl.onchange = e => {
@@ -2688,6 +3562,8 @@ function renderTree(){
       ${group('3D-виды', 'd3', of('d3'), 'Новый 3D-вид')}
       ${group('Аксонометрия', 'axo', of('axo'))}
       ${group('Фасады', 'elev', of('elev'))}
+      ${group('Разрезы', 'section', of('section'), 'Новый разрез — линия на плане')}
+      ${group('Развёртки', 'ielev', of('ielev'), 'Новые развёртки — щелчок в помещении')}
     </ul></li>
     ${group('Листы (все)', 'sheet', of('sheet').sort((a, b) => a.num.localeCompare(b.num, 'ru', { numeric:true })), 'Новый лист')}
     ${grs.length ? `<li><div class="node">Оси</div><ul>${grs.map(g => btn('Ось ' + esc(g.name), 'g:' + g.id, isSel(g.id))).join('')}</ul></li>` : ''}
@@ -2724,6 +3600,14 @@ function updateHint(){
     copy: s ? 'Укажите место копии или введите расстояние в мм и Enter.' : 'Укажите базовую точку копирования.',
     dim: DD.refs.length >= 2 ? `Добавьте ещё точки или щёлкните свободное место, чтобы поставить размерную линию${touchy ? ' («Поставить размер»)' : ' (или Enter)'}.`
        : DD.refs.length ? 'Укажите следующую точку, грань или ось.' : 'Укажите первую точку, грань стены или ось.',
+    floor: S.slabMode === 'poly' ? (D.poly ? `Следующая точка контура; щелчок в первую точку, Enter или ${touchy ? '«Завершить»' : 'правый щелчок'} — замкнуть.` : 'Укажите первую точку контура пола.') : S.slabMode === 'rect' ? (s ? 'Укажите противоположный угол.' : 'Укажите первый угол пола.') : S.slabMode === 'outline' ? 'Щёлкните в любом месте: пол ляжет по наружному контуру стен.' : 'Щёлкните внутри помещения: пол ляжет по внутренним граням стен.',
+    ceiling: S.slabMode === 'poly' ? (D.poly ? 'Следующая точка контура; щелчок в первую точку или Enter — замкнуть.' : 'Укажите первую точку контура потолка.') : S.slabMode === 'rect' ? (s ? 'Укажите противоположный угол.' : 'Укажите первый угол потолка.') : S.slabMode === 'outline' ? 'Щёлкните: потолок по наружному контуру.' : 'Щёлкните внутри помещения: потолок по контуру стен на заданной высоте.',
+    roof: S.roofMode === 'rect' ? (s ? 'Укажите противоположный угол основания крыши (по наружным граням стен).' : 'Укажите первый угол основания крыши.') : 'Щёлкните в любом месте: крыша встанет на наружные стены здания.',
+    column:'Щёлкните, где поставить колонну. Точки липнут к пересечениям осей и концам стен.',
+    stair: s ? 'Укажите конец марша (верх лестницы).' : 'Укажите начало марша (низ лестницы).',
+    room:'Щёлкните внутри контура стен. Двери не разрывают контур помещения, как в Revit.',
+    section: s ? 'Укажите конец линии разреза.' : 'Укажите начало линии разреза.',
+    ielev:'Щёлкните внутри помещения — марка развёртки и 4 вида на его стены.',
     callout:'Обведите рамкой участок плана: получится узел 1:20. Он появится в диспетчере проекта в разделе «Узлы».',
     demolish:`Стадия «${phName(S.phase)}»: щёлкните элемент, чтобы снести его (красный пунктир). Повторный щелчок отменяет снос.`,
     orbit: S.view === 'plan' ? 'Тяните, чтобы сдвинуть лист. Колесо или два пальца — масштаб.' : 'Тяните, чтобы вращать. Два пальца — сдвиг и масштаб.'
@@ -2848,6 +3732,15 @@ function sanitizeItems(arr){
     else if (it.type === 'grid' && seg(it)) o = { id, type:'grid', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, name:String(it.name || '?').slice(0, 6) };
     else if (it.type === 'line' && seg(it)) o = { id, type:'line', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2 };
     else if (it.type === 'circle' && ['x','z','r'].every(k => N(it[k]))) o = { id, type:'circle', x:+it.x, z:+it.z, r:Math.max(+it.r, 0.001) };
+    else if ((it.type === 'floor' || it.type === 'ceiling') && Array.isArray(it.pts) && it.pts.length >= 3 && it.pts.every(p => p && N(p.x) && N(p.z))){
+      o = { id, type:it.type, pts:it.pts.slice(0, 400).map(p => ({ x:+p.x, z:+p.z })), t:N(it.t) ? Math.max(+it.t, 0.005) : 0.3, m:MATS[it.m] ? it.m : (it.type === 'floor' ? 'concrete' : 'gkl'), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+      if (it.type === 'floor') o.off = N(it.off) ? +it.off : 0; else o.h = N(it.h) ? +it.h : 2.7;
+    }
+    else if (it.type === 'column' && ['x','z','w','h'].every(k => N(it[k]))) o = { id, type:'column', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.02), d:N(it.d) ? Math.max(+it.d, 0.02) : +it.w, h:Math.max(+it.h, 0.05), round:!!it.round, m:MATS[it.m] ? it.m : 'concrete', tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+    else if (it.type === 'stair' && seg(it) && N(it.w) && N(it.h)) o = { id, type:'stair', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, w:Math.max(+it.w, 0.3), h:Math.max(+it.h, 0.2), m:MATS[it.m] ? it.m : 'concrete', tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+    else if (it.type === 'roof' && ['x','z','w','d'].every(k => N(it[k]))) o = { id, type:'roof', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.2), d:Math.max(+it.d, 0.2), kind:['flat','shed','gable','hip'].includes(it.kind) ? it.kind : 'gable',
+      slope:N(it.slope) ? clamp(+it.slope, 1, 70) : 30, over:N(it.over) ? clamp(+it.over, 0, 3) : 0.5, t:N(it.t) ? clamp(+it.t, 0.02, 1) : 0.25, base:N(it.base) ? +it.base : 2.7, ridge:['x','z'].includes(it.ridge) ? it.ridge : 'auto', gab:it.gab !== false, m:MATS[it.m] ? it.m : 'tile', tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+    else if (it.type === 'room' && N(it.x) && N(it.z)) o = { id, type:'room', x:+it.x, z:+it.z, name:String(it.name || 'Помещение').slice(0, 60), num:String(it.num || '1').slice(0, 10) };
     else if (it.type === 'text' && N(it.x) && N(it.z) && it.s) o = { id, type:'text', x:+it.x, z:+it.z, s:String(it.s).slice(0, 200), size:[11, 14, 18, 24].includes(+it.size) ? +it.size : 14 };
     if (o){ out.push(o); seen.add(id); }
   }
@@ -2868,7 +3761,7 @@ function record(){
   saveCam();
   return { id:proj.id, name:proj.name, created:proj.created, updated:Date.now(), sample:proj.sample,
     items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), thumb:(S.view !== 'sheet' && makeThumb()) || proj.thumb || null, counts:counts(),
-    views:JSON.parse(JSON.stringify(views)), viewId:S.viewId, ver:4 };
+    views:JSON.parse(JSON.stringify(views)), viewId:S.viewId, ver:5 };
 }
 let saveT = null;
 function setSaveState(s){ const el = $('#saveState'); el.dataset.s = s; el.textContent = { dirty:'· изменён', saving:'· сохраняю…', saved:'· сохранено', mem:'· не сохраняется на этом устройстве' }[s] || ''; }
@@ -3104,6 +3997,8 @@ document.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => setTool(
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
 for (const id of ['#phaseSel', '#vbPhase']) $(id).onchange = e => setPhase(e.target.value);
 $('#rbSheet').onclick = () => newView('sheet');
+$('#rbAutoRooms').onclick = () => { if (S.view !== 'plan') setView('plan'); pushUndo(); markEdited(); const n = autoRooms(); rebuild(); toast(n ? `Расставлено помещений: ${n}` : 'Новых замкнутых контуров нет'); };
+$('#rbBox').onclick = () => toggleBox();
 $('#undoBtn').onclick = () => undo(1); $('#redoBtn').onclick = () => redo(1); $('#qSave').onclick = saveNow;
 // Revit-style undo list: pick an action and everything after it is undone too
 const histMenu = $('#histMenu');
@@ -3143,9 +4038,10 @@ $('#cPen').onchange = e => setPenOnly(e.target.checked, false);
 $('#lenOk').onclick = applyTyped;
 
 const COMBOS = { WA:() => setTool('wall'), RM:() => setTool('rect'), DR:() => setTool('door'), WN:() => setTool('window'), CM:() => setTool('box'), DI:() => setTool('dim'), MD:() => setTool('select'), OR:() => setTool('orbit'), ZA:() => fit(), ZF:() => fit(),
-  GR:() => setTool('grid'), DL:() => setTool('line'), TX:() => setTool('text'), MV:() => setTool('move'), CO:() => setTool('copy'), RO:() => rotateSel(), DE:() => deleteSel() };
+  GR:() => setTool('grid'), DL:() => setTool('line'), TX:() => setTool('text'), MV:() => setTool('move'), CO:() => setTool('copy'), RO:() => rotateSel(), DE:() => deleteSel(),
+  CN:() => setTool('column'), SB:() => setTool('floor'), CI:() => setTool('ceiling'), RF:() => setTool('roof'), ST:() => setTool('stair'), RT:() => setTool('room'), SC:() => setTool('section'), EL:() => setTool('ielev'), CL:() => setTool('callout'), DM:() => setTool('demolish') };
 let keyBuf = '', keyT = null;
-const LAT = { KeyW:'W', KeyA:'A', KeyR:'R', KeyM:'M', KeyD:'D', KeyN:'N', KeyC:'C', KeyI:'I', KeyO:'O', KeyZ:'Z', KeyF:'F', KeyG:'G', KeyL:'L', KeyT:'T', KeyX:'X', KeyV:'V', KeyE:'E' };
+const LAT = Object.fromEntries('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => ['Key' + c, c]));
 addEventListener('keydown', e => {
   const mod = e.ctrlKey || e.metaKey;
   if (mod && e.code === 'KeyS'){ e.preventDefault(); e.shiftKey ? saveAsFile() : saveNow(); return; }
@@ -3166,7 +4062,7 @@ addEventListener('keydown', e => {
   if (mod) return;
   if ((D.start || S.tool === 'dim') && /^[0-9.,;*xх×]$/i.test(e.key)){ e.preventDefault(); lenInput.value += e.key; return; }
   if ((D.start || S.tool === 'dim') && e.key === 'Backspace' && lenInput.value){ e.preventDefault(); lenInput.value = lenInput.value.slice(0, -1); return; }
-  if (e.key === 'Enter'){ if (lenInput.value){ e.preventDefault(); applyTyped(); return; } if (S.tool === 'dim' && DD.refs.length >= 2){ e.preventDefault(); placeDim(); return; } }
+  if (e.key === 'Enter'){ if (lenInput.value){ e.preventDefault(); applyTyped(); return; } if (D.poly){ e.preventDefault(); finishPoly(); return; } if (S.tool === 'dim' && DD.refs.length >= 2){ e.preventDefault(); placeDim(); return; } }
   if (e.code === 'Space'){
     if (e.target.closest && e.target.closest('button, summary, a')) return;
     e.preventDefault();
@@ -3175,6 +4071,8 @@ addEventListener('keydown', e => {
     return;
   }
   if (e.key === 'Escape'){ if (D.start || DD.refs.length) endDraw(); else if (S.tool !== 'select') setTool('select'); else if (sel.size){ clearSel(); rebuild(); } return; }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && !sel.size && S.selView){ e.preventDefault(); const id = S.selView; S.selView = null; deleteView(id); annoDirty = true; return; }
+  if (e.key === 'Escape' && S.selView){ S.selView = null; annoDirty = true; $('#propsBody').dataset.id = 'x'; updatePanel(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && sel.size){ e.preventDefault(); deleteSel(); return; }
   if (!D.start && ['1','2','3'].includes(e.key)){ setView({ 1:'plan', 2:'d3', 3:'axo' }[e.key]); return; }
   const L = LAT[e.code]; if (!L) return;
@@ -3249,7 +4147,7 @@ const RNAMES = { 'а':'А','бэ':'Б','бе':'Б','вэ':'В','ве':'В','гэ
   'ка':'К','эль':'Л','эл':'Л','эм':'М','эн':'Н','о':'О','пэ':'П','пе':'П','эр':'Р','эс':'С','тэ':'Т','те':'Т','у':'У','эф':'Ф','ха':'Х','цэ':'Ц','це':'Ц','че':'Ч','чэ':'Ч','ша':'Ш','ща':'Щ','э':'Э','ю':'Ю','я':'Я' };
 const AMBIG = new Set(['в','к','с','у','о','и','а','я']);
 const STOP = new Set(['на','от','до','по','за','из','во','ко','со','об','не','но','ли','бы','ее','их','ей','им','мы','вы','он','то','та','все','эту','эта','это','для','над','под','при','про','без','или','как','так','где','мм','см','шаг','ось','оси','два','три']);
-const NOUNS = [[/^стен/, 'wall'], [/^двер/, 'door'], [/^(окн|окон)/, 'window'], [/^(объем|блок|шкаф|стол|кроват|диван|тумб|короб|куб|крыльц)/, 'box']];
+const NOUNS = [[/^пол(?:а|у|ом|ы)?$/, 'floor'], [/^потол/, 'ceiling'], [/^(крыш|кровл)/, 'roof'], [/^(колонн|столб)/, 'column'], [/^лестниц/, 'stair'], [/^стен/, 'wall'], [/^двер/, 'door'], [/^(окн|окон)/, 'window'], [/^(объем|блок|шкаф|стол|кроват|диван|тумб|короб|куб|крыльц)/, 'box']];
 const AFTER_TAG = /^(на|от|до|к|добав|постав|сдел|удал|сдвин|передвин|перемест|отодвин|подвин|смест|выдел|выбер|покаж|ширин|высот|подоконник|измен|увелич|уменьш)/;
 function letterTok(tok){
   tok = (tok || '').replace(/[.,:;]$/, '').replace(/ё/g, 'е');
@@ -3278,12 +4176,12 @@ function elTagsIn(f){
 const wallTagsIn = f => { const r = elTagsIn(f), w = r.filter(t => t.type === 'wall'); w.missing = r.missing; return w; };
 // '@Д' — wall Д; '@window:А', '@door:Б', '@box:В' — other categories
 function findEl(spec){
-  const m = String(spec).match(/^@(?:(wall|door|window|box):)?(.+)$/); if (!m) return null;
+  const m = String(spec).match(/^@(?:(wall|door|window|box|floor|ceiling|roof|column|stair):)?(.+)$/); if (!m) return null;
   const type = m[1] || 'wall', it = byTag(type, m[2]);
   if (!it) throw new Error(`Нет элемента: ${CAT[type].toLowerCase()} ${m[2].toUpperCase()}`);
   return it;
 }
-const CMD = /стади|снес|снос|демонтир|узел|обмер|монтаж|мебел|откр|диспетчер|букв|сдвин|передвин|перемест|отодвин|подвин|смест|стен|перегород|комнат|помещени|двер|окн|объем|блок|шкаф|стол|кроват|диван|крыльц|тумб|куб|вид|план|аксоном|изометр|диметр|3д|перспектив|фасад|отмен|верни|повтор|покажи|очист|лист|удали|замкн|начн|точк|высот[а-я]* стен|толщин|лини|тонир|выбер|выдели|сетк|размер|ос[ия](?:[^а-я]|$)|осей|поверн/;
+const CMD = /крыш|кровл|потол|(?:^|\s)пол(?:\s|$)|перекрыт|колонн|лестниц|разрез|развертк|границ|стади|снес|снос|демонтир|узел|обмер|монтаж|мебел|откр|диспетчер|букв|сдвин|передвин|перемест|отодвин|подвин|смест|стен|перегород|комнат|помещени|двер|окн|объем|блок|шкаф|стол|кроват|диван|крыльц|тумб|куб|вид|план|аксоном|изометр|диметр|3д|перспектив|фасад|отмен|верни|повтор|покажи|очист|лист|удали|замкн|начн|точк|высот[а-я]* стен|толщин|лини|тонир|выбер|выдели|сетк|размер|ос[ия](?:[^а-я]|$)|осей|поверн/;
 function splitFrags(s){
   const parts = s.split(/\s*(?:[,;]|\.(?!\d))\s*|\s+(?:и|затем|потом|далее|после этого)\s+/).filter(p => p && p.trim());
   const out = [];
@@ -3306,6 +4204,8 @@ function viewIn(f){
     const sheets = views.filter(v => v.kind === 'sheet'), n = Number(sm[2]);
     return sheets.find(v => norm(v.num).replace(/\s/g, '') === (sm[1] || '') + sm[2] || norm(v.num).replace(/\D/g, '') === sm[2]) || (n >= 1 && n <= sheets.length && n < 100 ? sheets.sort((a, b) => a.num.localeCompare(b.num, 'ru', { numeric:true }))[n - 1] : null);
   }
+  const rz = g.match(/разрез[а-я]*\s*(\d+)/); if (rz){ const v = views.find(x => x.kind === 'section' && x.code === rz[1]); if (v) return v; }
+  if (/развертк/.test(g)){ const n = g.match(/(\d+)/); const list = views.filter(x => x.kind === 'ielev'); if (list.length) return (n && list.find(x => x.code === n[1])) || list[0]; }
   const um = g.match(/узел\s*(\d+)/); if (um){ const v = views.find(x => x.kind === 'detail' && norm(x.name) === 'узел ' + um[1]); if (v) return v; }
   let best = null;
   for (const v of views){ const nm = norm(v.name); if (nm.length > 2 && g.includes(nm) && (!best || nm.length > norm(best.name).length)) best = v; }
@@ -3382,8 +4282,30 @@ function parseOne(f){
       w:numAfter(f, 'ширин') ?? rest[0] ?? null, h:numAfter(f, 'высот') ?? rest[1] ?? null,
       sill:numAfter(f, 'подоконник|на высоте|от пола'), offset:off ? toM(off[1], off[2]) : numAfter(f, 'отступ') };
   }
+  // Revit categories by voice: rooms, floors, ceilings, roofs, columns, stairs, sections, elevations, 3D section box
+  const act = !/удали|сдвин|передвин|перемест|снес|снос|выдел|выбер|откр|покаж|отмен|верни/.test(f);
+  const roomNum = () => { const m = f.match(/помещени[а-я]*\s*(?:номер|№)?\s*(\d+)/); return m ? m[1] : null; };
+  if (/границ|обреж|секущ/.test(f) && /3д|трехмерн|вид|модел/.test(f)) return { a:'box3d', on:!/сним|убер|выключ|отключ|без|скрой/.test(f) };
+  if (/(?:расстав|автомат|везде|во всех)/.test(f) && /помещени|марк/.test(f)) return { a:'autorooms' };
+  { const m = f.match(/(?:назови|переименуй|имя)\s+помещени[а-я]*\s*(?:номер|№)?\s*(\d+)\s+(.+)$/) || f.match(/помещени[а-я]*\s*(?:номер|№)?\s*(\d+)\s+(?:назови|назовем|переименуй|это)\s+(.+)$/);
+    if (m) return { a:'roomname', num:m[1], name:m[2].trim() }; }
+  if (act && /развертк/.test(f)) return { a:'ielev', room:roomNum() };
+  if (act && /разрез/.test(f) && !/откр|покаж|перейд/.test(f)){ const m = f.match(/ос[ияе][а-я]*\s+(\S+)/); return { a:'section', grid:m ? m[1] : null }; }
+  if (act && /крыш|кровл/.test(f)){
+    const sl = f.match(/уклон[а-я]*\s*(?:в|на)?\s*(\d+(?:\.\d+)?)/);
+    return { a:'roof', kind:/вальм|шатр|четырехскат/.test(f) ? 'hip' : /односкат/.test(f) ? 'shed' : /плоск/.test(f) ? 'flat' : /двускат/.test(f) ? 'gable' : undefined, slope:sl ? Number(sl[1]) : null, over:numAfter(f, 'свес') };
+  }
+  if (act && /потол/.test(f)) return { a:'ceiling', room:roomNum(), h:numAfter(f, 'высот|на высоте') };
+  if (act && /(?:^|[^а-я])пол(?:ы|ов)?(?:[^а-я]|$)|перекрыти|плит[уа] пола/.test(f)) return { a:'floor', room:roomNum(), t:numAfter(f, 'толщин') };
+  if (act && /колонн|столб/.test(f)){
+    const m = f.match(/(?:пересечени[а-я]*\s+)?ос(?:ей|ях|и)\s+(\S+)\s+(?:и\s+)?(\S+)/);
+    const L = lensOf(stripNamed(f.replace(/ос(?:ей|ях|и)\s+\S+\s+(?:и\s+)?\S+/, ' ')));
+    return { a:'column', g1:m ? m[1] : null, g2:m ? m[2] : null, w:L[0] ?? null, d:L[1] ?? L[0] ?? null, h:numAfter(f, 'высот'), round:/кругл|диаметр/.test(f) };
+  }
+  if (act && /лестниц|марш/.test(f)){ const L = lensOf(stripNamed(f)); return { a:'stair', len:L[0] ?? null, angle:dirOf(f), w:numAfter(f, 'ширин'), h:numAfter(f, 'высот') }; }
   if (/комнат|помещени/.test(f)){
     const L = lensOf(stripNamed(f));
+    if (/помещени/.test(f) && !L[0]) return { a:'autorooms' };
     if (!L[0]) return { err:'Назовите размеры комнаты, например «комната 4 на 3»' };
     return { a:'room', w:L[0], d:L[1] ?? L[0], h:numAfter(f, 'высот') };
   }
@@ -3605,6 +4527,53 @@ function execOne(a, ctx){
       it.pos = pos; return `${tagName(it)} ${fem(it) ? 'сдвинута' : 'сдвинуто'} на ${mm(d)} мм вдоль стены ${w.tag}`;
     }
     case 'phase': setPhase(a.k); return 'Стадия вида: ' + phName(a.k);
+    case 'box3d': toggleBox(a.on !== false); return a.on !== false ? 'Границы 3D-вида включены' : 'Границы 3D-вида выключены';
+    case 'autorooms': { const n = autoRooms(); if (!n) throw new Error('Новых замкнутых контуров нет'); return `Расставлено помещений: ${n}`; }
+    case 'roomname': { const r = items.find(x => x.type === 'room' && String(x.num) === String(a.num)); if (!r) throw new Error('Нет помещения ' + a.num); r.name = String(a.name).replace(/^./, c => c.toUpperCase()).slice(0, 60); return `Помещение ${r.num}: «${r.name}»`; }
+    case 'floor': case 'ceiling': {
+      const rooms = a.room ? items.filter(r => r.type === 'room' && String(r.num) === String(a.room)) : a.a === 'ceiling' ? items.filter(r => r.type === 'room') : [];
+      if (a.room && !rooms.length) throw new Error('Нет помещения ' + a.room);
+      const extra = a.a === 'floor' ? { t:okNum(a.t, 0.01, 3) ?? S.floorT } : { h:okNum(a.h, 0.5, 20) ?? S.ceilH };
+      if (!rooms.length){ const pts = buildingOutline(); if (!pts) throw new Error('Нет замкнутого контура наружных стен'); const it = createFromOutline(a.a, pts, { voice:true, extra }); return `${CAT[a.a]} ${it.tag}: ${m2(Math.abs(polyArea(it.pts)))} м²`; }
+      const made = []; for (const r of rooms){ const d = roomData(r); if (d.open) continue; made.push(createFromOutline(a.a, d.poly, { voice:true, extra })); }
+      if (!made.length) throw new Error('Помещения не окружены стенами');
+      return `${a.a === 'floor' ? 'Полы' : 'Потолки'}: ${made.map(x => x.tag).join(', ')}` + (a.a === 'ceiling' ? ` на высоте ${mm(extra.h)} мм` : '');
+    }
+    case 'roof': {
+      const pts = buildingOutline(); if (!pts) throw new Error('Нет замкнутого контура наружных стен');
+      const it = createFromOutline('roof', pts, { voice:true, extra:{ kind:a.kind || S.roofKind, slope:okNum(a.slope, 1, 70) ?? S.roofSlope, over:a.over != null ? clamp(+a.over, 0, 3) : S.roofOver } });
+      return `Крыша ${it.tag}: ${ROOF_KINDS[it.kind].toLowerCase()}, уклон ${it.slope}°`;
+    }
+    case 'column': {
+      let p = null;
+      if (a.g1 && a.g2){
+        const gName = t => { const L = letterTok(t); return items.find(g => g.type === 'grid' && (g.name.toLowerCase() === String(t).toLowerCase() || (L && g.name === L))); };
+        const g1 = gName(a.g1), g2 = gName(a.g2); if (!g1 || !g2) throw new Error('Нет таких осей: ' + a.g1 + ' и ' + a.g2);
+        const f1 = wallFrame(g1), f2 = wallFrame(g2); p = xLines(f1.p1, f1.dir, f2.p1, f2.dir); if (!p) throw new Error('Оси параллельны');
+      } else p = penPoint();
+      const it = addColumn(p, { w:okNum(a.w, 0.05, 5) ?? S.colW, d:okNum(a.d, 0.05, 5) ?? okNum(a.w, 0.05, 5) ?? S.colD, h:okNum(a.h, 0.1, 50) ?? S.wallH, round:!!a.round });
+      return `Колонна ${it.tag}: ${it.round ? '⌀ ' + mm(it.w) : mm(it.w) + '×' + mm(it.d)} мм`;
+    }
+    case 'stair': {
+      const L = okNum(a.len, 0.5, 30); if (!L) throw new Error('Назовите длину марша, например «лестница 3 метра вверх»');
+      const p = penPoint(), ang = (a.angle ?? 0) * Math.PI / 180, q = new V3(p.x + Math.cos(ang) * L, 0, p.z - Math.sin(ang) * L);
+      const it = addStair(p, q, { w:okNum(a.w, 0.3, 5) ?? S.stairW, h:okNum(a.h, 0.2, 20) ?? S.stairH }), I = stairInfo(it);
+      voice.pen = q.clone();
+      return `Лестница ${it.tag}: ${I.n} подступенков по ${mm(I.rise)} мм`;
+    }
+    case 'section': {
+      let A, B;
+      if (a.grid){ const g = items.find(x => x.type === 'grid' && (x.name.toLowerCase() === String(a.grid).toLowerCase() || x.name === letterTok(a.grid))); if (!g) throw new Error('Нет оси ' + a.grid); const f = wallFrame(g); A = f.p1.clone().addScaledVector(f.dir, -0.5); B = new V3(g.x2, 0, g.z2).addScaledVector(f.dir, 0.5); }
+      else { const b = bounds(), c = b.getCenter(new V3()), w = b.max.x - b.min.x, d = b.max.z - b.min.z; if (w >= d){ A = new V3(c.x + 0.05, 0, b.max.z + 1); B = new V3(c.x + 0.05, 0, b.min.z - 1); } else { A = new V3(b.min.x - 1, 0, c.z); B = new V3(b.max.x + 1, 0, c.z); } }
+      const v = makeSection(A, B, { quiet:true }); openView(v.id); return 'Создан и открыт: ' + v.name;
+    }
+    case 'ielev': {
+      let p = null;
+      if (a.room){ const r = items.find(x => x.type === 'room' && String(x.num) === String(a.room)); if (!r) throw new Error('Нет помещения ' + a.room); p = new V3(r.x, 0, r.z); }
+      else { const r = items.find(x => x.type === 'room'); if (!r) throw new Error('Назовите помещение: «развёртка помещения 1»'); p = new V3(r.x, 0, r.z); }
+      const made = makeInteriorElevations(p, true); if (!made.length) throw new Error('Помещение не окружено стенами');
+      return `Развёртки: ${made.length} вида — в диспетчере проекта`;
+    }
     case 'openview': { const v = views.find(x => x.id === a.id); if (!v) throw new Error('Нет такого вида'); openView(v.id); return 'Открыт: ' + (v.kind === 'sheet' ? 'лист ' + v.num + ' — ' + v.name : v.name); }
     case 'newview': { newView(a.kind); return a.kind === 'detail' ? 'Обведите рамкой участок плана для узла' : 'Создано: ' + viewTitle(curView()); }
     case 'demolish': {
@@ -3635,7 +4604,7 @@ function outerWalls(){
   const b = bounds(), e = 0.4;
   return walls.filter(w => [w.x1, w.x2].every(x => Math.abs(x - b.min.x) < e + w.t) || [w.x1, w.x2].every(x => Math.abs(x - b.max.x) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.min.z) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.max.z) < e + w.t));
 }
-const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags', 'phase', 'openview', 'newview'];
+const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags', 'phase', 'openview', 'newview', 'box3d', 'section', 'ielev'];
 function execAll(actions, opt = {}){
   const mutating = actions.some(a => a && !PASSIVE.includes(a.a));
   if (mutating) pushUndo(opt.label);
@@ -3735,7 +4704,11 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 {"a":"view","v":"plan"} — "plan","d3","axo","dim"; {"a":"facade","side":"S"}; {"a":"style","s":"lines"}; {"a":"fit"}; {"a":"undo"}; {"a":"redo"}; {"a":"clear"}
 Стадии как в Revit: "obmer" (обмер, существующее), "demontazh", "montazh", "mebel"; новые элементы создаются в текущей стадии вида.
 {"a":"phase","k":"demontazh"} — стадия вида, "all" = показать все; {"a":"demolish","el":"@Д"} — снести элемент в текущей стадии (undo:true — отменить снос);
-{"a":"openview","id":"<id вида>"}; {"a":"newview","kind":"sheet"} — "plan","d3","sheet","detail".`;
+{"a":"openview","id":"<id вида>"}; {"a":"newview","kind":"sheet"} — "plan","d3","sheet","detail".
+Элементы Revit: {"a":"floor"} — пол по наружному контуру (room:"1" — в помещении 1, t — толщина); {"a":"ceiling","h":2.7} — потолки во всех помещениях (room — в одном);
+{"a":"roof","kind":"gable","slope":30,"over":0.5} — крыша по стенам ("gable","hip","shed","flat"); {"a":"column","g1":"1","g2":"А","w":0.4,"d":0.4} — колонна на пересечении осей (без осей — в точке пера);
+{"a":"stair","len":3,"angle":90,"w":1,"h":2.7}; {"a":"autorooms"} — помещения во всех контурах; {"a":"roomname","num":"1","name":"Кухня"};
+{"a":"section","grid":"2"} — разрез по оси или через середину; {"a":"ielev","room":"1"} — развёртки помещения; {"a":"box3d","on":true} — границы 3D-вида.`;
 function commandPrompt(text){
   return `Ты переводишь команду пользователя для программы архитектурного черчения «Kot project» в список действий JSON.
 ${ACTIONS_DOC}
@@ -3946,7 +4919,9 @@ setView('axo');
 showName(); greet(); renderVbar();
 (function loop(){
   requestAnimationFrame(loop);
+  updateHandles();
   if (S.view === 'sheet') return;
+  updateBoxLines();
   ctl[S.view].update();
   if (annoDirty || (S.view === 'plan' && planCam.zoom !== annoZoom)) rebuildAnno();
   renderer.render(scene, cam());
@@ -3956,15 +4931,15 @@ showName(); greet(); renderVbar();
 async function boot(){
   let list = await store.all();
   if (!list.length){
-    const sample = { id:uid(), name:'Пример — дом 6 × 4,5 м', created:Date.now(), updated:Date.now(), sample:true, items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), views:SAMPLE_VIEWS(), viewId:'v-plan', ver:4 };
+    const sample = { id:uid(), name:'Пример — дом 6 × 4,5 м', created:Date.now(), updated:Date.now(), sample:true, items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), views:SAMPLE_VIEWS(), viewId:'v-plan', ver:5 };
     await store.put(sample); list = [sample];
   } else {
     // examples saved by earlier versions get the current example (phases, views, sheets)
-    for (const p of list) if (p.sample && (p.ver || 0) < 4){ Object.assign(p, { items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), views:SAMPLE_VIEWS(), viewId:'v-plan', updated:Date.now(), ver:4 }); await store.put(p); }
+    for (const p of list) if (p.sample && (p.ver || 0) < 5){ Object.assign(p, { items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), views:SAMPLE_VIEWS(), viewId:'v-plan', updated:Date.now(), ver:5 }); await store.put(p); }
     // users whose old example was already edited get the new phases example once, as a separate project
-    if (!list.some(p => p.sample && p.ver >= 4) && lsGet('kot.sample4') !== '1'){
-      const ex = { id:uid(), name:'Пример — стадии и листы', created:Date.now(), updated:Date.now(), sample:true, items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), views:SAMPLE_VIEWS(), viewId:'v-plan', ver:4 };
-      await store.put(ex); list.push(ex); lsSet('kot.sample4', '1'); lsSet('kot.last', ex.id);
+    if (!list.some(p => p.sample && p.ver >= 5) && lsGet('kot.sample5') !== '1'){
+      const ex = { id:uid(), name:'Пример — дом с крышей и разрезами', created:Date.now(), updated:Date.now(), sample:true, items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), views:SAMPLE_VIEWS(), viewId:'v-plan', ver:5 };
+      await store.put(ex); list.push(ex); lsSet('kot.sample5', '1'); lsSet('kot.last', ex.id);
     }
   }
   const last = lsGet('kot.last');
