@@ -178,7 +178,7 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 #viewport{position:relative;overflow:hidden;background:var(--sheet);min-height:0;min-width:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #viewport canvas.main{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-#labels svg.leaders{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}#labels svg.leaders line{stroke:var(--ink);stroke-width:.8}
+#labels svg.leaders{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}#labels svg.leaders polyline{fill:none;stroke:var(--ink);stroke-width:.8;stroke-linejoin:round}
 .dim.dl.ed.mv{cursor:move}
 .dim{position:absolute;transform:translate(-50%,-50%);font-family:var(--font-ui);font-size:11.5px;color:var(--ink);background:color-mix(in srgb,var(--sheet) 82%,transparent);padding:0 3px;border-radius:2px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .dim.dl{background:transparent;font-size:var(--dimfs,12px);padding:0 1px}
@@ -209,7 +209,7 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 #cursor svg{width:22px;height:22px;display:block}
 #cursor.step{width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#111;box-shadow:0 0 0 1.5px #fff}
 #qbar{position:absolute;z-index:6;display:flex;gap:1px;padding:2px;background:var(--panel);border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 14px var(--shade)}
-#qbar[hidden]{display:none}#qbar button{width:28px;height:26px;display:flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:4px;background:transparent;cursor:pointer;padding:0}
+#qbar[hidden]{display:none}#qbar .qgrip{width:9px;align-self:stretch;margin:1px 2px 1px 0;cursor:move;touch-action:none;border-radius:3px;background:radial-gradient(circle,color-mix(in srgb,var(--ink) 45%,transparent) 1px,transparent 1.4px) 0 0/4px 4px}#qbar .qgrip:hover{background-color:var(--accent-soft)}#qbar button{width:28px;height:26px;display:flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:4px;background:transparent;cursor:pointer;padding:0}
 #qbar button:hover{background:var(--accent-soft);border-color:var(--line)}#qbar button:disabled{opacity:.35;cursor:default}#qbar svg.mi{width:18px;height:18px}
 #cursor.end{border-radius:2px;background:color-mix(in srgb,var(--temp) 35%,transparent)}
 #cursor.int{border-radius:0;transform:rotate(45deg);background:color-mix(in srgb,var(--temp) 35%,transparent)}
@@ -2822,11 +2822,15 @@ function spreadDimTexts(out){
   }
 }
 // leader of a dimension number in screen pixels: from the middle of its segment to the edge of the text
+// leader on a shelf (ГОСТ 2.307): from the middle of the segment a line at 45° to a shelf under the number;
+// the number slides along its shelf so that the leader keeps 45° — returns the polyline and the new centre of the text
 function leaderPx(L, s, fs){
-  const A = toScreen(L.leader.x, 0, L.leader.z), dx = s.x - A.x, dy = s.y - A.y, d = Math.hypot(dx, dy); if (d < 2) return null;
-  const w = textW(L.t, fs) + 6, h = fs * 1.2 + 2, a = (L.rot || 0) * Math.PI / 180, ca = Math.abs(Math.cos(a)), sa = Math.abs(Math.sin(a)), hw = (w * ca + h * sa) / 2, hh = (w * sa + h * ca) / 2;
-  const t = Math.min(hw / (Math.abs(dx) || 1e-9), hh / (Math.abs(dy) || 1e-9), 1);
-  return { x1:A.x, y1:A.y, x2:s.x - dx * t, y2:s.y - dy * t };
+  const A = toScreen(L.leader.x, 0, L.leader.z); if (Math.hypot(s.x - A.x, s.y - A.y) < 2) return null;
+  const w = textW(L.t, fs) + 4, h = fs * 1.2, a = (L.rot || 0) * Math.PI / 180, u = { x:Math.cos(a), y:Math.sin(a) }, n = { x:-Math.sin(a), y:Math.cos(a) };
+  const au = (A.x - s.x) * u.x + (A.y - s.y) * u.y, an = (A.x - s.x) * n.x + (A.y - s.y) * n.y, sh = h / 2;
+  const sg = au > 0 ? -1 : 1, dn = Math.abs(sh - an), d = au + sg * dn + sg * w / 2;
+  const T = { x:s.x + u.x * d, y:s.y + u.y * d }, P = (cu, cn) => ({ x:T.x + u.x * cu + n.x * cn, y:T.y + u.y * cu + n.y * cn });
+  return { pts:[A, P(-sg * w / 2, sh), P(sg * w / 2, sh)], tx:T.x, ty:T.y };
 }
 /* ---------- Revit dimension kinds: linear (horizontal/vertical by the cursor), angular, radial, diameter; and the ruler ---------- */
 const effDimMode = () => S.dimMode === 'lin' ? (DD.lin || 'h') : S.dimMode;
@@ -3033,12 +3037,20 @@ function snapCursor(kind){
   cv.style.cursor = sym ? 'none' : CUR.pencil;
 }
 /* quick actions next to the selection (ArchiCAD «Pet palette»): move, copy, mirror, rotate, create similar */
-let QBAR = null;
+let QBAR = null, QDRAG = false, QOFF = { x:0, y:0 };
+try { const o = JSON.parse(lsGet('kot.qbarOff') || 'null'); if (o && Number.isFinite(o.x) && Number.isFinite(o.y)) QOFF = o; } catch (e){}
 function quickBar(){
   if (QBAR) return QBAR;
   QBAR = document.createElement('div'); QBAR.id = 'qbar'; QBAR.hidden = true; QBAR.setAttribute('role', 'toolbar'); QBAR.setAttribute('aria-label', 'Быстрые действия');
   const acts = [['move', 'Переместить (MV)', () => setTool('move')], ['copy', 'Копировать (CO)', () => setTool('copy')], ['mirror', 'Зеркально: выбрать ось (MM)', () => setTool('mirror')], ['rotatet', 'Повернуть (RO)', () => setTool('rotate')], ['similar', 'Создать аналог (CS)', createSimilar]];
-  QBAR.innerHTML = acts.map(([k, t]) => `<button data-q="${k}" title="${t}" aria-label="${t}">${MI(MOD_ICONS[k])}</button>`).join('');
+  QBAR.innerHTML = '<span class="qgrip" title="Перетащите, чтобы переставить панель. Двойной щелчок — вернуть на место" aria-label="Переставить панель" role="button" tabindex="0"></span>' + acts.map(([k, t]) => `<button data-q="${k}" title="${t}" aria-label="${t}">${MI(MOD_ICONS[k])}</button>`).join('');
+  // the bar can be dragged by its grip; its place is kept as a shift from where it would stand by itself
+  const grip = QBAR.querySelector('.qgrip');
+  grip.addEventListener('pointerdown', ev => { ev.preventDefault(); ev.stopPropagation(); const x0 = ev.clientX, y0 = ev.clientY, o0 = { ...QOFF }; QDRAG = true; try { grip.setPointerCapture(ev.pointerId); } catch (e){}
+    const mv = e => { QOFF = { x:o0.x + e.clientX - x0, y:o0.y + e.clientY - y0 }; placeQuickBar(); };
+    const up = () => { QDRAG = false; grip.removeEventListener('pointermove', mv); grip.removeEventListener('pointerup', up); grip.removeEventListener('pointercancel', up); lsSet('kot.qbarOff', JSON.stringify(QOFF)); };
+    grip.addEventListener('pointermove', mv); grip.addEventListener('pointerup', up); grip.addEventListener('pointercancel', up); });
+  grip.addEventListener('dblclick', ev => { ev.stopPropagation(); QOFF = { x:0, y:0 }; lsSet('kot.qbarOff', JSON.stringify(QOFF)); placeQuickBar(); });
   acts.forEach(([k, , fn]) => { QBAR.querySelector(`[data-q="${k}"]`).onclick = ev => { ev.stopPropagation(); QBAR.hidden = true; fn(); }; });
   QBAR.addEventListener('pointerdown', ev => ev.stopPropagation());
   vp.append(QBAR); return QBAR;
@@ -3063,7 +3075,7 @@ function placeQuickBar(){
   const q = quickBar(); if (x1 < -1e8){ q.hidden = true; return; }
   q.hidden = false; q.querySelector('[data-q="similar"]').disabled = sel.size !== 1;
   const W = cv.clientWidth, H = cv.clientHeight, w = q.offsetWidth || 150, h = q.offsetHeight || 30;
-  q.style.left = clamp(x1 + 12, 4, W - w - 4) + 'px'; q.style.top = clamp(y0 - h - 10, 4, H - h - 4) + 'px';
+  q.style.left = clamp(x1 + 12 + QOFF.x, 4, W - w - 4) + 'px'; q.style.top = clamp(y0 - h - 10 + QOFF.y, 4, H - h - 4) + 'px';
 }
 function hovUpdate(px, py, alt){
   if (S.tool !== 'select' || drag || box){ if (HOV.list.length){ HOV.list = []; hovDraw(); } return; }
@@ -3278,6 +3290,8 @@ function surveyRefs(w, side){
       mids.push({ s, r:[{ k:'w', id:o.id, end, side:-1 }, { k:'w', id:o.id, end, side:1 }] });
     });
   }
+  // doors, windows and openings: the chain also gets their edges (piers and the width of each opening)
+  for (const op of opsOf(w, f.L)) mids.push({ s:op.a, r:[{ k:'o', id:op.o.id, edge:0, side }] }, { s:op.b, r:[{ k:'o', id:op.o.id, edge:1, side }] });
   mids.sort((a, b) => a.s - b.s).forEach(m => refs.push(...m.r));
   refs.push({ k:'w', id:w.id, end:1, side });
   return refs;
@@ -4786,9 +4800,12 @@ function buildLabels(){
     const wl = byId(w.wall); if (!wl) continue;
     const f = wallFrame(wl), op = opsOf(wl, f.L).find(o => o.o.id === w.id); if (!op) continue;
     const c = bounds().getCenter(new V3()), mid = f.p1.clone().addScaledVector(f.dir, op.pos), inSide = Math.sign(c.clone().sub(mid).dot(f.nrm)) || 1;
-    const p = mid.addScaledVector(f.nrm, -inSide * (wl.t / 2 + 0.5));
-    out.push({ x:p.x, y:0, z:p.z, t:`h от пола=${Math.round((w.sill || 0) * 1000)}мм`, cls:'hb', dy:-8, col:winO.c || '#2433c8' });
-    out.push({ x:p.x, y:0, z:p.z, t:`h проёма=${Math.round(w.h * 1000)}мм`, cls:'hb', dy:8, col:winO.c || '#2433c8' });
+    // the two lines run parallel to the window (along its wall), stacked outward from the wall face
+    const a0 = toScreen(f.p1.x, 0, f.p1.z), a1 = toScreen(f.p1.x + f.dir.x, 0, f.p1.z + f.dir.z); let rot = Math.atan2(a1.y - a0.y, a1.x - a0.x) * 180 / Math.PI; if (rot > 90) rot -= 180; if (rot <= -90) rot += 180;
+    const gap = STD.anno.textMm * 1.5 * paperMm(), base = wl.t / 2 + gap * 0.9;
+    const p1 = mid.clone().addScaledVector(f.nrm, -inSide * base), p2 = mid.clone().addScaledVector(f.nrm, -inSide * (base + gap));
+    out.push({ x:p1.x, y:0, z:p1.z, t:`h от пола=${Math.round((w.sill || 0) * 1000)}мм`, cls:'hb', rot, col:winO.c || '#2433c8' });
+    out.push({ x:p2.x, y:0, z:p2.z, t:`h проёма=${Math.round(w.h * 1000)}мм`, cls:'hb', rot, col:winO.c || '#2433c8' });
   }
   if (plan) viewMarkLabels(out);
   if (plan && !RENDER){
@@ -4872,8 +4889,8 @@ function updateLabels(){
     n++;
     el.hidden = false; el.className = L.cls ? 'dim ' + L.cls : 'dim';
     if (el.textContent !== L.t) el.textContent = L.t;
+    if (L.leader){ const q = leaderPx(L, s, fsL); if (q){ lead.push(q); s.x = q.tx; s.y = q.ty; } }
     el.style.left = s.x + 'px'; el.style.top = (s.y + (L.dy || 0)) + 'px';
-    if (L.leader){ const q = leaderPx(L, s, fsL); if (q) lead.push(q); }
     el._dd = L.own || null;
     el.style.transform = L.rot ? `translate(-50%,-50%) rotate(${L.rot}deg)` : '';
     el.style.fontSize = L.size ? L.size + 'px' : ''; el.style.color = L.col || '';
@@ -4883,7 +4900,7 @@ function updateLabels(){
   }
   for (let i = n; i < pool.length; i++){ pool[i].hidden = true; pool[i]._edit = pool[i]._open = pool[i]._act = pool[i]._txt = pool[i]._dd = null; }
   if (!leadSvg){ leadSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); leadSvg.setAttribute('class', 'leaders'); labelsEl.prepend(leadSvg); }
-  leadSvg.innerHTML = lead.map(q => `<line x1="${q.x1.toFixed(1)}" y1="${q.y1.toFixed(1)}" x2="${q.x2.toFixed(1)}" y2="${q.y2.toFixed(1)}"/>`).join('');
+  leadSvg.innerHTML = lead.map(q => `<polyline points="${q.pts.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ')}"/>`).join('');
   if (!cursorEl.hidden && D.cur){ const s = toScreen(D.cur.x, 0, D.cur.z); cursorEl.style.left = s.x + 'px'; cursorEl.style.top = s.y + 'px'; }
   if (editing && !editing.inp.isConnected) editing = null;
 }
@@ -5509,7 +5526,7 @@ function drawImageLabels(g, PX){
   for (const L of buildLabels()){
     const s = L.sx != null ? { x:L.sx, y:L.sy } : toScreen(L.x, L.y, L.z), cls = L.cls || '';
     g.save(); g.translate(s.x, s.y);
-    if (/^dl/.test(cls) && L.leader){ const q = leaderPx(L, s, STD.anno.textMm * PX * 1.15); if (q){ g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.strokeStyle = '#1b252c'; g.lineWidth = 0.18 * PX; g.beginPath(); g.moveTo(q.x1, q.y1); g.lineTo(q.x2, q.y2); g.stroke(); g.restore(); } }
+    if (/^dl/.test(cls) && L.leader){ const q = leaderPx(L, s, STD.anno.textMm * PX * 1.15); if (q){ g.restore(); g.save(); g.strokeStyle = '#1b252c'; g.lineWidth = 0.18 * PX; g.beginPath(); q.pts.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)); g.stroke(); g.translate(q.tx, q.ty); } }
     if (/^dl/.test(cls)){ g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(STD.anno.textMm * PX); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
     else if (/^gb/.test(cls)){ g.beginPath(); g.arc(0, 0, 3.6 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.25 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(3 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.2 * PX); }
     else if (/^wt/.test(cls)){ g.font = font(STD.anno.tagMm * 0.8 * PX, true); const tw = g.measureText(L.t).width + 1.2 * PX, th = 3.2 * PX; g.fillStyle = '#fff'; g.strokeStyle = '#1b252c'; g.lineWidth = 0.2 * PX; if (/dr/.test(cls)){ g.beginPath(); g.ellipse(0, 0, Math.max(tw, th) / 2, th / 2, 0, 0, Math.PI * 2); g.fill(); g.stroke(); } else { g.fillRect(-tw / 2, -th / 2, tw, th); g.strokeRect(-tw / 2, -th / 2, tw, th); } g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.1 * PX); }
@@ -5521,7 +5538,7 @@ function drawImageLabels(g, PX){
     }
     else if (/^svn/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.beginPath(); g.arc(0, 0, 2.6 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.2 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(2.2 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.15 * PX); }
     else if (/^sva/.test(cls)){ g.font = font(2.3 * PX); g.fillStyle = /open/.test(cls) ? '#c62828' : '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); const tw = g.measureText(L.t).width; g.fillRect(-tw / 2, 1.5 * PX, tw, 0.18 * PX); }
-    else if (/^hb/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.font = font(2.4 * PX); g.fillStyle = L.col || '#2433c8'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
+    else if (/^hb/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(2.4 * PX); g.fillStyle = L.col || '#2433c8'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
     else if (/^lv/.test(cls)){ const ln = String(L.t).split('\n'); g.fillStyle = '#1b252c'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.font = font(2.4 * PX, true); g.fillText(ln[0], 1 * PX, -3 * PX); g.font = font(2.2 * PX); g.fillText(ln[1] || '', 1 * PX, -0.4 * PX); }
     else if (/^sx/.test(cls)){ g.font = font(3.2 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
     else if (/^tx/.test(cls)){ g.font = font((L.size || 14) / 14 * 3 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText(L.t, 0, 0); }
