@@ -1364,7 +1364,7 @@ function sanitizeStd(o){
   out.anno = { tick:['tick','arrow','dot'].includes(a.tick) ? a.tick : d.anno.tick, textMm:N(a.textMm) ? clamp(+a.textMm, 1, 10) : d.anno.textMm, units:['mm','cm','m'].includes(a.units) ? a.units : 'mm', dec:clamp(Math.round(+a.dec) || 0, 0, 3),
     gap:N(a.gap) ? clamp(+a.gap, 0, 20) : d.anno.gap, over:N(a.over) ? clamp(+a.over, 0, 20) : d.anno.over, ext:N(a.ext) ? clamp(+a.ext, 0, 20) : d.anno.ext, tagMm:N(a.tagMm) ? clamp(+a.tagMm, 1, 10) : d.anno.tagMm };
   out.stamps = sanitizeStamps(o.stamps); out.lw = sanitizeLW(o.lw); out.ph = sanitizePh(o.ph); if (o.ieAuto) out.ieAuto = true;
-  if (Array.isArray(o.folders)) out.folders = o.folders.filter(f => f && typeof f.id === 'string').slice(0, 200).map(f => ({ id:f.id.slice(0, 30), n:String(f.n || 'Раздел').slice(0, 80) }));
+  // «Мои разделы видов» removed: old project folders are dropped on load (the views stay in «Виды (все)»)
   return out;
 }
 const styleOpts = cur => STD.styles.map(s => `<option value="${s.id}"${s.id === cur ? ' selected' : ''}>${esc(s.n)}</option>`).join('');
@@ -5960,7 +5960,7 @@ function sanitizeViews(arr){
     if (v.tplAuto && o.tpl) o.tplAuto = true;
     if (v.ov && typeof v.ov === 'object'){ const ov = sanOv(v.ov); if (Object.keys(ov).length) o.ov = ov; }
     if (typeof v.phf === 'string' && v.phf !== 'all') o.phf = v.phf.slice(0, 24);
-    if (typeof v.folder === 'string') o.folder = v.folder.slice(0, 30);
+
     if (v.kind === 'camera'){
       if (!o.cam) continue;
       o.code = String(v.code || 'К').slice(0, 6); const l = v.lens || {}, L = {};
@@ -6202,13 +6202,30 @@ function newView(kind){
   if (kind === 'section' || kind === 'ielev' || kind === 'camera'){ setTool(kind); return; }
   const same = views.filter(v => v.kind === kind);
   let v;
-  if (kind === 'plan'){ let n = same.length + 1; while (views.some(x => x.name === 'План ' + n)) n++; v = { id:vid('v'), kind:'plan', name:'План ' + n, phase:S.phase, lv:actLv() }; }
+  if (kind === 'axo'){ let n = same.length + 1; while (views.some(x => x.name === 'Аксонометрия ' + n)) n++; v = { id:vid('v'), kind:'axo', name:'Аксонометрия ' + n, phase:S.phase }; }
+  else if (/^elev:/.test(kind)){ const sd = kind.slice(5), nm = { S:'Южный', N:'Северный', E:'Восточный', W:'Западный' }[sd]; if (!nm) return; let n = 1, name = nm; while (views.some(x => x.name === name)) name = nm + ' ' + (++n); kind = 'elev'; v = { id:vid('v'), kind:'elev', side:sd, name, phase:S.phase }; }
+  else
+ if (kind === 'plan'){ let n = same.length + 1; while (views.some(x => x.name === 'План ' + n)) n++; v = { id:vid('v'), kind:'plan', name:'План ' + n, phase:S.phase, lv:actLv() }; }
   else if (kind === 'd3'){ let n = same.length + 1; v = { id:vid('v'), kind:'d3', name:'3D-вид ' + n, phase:S.phase }; }
   else if (kind === 'sheet'){
     let n = 101; while (views.some(x => x.kind === 'sheet' && x.num === 'А' + n)) n++;
     v = { id:vid('v'), kind:'sheet', num:'А' + n, name:'Новый лист', size:'A3', author:'', checker:'', stage:'П', vps:[] };
   } else return;
   views.push(v); if (kind === 'plan') autoSheetFor(v); openView(v.id); toast(`Создано: ${KIND_NAME[v.kind].toLowerCase()} «${v.kind === 'sheet' ? v.num : v.name}»${kind === 'plan' ? '. Лист для него — в списке «Добавить лист» у «Листы (все)»' : ''}`);
+}
+// «+» at «Виды (все)»: a menu of the views that can be created
+function viewNewMenu(anchor){
+  let m = document.getElementById('vnewMenu');
+  if (!m){ m = document.createElement('div'); m.id = 'vnewMenu'; m.className = 'menu-list'; m.setAttribute('role', 'menu'); m.hidden = true; document.body.append(m);
+    document.addEventListener('pointerdown', ev => { if (!m.hidden && !m.contains(ev.target) && ev.target !== anchor) m.hidden = true; }, true);
+    addEventListener('keydown', ev => { if (ev.key === 'Escape') m.hidden = true; }); }
+  const rows = [['План этажа', 'plan'], ['3D-вид', 'd3'], ['Аксонометрия', 'axo'], null, ['Разрез — линия на плане', 'section'], ['Узел — обвести на плане', 'detail'], ['Развёртки — щелчок в помещении', 'ielev'], ['Камера — две точки на плане', 'camera'], null,
+    ['Фасад: южный', 'elev:S'], ['Фасад: северный', 'elev:N'], ['Фасад: восточный', 'elev:E'], ['Фасад: западный', 'elev:W'], null, ['Лист', 'sheet']];
+  m.innerHTML = rows.map(r => r ? `<button role="menuitem" data-k="${r[1]}">${esc(r[0])}</button>` : '<hr>').join('');
+  m.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { m.hidden = true; const k = b.dataset.k; if (S.view === 'sheet' && ['section', 'detail', 'ielev', 'camera'].includes(k)) openView((views.find(x => x.kind === 'plan') || views[0]).id); newView(k); renderTree(); scheduleSave(); });
+  m.hidden = false;
+  const a = anchor.getBoundingClientRect(), r = m.getBoundingClientRect();
+  m.style.left = Math.min(a.left, innerWidth - r.width - 4) + 'px'; m.style.top = Math.min(a.bottom + 2, innerHeight - r.height - 4) + 'px';
 }
 function deleteView(id){
   const v = views.find(x => x.id === id); if (!v) return;
@@ -9134,10 +9151,7 @@ function renderTree(){
   const group = (title, kind, list, add) => `<li><div class="node">${title}${add ? `<button class="add" data-tree="n:${kind}" title="${add}" aria-label="${add}">+</button>` : ''}</div><ul>${list.map(vItem).join('') || '<li class="it"><span class="ph">пусто</span></li>'}</ul></li>`;
   const of = k => views.filter(v => v.kind === k);
   const lvHtml = `<li><div class="node">Уровни<button class="add" data-tree="lvadd:" title="Новый уровень" aria-label="Новый уровень">+</button></div><ul>` + [...levels].sort((a, b) => b.elev - a.elev).map(L => `<li class="it"><button data-tree="lv:${L.id}" title="Открыть план уровня">${esc(L.name)}<span class="ph">${fmtElev(L.elev)}</span></button><button class="x" data-tree="lved:" title="Изменить уровни" aria-label="Изменить уровни">✎</button></li>`).join('') + `</ul></li>`;
-  // own sections of the browser (Revit: «Организация диспетчера проекта» — folders such as «02_Обмерный план»)
-  const FD = STD.folders || [];
-  const fdHtml = `<li><div class="node">Мои разделы видов<button class="add" data-tree="fnew:" title="Новый раздел видов" aria-label="Новый раздел видов">+</button></div><ul>` + (FD.map(f => `<li><div class="node">${esc(f.n)}<button class="add" data-tree="fadd:${f.id}" title="Добавить виды или создать план этажа в разделе" aria-label="Добавить виды">+</button><button class="add" data-tree="fren:${f.id}" title="Переименовать раздел" aria-label="Переименовать раздел">✎</button><button class="add" data-tree="fdel:${f.id}" title="Удалить раздел (виды остаются)" aria-label="Удалить раздел">×</button></div><ul>` + (views.filter(v => v.folder === f.id).map(vItem).join('') || '<li class="it"><span class="ph">пусто — нажмите +</span></li>') + '</ul></li>').join('') || '<li class="it"><span class="ph">нажмите +, чтобы создать раздел</span></li>') + '</ul></li>';
-  ul.innerHTML = lvHtml + fdHtml + `<li><div class="node">Виды (все)</div><ul>
+  ul.innerHTML = lvHtml + `<li><div class="node">Виды (все)<button class="add" data-tree="vnew:" title="Создать вид" aria-label="Создать вид">+</button></div><ul>
       ${group('Планы этажей', 'plan', of('plan'), 'Новый план')}
       ${group('Узлы', 'detail', of('detail'), 'Новый узел — обвести на плане')}
       ${group('3D-виды', 'd3', of('d3'), 'Новый 3D-вид')}
@@ -9174,6 +9188,7 @@ function renderTree(){
     else if (k === 'fren'){ const f = (STD.folders || []).find(x => x.id === v); if (!f) return; const n = prompt('Имя раздела', f.n); if (n && n.trim()){ f.n = n.trim().slice(0, 80); scheduleSave(); renderTree(); } return; }
     else if (k === 'fdel'){ const f = (STD.folders || []).find(x => x.id === v); if (!f || !confirm(`Удалить раздел «${f.n}»? Виды останутся в «Виды (все)».`)) return; STD.folders = STD.folders.filter(x => x !== f); for (const w of views) if (w.folder === f.id) delete w.folder; scheduleSave(); renderTree(); return; }
     else if (k === 'mdlimp'){ const i = $('#mdlFile'); i.value = ''; i.click(); return; }
+    else if (k === 'vnew'){ viewNewMenu(b); return; }
     else if (k === 'n'){ newView(v); return; }
     else if (k === 'd'){ const x = views.find(y => y.id === v); if (x && confirm(`Удалить ${x.kind === 'sheet' ? 'лист ' + x.num : '«' + x.name + '»'}?`)) deleteView(v); return; }
     else if (k === 'p'){ placeOnSheet(v); renderTree(); return; }
