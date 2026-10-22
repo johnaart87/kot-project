@@ -173,6 +173,10 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .dim.dl.sel,.dim.tx.sel{color:var(--sel)}
 .dim.temp{color:var(--temp);background:var(--sheet);border:1px solid var(--temp);pointer-events:auto;cursor:pointer;font-weight:500}
 .dim.temp:hover{background:var(--accent-soft)}
+/* Revit: the dimensions of the selected element are editable — click the number and type a value */
+.dim.dl.ed{pointer-events:auto;cursor:text;color:var(--sel);background:var(--sheet);border-bottom:1px dashed var(--sel)}
+.dim.dl.ed:hover{background:var(--accent-soft)}
+.dim.dl.ovt{font-style:italic}
 .dim.op{color:var(--muted)}
 .dim.live{color:var(--temp);font-weight:500;font-size:12px}
 .dim.pen{color:var(--accent);border:1px solid var(--accent)}
@@ -362,6 +366,17 @@ details.more summary::-webkit-details-marker{display:none}
 .famtab td{padding:2px 3px}
 .famtab input{width:100%;min-width:44px;font-size:12px}
 @media (max-width:760px){ .patwrap{grid-template-columns:1fr} .patgal{max-height:240px} .pated{max-height:none} }
+/* «Видимость/графика» table */
+.vgtab td{white-space:nowrap}
+.vgtab .vgname,.vgtab .vgcell{border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;padding:2px 4px;border-radius:3px;text-align:left}
+.vgtab .vgname:hover,.vgtab .vgcell:hover{background:var(--accent-soft)}
+.vgtab tr.open > td{background:var(--accent-soft)}
+.vgsw{display:inline-block;width:28px;height:var(--w);background:var(--c);vertical-align:middle;border-radius:1px}
+.vgdetail{display:flex;flex-direction:column;gap:6px;padding:6px 4px 10px 22px}
+.vgf{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}
+.vgf > span:first-child{min-width:170px;color:var(--muted)}
+.vgf .vgl{color:var(--muted);font-size:11.5px}
+.vgf input[type=color]{width:34px;height:24px;padding:0;border:1px solid var(--line);border-radius:4px;background:none}
 .stdtab canvas.pick{cursor:pointer}
 .stdtab canvas.pick:hover{outline:2px solid var(--accent);outline-offset:1px}
 /* camera views: the frame of the shot, the rest of the viewport dimmed */
@@ -562,6 +577,7 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" data-tool="ielev" title="Развёртка стен помещения (EL)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2.5l2 3h-4zM10 17.5l2-3h-4zM2.5 10l3-2v4zM17.5 10l-3-2v4z" fill="currentColor" stroke="none"/></svg>Развёртка<span class="k">EL</span></button>
         <button class="rbtn" id="rbBox" title="Границы 3D-вида: обрезать модель рамкой с ручками"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8" stroke-dasharray="2 1.3"/><rect x="8.5" y="1" width="3" height="3" fill="currentColor" stroke="none"/></svg>Границы<br>3D-вида</button>
         <button class="rbtn" data-tool="callout" title="Узел: обведите рамкой участок плана (CL)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="9" height="9" stroke-dasharray="2 1.5"/><path d="M12 12l4 4"/><circle cx="16" cy="16" r="2"/></svg>Узел<span class="k">CL</span></button>
+        <button class="rbtn" id="rbVG" title="Видимость/графика этого вида: категории, линии, штриховки, полутон, прозрачность (VV)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/><path d="M14 15h5M16.5 12.5v5" stroke-width="1.1"/></svg>Видимость/<br>графика<span class="k">VV</span></button>
         <button class="rbtn" id="rbTpl" title="Шаблоны видов: видимость и графика категорий и семейств"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="3" width="15" height="14" rx="1"/><path d="M2.5 7h15M7 7v10"/><path d="M9.5 10h5M9.5 13h3"/></svg>Шаблоны<br>видов</button>
         <button class="rbtn" id="rbRender" title="Визуализация: красивая картинка 3D-вида с тенями, небом и материалами (RR)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="14.5" cy="5.5" r="2.5"/><path d="M14.5 1.5v1M18.5 5.5h-1M17.3 2.7l-.7.7"/><path d="M2 17l5-6 3 3 2-2 4 5z" stroke-linejoin="round"/></svg>Визуали-<br>зация<span class="k">RR</span></button>
         <button class="rbtn" id="rbSheet" title="Новый лист"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12"/><rect x="11" y="12" width="6.5" height="4"/></svg>Лист</button>
@@ -1613,8 +1629,8 @@ function buildWall(w, prevMat, prevEdge){
   }
   if (plan && !prevEdge && w.id){
     const sty = st === 'demo' ? 'demo' : st === 'exist' ? 'exist' : 'cut', col = s ? C.sel : null, lk = lookOf(), lw = lk && lk.line && sty === 'cut' ? lk.line : null;
-    const a = fatLines(segs, sty, col || (lw && lw.c), lw && lw.w); if (a) g.add(a);
-    const b = segsI.length && !(lk && lk.noLayers && st === 'normal') && fatLines(segsI, st === 'normal' ? 'layer' : sty, col); if (b) g.add(b);
+    const a = fatLines(segs, sty, col || (lw && lw.c), lw && lw.w); if (a){ a.userData.cut = true; g.add(a); }
+    const b = segsI.length && !(lk && lk.noLayers && st === 'normal') && fatLines(segsI, st === 'normal' ? 'layer' : sty, col); if (b){ b.userData.cut = true; g.add(b); }
   } else { if (segs.length) g.add(lineOf(segs, em, true)); if (segsI.length) g.add(lineOf(segsI, em, true)); }
   if (plan) for (const o of ops0) planSymbol(g, o, w.t);
   else for (const o of ops0){
@@ -1906,18 +1922,28 @@ function DEFAULT_TPLS(){ return [
   { id:'t-pres', name:'Презентация: мебель полутоном, без размеров', ov:{ 'cat:furniture':{ half:true }, 'cat:casework':{ half:true }, box:{ half:true }, dim:{ vis:false } } }
 ]; }
 let TPLS = DEFAULT_TPLS();
+/* visibility/graphics overrides of a category (Revit V/G): vis, half — halftone, tr — transparency 0…1,
+   c/w — projection lines colour and pen weight, cc/cw — cut lines, sp/cp — surface and cut patterns ({ fg:{p,c}, bg:{p,c} }) */
+function sanOv(ov){
+  const col = v => /^#[0-9a-f]{6}$/i.test(v), wt = v => Number.isFinite(+v) && +v >= 1 && +v <= 16, lay = q => q && typeof q === 'object' ? { p:typeof q.p === 'string' ? q.p.slice(0, 20) : '', c:col(q.c) ? q.c : '#2b3439' } : null;
+  const pats = q => q && typeof q === 'object' ? { fg:lay(q.fg) || { p:'', c:'#2b3439' }, bg:lay(q.bg) || { p:'', c:'#ffffff' } } : null;
+  return Object.fromEntries(Object.entries(ov || {}).filter(([k, v]) => typeof k === 'string' && v && typeof v === 'object').map(([k, v]) => [k.slice(0, 60), {
+    ...(v.vis === false ? { vis:false } : {}), ...(v.half ? { half:true } : {}), ...(col(v.c) ? { c:v.c } : {}), ...(wt(v.w) ? { w:Math.round(+v.w) } : {}),
+    ...(col(v.cc) ? { cc:v.cc } : {}), ...(wt(v.cw) ? { cw:Math.round(+v.cw) } : {}), ...(Number.isFinite(+v.tr) && +v.tr > 0 ? { tr:Math.min(+v.tr, 0.95) } : {}),
+    ...(pats(v.sp) ? { sp:pats(v.sp) } : {}), ...(pats(v.cp) ? { cp:pats(v.cp) } : {}) }]).filter(([, v]) => Object.keys(v).length));
+}
 function sanitizeTpls(arr){
   if (!Array.isArray(arr)) return DEFAULT_TPLS();
-  return arr.filter(t => t && typeof t.id === 'string').map(t => ({ id:t.id.slice(0, 40), name:String(t.name || 'Шаблон').slice(0, 80), ov:Object.fromEntries(Object.entries(t.ov || {}).filter(([k, v]) => typeof k === 'string' && v && typeof v === 'object').map(([k, v]) => [k.slice(0, 60), {
-    ...(v.vis === false ? { vis:false } : {}), ...(v.half ? { half:true } : {}), ...(/^#[0-9a-f]{6}$/i.test(v.c) ? { c:v.c } : {}), ...(Number.isFinite(+v.w) && +v.w >= 1 && +v.w <= 16 ? { w:Math.round(+v.w) } : {}) }])),
+  return arr.filter(t => t && typeof t.id === 'string').map(t => ({ id:t.id.slice(0, 40), name:String(t.name || 'Шаблон').slice(0, 80), ov:sanOv(t.ov),
     // the survey template of older projects gets the survey look
     ...(t.look ? { look:sanitizeLook(t.look) } : t.id === 't-survey' ? { look:SURVEY_LOOK() } : {}) }));
 }
 const tplOfView = v => v && v.tpl && TPLS.find(t => t.id === v.tpl);
 const ovKeys = it => { if (!it) return []; const k = it.type === 'circle' ? 'line' : (it.type === 'adim' || it.type === 'rdim') ? 'dim' : it.type; if (it.type === 'fam'){ const f = famById(it.f); return ['f:' + it.f, ...(f ? ['cat:' + f.cat] : [])]; } return [k]; };
+// the template's overrides, then the view's own on top (Revit: view V/G over the template)
 function ovOf(it){
-  const t = tplOfView(viewNow()); if (!t) return null;
-  let o = null; for (const k of ovKeys(isOp(it) ? it : it).reverse()) if (t.ov[k]) o = { ...(o || {}), ...t.ov[k] };
+  const v = viewNow(), t = tplOfView(v), keys = ovKeys(it).reverse(); let o = null;
+  for (const src of [t && t.ov, v && v.ov]) if (src) for (const k of keys) if (src[k]) o = { ...(o || {}), ...src[k] };
   return o;
 }
 const tplVisible = it => { const o = ovOf(it); return !o || o.vis !== false; };
@@ -1925,17 +1951,45 @@ const tplVisible = it => { const o = ovOf(it); return !o || o.vis !== false; };
 const gridsOff = () => { const v = RV || (typeof curView === 'function' ? curView() : null); return !!(v && v.noGrid) && !S.reveal; };
 const gridShown = gr => !gridsOff() && tplVisible(gr);
 const OVM = new Map();
+const patsOn = pp => !!(pp && ((pp.fg && pp.fg.p) || (pp.bg && pp.bg.p)));
+// a copy of a material that keeps its own shader hook (patterns, triplanar) under its own program key
+function cloneMat(base){
+  const m = base.clone(); if (base.onBeforeCompile){ m.onBeforeCompile = base.onBeforeCompile; const ck = 'ovc|' + (++SHADER_N); m.customProgramCacheKey = () => ck; }
+  m.userData = { ...base.userData }; if (base.clippingPlanes) m.clippingPlanes = base.clippingPlanes; return m;
+}
 function applyOv(obj, o){
-  if (!o || (!o.half && !o.c && !o.w)) return;
+  if (!o) return;
+  const plan = S.view === 'plan', mp = plan ? o.cp : o.sp, meshOv = o.half || o.tr || patsOn(mp) || (!plan && patsOn(o.cp)), lineOv = o.c || o.w || o.cc || o.cw || o.half;
+  if (!meshOv && !lineOv) return;
   obj.traverse(q => {
-    if (!q.material) return;
-    const base = q.material, key = base.uuid + '|' + JSON.stringify(o);
+    const base = q.material; if (!base || Array.isArray(base) || base === M.pick) return;
+    if (q.isMesh && !q.isLineSegments2){
+      if (!meshOv || base.opacity === 0) return;
+      const key = 'm|' + base.uuid + '|' + JSON.stringify([patsOn(mp) ? mp : 0, o.half, o.tr, !plan && patsOn(o.cp) ? o.cp : 0]);
+      let m = OVM.get(key);
+      if (!m){
+        if (patsOn(mp) && !base.userData.glass){
+          // surface (3D, elevations) or cut (plan) pattern of the category instead of the material's own
+          const col = '#' + (base.color ? base.color.getHexString() : 'ffffff');
+          m = plan ? patMat({ color:col, pats:mp, proj:'xz', extra:PO }) : patMat({ lit:true, color:col, pats:mp, proj:'tri', extra:{ ...PO, clippingPlanes:CLIP } });
+          m.userData = { ...base.userData };
+        } else m = cloneMat(base);
+        if (!plan && patsOn(o.cp)) m.userData.cutOv = o.cp; // section caps of this category
+        const op = Math.min(o.half ? 0.35 : 1, o.tr ? 1 - o.tr : 1);
+        if (op < 1){ m.transparent = true; m.opacity = Math.min(m.opacity ?? 1, op); m.depthWrite = false; }
+        OVM.set(key, m);
+      }
+      q.material = m; return;
+    }
+    if (!lineOv) return;
+    const cut = !!q.userData.cut, c2 = cut ? (o.cc || o.c) : o.c, w2 = cut ? (o.cw || o.w) : o.w;
+    if (!c2 && !w2 && !o.half) return;
+    const key = 'l|' + base.uuid + '|' + [c2, w2, o.half].join(',');
     let m = OVM.get(key);
     if (!m){
       m = base.clone();
-      if (q.isMesh && o.half){ m.transparent = true; m.opacity = Math.min(m.opacity ?? 1, 0.35); m.depthWrite = false; }
-      if (!q.isMesh && (o.c || o.half)){ if (o.c) m.color = new THREE.Color(o.c); if (o.half){ m.transparent = true; m.opacity = 0.4; } }
-      if (q.isLineSegments2 && o.w) m.linewidth = linePx(weightMm(o.w));
+      if (c2) m.color = new THREE.Color(c2); if (o.half){ m.transparent = true; m.opacity = 0.4; }
+      if (q.isLineSegments2 && w2) m.linewidth = linePx(weightMm(w2));
       if (base.clippingPlanes) m.clippingPlanes = base.clippingPlanes;
       OVM.set(key, m);
     }
@@ -2111,7 +2165,8 @@ function applyClip(){
   if (!CLIP.length) return;
   model.updateMatrixWorld(true);
   // the cut faces of each material get that material's cut pattern (Revit «Штриховка сечения»); the rest gets poche
-  const groups = new Map(); model.traverse(o => { if (o.isMesh && !o.material.transparent && o.material !== M.pick && o.geometry){ const k = (o.material.userData && o.material.userData.mk) || ''; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(o); } });
+  // grouped by material and by the category's own cut pattern (view/template override)
+  const groups = new Map(), gInfo = new Map(); model.traverse(o => { if (o.isMesh && !o.isLineSegments2 && !o.material.transparent && o.material !== M.pick && o.geometry){ const ud = o.material.userData || {}, k = (ud.mk || '') + (ud.cutOv ? '|' + JSON.stringify(ud.cutOv) : ''); if (!groups.has(k)){ groups.set(k, []); gInfo.set(k, ud); } groups.get(k).push(o); } });
   const so = THREE, coarse = S.detail === 'coarse' || S.style === 'lines';
   CLIP.forEach((plane, i) => {
     const others = CLIP.filter(p => p !== plane), n = plane.normal;
@@ -2123,8 +2178,8 @@ function applyClip(){
     let j = 0;
     for (const [mk, meshes] of groups){
       const capOpt = { side:so.DoubleSide, clippingPlanes:others, stencilWrite:true, stencilRef:0, stencilFunc:so.NotEqualStencilFunc, stencilFail:so.ReplaceStencilOp, stencilZFail:so.ReplaceStencilOp, stencilZPass:so.ReplaceStencilOp };
-      const sp = mk && !coarse ? matSpec(mk) : null;
-      const capM = sp ? patMat({ color:sp.c, pats:sp.cut, proj:'plane', U, V, extra:capOpt }) : new THREE.MeshBasicMaterial({ color:C.poche, ...capOpt });
+      const ud = gInfo.get(mk) || {}, sp = ud.mk && !coarse ? matSpec(ud.mk) : null, cov = ud.cutOv && !coarse ? ud.cutOv : null;
+      const capM = cov ? patMat({ color:sp ? sp.c : '#ffffff', pats:cov, proj:'plane', U, V, extra:capOpt }) : sp ? patMat({ color:sp.c, pats:sp.cut, proj:'plane', U, V, extra:capOpt }) : new THREE.MeshBasicMaterial({ color:C.poche, ...capOpt });
       capMats.push(capM);
       const ro = 100 + i * 400 + j * 2; j++;
       for (const m of meshes) for (const mat of [back, front]){ const c = new THREE.Mesh(m.geometry, mat); c.matrixAutoUpdate = false; c.matrix.copy(m.matrixWorld); c.renderOrder = ro; capG.add(c); }
@@ -2216,7 +2271,7 @@ function refPoint(r){
   return null;
 }
 function dimGeom(d){
-  const pts = d.refs.map(refPoint).filter(Boolean); if (pts.length < 2) return null;
+  const pts = d.refs.map((r, ri) => { const p = refPoint(r); return p ? { x:p.x, z:p.z, ri } : null; }).filter(Boolean); if (pts.length < 2) return null;
   let u;
   if (d.mode === 'h') u = new V3(1, 0, 0);
   else if (d.mode === 'v') u = new V3(0, 0, 1);
@@ -2224,7 +2279,7 @@ function dimGeom(d){
   else u = new V3(pts[1].x - pts[0].x, 0, pts[1].z - pts[0].z);
   if (u.lengthSq() < 1e-10) return null; u.normalize();
   const n = new V3(-u.z, 0, u.x), o = pts[0];
-  const arr = pts.map(p => ({ t:(p.x - o.x) * u.x + (p.z - o.z) * u.z, s:(p.x - o.x) * n.x + (p.z - o.z) * n.z })).sort((a, b) => a.t - b.t)
+  const arr = pts.map(p => ({ t:(p.x - o.x) * u.x + (p.z - o.z) * u.z, s:(p.x - o.x) * n.x + (p.z - o.z) * n.z, ri:p.ri })).sort((a, b) => a.t - b.t)
     .filter((a, i, A) => i === 0 || a.t - A[i - 1].t > 0.0005);
   if (arr.length < 2) return null;
   return { u, n, o, arr, off:d.off || 0 };
@@ -2416,9 +2471,54 @@ function dimTexts(d, cls, out){
   const side = off >= 0 ? 1 : -1;
   const a0 = toScreen(o.x + u.x * arr[0].t, 0, o.z + u.z * arr[0].t), a1 = toScreen(o.x + u.x * arr[arr.length - 1].t, 0, o.z + u.z * arr[arr.length - 1].t);
   let ang = Math.atan2(a1.y - a0.y, a1.x - a0.x) * 180 / Math.PI; if (ang > 90) ang -= 180; if (ang <= -90) ang += 180;
+  // Revit: with an element selected, the dimensions that reference it become editable — type a value and the selected element moves
+  const ED = !d.edit && d.type === 'dim' ? dimEditor(d) : null;
   for (let i = 0; i < arr.length - 1; i++){
-    const tm = (arr[i].t + arr[i + 1].t) / 2, s = off + side * (STD.anno.textMm * 0.7 + 0.9) * paperMm();
-    out.push({ x:o.x + u.x * tm + n.x * s, y:0, z:o.z + u.z * tm + n.z * s, t:fmtLen(arr[i + 1].t - arr[i].t), cls, rot:ang, edit:d.edit ? v => d.edit(i, v) : null, val:arr[i + 1].t - arr[i].t });
+    const tm = (arr[i].t + arr[i + 1].t) / 2, s = off + side * (STD.anno.textMm * 0.7 + 0.9) * paperMm(), L = arr[i + 1].t - arr[i].t;
+    let edit = d.edit ? v => d.edit(i, v) : null, c2 = cls, txtEdit = null;
+    if (ED){ const ea = ED.owns(d.refs[arr[i].ri]), eb = ED.owns(d.refs[arr[i + 1].ri]); if (ea !== eb){ edit = v => ED.move(u, eb ? v - L : L - v); c2 = cls + ' ed'; } }
+    // Revit «Заменить значение размера»: the selected dimension's numbers take your own text
+    const ov = d.txt && d.txt[i];
+    if (!edit && d.type === 'dim' && d.id && sel.size === 1 && isSel(d.id)){ txtEdit = v => { d.txt = d.txt || {}; if (v && v !== fmtLen(L)) d.txt[i] = v.slice(0, 40); else delete d.txt[i]; if (!Object.keys(d.txt).length) delete d.txt; }; c2 = cls + ' ed'; }
+    out.push({ x:o.x + u.x * tm + n.x * s, y:0, z:o.z + u.z * tm + n.z * s, t:ov || fmtLen(L), cls:c2 + (ov ? ' ovt' : ''), rot:ang, edit, txtEdit, val:L, du:{ x:u.x, z:u.z } });
+  }
+}
+function dimEditor(d){
+  if (sel.size !== 1 || S.view !== 'plan') return null;
+  const it = byId(selId); if (!it || isMeta(it) || it.type === 'dim') return null;
+  const owns = r => !!r && r.id === it.id;
+  if (!d.refs.some(owns)) return null;
+  return { owns, move:(u, sh) => {
+    if (Math.abs(sh) < 1e-6) return;
+    if (it.pin){ toast('Элемент закреплён (замок): сначала откройте замок'); return; }
+    const dx = u.x * sh, dz = u.z * sh;
+    if (isOp(it)){ const w = byId(it.wall); if (!w) return; const f = wallFrame(w), dp = dx * f.dir.x + dz * f.dir.z; it.pos = r4(clamp(it.pos + dp, it.w / 2, f.L - it.w / 2)); }
+    else if (it.type === 'wall') moveWallJoined(it, dx, dz);
+    else translateItem(it, dx, dz);
+    if (S.phase === 'obmer') SV_PENDING = true;
+    toast(`Сдвинуто на ${mm(Math.abs(sh))} мм`);
+  } };
+}
+// dimension numbers never sit on each other: a number that lands on another one (or on a room tag) slides along its own dimension line
+function spreadDimTexts(out){
+  const fs = STD.anno.textMm * 96 / 25.4 * 1.15 * (RENDER ? RENDER.pxmm / (96 / 25.4) : 1), placed = [];
+  const box = L => { const s = toScreen(L.x, 0, L.z), w = String(L.t).length * fs * 0.58 + 6, h = fs + 3, a = (L.rot || 0) * Math.PI / 180, ca = Math.abs(Math.cos(a)), sa = Math.abs(Math.sin(a));
+    return { x:s.x, y:s.y + (L.dy || 0), hw:(w * ca + h * sa) / 2, hh:(w * sa + h * ca) / 2, w }; };
+  const hit = b => placed.some(p => Math.abs(p.x - b.x) < p.hw + b.hw - 1 && Math.abs(p.y - b.y) < p.hh + b.hh - 1);
+  for (const L of out) if (!L.du && L.x != null && /^(rm|svn|sva|hb|wt|tx)/.test(L.cls || '')) placed.push(box(L));
+  for (const L of out){
+    if (!L.du) continue;
+    let b = box(L);
+    if (hit(b)){
+      const x0 = L.x, z0 = L.z, s0 = toScreen(x0, 0, z0), s1 = toScreen(x0 + L.du.x, 0, z0 + L.du.z), pl = Math.hypot(s1.x - s0.x, s1.y - s0.y) || 1, step = (b.w + 6) * 0.6;
+      let done = false;
+      for (let n = 1; n <= 8 && !done; n++) for (const sg of [1, -1]){
+        const dpx = sg * n * step; L.x = x0 + L.du.x * dpx / pl; L.z = z0 + L.du.z * dpx / pl; // screen px → model metres along the line
+        b = box(L); if (!hit(b)){ done = true; break; }
+      }
+      if (!done){ L.x = x0; L.z = z0; b = box(L); }
+    }
+    placed.push(b);
   }
 }
 /* ---------- Revit dimension kinds: linear (horizontal/vertical by the cursor), angular, radial, diameter; and the ruler ---------- */
@@ -2789,7 +2889,7 @@ function sanitizeLevels(arr){
 }
 const fmtElev = v => (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v).toLocaleString('ru-RU', { minimumFractionDigits:3, maximumFractionDigits:3 });
 const shown = it => levelOk(it) && visState(it) !== 'hide' && (S.reveal || !viewHidden(it)) && tplVisible(it);
-const dimShown = d => (!d.survey || S.phase === 'obmer') && tplVisible(d) && d.refs.every(r => !r.id || shown(byId(r.id)));
+const dimShown = d => (!d.survey || (S.phase === 'obmer' && !d.dup)) && tplVisible(d) && d.refs.every(r => !r.id || shown(byId(r.id)));
 /* survey dimensions (обмерные размеры): drawn by themselves along every wall built on the «Обмер» stage,
    on the inner faces of the walls, split where partitions join (room by room); shown only on the «Обмер» stage */
 let SV_PENDING = false;
@@ -2829,6 +2929,26 @@ function refreshSurveyDims(){
       const refs = surveyRefs(w, side), d = items.find(x => x.type === 'dim' && x.survey && x.sw === w.id && x.side === side);
       if (d){ d.refs = refs; d.dir = { x:f.dir.x, z:f.dir.z }; }
       else items.push({ id:nextId++, type:'dim', survey:true, sw:w.id, side, refs, off:r4(side * 0.45), dir:{ x:f.dir.x, z:f.dir.z } });
+    }
+  }
+  markSurveyDups();
+}
+// a survey dimension that repeats another one (opposite walls of one room, same points along the same direction) is not drawn
+function markSurveyDups(){
+  const sv = items.filter(d => d.type === 'dim' && d.survey && byId(d.sw));
+  const info = sv.map(d => {
+    const w = byId(d.sw), f = wallFrame(w), u = new V3(f.dir.x, 0, f.dir.z), mid = f.p1.clone().addScaledVector(f.dir, f.L / 2).addScaledVector(f.nrm, d.side * (w.t / 2 + 0.25));
+    const R = regionAt(mid.x, mid.z, lvOf(w)), pts = d.refs.map(refPoint).filter(Boolean);
+    return { d, u, R, key:R && !R.open ? Math.round(R.area * 1e4) + '|' + R.poly.length : null, pts };
+  });
+  for (const a of info) delete a.d.dup;
+  for (let i = 0; i < info.length; i++){
+    const a = info[i]; if (a.d.dup || !a.key) continue;
+    const ta = a.pts.map(p => p.x * a.u.x + p.z * a.u.z).sort((x, y) => x - y);
+    for (let j = i + 1; j < info.length; j++){
+      const b = info[j]; if (b.d.dup || b.key !== a.key || Math.abs(a.u.x * b.u.z - a.u.z * b.u.x) > 1e-3) continue;
+      const tb = b.pts.map(p => p.x * a.u.x + p.z * a.u.z).sort((x, y) => x - y);
+      if (ta.length === tb.length && ta.every((t, k) => Math.abs(t - tb[k]) < 0.003)) b.d.dup = true;
     }
   }
 }
@@ -4277,6 +4397,7 @@ function buildLabels(){
     for (const d of tempDims()) dimTexts(d, 'temp', out);
     if (S.tool === 'dim' && DD.refs.length){ const refs = DD.hover ? [...DD.refs, DD.hover] : DD.refs; if (refs.length >= 2) dimTexts({ refs, off:DD.off, dir:DD.dir, mode:effDimMode() }, 'dl live', out); }
     for (const it of items) if (it.type === 'text' && shown(it)) out.push({ x:it.x, y:0, z:it.z, t:it.s, cls:'tx' + (isSel(it.id) ? ' sel' : ''), size:it.size });
+    spreadDimTexts(out);
   }
   if (placing() && D.op){
     const t = D.op, f = wallFrame(t.wall), a = t.pos - t.spec.w / 2, b = t.pos + t.spec.w / 2;
@@ -4306,19 +4427,30 @@ function updateLabels(){
     if (reg && (L.x == null ? /^gb/.test(L.cls) : (L.x < reg.x0 - 0.05 || L.x > reg.x1 + 0.05 || L.z < reg.z0 - 0.05 || L.z > reg.z1 + 0.05))) continue;
     const s = L.sx != null ? { x:L.sx, y:L.sy, ok:true } : toScreen(L.x, L.y, L.z);
     if (!s.ok || s.x < -60 || s.x > W + 60 || s.y < -30 || s.y > H + 30) continue;
-    let el = pool[n]; if (!el){ el = document.createElement('div'); labelsEl.appendChild(el); pool[n] = el; el.addEventListener('pointerdown', ev => { if (el._act){ ev.stopPropagation(); ev.preventDefault(); el._act(); } else if (el._edit){ ev.stopPropagation(); ev.preventDefault(); startEdit(el); } else if (el._open){ ev.stopPropagation(); ev.preventDefault(); openView(el._open); } }); }
+    let el = pool[n]; if (!el){ el = document.createElement('div'); labelsEl.appendChild(el); pool[n] = el; el.addEventListener('pointerdown', ev => { if (el._act){ ev.stopPropagation(); ev.preventDefault(); el._act(); } else if (el._txt){ ev.stopPropagation(); ev.preventDefault(); startTextEdit(el); } else if (el._edit){ ev.stopPropagation(); ev.preventDefault(); startEdit(el); } else if (el._open){ ev.stopPropagation(); ev.preventDefault(); openView(el._open); } }); }
     n++;
     el.hidden = false; el.className = L.cls ? 'dim ' + L.cls : 'dim';
     if (el.textContent !== L.t) el.textContent = L.t;
     el.style.left = s.x + 'px'; el.style.top = (s.y + (L.dy || 0)) + 'px';
     el.style.transform = L.rot ? `translate(-50%,-50%) rotate(${L.rot}deg)` : '';
     el.style.fontSize = L.size ? L.size + 'px' : ''; el.style.color = L.col || '';
-    el._edit = L.edit || null; el._val = L.val; el._open = L.open || null; el._act = L.act || null;
-    if (L.edit) el.title = 'Нажмите, чтобы ввести размер'; else if (L.open) el.title = 'Открыть вид: ' + (views.find(x => x.id === L.open) || { name:'' }).name; else el.removeAttribute('title');
+    el._edit = L.edit || null; el._val = L.val; el._open = L.open || null; el._act = L.act || null; el._txt = L.txtEdit || null;
+    if (L.txtEdit) el.title = 'Нажмите, чтобы заменить значение размера своим текстом (пусто — вернуть число)';
+    else if (L.edit) el.title = 'Нажмите, чтобы ввести размер'; else if (L.open) el.title = 'Открыть вид: ' + (views.find(x => x.id === L.open) || { name:'' }).name; else el.removeAttribute('title');
   }
-  for (let i = n; i < pool.length; i++){ pool[i].hidden = true; pool[i]._edit = pool[i]._open = pool[i]._act = null; }
+  for (let i = n; i < pool.length; i++){ pool[i].hidden = true; pool[i]._edit = pool[i]._open = pool[i]._act = pool[i]._txt = null; }
   if (!cursorEl.hidden && D.cur){ const s = toScreen(D.cur.x, 0, D.cur.z); cursorEl.style.left = s.x + 'px'; cursorEl.style.top = s.y + 'px'; }
   if (editing && !editing.inp.isConnected) editing = null;
+}
+// the text of a dimension number (any text, e.g. «2700 ± 5», «по факту»); empty — the measured value again
+function startTextEdit(el){
+  if (editing) editing.inp.remove();
+  const fn = el._txt, inp = document.createElement('input');
+  inp.className = 'dimedit'; inp.type = 'text'; inp.value = el.textContent; inp.style.left = el.style.left; inp.style.top = el.style.top; inp.style.width = '150px';
+  labelsEl.append(inp); inp.focus(); inp.select(); editing = { inp };
+  const done = ok => { if (!inp.isConnected) return; const v = inp.value.trim(); inp.remove(); editing = null; if (ok){ pushUndo('Значение размера'); markEdited(); fn(v); annoDirty = true; rebuild(); } };
+  inp.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') done(true); if (e.key === 'Escape') done(false); };
+  inp.onblur = () => done(true);
 }
 function startEdit(el){
   if (editing) editing.inp.remove();
@@ -4606,6 +4738,7 @@ function sanitizeViews(arr){
     if (v.kind === 'plan') o.crop = !!v.crop && !!o.region;
     if (typeof v.tpl === 'string') o.tpl = v.tpl.slice(0, 40);
     if (v.tplAuto && o.tpl) o.tplAuto = true;
+    if (v.ov && typeof v.ov === 'object'){ const ov = sanOv(v.ov); if (Object.keys(ov).length) o.ov = ov; }
     if (v.kind === 'camera'){
       if (!o.cam) continue;
       o.code = String(v.code || 'К').slice(0, 6); const l = v.lens || {}, L = {};
@@ -5678,31 +5811,63 @@ $('#rbFamLoad').onclick = () => $('#famFile').click();
 $('#rbFamEdit').onclick = () => { const it = sel.size === 1 ? byId(selId) : null; openFamEditor(it && it.type === 'fam' ? it.f : S.famId); };
 
 /* ---------- view templates dialog ---------- */
-const tplDlg = $('#tplDlg'); let TPL_CUR = null;
+/* «Видимость/графика» (Revit V/G, VV): for a template, or for one view on top of its template */
+const tplDlg = $('#tplDlg'); let TPL_CUR = null, VG_VIEW = null, VG_OPEN = null;
 function renderTpl(){
   const sel2 = $('#tplSel'); sel2.innerHTML = TPLS.map(t => `<option value="${t.id}"${t.id === TPL_CUR ? ' selected' : ''}>${esc(t.name)}</option>`).join('');
-  const t = TPLS.find(x => x.id === TPL_CUR), body = $('#tplBody'); body.replaceChildren();
-  if (!t){ body.innerHTML = '<p class="libnote">Шаблонов нет. Нажмите «Новый».</p>'; return; }
-  const used = views.filter(v => v.tpl === t.id).map(v => v.name);
-  const note = document.createElement('p'); note.className = 'libnote'; note.textContent = used.length ? `Шаблон назначен видам: ${used.join(', ')}` : 'Шаблон пока не назначен ни одному виду.'; body.append(note);
-  const section = (title, rows) => {
+  const vv = VG_VIEW && views.includes(VG_VIEW) ? VG_VIEW : null, t = vv ? null : TPLS.find(x => x.id === TPL_CUR), body = $('#tplBody'), keepTop = body.scrollTop;
+  body.replaceChildren();
+  for (const id of ['tplSel', 'tplNew', 'tplDup', 'tplRen', 'tplDel']) $('#' + id).hidden = !!vv;
+  $('#tplTitle').textContent = vv ? `Видимость/графика: «${vv.name}»` : 'Шаблоны видов';
+  if (!vv && !t){ body.innerHTML = '<p class="libnote">Шаблонов нет. Нажмите «Новый».</p>'; return; }
+  const OV = vv ? (vv.ov = vv.ov || {}) : t.ov, vt = vv ? tplOfView(vv) : null;
+  const note = document.createElement('p'); note.className = 'libnote';
+  if (vv){ note.innerHTML = vt ? `Виду назначен шаблон «${esc(vt.name)}». Здесь — переопределения <b>только этого вида</b>, поверх шаблона. <button class="btn sm" id="vgTpl">Открыть шаблон</button>` : 'Переопределения видимости и графики только этого вида. Чтобы применять их к нескольким видам, создайте шаблон из вида в «Свойствах».'; }
+  else { const used = views.filter(v => v.tpl === t.id).map(v => v.name); note.textContent = used.length ? `Шаблон назначен видам: ${used.join(', ')}` : 'Шаблон пока не назначен ни одному виду.'; }
+  body.append(note);
+  if (vv && vt) note.querySelector('#vgTpl').onclick = () => { VG_VIEW = null; TPL_CUR = vt.id; renderTpl(); };
+  const wOpts = cur => `<option value="">—</option>` + STD.weights.map((w, i) => `<option value="${i + 1}"${cur === i + 1 ? ' selected' : ''}>${i + 1} — ${w.toLocaleString('ru-RU')} мм</option>`).join('');
+  const pOpts = cur => `<option value=""${!cur ? ' selected' : ''}>По умолчанию</option><option value="none"${cur === 'none' ? ' selected' : ''}>Нет (скрыть)</option>` + STD.fills.filter(f => f.k !== 'none').map(f => `<option value="${f.id}"${f.id === cur ? ' selected' : ''}>${esc(f.n)}</option>`).join('');
+  const section = (title, rows, anno) => {
     const h3 = document.createElement('h3'); h3.textContent = title; h3.style.cssText = 'font-size:14px;margin:12px 0 4px'; body.append(h3);
-    const tb = document.createElement('table'); tb.className = 'stdtab'; tb.innerHTML = '<thead><tr><th>Категория / семейство</th><th>Видимость</th><th>Полутон</th><th>Цвет линий</th><th>Вес линий</th></tr></thead><tbody></tbody>'; body.append(tb);
+    const wrap = document.createElement('div'); wrap.style.overflowX = 'auto'; body.append(wrap);
+    const tb = document.createElement('table'); tb.className = 'stdtab vgtab';
+    tb.innerHTML = `<thead><tr><th>Категория / семейство</th><th>Видимость</th>${anno ? '<th>Линии</th>' : '<th>Проекция: линии</th><th>Проекция: штриховка</th><th>Сечение: линии</th><th>Сечение: штриховка</th>'}<th>Полутон</th>${anno ? '' : '<th>Прозрачность, %</th>'}</tr></thead><tbody></tbody>`; wrap.append(tb);
     for (const [key, name] of rows){
-      const o = t.ov[key] || {}, tr = document.createElement('tr');
-      const set = (k, v) => { const cur = { ...(t.ov[key] || {}) }; if (v === undefined || v === null || v === '' || (k === 'vis' && v === true) || (k === 'half' && !v)) delete cur[k]; else cur[k] = v; if (Object.keys(cur).length) t.ov[key] = cur; else delete t.ov[key]; rebuild(); scheduleSave(); };
-      tr.innerHTML = `<td>${esc(name)}</td><td><input type="checkbox" data-k="vis"${o.vis === false ? '' : ' checked'} aria-label="Видимость: ${esc(name)}"></td><td><input type="checkbox" data-k="half"${o.half ? ' checked' : ''} aria-label="Полутон: ${esc(name)}"></td>`
-        + `<td><label class="pchk"><input type="checkbox" data-k="cOn"${o.c ? ' checked' : ''} aria-label="Свой цвет"><input type="color" data-k="c" value="${o.c || '#1b252c'}"${o.c ? '' : ' disabled'}></label></td>`
-        + `<td><select data-k="w"><option value="">По стилю</option>${STD.weights.map((w, i) => `<option value="${i + 1}"${o.w === i + 1 ? ' selected' : ''}>${i + 1} — ${w.toLocaleString('ru-RU')} мм</option>`).join('')}</select></td>`;
-      const q = k => tr.querySelector(`[data-k="${k}"]`);
-      q('vis').onchange = e => set('vis', e.target.checked ? true : false); q('half').onchange = e => set('half', e.target.checked);
-      q('cOn').onchange = e => { q('c').disabled = !e.target.checked; set('c', e.target.checked ? q('c').value : null); }; q('c').onchange = e => set('c', e.target.value);
-      q('w').onchange = e => set('w', e.target.value ? +e.target.value : null);
+      const o = OV[key] || {}, tr = document.createElement('tr'), open = VG_OPEN === key;
+      const save = () => { rebuild(); annoDirty = true; scheduleSave(); renderTpl(); };
+      const set = (k, v) => { const cur = { ...(OV[key] || {}) }; if (v === undefined || v === null || v === '' || (k === 'vis' && v === true) || (k === 'half' && !v) || (k === 'tr' && !v)) delete cur[k]; else cur[k] = v; if (Object.keys(cur).length) OV[key] = cur; else delete OV[key]; save(); };
+      const lineSw = (c2, w2) => c2 || w2 ? `<span class="vgsw" style="--c:${c2 || '#1b252c'};--w:${Math.max(1, Math.min(6, (w2 || 2) / 2))}px"></span>${w2 ? ' ' + w2 : ''}` : '—';
+      const patSw = pp => patsOn(pp) ? `<canvas width="40" height="16" data-pv="${key}"></canvas>` : '—';
+      tr.className = open ? 'open' : '';
+      tr.innerHTML = `<td><button class="vgname" data-x="1" aria-expanded="${open}">${open ? '▾' : '▸'} ${esc(name)}</button></td><td><input type="checkbox" data-k="vis"${o.vis === false ? '' : ' checked'} aria-label="Видимость: ${esc(name)}"></td>`
+        + (anno ? `<td><button class="vgcell" data-x="1">${lineSw(o.c, o.w)}</button></td>` : `<td><button class="vgcell" data-x="1">${lineSw(o.c, o.w)}</button></td><td><button class="vgcell" data-x="1">${patSw(o.sp)}</button></td><td><button class="vgcell" data-x="1">${lineSw(o.cc, o.cw)}</button></td><td><button class="vgcell" data-x="1">${patSw(o.cp)}</button></td>`)
+        + `<td><input type="checkbox" data-k="half"${o.half ? ' checked' : ''} aria-label="Полутон: ${esc(name)}"></td>` + (anno ? '' : `<td><input type="number" data-k="tr" min="0" max="95" step="5" value="${Math.round((o.tr || 0) * 100)}" style="width:64px" aria-label="Прозрачность: ${esc(name)}"></td>`);
       tb.tBodies[0].append(tr);
+      const cvs = tr.querySelectorAll('canvas[data-pv]'); if (cvs[0]) prevPats(cvs[0], '#ffffff', o.sp && patsOn(o.sp) ? o.sp : o.cp); if (cvs[1]) prevPats(cvs[1], '#ffffff', o.cp);
+      tr.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { VG_OPEN = open ? null : key; renderTpl(); });
+      tr.querySelector('[data-k="vis"]').onchange = e => set('vis', e.target.checked ? true : false);
+      tr.querySelector('[data-k="half"]').onchange = e => set('half', e.target.checked);
+      const trI = tr.querySelector('[data-k="tr"]'); if (trI) trI.onchange = e => set('tr', clamp(+e.target.value || 0, 0, 95) / 100);
+      if (!open) continue;
+      // details: lines (colour, weight) and patterns (foreground / background) of projection and cut
+      const d = document.createElement('tr'); d.className = 'vgdet';
+      const lineEd = (lbl, kc, kw) => `<div class="vgf"><span>${lbl}</span><label class="pchk"><input type="checkbox" data-on="${kc}"${o[kc] ? ' checked' : ''}> цвет</label><input type="color" data-c="${kc}" value="${o[kc] || '#1b252c'}"${o[kc] ? '' : ' disabled'}><select data-w="${kw}" aria-label="${lbl}: вес">${wOpts(o[kw])}</select></div>`;
+      const patEd = (lbl, kp) => { const pp = o[kp] || {}; return `<div class="vgf"><span>${lbl}</span><span class="vgl">передний план</span><select data-p="${kp}.fg">${pOpts(pp.fg && pp.fg.p)}</select><input type="color" data-pc="${kp}.fg" value="${(pp.fg && pp.fg.c) || '#2b3439'}"><span class="vgl">фон</span><select data-p="${kp}.bg">${pOpts(pp.bg && pp.bg.p)}</select><input type="color" data-pc="${kp}.bg" value="${(pp.bg && pp.bg.c) || '#ffffff'}"></div>`; };
+      d.innerHTML = `<td colspan="${anno ? 4 : 8}"><div class="vgdetail">${lineEd(anno ? 'Линии' : 'Линии проекции', 'c', 'w')}${anno ? '' : lineEd('Линии сечения', 'cc', 'cw') + patEd('Штриховка поверхности', 'sp') + patEd('Штриховка сечения', 'cp')}<div class="vgf"><button class="btn sm" data-reset="1">Сбросить переопределения «${esc(name)}»</button></div></div></td>`;
+      tb.tBodies[0].append(d);
+      d.querySelectorAll('[data-on]').forEach(cb => cb.onchange = () => { const k = cb.dataset.on; set(k, cb.checked ? d.querySelector(`[data-c="${k}"]`).value : null); });
+      d.querySelectorAll('[data-c]').forEach(ci => ci.onchange = () => set(ci.dataset.c, ci.value));
+      d.querySelectorAll('[data-w]').forEach(sw => sw.onchange = () => set(sw.dataset.w, sw.value ? +sw.value : null));
+      const setPat = (path, prop, val) => { const [kp, lay] = path.split('.'); const cur = { ...(OV[key] || {}) }, pp = JSON.parse(JSON.stringify(cur[kp] || { fg:{ p:'', c:'#2b3439' }, bg:{ p:'', c:'#ffffff' } })); pp[lay][prop] = val; if (patsOn(pp)) cur[kp] = pp; else delete cur[kp]; if (Object.keys(cur).length) OV[key] = cur; else delete OV[key]; save(); };
+      d.querySelectorAll('[data-p]').forEach(sp2 => sp2.onchange = () => setPat(sp2.dataset.p, 'p', sp2.value));
+      d.querySelectorAll('[data-pc]').forEach(pc => pc.onchange = () => setPat(pc.dataset.pc, 'c', pc.value));
+      d.querySelector('[data-reset]').onclick = () => { delete OV[key]; save(); };
     }
   };
-  // «Оформление»: the look of the whole view (survey plan style)
-  {
+  requestAnimationFrame(() => { body.scrollTop = keepTop; });
+  // «Оформление»: the look of the whole view (survey plan style) — templates only
+  if (t){
     const L = t.look, h3 = document.createElement('h3'); h3.textContent = 'Оформление плана'; h3.style.cssText = 'font-size:14px;margin:12px 0 4px'; body.append(h3);
     const box = document.createElement('div'); box.className = 'stdgrid'; body.append(box);
     const fo = cur => [['none', 'Нет'], ...STD.fills.filter(f => f.k !== 'none').map(f => [f.id, f.n])].map(([v, n]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${esc(n)}</option>`).join('');
@@ -5728,16 +5893,19 @@ function renderTpl(){
   section('Категории модели', TPL_CATS);
   section('Категории семейств', Object.entries(FAM_CATS).map(([k, n]) => ['cat:' + k, n]));
   if (fams.length) section('Отдельные семейства', fams.map(f => ['f:' + f.id, `${f.name} (${FAM_CATS[f.cat]})`]));
-  section('Аннотации', TPL_ANNO);
+  section('Аннотации', TPL_ANNO, true);
 }
-function openTpl(id){ TPL_CUR = id && TPLS.some(t => t.id === id) ? id : (TPLS[0] || {}).id || null; renderTpl(); tplDlg.hidden = false; }
+function openTpl(id){ VG_VIEW = null; TPL_CUR = id && TPLS.some(t => t.id === id) ? id : (TPLS[0] || {}).id || null; renderTpl(); tplDlg.hidden = false; }
+// Revit VV: visibility/graphics of the open view (its own overrides on top of the template)
+function openVG(v){ v = v || curView(); if (!v || v.kind === 'sheet'){ toast('Откройте план, разрез или 3D-вид'); return; } VG_VIEW = v; VG_OPEN = null; renderTpl(); tplDlg.hidden = false; }
 $('#rbTpl').onclick = () => openTpl(curView().tpl);
+$('#rbVG').onclick = () => openVG();
 $('#tplSel').onchange = e => { TPL_CUR = e.target.value; renderTpl(); };
 $('#tplNew').onclick = () => { const t = { id:vid('t'), name:'Новый шаблон', ov:{} }; TPLS.push(t); TPL_CUR = t.id; renderTpl(); scheduleSave(); };
-$('#tplDup').onclick = () => { const s0 = TPLS.find(t => t.id === TPL_CUR); if (!s0) return; const t = { id:vid('t'), name:s0.name + ' (копия)', ov:JSON.parse(JSON.stringify(s0.ov)) }; TPLS.push(t); TPL_CUR = t.id; renderTpl(); scheduleSave(); };
+$('#tplDup').onclick = () => { const s0 = TPLS.find(t => t.id === TPL_CUR); if (!s0) return; const t = { id:vid('t'), name:s0.name + ' (копия)', ov:JSON.parse(JSON.stringify(s0.ov)), ...(s0.look ? { look:JSON.parse(JSON.stringify(s0.look)) } : {}) }; TPLS.push(t); TPL_CUR = t.id; renderTpl(); scheduleSave(); };
 $('#tplRen').onclick = () => { const t = TPLS.find(x => x.id === TPL_CUR); if (!t) return; const n = prompt('Имя шаблона', t.name); if (n && n.trim()){ t.name = n.trim().slice(0, 80); renderTpl(); scheduleSave(); } };
 $('#tplDel').onclick = () => { const t = TPLS.find(x => x.id === TPL_CUR); if (!t || !confirm(`Удалить шаблон «${t.name}»? Виды с ним останутся без шаблона.`)) return; TPLS = TPLS.filter(x => x !== t); for (const v of views) if (v.tpl === t.id) delete v.tpl; TPL_CUR = (TPLS[0] || {}).id || null; renderTpl(); rebuild(); scheduleSave(); };
-$('#tplClose').onclick = () => { tplDlg.hidden = true; $('#propsBody').dataset.id = 'x'; updatePanel(); };
+$('#tplClose').onclick = () => { tplDlg.hidden = true; VG_VIEW = null; $('#propsBody').dataset.id = 'x'; updatePanel(); };
 
 /* ---------- levels dialog ---------- */
 const levelDlg = $('#levelDlg');
@@ -6636,7 +6804,13 @@ function elSummary(it){
   return `<span class="tsub">${t}</span>`;
 }
 // view-specific properties (Revit: «Границы 3D-вида», «Обрезать вид», «Дальняя граница»…)
-function tplRow(v){ return prow('Шаблон вида', `<select id="pTpl"><option value="">Нет</option>${TPLS.map(t => `<option value="${t.id}"${t.id === v.tpl ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select>`) + `<div class="pbtns"><button class="btn sm" id="pTplEd">Изменить шаблоны…</button></div>`; }
+// Revit «Свойства → Шаблон вида»: the template of the view, the view's own V/G overrides, a template made from the view
+function tplRow(v){
+  const n = v.ov ? Object.keys(v.ov).length : 0, t = tplOfView(v);
+  return `<div class="pgrp">Шаблон вида</div>` + prow('Шаблон вида', `<select id="pTpl"><option value="">&lt;Нет&gt;</option>${TPLS.map(t2 => `<option value="${t2.id}"${t2.id === v.tpl ? ' selected' : ''}>${esc(t2.name)}</option>`).join('')}</select>`)
+    + prow('Переопределения вида', `<span class="val">${n ? n + ' категор.' : 'нет'}</span>`)
+    + `<div class="pbtns"><button class="btn sm" id="pVG" title="Видимость и графика категорий в этом виде (VV)">Видимость/графика…</button>${t ? '<button class="btn sm" id="pTplEd">Изменить шаблон…</button>' : '<button class="btn sm" id="pTplEd">Шаблоны видов…</button>'}<button class="btn sm" id="pTplNew" title="Сохранить видимость и графику этого вида как новый шаблон и назначить его виду">Создать шаблон из вида</button>${n ? '<button class="btn sm" id="pOvReset">Сбросить переопределения</button>' : ''}</div>`;
+}
 function viewRows(v){
   if (v.kind !== 'sheet' && !viewRows.inner){ viewRows.inner = true; try { return tplRow(v) + viewRows(v); } finally { viewRows.inner = false; } }
   const mode = KIND_MODE[v.kind], ck = (id, on, label) => `<label class="pchk"><input type="checkbox" id="${id}"${on ? ' checked' : ''}> ${label}</label>`;
@@ -6680,6 +6854,14 @@ function bindViewRows(v, q){
   const done = () => { viewChanged(v); $('#propsBody').dataset.id = 'x'; updatePanel(); renderTree(); };
   if (q('pTpl')) q('pTpl').onchange = e => { if (e.target.value) v.tpl = e.target.value; else delete v.tpl; rebuild(); $('#propsBody').dataset.id = 'x'; updatePanel(); scheduleSave(); toast(v.tpl ? `Виду назначен шаблон «${tplOfView(v).name}»` : 'Шаблон вида снят'); };
   if (q('pTplEd')) q('pTplEd').onclick = () => openTpl(v.tpl);
+  if (q('pVG')) q('pVG').onclick = () => openVG(v);
+  if (q('pOvReset')) q('pOvReset').onclick = () => { delete v.ov; rebuild(); annoDirty = true; scheduleSave(); $('#propsBody').dataset.id = 'x'; updatePanel(); toast('Переопределения вида сброшены'); };
+  if (q('pTplNew')) q('pTplNew').onclick = () => {
+    const t0 = tplOfView(v), ov = JSON.parse(JSON.stringify((t0 && t0.ov) || {}));
+    for (const [k, o] of Object.entries(v.ov || {})) ov[k] = { ...(ov[k] || {}), ...o };
+    const t = { id:vid('t'), name:(v.name + ' — шаблон').slice(0, 80), ov, ...(t0 && t0.look ? { look:JSON.parse(JSON.stringify(t0.look)) } : {}) };
+    TPLS.push(t); v.tpl = t.id; delete v.ov; delete v.tplAuto; rebuild(); scheduleSave(); $('#propsBody').dataset.id = 'x'; updatePanel(); toast(`Создан шаблон «${t.name}» и назначен виду`);
+  };
   if (q('pBox')) q('pBox').onchange = e => toggleBox(e.target.checked);
   if (q('pBoxReset')) q('pBoxReset').onclick = () => { v.box = defaultBox(); rebuild(); done(); };
   if (q('pCrop')) q('pCrop').onchange = e => { v.crop = e.target.checked; if (v.crop && !v.region){ const b = bounds(); v.region = { x0:r4(b.min.x - 1), x1:r4(b.max.x + 1), z0:r4(b.min.z - 1), z1:r4(b.max.z + 1) }; } rebuild(); done(); toast(v.crop ? 'Вид обрезан рамкой: тяните синие ручки' : 'Обрезка вида снята'); };
@@ -7195,7 +7377,8 @@ function sanitizeItems(arr){
     if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it), ...(Array.isArray(it.svNo) ? { svNo:it.svNo.filter(s => s === 1 || s === -1) } : {}), ...(Array.isArray(it.dj) && (it.dj[0] || it.dj[1]) ? { dj:[!!it.dj[0], !!it.dj[1]] } : {}), ...(LOC_LINES[it.loc] && it.loc !== 'center' ? { loc:it.loc } : {}), ...(it.nrb ? { nrb:true } : {}) };
     else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
     else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand, ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
-    else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1 } : {}) };
+    else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1, ...(it.dup ? { dup:true } : {}) } : {}),
+      ...(it.txt && typeof it.txt === 'object' ? { txt:Object.fromEntries(Object.entries(it.txt).filter(([k, v]) => /^\d{1,3}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.slice(0, 40)])) } : {}) };
     else if (it.type === 'grid' && seg(it)) o = { id, type:'grid', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, name:String(it.name || '?').slice(0, 6) };
     else if (it.type === 'line' && seg(it)) o = { id, type:'line', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2 };
     else if (it.type === 'circle' && ['x','z','r'].every(k => N(it[k]))) o = { id, type:'circle', x:+it.x, z:+it.z, r:Math.max(+it.r, 0.001) };
@@ -7276,7 +7459,7 @@ function loadRecord(rec){
   fileHandle = null;
   applySettings(rec.settings); showName();
   for (const k in fitted) delete fitted[k];
-  views = sanitizeViews(rec.views) || DEFAULT_VIEWS(); vpImgs.clear(); SHEET.sel = null;
+  views = sanitizeViews(rec.views) || DEFAULT_VIEWS(); vpImgs.clear(); SHEET.sel = null; SV_PENDING = true;
   if (!rec.svl) for (const v of views) surveyTpl(v);
   S.viewId = null;
   const start = views.find(v => v.id === rec.viewId) || views.find(v => v.kind === 'plan');
@@ -7771,7 +7954,7 @@ const COMBOS = { WA:() => setTool('wall'), RM:() => setTool('rect'), DR:() => se
   GR:() => setTool('grid'), CA:() => setTool('camera'), DL:() => setTool('line'), TX:() => setTool('text'), MV:() => setTool('move'), CO:() => setTool('copy'), RO:() => setTool('rotate'), DE:() => deleteSel(),
   CN:() => setTool('column'), SB:() => setTool('floor'), CI:() => setTool('ceiling'), RF:() => setTool('roof'), ST:() => setTool('stair'), RT:() => setTool('room'), SC:() => setTool('section'), EL:() => setTool('ielev'), CL:() => setTool('callout'), DM:() => setTool('demolish'), RR:() => openRender(), LL:() => openLevels(), ME:() => setTool('measure'), FA:() => setTool('fam'), VV:() => openTpl(curView().tpl),
   AL:() => setTool('align'), OF:() => setTool('offset'), MM:() => setTool('mirror'), RE:() => setTool('scale'), TR:() => setTool('trimcorner'), SL:() => setTool('split'), PN:() => pinSel(true), UP:() => pinSel(false),
-  HH:() => tempHide('hide'), HI:() => tempHide('iso'), HR:() => tempHide('reset'), EH:() => hideInView(true), RH:() => toggleReveal(), TL:() => toggleThin(), VG:() => toggleGrids(), GP:() => makeGroup('grp'), CS:() => createSimilar() };
+  HH:() => tempHide('hide'), HI:() => tempHide('iso'), HR:() => tempHide('reset'), EH:() => hideInView(true), RH:() => toggleReveal(), TL:() => toggleThin(), VV:() => openVG(), VG:() => toggleGrids(), GP:() => makeGroup('grp'), CS:() => createSimilar() };
 let keyBuf = '', keyT = null;
 const LAT = Object.fromEntries('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => ['Key' + c, c]));
 addEventListener('keydown', e => {
