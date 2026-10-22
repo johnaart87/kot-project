@@ -94,7 +94,7 @@ select,input[type=text]{font-family:var(--font-ui);font-size:13px}
 .rbtn:disabled{opacity:.4;cursor:default;background:transparent;border-color:transparent}
 .rbtn .k{display:block}
 /* «Изменить» tab like Revit: big buttons, then columns of three small buttons (icon + text, or icon only) */
-#rbModify .grp-items{gap:3px;align-items:flex-start}
+.rb-panel .grp-items{gap:3px;align-items:flex-start}
 .rbtn.mbig{min-width:52px;padding:3px 4px}.rbtn.mbig svg.mi{width:32px;height:32px}
 .mcol{display:grid;grid-template-rows:repeat(3,24px);grid-auto-flow:column;gap:1px 2px;align-content:start}
 .msm,.mic{display:flex;align-items:center;gap:5px;height:24px;border:1px solid transparent;background:transparent;border-radius:3px;cursor:pointer;color:var(--ink);font-size:12px;white-space:nowrap;padding:0 5px 0 3px}
@@ -102,7 +102,7 @@ select,input[type=text]{font-family:var(--font-ui);font-size:13px}
 .msm:hover,.mic:hover{background:var(--accent-soft);border-color:var(--line)}
 .msm[aria-pressed="true"],.mic[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
 svg.mi{width:16px;height:16px;flex:none}
-#rbModify .msm,#rbModify .mic{background:transparent;box-shadow:none}#rbModify .msm:hover,#rbModify .mic:hover{background:var(--accent-soft)}#rbModify [aria-pressed="true"]{background:var(--accent-soft)}
+.rb-panel .msm,.rb-panel .mic{background:transparent;box-shadow:none}.rb-panel .msm:hover,.rb-panel .mic:hover{background:var(--accent-soft)}.rb-panel .msm[aria-pressed="true"],.rb-panel .mic[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
 .rstack{display:flex;flex-direction:column;gap:3px;justify-content:center;padding:2px 0}
 .rstack label{display:flex;gap:6px;align-items:center;font-size:12px;white-space:nowrap}
 .menu-list{position:absolute;z-index:30;min-width:280px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px;display:flex;flex-direction:column;box-shadow:0 10px 30px var(--shade)}
@@ -241,6 +241,36 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .hnd.flip{clip-path:none;border-radius:4px;width:24px;height:20px;margin:-10px 0 0 -12px;transform:none;color:#fff;font-size:13px;line-height:16px;font-weight:700;cursor:pointer}
 @media (pointer:coarse){.hnd{width:24px;height:24px;margin:-12px 0 0 -12px}.hnd.pt{width:22px;height:22px;margin:-11px 0 0 -11px}}
 .pchk{display:flex;align-items:center;gap:6px;font-size:12px}
+/* «Свойства» like Revit's palette: type selector with a preview, grey group bars that fold, a two-column grid of thin lines, 12px Segoe UI */
+#props{--pp-line:color-mix(in srgb,var(--ink) 17%,var(--sheet));--pp-head:color-mix(in srgb,var(--ink) 9%,var(--sheet));--pp-ro:color-mix(in srgb,var(--ink) 52%,var(--sheet))}
+#propsBody{font:12px/1.25 "Segoe UI",Tahoma,var(--font-ui);background:var(--sheet);color:var(--ink)}
+#propsBody .typesel{margin:4px;padding:6px 8px 6px 64px;min-height:52px;border:1px solid var(--pp-line);border-radius:0;background:var(--sheet) no-repeat 6px 6px/48px 48px;position:relative;gap:3px;justify-content:center;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect x='.5' y='.5' width='47' height='47' fill='%23fff' stroke='%23b9bec2'/%3E%3Crect x='12' y='10' width='18' height='22' fill='%23e9ecef' stroke='%23555'/%3E%3Crect x='18' y='16' width='18' height='22' fill='%23f7f8f9' stroke='%23555'/%3E%3C/svg%3E")}
+#propsBody .typesel .tname{font-weight:400;font-size:12.5px}
+#propsBody .typesel .tsub{font-size:11px;color:var(--pp-ro)}
+#propsBody .typesel select{height:22px;font-size:12px;padding:0 4px;border:1px solid var(--pp-line);border-radius:0;background:var(--sheet)}
+#propsBody .pgrp{display:flex;align-items:center;justify-content:space-between;font:600 12px "Segoe UI",Tahoma,var(--font-ui);letter-spacing:0;text-transform:none;color:var(--ink);background:var(--pp-head);padding:2px 6px;border:0;border-top:1px solid var(--pp-line);cursor:pointer;user-select:none;margin-top:2px}
+#propsBody .pgrp::after{content:'';width:9px;height:9px;flex:none;background:no-repeat center/9px 9px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 5l4-4 4 4M1 9l4-4 4 4' fill='none' stroke='%23444' stroke-width='1.4'/%3E%3C/svg%3E")}
+#propsBody .pgrp.closed::after{transform:rotate(180deg)}
+#propsBody .pgrp:hover{background:color-mix(in srgb,var(--accent) 12%,var(--pp-head))}
+#propsBody .prow{grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:0;border-bottom:1px solid var(--pp-line);min-height:20px;align-items:stretch}
+#propsBody .prow>label,#propsBody .prow>span:first-child{padding:2px 4px 2px 8px;font-size:12px;border-right:1px solid var(--pp-line);display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#propsBody .prow>div{padding:0;display:flex;align-items:center;gap:3px;min-height:20px}
+#propsBody .prow input:not([type=checkbox]):not([type=color]):not([type=range]),#propsBody .prow select{height:20px;font:12px "Segoe UI",Tahoma,var(--font-ui);padding:0 4px;border:1px solid transparent;border-radius:0;background:var(--sheet);color:var(--ink);box-shadow:none}
+#propsBody .prow input:hover:not(:disabled),#propsBody .prow select:hover:not(:disabled){border-color:var(--pp-line)}
+#propsBody .prow input:focus,#propsBody .prow select:focus{border-color:#3b78d8;outline:0}
+#propsBody .prow input:disabled,#propsBody .prow select:disabled{color:var(--pp-ro);background:transparent}
+#propsBody .prow input[type=checkbox]{margin:0 4px}
+#propsBody .prow .val{font:12px "Segoe UI",Tahoma,var(--font-ui);padding:0 4px;color:var(--pp-ro)}
+#propsBody .prow .btn,#propsBody .pbtns .btn{height:20px;min-height:0;padding:0 8px;font:12px "Segoe UI",Tahoma,var(--font-ui);border:1px solid color-mix(in srgb,var(--ink) 30%,var(--sheet));border-radius:2px;background:color-mix(in srgb,var(--ink) 5%,var(--sheet));color:var(--ink);box-shadow:none}
+#propsBody .prow .btn:hover,#propsBody .pbtns .btn:hover{background:color-mix(in srgb,var(--accent) 14%,var(--sheet));border-color:var(--accent)}
+#propsBody .pbtns{padding:4px 6px;gap:4px}
+#propsBody .pbtns .btn.danger{color:var(--bad)}
+#propsBody .pnote{padding:4px 8px;font-size:11.5px;line-height:1.35}
+#propsBody .pghide{display:none}
+.pfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 6px;border-top:1px solid var(--line);background:var(--panel);font:12px "Segoe UI",Tahoma,var(--font-ui)}
+.pfoot a{color:var(--accent);text-decoration:underline;cursor:pointer}
+.pfoot button{height:22px;padding:0 12px;font:12px "Segoe UI",Tahoma,var(--font-ui);border:1px solid color-mix(in srgb,var(--ink) 30%,var(--sheet));border-radius:2px;background:color-mix(in srgb,var(--ink) 5%,var(--sheet));color:var(--ink);cursor:pointer}
 .dim.lockl{pointer-events:auto;cursor:pointer;background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:1px 3px;font-size:13px}
 .dim.lockl.open{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
 .dim.pinl{background:transparent;font-size:15px}
@@ -263,6 +293,34 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .tree .x:hover{color:var(--bad);background:var(--accent-soft)}
 .tree input{font:inherit;width:100%;padding:2px 4px;border:1px solid var(--accent);border-radius:3px;background:var(--sheet);color:var(--ink)}
 .tree .ph{font-size:11px;color:var(--muted);margin-left:4px}
+/* «Диспетчер проекта» like Revit: search, dotted connectors, [+]/[−] boxes, small view icons, the open view in bold */
+.treesearch{padding:4px 6px;border-bottom:1px solid var(--line-soft);background:var(--sheet)}
+.treesearch input{width:100%;height:24px;box-sizing:border-box;padding:0 6px 0 26px;font:12px "Segoe UI",Tahoma,var(--font-ui);border:1px solid color-mix(in srgb,var(--ink) 22%,var(--sheet));border-radius:2px;color:var(--ink);background:var(--sheet) no-repeat 6px 50%/14px 14px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='6.5' cy='6.5' r='4.5' fill='none' stroke='%23666' stroke-width='1.6'/%3E%3Cpath d='M10 10l4.5 4.5' stroke='%23666' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")}
+#browser .scroll{background:var(--sheet)}
+.tree{font:12px/1.2 "Segoe UI",Tahoma,var(--font-ui);padding:4px 2px 8px 4px;color:var(--ink)}
+.tree ul{padding-left:0;margin-left:8px;border-left:1px dotted color-mix(in srgb,var(--ink) 40%,var(--sheet))}
+.tree ul>li{position:relative;padding-left:12px}
+.tree ul>li::before{content:'';position:absolute;left:0;top:10px;width:10px;border-top:1px dotted color-mix(in srgb,var(--ink) 40%,var(--sheet))}
+.tree .node{font:12px "Segoe UI",Tahoma,var(--font-ui);text-transform:none;letter-spacing:0;color:var(--ink);padding:1px 4px 1px 0;min-height:20px}
+.tree .node .tg{width:9px;height:9px;margin:0 5px 0 -5px;border:1px solid color-mix(in srgb,var(--ink) 45%,var(--sheet));background:var(--sheet);position:relative;z-index:1;box-sizing:border-box}
+.tree .node .tg::before{content:'';position:absolute;left:1px;right:1px;top:3px;height:1px;background:var(--ink);font-size:0}
+.tree li.closed>.node .tg::after{content:'';position:absolute;top:1px;bottom:1px;left:3px;width:1px;background:var(--ink)}
+.tree li.closed>.node .tg::before{content:''}
+.tree>li>.node .tg{margin-left:0}
+.tree button{padding:2px 4px;border-radius:0;min-height:18px}
+.tree button:hover{background:color-mix(in srgb,var(--accent) 12%,var(--sheet))}
+.tree button[aria-current="true"]{background:transparent;color:var(--ink);font-weight:700}
+.tree button[aria-current="true"] .tl{background:color-mix(in srgb,var(--accent) 16%,var(--sheet));outline:1px dotted var(--ink);outline-offset:0}
+.tree .tl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tree .vic{width:14px;height:14px;flex:none;background:no-repeat center/14px 14px}
+.tree .vic.k-plan,.tree .vic.k-detail{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='1.5' width='11' height='11' fill='%233d8fe0' stroke='%231c4f8f' stroke-dasharray='2 1'/%3E%3Cpath d='M3.5 3.5h7v7h-7z' fill='none' stroke='%23fff' stroke-width='.8'/%3E%3C/svg%3E")}
+.tree .vic.k-d3,.tree .vic.k-axo{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M7 1.5l5 2.8v5.4L7 12.5 2 9.7V4.3z' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Cpath d='M2 4.3L7 7l5-2.7M7 7v5.5' fill='none' stroke='%231c4f8f'/%3E%3C/svg%3E")}
+.tree .vic.k-camera{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='4' width='8' height='6.5' rx='1' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Cpath d='M9.5 6l3-1.5v5L9.5 8z' fill='%233d8fe0' stroke='%231c4f8f'/%3E%3C/svg%3E")}
+.tree .vic.k-section,.tree .vic.k-ielev{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='3' width='11' height='8' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Cpath d='M1.5 7h11' stroke='%23d6332a' stroke-dasharray='2 1'/%3E%3C/svg%3E")}
+.tree .vic.k-elev{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 12.5V6l5-4 5 4v6.5z' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Crect x='5.5' y='8.5' width='3' height='4' fill='%233d8fe0'/%3E%3C/svg%3E")}
+.tree .vic.k-sheet{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='2.5' width='11' height='9' fill='%23fff' stroke='%23555'/%3E%3Crect x='8' y='8.5' width='4' height='2.5' fill='%23e8a317'/%3E%3Crect x='3' y='4' width='4' height='3.5' fill='%233d8fe0'/%3E%3C/svg%3E")}
+.tree.searching li.nohit{display:none}
+.tree.searching li.hit>ul{display:block!important}
 #selbox{position:absolute;border:1px solid var(--sel);background:color-mix(in srgb,var(--sel) 10%,transparent);pointer-events:none}
 #selbox.cross{border-style:dashed;background:color-mix(in srgb,var(--ok) 10%,transparent);border-color:var(--ok)}
 #vcube{position:absolute;right:10px;top:10px;width:104px;height:104px;cursor:pointer;touch-action:none}
@@ -705,9 +763,11 @@ details.more summary::-webkit-details-marker{display:none}
       <section class="panel" id="props" aria-label="Свойства">
         <div class="side-h"><span class="ptl">Свойства</span> <div class="row"><button id="leftClose" aria-label="Скрыть окно «Свойства»" title="Скрыть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div></div>
         <div class="scroll" id="propsBody"></div>
+        <div class="pfoot"><a id="propHelp" role="button" tabindex="0">Справка по свойствам</a><button id="propApply" title="Принять введённое значение">Применить</button></div>
       </section>
       <section class="panel" id="browser" aria-label="Диспетчер проекта">
-        <div class="side-h"><span class="ptl">Диспетчер проекта</span> <div class="row"><button id="treeFold" aria-label="Свернуть все разделы" title="Свернуть все разделы"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l4 4 4-4M6 16l4-4 4 4"/></svg></button><button id="treeUnfold" aria-label="Развернуть все разделы" title="Развернуть все разделы"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8l4-4 4 4M6 12l4 4 4-4"/></svg></button><button id="browserClose" aria-label="Скрыть диспетчер проекта" title="Скрыть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div></div>
+        <div class="side-h"><span class="ptl" id="treeTitle">Диспетчер проекта</span> <div class="row"><button id="treeFold" aria-label="Свернуть все разделы" title="Свернуть все разделы"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l4 4 4-4M6 16l4-4 4 4"/></svg></button><button id="treeUnfold" aria-label="Развернуть все разделы" title="Развернуть все разделы"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8l4-4 4 4M6 12l4 4 4-4"/></svg></button><button id="browserClose" aria-label="Скрыть диспетчер проекта" title="Скрыть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div></div>
+        <div class="treesearch"><input type="search" id="treeFind" placeholder="Поиск" aria-label="Поиск в диспетчере проекта"></div>
         <div class="scroll"><ul class="tree" id="tree"></ul></div>
       </section>
     </aside>
@@ -4959,7 +5019,7 @@ function renderVbar(){
   $('#vbWeights').textContent = 'Вес линий: ' + (THIN.on ? 'выкл' : 'вкл'); $('#vbWeights').setAttribute('aria-pressed', !THIN.on);
   $('#vbReveal').setAttribute('aria-pressed', !!S.reveal);
   const gv = $('#rbGridVis'), off = !!curView().noGrid;
-  if (gv){ gv.setAttribute('aria-pressed', !off); gv.querySelector('.lbl').innerHTML = off ? 'Показать<br>оси' : 'Скрыть<br>оси'; }
+  if (gv){ gv.setAttribute('aria-pressed', !off); gv.querySelector('.lbl').textContent = off ? 'Показать оси' : 'Скрыть оси'; }
 }
 function toggleGrids(){
   const v = curView(); if (!v || v.kind === 'sheet'){ toast('Откройте план, разрез или 3D-вид'); return; }
@@ -7682,8 +7742,23 @@ function syncSelTab(){
   else if (!has && SEL_TAB.had){ if (SEL_TAB.back && cur === 'rbModify') showTab(SEL_TAB.back); SEL_TAB.back = null; }
   SEL_TAB.had = has;
 }
+// Revit: the groups of the palette fold (the folded ones stay folded for every element)
+const PGRP_CLOSED = new Set();
+function foldPanelGroups(el){
+  const gs = [...el.querySelectorAll(':scope > .pgrp')];
+  for (const g of gs){
+    const name = g.textContent.trim(), rows = []; let n = g.nextElementSibling;
+    while (n && !n.classList.contains('pgrp') && !n.classList.contains('typesel')){ rows.push(n); n = n.nextElementSibling; }
+    const set = () => { const c = PGRP_CLOSED.has(name); g.classList.toggle('closed', c); g.setAttribute('aria-expanded', !c); rows.forEach(r => r.classList.toggle('pghide', c)); };
+    g.setAttribute('role', 'button'); g.tabIndex = 0; set();
+    g.onclick = () => { if (PGRP_CLOSED.has(name)) PGRP_CLOSED.delete(name); else PGRP_CLOSED.add(name); set(); };
+    g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); g.onclick(); } };
+  }
+}
+$('#propApply').onclick = () => { const a = document.activeElement; if (a && $('#propsBody').contains(a)){ a.dispatchEvent(new Event('change', { bubbles:true })); a.blur(); } toast('Значения применены'); };
+$('#propHelp').onclick = () => toast('Свойства: параметры выбранного элемента или открытого вида. Щелчок по серой полосе группы — свернуть или развернуть её. Наведите на параметр — подсказка.');
 function updatePanel(){
-  syncSelTab(); MULTI_P = null; renderPanel();
+  syncSelTab(); MULTI_P = null; renderPanel(); foldPanelGroups($('#propsBody'));
   const M = MULTI_P; if (M) multiEnhance($('#propsBody'), M);
 }
 const MULTI_OFF = ['sTag', 'sRN', 'sGName', 'sTx', 'fFam'];
@@ -8016,6 +8091,17 @@ function treeFolds(ul){
     n.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } };
   });
 }
+// «Поиск»: only the items that match stay, with the sections they are in (opened while searching)
+function treeFilter(){
+  const q = ($('#treeFind').value || '').trim().toLowerCase(), ul = $('#tree');
+  ul.classList.toggle('searching', !!q);
+  ul.querySelectorAll('li').forEach(li => li.classList.remove('hit', 'nohit'));
+  if (!q) return;
+  ul.querySelectorAll('li.it').forEach(li => { li.classList.add(li.textContent.toLowerCase().includes(q) ? 'hit' : 'nohit'); });
+  ul.querySelectorAll('li:not(.it)').forEach(li => { li.classList.add(li.querySelector('li.it.hit') || (li.querySelector(':scope>.node') && li.querySelector(':scope>.node').textContent.toLowerCase().includes(q)) ? 'hit' : 'nohit'); });
+}
+$('#treeFind').addEventListener('input', treeFilter);
+$('#treeFind').addEventListener('keydown', e => { if (e.key === 'Escape'){ e.target.value = ''; treeFilter(); } e.stopPropagation(); });
 function treeFoldAll(close){ const ul = $('#tree'); ul.querySelectorAll('.node').forEach(n => { const k = treeKey(n); if (close) TREE_CLOSED.add(k); else TREE_CLOSED.delete(k); }); treeSave(); renderTree(); }
 $('#treeFold').onclick = () => treeFoldAll(true); $('#treeUnfold').onclick = () => treeFoldAll(false);
 function renderTree(){
@@ -8027,7 +8113,7 @@ function renderTree(){
     const cur = v.id === S.viewId, label = v.kind === 'sheet' ? `${esc(v.num)} — ${esc(v.name)}` : esc(v.name);
     const ph = v.kind !== 'sheet' && v.phase && v.phase !== 'all' ? `<span class="ph">${esc(phName(v.phase))}</span>` : '';
     const mark = v.kind !== 'sheet' && onSheet.has(v.id) ? ' <span class="ph" title="Размещён на листе">▣</span>' : '';
-    return `<li class="it"><button data-tree="o:${v.id}"${cur ? ' aria-current="true"' : ''} title="Двойной щелчок — переименовать">${label}${ph}${mark}</button>`
+    return `<li class="it"><button data-tree="o:${v.id}"${cur ? ' aria-current="true"' : ''} title="Двойной щелчок — переименовать"><span class="vic k-${v.kind}" aria-hidden="true"></span><span class="tl">${label}</span>${ph}${mark}</button>`
       + (S.view === 'sheet' && v.kind !== 'sheet' && !onSheet.has(v.id) ? `<button class="add" data-tree="p:${v.id}" title="Разместить на открытом листе" aria-label="Разместить на листе">+▣</button>` : '')
       + `<button class="x" data-tree="d:${v.id}" title="Удалить" aria-label="Удалить ${label}">×</button></li>`;
   };
@@ -8049,7 +8135,7 @@ function renderTree(){
     <li><div class="node">Семейства · Компоненты<button class="add" data-tree="famnew:" title="Новое семейство" aria-label="Новое семейство">+</button></div><ul>${fams.map(f => `<li class="it"><button data-tree="fam:${f.id}" title="Разместить">${esc(f.name)}<span class="ph">${esc(FAM_CATS[f.cat])}</span></button><button class="x" data-tree="famed:${f.id}" title="Редактировать семейство" aria-label="Редактировать ${esc(f.name)}">✎</button></li>`).join('')}<li class="it"><button data-tree="famload:">Загрузить семейство…</button></li></ul></li>
     <li><div class="node">Семейства · Стены</div><ul>${types.map(t => btn(`<span class="swatch" style="background:${(MATS[t.layers[Math.floor(t.layers.length / 2)]?.m] || MATS.generic).c}"></span>${esc(t.name)}`, 't:' + t.id, false)).join('')}</ul></li>
     <li><div class="node">Проекты</div><ul>${btn('Мои проекты…', 'lib')}</ul></li>`;
-  treeFolds(ul);
+  treeFolds(ul); treeFilter(); $('#treeTitle').textContent = 'Диспетчер проекта — ' + (proj.name || 'Без названия');
   ul.querySelectorAll('[data-tree^="o:"]').forEach(b => b.ondblclick = e => { e.preventDefault(); renameViewInline(b, b.dataset.tree.slice(2)); });
   ul.querySelectorAll('[data-tree]').forEach(b => b.onclick = () => {
     const i = b.dataset.tree.indexOf(':'), k = b.dataset.tree.slice(0, i), v = b.dataset.tree.slice(i + 1);
@@ -8790,6 +8876,127 @@ const MOD_GROUPS = [
   host.innerHTML = h;
   for (const [id, fn] of all) host.querySelector('#rbm_' + id).onclick = fn;
   host.querySelector('#rbm_reveal').id = 'rbReveal';
+})();
+/* ---------- Revit-like ribbon for «Архитектура», «Аннотации», «Вид», «Управление» ----------
+   The existing buttons (with their handlers) are moved into Revit's layout: a few large buttons per panel,
+   the rest as small buttons three to a column; colour icons in Revit's manner */
+const RB_ICONS = {
+  select:MOD_ICONS.select,
+  wall:`<path d="M1.5 5.5l8-3 5 2v8l-8 3-5-2z" fill="#d9d2c3" stroke="#6b5f4b"/><path d="M1.5 5.5l5 2 8-3M6.5 7.5v8" stroke="#6b5f4b"/><path d="M2.5 8.5l3 1.2M2.5 11l3 1.2M8 8.4l5-1.9M8 11l5-1.9" stroke="#a89878" stroke-width=".8"/>`,
+  door:`<rect x="3.5" y="1.5" width="9" height="13" fill="#fff" stroke="${cK}"/><rect x="5" y="3" width="6" height="11.5" fill="#c99a62" stroke="#7a5326"/><circle cx="9.7" cy="9" r=".8" fill="#4a3a20" stroke="none"/>`,
+  window:`<rect x="2" y="2" width="12" height="12" fill="#fff" stroke="${cK}"/><rect x="3.5" y="3.5" width="9" height="9" fill="#a9d3f5" stroke="${cB}"/><path d="M8 3.5v9M3.5 8h9" stroke="${cB}"/>`,
+  fam:`<path d="M3 8h10v2.5H3z" fill="#c99a62" stroke="#7a5326"/><path d="M4 10.5v4M12 10.5v4" stroke="#7a5326" stroke-width="1.3"/><path d="M4 8V3h8v5" fill="${cF}" stroke="${cB}"/>`,
+  column:`<rect x="5.5" y="3" width="5" height="10" fill="#cfd4d8" stroke="${cK}"/><path d="M3.5 2.5h9v1.5h-9zM3.5 12h9v1.5h-9z" fill="#aab1b7" stroke="${cK}"/>`,
+  roof:`<path d="M1 9L8 2.5 15 9" fill="#c8553d" stroke="#7d2a1b" stroke-width="1.2"/><rect x="3.5" y="8.5" width="9" height="6" fill="#d9d2c3" stroke="#6b5f4b"/>`,
+  ceiling:`<path d="M1.5 4.5l6.5-3 6.5 3-6.5 3z" fill="#e5e8ea" stroke="${cK}"/><path d="M1.5 4.5v1.3l6.5 3 6.5-3V4.5" fill="#c9ced2" stroke="${cK}"/><circle cx="5" cy="12" r="1.3" fill="#f4d23c" stroke="#8a6a2b"/><circle cx="11" cy="12" r="1.3" fill="#f4d23c" stroke="#8a6a2b"/>`,
+  floor:`<path d="M1.5 9l6.5-3.5 6.5 3.5L8 12.5z" fill="#d9d2c3" stroke="#6b5f4b"/><path d="M1.5 9v2l6.5 3.5 6.5-3.5V9" fill="#b9ad94" stroke="#6b5f4b"/>`,
+  stair:`<path d="M1.5 14.5h3v-3h3v-3h3v-3h3v-3h1.5v12z" fill="#d9d2c3" stroke="#6b5f4b"/>`,
+  rect:`<rect x="1.5" y="1.5" width="13" height="13" fill="#d9d2c3" stroke="#6b5f4b"/><rect x="4" y="4" width="8" height="8" fill="#fff" stroke="#6b5f4b"/>`,
+  box:`<path d="M8 1.5l6 3.3v6.4L8 14.5 2 11.2V4.8z" fill="#e2e5e8" stroke="${cK}"/><path d="M2 4.8L8 8l6-3.2M8 8v6.5" stroke="${cK}"/>`,
+  room:`<rect x="1.5" y="2.5" width="13" height="11" fill="#fff" stroke="${cK}"/><path d="M1.5 2.5l13 11M14.5 2.5l-13 11" stroke="${cB}" stroke-width=".7" stroke-dasharray="1.2 1"/><rect x="4.5" y="6" width="7" height="4" fill="#fff" stroke="${cR}"/>`,
+  rbAutoRooms:`<rect x="1" y="1.5" width="6.5" height="6" fill="#fff" stroke="${cK}"/><rect x="8.5" y="1.5" width="6.5" height="6" fill="#fff" stroke="${cK}"/><rect x="1" y="8.5" width="14" height="6" fill="#fff" stroke="${cK}"/><path d="M2.5 4.5h3.5M10 4.5h3.5M5 11.5h6" stroke="${cR}" stroke-width="1.4"/>`,
+  rbFamNew:`<path d="M3 1.5h7l3 3v10H3z" fill="#fff" stroke="${cK}"/><path d="M10 1.5v3h3" stroke="${cK}"/><path d="M8 7v6M5 10h6" stroke="${cG}" stroke-width="1.7"/>`,
+  rbFamLoad:`<path d="M1.5 4.5h5l1.5 1.5h6.5v8.5h-13z" fill="#f2cf73" stroke="#8a6a2b"/><path d="M8 3v6M5.5 6.5L8 9l2.5-2.5" stroke="${cB}" stroke-width="1.5"/>`,
+  rbFamEdit:`<path d="M3 8h10v2.5H3z" fill="#c99a62" stroke="#7a5326"/><path d="M4 10.5v4M12 10.5v4" stroke="#7a5326" stroke-width="1.3"/><path d="M9.5 6.5l4.5-4.5 1.5 1.5L11 8l-2 .5z" fill="${cY}" stroke="#8a6a2b"/>`,
+  rbLevels:`<path d="M1 10.5h11" stroke="${cB}" stroke-width="1.3" stroke-dasharray="3 1 1 1"/><path d="M12 10.5l2-2 2 2-2 2z" fill="${cB}" stroke="none"/><path d="M1 4.5h11" stroke="${cK}" stroke-dasharray="3 1 1 1"/><path d="M12 4.5l2-2 2 2-2 2z" fill="#9aa3a9" stroke="none"/>`,
+  grid:`<circle cx="8" cy="4" r="3" fill="#fff" stroke="${cB}" stroke-width="1.2"/><path d="M8 7v8.5" stroke="${cB}" stroke-dasharray="3 1 1 1"/><path d="M6.8 3.2l1.2-1v3.6" stroke="${cB}" stroke-width=".9"/>`,
+  rbTypes:`<rect x="1.5" y="2" width="4" height="12" fill="#ece4d6" stroke="${cK}"/><rect x="5.5" y="2" width="5" height="12" fill="#b8664b" stroke="${cK}"/><rect x="10.5" y="2" width="4" height="12" fill="#e6cc5c" stroke="${cK}"/>`,
+  orbit:`<circle cx="8" cy="8" r="6.3" fill="${cF}" stroke="${cB}"/><ellipse cx="8" cy="8" rx="6.3" ry="2.4" stroke="${cB}"/><path d="M12.5 3.5l1.6-1.6M12.3 1.9h1.9v1.9" stroke="${cG}" stroke-width="1.2"/>`,
+  demolish:`<path d="M2 7l5-4.5 3 3-5 4.5z" fill="#9aa3a9" stroke="${cK}"/><path d="M7.5 8l6.5 6.5" stroke="#7a5326" stroke-width="2"/><path d="M10 2l4 4M14 2l-4 4" stroke="${cR}" stroke-width="1.3"/>`,
+  rbDimAl:`<path d="M2.5 3v10M13.5 3v10" stroke="${cK}"/><path d="M2.5 8h11" stroke="${cB}" stroke-width="1.2"/><path d="M1.3 9.2l2.4-2.4M12.3 9.2l2.4-2.4" stroke="${cB}" stroke-width="1.2"/><path d="M6 6h4" stroke="${cK}" stroke-width=".9"/>`,
+  rbDimLin:`<path d="M2 13l3-9M12 13l3-9" stroke="${cK}"/><path d="M2.5 6.5h11" stroke="${cB}" stroke-width="1.2"/><path d="M1.3 7.7l2.4-2.4M12.3 7.7l2.4-2.4" stroke="${cB}" stroke-width="1.2"/>`,
+  adim:`<path d="M2 14L14 14M2 14L11 3" stroke="${cK}"/><path d="M9.5 14A7.5 7.5 0 0 0 7 8.2" stroke="${cB}" stroke-width="1.3"/>`,
+  rdim:`<circle cx="7" cy="9" r="5.5" stroke="${cK}"/><path d="M7 9l4-4" stroke="${cB}" stroke-width="1.3"/><path d="M9.5 4.5h2v2" stroke="${cB}" stroke-width="1.2"/><text x="11" y="15.5" font-size="5" font-family="Arial" fill="${cB}" stroke="none">R</text>`,
+  ddim:`<circle cx="8" cy="8" r="6" stroke="${cK}"/><path d="M3.5 12.5l9-9" stroke="${cB}" stroke-width="1.3"/><path d="M10.5 3.5h2v2M5.5 12.5h-2v-2" stroke="${cB}" stroke-width="1.2"/>`,
+  rbAutoDim:`<rect x="3" y="5.5" width="10" height="8" fill="#d9d2c3" stroke="#6b5f4b"/><path d="M3 2.5h10" stroke="${cB}" stroke-width="1.2"/><path d="M3 1v3M8 1v3M13 1v3" stroke="${cB}"/>`,
+  rbGridVis:`<circle cx="8" cy="4" r="3" fill="#fff" stroke="${cB}" stroke-width="1.2"/><path d="M8 7v8.5" stroke="${cB}" stroke-dasharray="3 1 1 1"/><path d="M2 14L14 2" stroke="${cR}" stroke-width="1.3"/>`,
+  measure:`<rect x="1" y="5.5" width="14" height="5" rx=".6" fill="${cY}" stroke="#8a6a2b"/><path d="M3.5 5.5v2M6 5.5v3M8.5 5.5v2M11 5.5v3M13.5 5.5v2" stroke="#8a6a2b"/>`,
+  line:`<path d="M2 13L13 2" stroke="${cB}" stroke-width="1.6"/><path d="M10.5 12.5l3.5-3.5 1 1-3.5 3.5-1.6.6z" fill="${cY}" stroke="#8a6a2b"/>`,
+  text:`<path d="M3 13.5L7 2.5h2l4 11M4.8 9.5h6.4" stroke="#222" stroke-width="1.5" fill="none"/>`,
+  plan:`<rect x="1.5" y="1.5" width="13" height="13" fill="#3d8fe0" stroke="#1c4f8f" stroke-dasharray="2 1"/><path d="M4 4h8v8H4zM8 4v4h4" stroke="#fff" stroke-width=".9"/>`,
+  d3:`<path d="M8 1.5l6 3.3v6.4L8 14.5 2 11.2V4.8z" fill="${cF}" stroke="#1c4f8f"/><path d="M2 4.8L8 8l6-3.2M8 8v6.5" stroke="#1c4f8f"/><path d="M8 8l6-3.2v6.4L8 14.5z" fill="#3d8fe0" stroke="#1c4f8f"/>`,
+  axo:`<path d="M8 2l6 3.5L8 9 2 5.5z" fill="#fff" stroke="#1c4f8f"/><path d="M2 5.5v5L8 14V9zM14 5.5v5L8 14V9z" fill="${cF}" stroke="#1c4f8f"/>`,
+  camera:`<rect x="1.5" y="5" width="9" height="7" rx="1" fill="${cF}" stroke="#1c4f8f"/><path d="M10.5 7.2l4-2v6.6l-4-2z" fill="#3d8fe0" stroke="#1c4f8f"/><circle cx="6" cy="8.5" r="1.8" fill="#fff" stroke="#1c4f8f"/>`,
+  section:`<path d="M3 13.5V5" stroke="${cK}" stroke-width="1.3" stroke-dasharray="2.5 1"/><path d="M3 5h8" stroke="${cK}" stroke-width="1.3"/><path d="M8.5 1.5L13 5l-4.5 3.5z" fill="#1c4f8f" stroke="none"/><circle cx="3" cy="13" r="2.2" fill="#fff" stroke="${cK}"/>`,
+  ielev:`<rect x="3" y="3" width="10" height="10" fill="#fff" stroke="${cK}"/><circle cx="8" cy="8" r="2.4" fill="#fff" stroke="#1c4f8f"/><path d="M8 3.8v1.8M8 10.4v1.8M3.8 8h1.8M10.4 8h1.8" stroke="#1c4f8f" stroke-width="1.6"/>`,
+  rbBox:`<path d="M8 2l6 3.3v6.4L8 15 2 11.7V5.3z" fill="${cF}" stroke="#1c4f8f"/><path d="M1 1h4M1 1v4M15 15h-4M15 15v-4" stroke="${cR}" stroke-width="1.4"/>`,
+  callout:`<rect x="1.5" y="1.5" width="9" height="8" rx="1.5" fill="#fff" stroke="#1c4f8f" stroke-dasharray="2 1"/><path d="M10.5 8l2.5 3" stroke="#1c4f8f"/><circle cx="13" cy="12.5" r="2.2" fill="#fff" stroke="#1c4f8f"/>`,
+  rbTpl:`<rect x="1.5" y="2" width="13" height="12" fill="#fff" stroke="${cK}"/><path d="M1.5 5h13M5.5 5v9" stroke="${cK}"/><path d="M7.5 7.5h5M7.5 10h5M7.5 12.5h3" stroke="${cB}"/>`,
+  rbRender:`<path d="M2 13.5L5.5 9l2.5 2.5L11 7l3 6.5z" fill="#6fb25b" stroke="#2f6b25"/><circle cx="11.5" cy="4" r="2" fill="#f4d23c" stroke="#8a6a2b"/><rect x="1" y="1.5" width="14" height="13" stroke="${cK}"/>`,
+  rbSheet:`<rect x="1.5" y="2.5" width="13" height="11" fill="#fff" stroke="${cK}"/><rect x="9" y="10" width="5" height="3" fill="${cY}" stroke="#8a6a2b" stroke-width=".7"/><rect x="3" y="4" width="5" height="4.5" fill="#3d8fe0" stroke="#1c4f8f" stroke-width=".7"/>`,
+  rbFit:`<rect x="3.5" y="3.5" width="9" height="9" fill="${cF}" stroke="${cB}"/><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4" stroke="${cK}" stroke-width="1.3"/>`,
+  rbLeft:`<rect x="1.5" y="2" width="13" height="12" fill="#fff" stroke="${cK}"/><rect x="1.5" y="2" width="5" height="12" fill="${cF}" stroke="${cB}"/><path d="M2.8 5h2.4M2.8 7.5h2.4M2.8 10h2.4" stroke="${cB}"/>`,
+  rbRight:`<path d="M1.5 2.5h13v8.5H7l-3.5 3v-3h-2z" fill="${cF}" stroke="${cB}"/><path d="M4 5.5h8M4 8h5" stroke="${cB}"/>`,
+  rbMats:`<circle cx="8" cy="8" r="6.3" fill="#d9d2c3" stroke="#6b5f4b"/><path d="M3.5 4.5l8 8M2.3 8.3l5.4 5.4M4.5 3.5l8 8M8.3 2.3l5.4 5.4" stroke="#8a7a5b" stroke-width=".8"/><circle cx="10" cy="5.5" r="1.8" fill="#3d8fe0" stroke="none"/>`,
+  rbTplMgr:`<rect x="1.5" y="2" width="13" height="12" fill="#fff" stroke="${cK}"/><path d="M1.5 5h13" stroke="${cK}"/><path d="M4 7.5h8M4 10h8M4 12.5h5" stroke="${cB}"/><path d="M3 3.5h3" stroke="${cR}"/>`,
+  rbStamps:`<rect x="1" y="3" width="14" height="10" fill="#fff" stroke="${cK}"/><path d="M1 9h14M6 9v4M10.5 9v4M6 11h9" stroke="${cK}" stroke-width=".8"/><rect x="2.5" y="4.5" width="4" height="3" fill="#3d8fe0" stroke="none"/>`,
+  styles:`<path d="M1.5 4h13" stroke="#222" stroke-width="2.2"/><path d="M1.5 8.5h13" stroke="${cB}" stroke-width="1.3" stroke-dasharray="3 1.5"/><path d="M1.5 12.5h13" stroke="${cR}" stroke-width=".9" stroke-dasharray="4 1 1 1"/>`,
+  weights:`<path d="M1.5 3h13" stroke="#222" stroke-width=".6"/><path d="M1.5 6.5h13" stroke="#222" stroke-width="1.2"/><path d="M1.5 10h13" stroke="#222" stroke-width="1.9"/><path d="M1.5 13.8h13" stroke="#222" stroke-width="2.7"/>`,
+  patterns:`<path d="M1.5 4h13" stroke="#222" stroke-dasharray="3 1.5"/><path d="M1.5 8h13" stroke="#222" stroke-dasharray="1 1.5"/><path d="M1.5 12h13" stroke="#222" stroke-dasharray="5 1.5 1 1.5"/>`,
+  fills:`<rect x="1.5" y="1.5" width="13" height="13" fill="#fff" stroke="${cK}"/><path d="M1.5 7.5l6-6M1.5 13.5l12-12M4.5 14.5l10-10M10.5 14.5l4-4" stroke="${cB}" stroke-width=".9"/>`,
+  anno:`<path d="M2 4v8M14 4v8" stroke="${cK}"/><path d="M2 8h12" stroke="${cB}" stroke-width="1.2"/><path d="M.8 9.2l2.4-2.4M12.8 9.2l2.4-2.4" stroke="${cB}" stroke-width="1.2"/><path d="M5.5 5.5h5" stroke="#222"/>`
+};
+// [panel id, [[group label, { b:[keys], t:[keys…], t2:[…], i:[…] }]]]; key → button selector and label
+const RB_LAYOUT = [
+  ['rbArch', [
+    ['Выбрать', { b:[['[data-tool="select"]', 'select', 'Изменить']] }],
+    ['Построение', { b:[['[data-tool="wall"]', 'wall', 'Стена'], ['[data-tool="door"]', 'door', 'Дверь'], ['[data-tool="window"]', 'window', 'Окно'], ['[data-tool="fam"]', 'fam', 'Компонент']],
+      t:[['[data-tool="column"]', 'column', 'Колонна'], ['[data-tool="roof"]', 'roof', 'Крыша'], ['[data-tool="ceiling"]', 'ceiling', 'Потолок']],
+      t2:[['[data-tool="floor"]', 'floor', 'Перекрытие'], ['[data-tool="stair"]', 'stair', 'Лестница'], ['[data-tool="box"]', 'box', 'Объём']],
+      t3:[['[data-tool="rect"]', 'rect', 'Комната из стен']] }],
+    ['Помещения и зоны', { b:[['[data-tool="room"]', 'room', 'Помещение']], t:[['#rbAutoRooms', 'rbAutoRooms', 'Расставить везде']] }],
+    ['Семейства', { t:[['#rbFamNew', 'rbFamNew', 'Новое семейство'], ['#rbFamLoad', 'rbFamLoad', 'Загрузить'], ['#rbFamEdit', 'rbFamEdit', 'Редактировать']] }],
+    ['Базовые элементы', { b:[['#rbLevels', 'rbLevels', 'Уровень'], ['[data-tool="grid"]', 'grid', 'Ось']] }],
+    ['Свойства и вид', { t:[['#rbTypes', 'rbTypes', 'Типы стен'], ['[data-tool="orbit"]', 'orbit', 'Обзор'], ['[data-tool="demolish"]', 'demolish', 'Снести']] }]
+  ], ['[data-tool="move"]', '[data-tool="copy"]', '#rbRotate', '#rbDelete']],
+  ['rbAnno', [
+    ['Размер', { b:[['#rbDimAl', 'rbDimAl', 'Параллельный']], t:[['#rbDimLin', 'rbDimLin', 'Линейный'], ['[data-tool="adim"]', 'adim', 'Угловой'], ['[data-tool="rdim"]', 'rdim', 'Радиальный']],
+      t2:[['[data-tool="ddim"]', 'ddim', 'Диаметр'], ['#rbAutoDim', 'rbAutoDim', 'По стенам']] }],
+    ['Детализация', { b:[['[data-tool="line"]', 'line', 'Линия детализации']] }],
+    ['Текст', { b:[['[data-tool="text"]', 'text', 'Текст']] }],
+    ['Оси', { t:[['[data-tool="grid"]', 'grid', 'Ось'], ['#rbGridVis', 'rbGridVis', null]] }],
+    ['Измерить', { t:[['[data-tool="measure"]', 'measure', 'Линейка']] }]
+  ]],
+  ['rbView', [
+    ['Графика', { b:[['#rbTpl', 'rbTpl', 'Шаблоны видов']], t:[['#rbRender', 'rbRender', 'Визуализация'], ['#rbBox', 'rbBox', 'Границы 3D-вида']] }],
+    ['Создание', { b:[['[data-view="d3"]', 'd3', '3D-вид'], ['[data-tool="section"]', 'section', 'Разрез'], ['[data-tool="callout"]', 'callout', 'Узел']],
+      t:[['[data-view="plan"]', 'plan', 'План'], ['[data-view="axo"]', 'axo', 'Аксонометрия'], ['[data-tool="camera"]', 'camera', 'Камера']], t2:[['[data-tool="ielev"]', 'ielev', 'Развёртка']] }],
+    ['Компоновка листа', { b:[['#rbSheet', 'rbSheet', 'Лист']] }],
+    ['Окна', { t:[['#rbFit', 'rbFit', 'Показать всё'], ['#rbLeft', 'rbLeft', 'Свойства'], ['#rbRight', 'rbRight', 'Чат команд']] }]
+  ]],
+  ['rbManage', [
+    ['Параметры', { b:[['#rbMats', 'rbMats', 'Материалы']], t:[['[data-std="styles"]', 'styles', 'Стили линий'], ['[data-std="weights"]', 'weights', 'Вес линий'], ['[data-std="patterns"]', 'patterns', 'Образцы линий']],
+      t2:[['[data-std="fills"]', 'fills', 'Штриховки'], ['[data-std="anno"]', 'anno', 'Аннотации']] }],
+    ['Шаблоны видов', { t:[['#rbTplMgr', 'rbTplMgr', 'Диспетчер шаблонов'], ['#rbStamps', 'rbStamps', 'Штампы']] }]
+  ]]
+];
+(function ribbonize(){
+  for (const [pid, groups, drop] of RB_LAYOUT){
+    const panel = document.getElementById(pid); if (!panel) continue;
+    const keepTail = [...panel.querySelectorAll(':scope > .grp')].filter(g => g.querySelector('.rstack')); // checkbox panels stay as they are
+    const take = sel => panel.querySelector(sel);
+    const prep = (b, key, label, cls) => {
+      if (!b) return null;
+      const lbl = b.querySelector('.lbl'), text = lbl ? lbl.innerHTML.replace(/<br>/g, ' ') : label;
+      b.className = cls; b.querySelectorAll('svg, .k').forEach(x => x.remove());
+      b.innerHTML = MI(RB_ICONS[key] || '') + (cls === 'mic' ? '' : (lbl ? `<span class="lbl">${text}</span>` : `<span>${cls.includes('mbig') ? label.replace(' ', '<br>') : label}</span>`));
+      if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', (label || text || '').replace(/<br>/g, ' '));
+      return b;
+    };
+    const out = [];
+    for (const [label, g] of groups){
+      const grp = document.createElement('div'); grp.className = 'grp'; const items = document.createElement('div'); items.className = 'grp-items';
+      for (const [s, k, l] of g.b || []){ const b = prep(take(s), k, l, 'rbtn mbig'); if (b) items.append(b); }
+      for (const col of ['t', 't2', 't3', 'i']) if (g[col]){ const c = document.createElement('div'); c.className = 'mcol'; for (const [s, k, l] of g[col]){ const b = prep(take(s), k, l, col === 'i' ? 'mic' : 'msm'); if (b) c.append(b); } if (c.children.length) items.append(c); }
+      const lab = document.createElement('div'); lab.className = 'grp-label'; lab.textContent = label;
+      grp.append(items, lab); out.push(grp);
+    }
+    const file = panel.querySelector('#famFile');
+    for (const s of drop || []){ const b = take(s); if (b){ b.hidden = true; b.style.display = 'none'; } }
+    const hiddenKeep = [...panel.querySelectorAll('button[hidden], input[type=file]')];
+    panel.replaceChildren(...out, ...keepTail);
+    const stash = document.createElement('div'); stash.hidden = true; stash.append(...hiddenKeep); if (file && !stash.contains(file)) stash.append(file); panel.append(stash);
+  }
 })();
 $('#fltAll').onclick = () => $('#filterList').querySelectorAll('input').forEach(i => i.checked = true);
 $('#fltNone').onclick = () => $('#filterList').querySelectorAll('input').forEach(i => i.checked = false);
