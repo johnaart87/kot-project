@@ -1,19 +1,3 @@
-<!doctype html>
-<html lang="ru">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1f6fd6">
-<meta name="description" content="Kot project: С‡РµСЂС‡РµРЅРёРµ СЃС‚РµРЅ, РґРІРµСЂРµР№ Рё РѕРєРѕРЅ, РјРЅРѕРіРѕСЃР»РѕР№РЅС‹Рµ СЃС‚РµРЅС‹, СЂР°Р·РјРµСЂС‹, 3D-РјРѕРґРµР»СЊ Рё Р°РєСЃРѕРЅРѕРјРµС‚СЂРёСЏ.">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Kot project">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-</head>
-<body>
 <title>Kot project</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +9,7 @@
   --bg:#dfe3e6; --chrome:#eef1f3; --panel:#f8f9fa; --sheet:#ffffff; --ink:#1b252c; --muted:#5a666e; --line:#c5cdd2; --line-soft:#dde2e5;
   --accent:#1f6fd6; --accent-ink:#ffffff; --accent-soft:#e3edfb; --sel:#1a73e8; --temp:#1f6fd6; --bad:#c62828; --ok:#2e7d32;
   --poche:#2b3439; --mass:#c6d4e2; --mass-plan:#d6e1ec; --grid:#eef1f3; --grid-major:#d9dfe3; --datum:#6d7a82;
-  --ax-x:#d33a2c; --ax-y:#2e9a3c; --ax-z:#2d6ad6;
+  --ax-x:#d33a2c; --ax-y:#2e9a3c; --ax-z:#2d6ad6; --exist:#cfd3d6; --exist-edge:#8a939a; --demo:#d43a2a;
   --glass:#8fbde3; --door:#b98d5e; --shade:rgb(16 24 30 / .18); --scrim:rgb(10 16 20 / .45); --bubble:#e9eef2;
   --font-ui:"Golos Text","Segoe UI",system-ui,sans-serif;
   --font-num:"IBM Plex Mono",ui-monospace,Consolas,monospace;
@@ -34,14 +18,14 @@
   --bg:#0e1316; --chrome:#161d21; --panel:#1a2226; --sheet:#11171a; --ink:#e2e8eb; --muted:#93a1a8; --line:#2c373d; --line-soft:#232c31;
   --accent:#6f9bff; --accent-ink:#0b1222; --accent-soft:#1d2a44; --sel:#5b9bff; --temp:#6f9bff; --bad:#ff6b6b; --ok:#7bd88f;
   --poche:#cfd6da; --mass:#5a7590; --mass-plan:#33475a; --grid:#172025; --grid-major:#24313a; --datum:#8c9aa2;
-  --ax-x:#ff6b5e; --ax-y:#5fd170; --ax-z:#6f9bff;
+  --ax-x:#ff6b5e; --ax-y:#5fd170; --ax-z:#6f9bff; --exist:#3a4247; --exist-edge:#7f8b92; --demo:#ff6b5e;
   --glass:#4f86b5; --door:#8d6a45; --shade:rgb(0 0 0 / .5); --scrim:rgb(0 0 0 / .6); --bubble:#222c32;
   color-scheme:dark } }
 :root[data-theme="dark"]{
   --bg:#0e1316; --chrome:#161d21; --panel:#1a2226; --sheet:#11171a; --ink:#e2e8eb; --muted:#93a1a8; --line:#2c373d; --line-soft:#232c31;
   --accent:#6f9bff; --accent-ink:#0b1222; --accent-soft:#1d2a44; --sel:#5b9bff; --temp:#6f9bff; --bad:#ff6b6b; --ok:#7bd88f;
   --poche:#cfd6da; --mass:#5a7590; --mass-plan:#33475a; --grid:#172025; --grid-major:#24313a; --datum:#8c9aa2;
-  --ax-x:#ff6b5e; --ax-y:#5fd170; --ax-z:#6f9bff;
+  --ax-x:#ff6b5e; --ax-y:#5fd170; --ax-z:#6f9bff; --exist:#3a4247; --exist-edge:#7f8b92; --demo:#ff6b5e;
   --glass:#4f86b5; --door:#8d6a45; --shade:rgb(0 0 0 / .5); --scrim:rgb(0 0 0 / .6); --bubble:#222c32;
   color-scheme:dark }
 [hidden]{display:none!important}
@@ -99,6 +83,10 @@ select,input[type=text]{font-family:var(--font-ui);font-size:13px}
 .menu-list button{all:unset;display:flex;justify-content:space-between;gap:16px;padding:8px 10px;border-radius:5px;cursor:pointer;color:var(--ink)}
 .menu-list button:hover,.menu-list button:focus-visible{background:var(--accent-soft)}
 .menu-list hr{border:0;border-top:1px solid var(--line);margin:4px 0;width:100%}
+.menu-list .mh{padding:6px 10px 4px;font-size:12px;color:var(--muted)}
+.menu-list button.on{background:var(--accent-soft)}
+.menu-list button .n{font-family:var(--font-num);color:var(--muted);font-size:11.5px;min-width:18px}
+.menu-list button .lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px}
 
 /* options bar */
 .optbar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;background:var(--chrome);border-bottom:1px solid var(--line);padding:5px max(12px,env(safe-area-inset-right,0px)) 5px max(12px,env(safe-area-inset-left,0px));min-height:36px;font-size:12.5px;min-width:0}
@@ -160,6 +148,9 @@ main{display:grid;grid-template-columns:270px minmax(0,1fr) 330px;min-height:0;p
 .dim.gb.sel{border-color:var(--sel);color:var(--sel)}
 .dim.tx{background:transparent;padding:0;font-size:14px;transform:translate(0,-100%)}
 .dim.wt{font-weight:700;font-size:12px;line-height:1;padding:3px 5px;border:1.5px solid var(--ink);border-radius:4px;background:var(--sheet);color:var(--ink)}
+.dim.wt.dr{border-radius:50%;min-width:22px;text-align:center}
+.dim.wt.wn{border-style:double;border-width:3px;padding:2px 5px}
+.dim.wt.bx{border-style:dashed}
 .dim.wt.sel{border-color:var(--sel);color:var(--sel)}
 .dim.ax{background:transparent;font-weight:700;font-size:12px;padding:0}
 .dim.ax.x{color:var(--ax-x)} .dim.ax.y{color:var(--ax-y)} .dim.ax.z{color:var(--ax-z)}
@@ -169,6 +160,18 @@ main{display:grid;grid-template-columns:270px minmax(0,1fr) 330px;min-height:0;p
 #cursor{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border:1.5px solid var(--temp);border-radius:50%;pointer-events:none}
 #cursor.end{border-radius:2px;background:color-mix(in srgb,var(--temp) 35%,transparent)}
 #cursor.int{border-radius:0;transform:rotate(45deg);background:color-mix(in srgb,var(--temp) 35%,transparent)}
+#sheetWrap{position:absolute;inset:0;background:var(--bg);overflow:auto;z-index:2}
+#sheetCv{display:block;margin:16px auto;box-shadow:0 6px 24px var(--shade);touch-action:none;cursor:default}
+.dim.co{pointer-events:auto;cursor:pointer;color:var(--accent);border:1px solid var(--accent);background:var(--sheet);font-weight:500}
+.tree .add{all:unset;cursor:pointer;color:var(--accent);font-weight:600;padding:0 6px;border-radius:3px;margin-left:4px}
+.tree .add:hover{background:var(--accent-soft)}
+.tree .node{display:flex;align-items:center;justify-content:space-between}
+.tree li.it{display:flex;align-items:center}
+.tree li.it>button:first-child{flex:1;min-width:0}
+.tree .x{all:unset;cursor:pointer;color:var(--muted);padding:2px 6px;border-radius:3px;font-size:12px}
+.tree .x:hover{color:var(--bad);background:var(--accent-soft)}
+.tree input{font:inherit;width:100%;padding:2px 4px;border:1px solid var(--accent);border-radius:3px;background:var(--sheet);color:var(--ink)}
+.tree .ph{font-size:11px;color:var(--muted);margin-left:4px}
 #selbox{position:absolute;border:1px solid var(--sel);background:color-mix(in srgb,var(--sel) 10%,transparent);pointer-events:none}
 #selbox.cross{border-style:dashed;background:color-mix(in srgb,var(--ok) 10%,transparent);border-color:var(--ok)}
 #vcube{position:absolute;right:10px;top:10px;width:104px;height:104px;cursor:pointer;touch-action:none}
@@ -286,6 +289,7 @@ details.more summary::-webkit-details-marker{display:none}
       <div class="qat" aria-label="Панель быстрого доступа">
         <button id="qSave" title="Сохранить (Ctrl+S)" aria-label="Сохранить"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 3h10l3 3v11H3V3z M6 3v5h7V3 M6 17v-5h8v5"/></svg></button>
         <button id="undoBtn" title="Отменить (Ctrl+Z)" aria-label="Отменить"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M7 5L3 9l4 4M3 9h9a5 5 0 010 10h-2"/></svg></button>
+        <button id="histBtn" title="Журнал: отменить сразу несколько действий (до 10)" aria-label="Журнал действий" aria-haspopup="menu" style="padding:5px 2px"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" style="width:10px"><path d="M5 8l5 5 5-5"/></svg></button>
         <button id="redoBtn" title="Вернуть (Ctrl+Y)" aria-label="Вернуть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M13 5l4 4-4 4M17 9H8a5 5 0 000 10h2"/></svg></button>
       </div>
       <div class="tabs" role="tablist" aria-label="Вкладки ленты">
@@ -318,6 +322,7 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" data-tool="copy" title="Копировать выбранное (CO)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="10" height="10"/><rect x="7" y="7" width="10" height="10"/></svg>Копиро-<br>вать<span class="k">CO</span></button>
         <button class="rbtn" id="rbRotate" title="Повернуть выбранное на 90° (RO)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><path d="M15.5 6.5A6.5 6.5 0 1 0 16.5 12M15.5 2.5v4h-4"/></svg>Повернуть<br>90°<span class="k">RO</span></button>
         <button class="rbtn" id="rbDelete" title="Удалить выбранное (DE или Delete)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M4 6h12M8 6V4h4v2M6 6l1 11h6l1-11"/></svg>Удалить<span class="k">DE</span></button>
+        <button class="rbtn" data-tool="demolish" title="Снести: отметить элемент как демонтируемый в текущей стадии (DM)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M4 7l5-4 3 3-5 4z M8.5 8.5L16 16"/></svg>Снести<span class="k">DM</span></button>
       </div><div class="grp-label">Изменить</div></div>
       <div class="grp"><div class="grp-items">
         <button class="rbtn" id="rbTypes" title="Типы стен и слои"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="14" height="14"/><path d="M6 3v14M8 3v14M13 3v14"/></svg>Типы<br>стен</button>
@@ -339,7 +344,13 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" data-view="plan" title="План этажа (1)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="14" height="14"/><path d="M3 10h7v7M10 3v4"/></svg>План</button>
         <button class="rbtn" data-view="d3" title="3D-вид (2)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8"/></svg>3D</button>
         <button class="rbtn" data-view="axo" title="Аксонометрия (3)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 3l7 3.5v7L10 17l-7-3.5v-7z M3 6.5L10 10l7-3.5M10 10v7"/></svg>Аксоно-<br>метрия</button>
+        <button class="rbtn" data-tool="callout" title="Узел: обведите рамкой участок плана (CL)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="9" height="9" stroke-dasharray="2 1.5"/><path d="M12 12l4 4"/><circle cx="16" cy="16" r="2"/></svg>Узел<span class="k">CL</span></button>
+        <button class="rbtn" id="rbSheet" title="Новый лист"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12"/><rect x="11" y="12" width="6.5" height="4"/></svg>Лист</button>
       </div><div class="grp-label">Создание</div></div>
+      <div class="grp"><div class="grp-items rstack">
+        <label for="phaseSel">Стадия вида</label>
+        <select id="phaseSel"><option value="obmer">Обмер</option><option value="demontazh">Демонтаж</option><option value="montazh">Монтаж</option><option value="mebel">Мебель</option><option value="all">Показать все</option></select>
+      </div><div class="grp-label">Стадии</div></div>
       <div class="grp"><div class="grp-items rstack">
         <label><input type="checkbox" id="cAxes" checked> Оси координат</label>
         <label><input type="checkbox" id="cTags" checked> Буквы стен</label>
@@ -382,8 +393,10 @@ details.more summary::-webkit-details-marker{display:none}
       <div class="vbar" id="vbar">
         <span class="scale" id="scale">1:100</span><span class="sep"></span>
         <button id="vbDetail" title="Уровень детализации стен">Детализация: средняя</button><span class="sep"></span>
-        <button id="vbStyle" title="Визуальный стиль">Стиль: тонированный</button>
+        <button id="vbStyle" title="Визуальный стиль">Стиль: тонированный</button><span class="sep"></span>
+        <label for="vbPhase" style="padding:0 2px">Стадия</label><select id="vbPhase" style="font-size:12px;padding:1px 4px"><option value="obmer">Обмер</option><option value="demontazh">Демонтаж</option><option value="montazh">Монтаж</option><option value="mebel">Мебель</option><option value="all">Показать все</option></select>
       </div>
+      <div id="sheetWrap" hidden><canvas id="sheetCv"></canvas></div>
       <button class="btn primary" id="finishBtn" hidden>Завершить стену</button>
       <div id="toast" role="status"></div>
     </div>
@@ -400,11 +413,11 @@ details.more summary::-webkit-details-marker{display:none}
       <details class="more">
         <summary>Примеры команд и настройки ▾</summary>
         <div class="ex" id="examples">
-          <button>на стену D добавь окно</button><button>от стены A сдвинь стену C на 1200 мм</button><button>скрой буквы</button><button>покажи буквы</button>
+          <button>на стену Д добавь окно</button><button>от стены А сдвинь стену В на 1200 мм</button><button>окно Б шириной 1500</button><button>сдвинь дверь А на 500 вправо</button><button>удали окно В</button><button>скрой буквы</button><button>покажи буквы</button>
           <button>оси 4 по 6000 на 3 по 4500</button><button>комната 5 на 4</button><button>дверь в южной стене</button><button>два окна в северной стене</button>
           <button>окно 1500 в восточной стене</button><button>перегородка 3 метра вниз</button><button>начни в точке 8 0</button>
           <button>стена 3 метра вправо</button><button>замкни</button><button>шкаф 2 на 0,6 высотой 2,2</button>
-          <button>проставь размеры</button><button>высота стен 3 метра</button><button>покажи аксонометрию</button><button>отмени</button>
+          <button>проставь размеры</button><button>высота стен 3 метра</button><button>покажи аксонометрию</button><button>отмени</button><button>отмени 3 шага</button><button>покажи журнал</button>
         </div>
         <label class="chk"><input type="checkbox" id="cAuto" checked> Выполнять сам после паузы 2 с (для голосового набора)</label>
         <label class="chk"><input type="checkbox" id="cSpeak"> Отвечать голосом</label>
@@ -442,6 +455,8 @@ details.more summary::-webkit-details-marker{display:none}
   <button data-act="png">Картинка вида (PNG)</button>
   <button data-act="install">Установить приложение…</button>
 </div>
+
+<div class="menu-list" id="histMenu" role="menu" hidden style="min-width:320px"></div>
 
 <div class="modal" id="lib" hidden role="dialog" aria-modal="true" aria-labelledby="libTitle">
   <div class="sheetd">
@@ -515,7 +530,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const $ = s => document.querySelector(s);
 const V3 = THREE.Vector3;
 const vp = $('#viewport'), labelsEl = $('#labels'), cursorEl = $('#cursor'), lenInput = $('#lenInput');
-const S = { tool:'select', view:'axo', style:'shaded', detail:'medium', snap:0.1, wallH:2.7, boxH:0.9, grid:false, dims:false, axes:true, infer:true, tags:true, axoAz:45, axoEl:35.264,
+const S = { phase:'all', viewId:null, tool:'select', view:'axo', style:'shaded', detail:'medium', snap:0.1, wallH:2.7, boxH:0.9, grid:false, dims:false, axes:true, infer:true, tags:true, axoAz:45, axoEl:35.264,
   doorW:0.9, doorH:2.1, winW:1.2, winH:1.4, winSill:0.9, penOnly:false, wallType:'ext', loc:'center', chain:true, dimRef:'faces', dimMode:'aligned', lineMode:'line', textSize:14 };
 let items = [], nextId = 1, selId = null, types = [];
 let sel = new Set();
@@ -577,7 +592,7 @@ function syncTypeThickness(){ for (const w of items) if (w.type === 'wall' && ty
 let C = {};
 function readColors(){
   const cs = getComputedStyle(document.documentElement);
-  for (const k of ['sheet','ink','accent','sel','temp','bad','poche','mass','mass-plan','grid','grid-major','glass','door','datum','ax-x','ax-y','ax-z','ok']) C[k] = cs.getPropertyValue('--' + k).trim() || '#888888';
+  for (const k of ['sheet','ink','accent','sel','temp','bad','poche','mass','mass-plan','grid','grid-major','glass','door','datum','ax-x','ax-y','ax-z','ok','exist','exist-edge','demo']) C[k] = cs.getPropertyValue('--' + k).trim() || '#888888';
 }
 
 /* ---------- three.js setup ---------- */
@@ -648,7 +663,7 @@ ctl.axo.screenSpacePanning = true;
 function configControls(){
   const hand = S.tool === 'orbit', fingers = hand || S.penOnly;
   for (const [k, c] of Object.entries(ctl)) c.enabled = k === S.view;
-  const c = ctl[S.view];
+  const c = ctl[S.view]; if (!c) return;
   if (S.view === 'plan'){
     c.mouseButtons = { LEFT: hand ? THREE.MOUSE.PAN : null, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.PAN };
     c.touches = { ONE: fingers ? THREE.TOUCH.PAN : null, TWO: THREE.TOUCH.DOLLY_PAN };
@@ -695,6 +710,15 @@ function makeMaterials(){
   M.datum = new THREE.LineDashedMaterial({ color:C.datum, dashSize:0.9, gapSize:0.25 });
   M.datumSel = new THREE.LineDashedMaterial({ color:C.sel, dashSize:0.9, gapSize:0.25 });
   M.detail = new THREE.LineBasicMaterial({ color:C.ink });
+  M.existFlat = new THREE.MeshBasicMaterial({ color:C.exist || '#cfd3d6', ...po });
+  M.exist3D = new THREE.MeshStandardMaterial({ color:C.exist || '#c4c8cb', roughness:0.9, ...po });
+  M.existEdge = new THREE.LineBasicMaterial({ color:C['exist-edge'] || '#8a939a' });
+  M.demoEdge = new THREE.LineDashedMaterial({ color:C.demo || '#d43a2a', dashSize:0.12, gapSize:0.07 });
+  M.demo3D = new THREE.MeshStandardMaterial({ color:C.demo || '#d43a2a', transparent:true, opacity:0.22, depthWrite:false });
+  M.callout = new THREE.LineDashedMaterial({ color:C.accent, dashSize:0.18, gapSize:0.1 });
+  // transparent so it sorts after the plan's transparent symbols (glass, grids) and covers them too
+  M.crop = new THREE.MeshBasicMaterial({ color:C.sheet, depthTest:false, depthWrite:false, transparent:true, opacity:1 });
+  M.cropEdge = new THREE.LineBasicMaterial({ color:C.ink, depthTest:false, transparent:true });
   M.gX = new THREE.LineBasicMaterial({ color:C['ax-x'], depthTest:false });
   M.gY = new THREE.LineBasicMaterial({ color:C['ax-y'], depthTest:false });
   M.gAl = new THREE.LineDashedMaterial({ color:C.accent, dashSize:0.15, gapSize:0.1, depthTest:false });
@@ -722,7 +746,7 @@ function disposeGroup(g){ for (const ch of [...g.children]){ ch.traverse(o => { 
 function part(geo, mat, edgeMat, id, x = 0, y = 0, z = 0){
   const m = new THREE.Mesh(geo, mat);
   m.position.set(x, y, z);
-  if (edgeMat) m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 15), edgeMat));
+  if (edgeMat){ const ls = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 15), edgeMat); if (edgeMat.isLineDashedMaterial) ls.computeLineDistances(); m.add(ls); }
   if (id) m.userData.id = id;
   m.castShadow = m.receiveShadow = S.view !== 'plan' && S.style === 'shaded' && !mat.transparent;
   return m;
@@ -740,7 +764,7 @@ function wallFrame(w){
 }
 function opsOf(w, L){
   if (!w.id) return [];
-  return items.filter(o => isOp(o) && o.wall === w.id).map(o => {
+  return items.filter(o => isOp(o) && o.wall === w.id && shown(o)).map(o => {
     const ww = Math.min(o.w, Math.max(L - 0.02, 0.05));
     const pos = clamp(o.pos, ww / 2, L - ww / 2);
     const bot = o.type === 'door' ? 0 : clamp(o.sill, 0.05, w.h - 0.15);
@@ -761,7 +785,7 @@ function xLines(p, d, q, e){
    Free end and straight continuation: a square end at the end point. */
 let CUTS = new Map();
 function computeCuts(){
-  const res = new Map(), walls = items.filter(w => w.type === 'wall');
+  const res = new Map(), walls = items.filter(w => w.type === 'wall' && shown(w));
   const F = new Map(walls.map(w => [w.id, wallFrame(w)]));
   const toLocal = (f, q) => { const v = q.clone().sub(f.p1); return { x:v.dot(f.dir), z:v.dot(f.nrm) }; };
   const lineThrough = (f, A, B) => { const a = toLocal(f, A), b = toLocal(f, B); if (Math.abs(b.z - a.z) < 1e-6) return null; const m = (b.x - a.x) / (b.z - a.z); return { c:a.x - m * a.z, m }; };
@@ -826,8 +850,9 @@ function prism(poly, y0, y1){
 function buildWall(w, prevMat, prevEdge){
   const f = wallFrame(w); if (f.L < 1e-4) return null;
   const g = new THREE.Group(); g.position.copy(f.p1); g.rotation.y = f.rotY;
-  const s = w.id && isSel(w.id), plan = S.view === 'plan';
-  const em = prevEdge || (s ? M.edgeSel : M.edge);
+  const s = w.id && isSel(w.id), plan = S.view === 'plan', st = w.id ? visState(w) : 'normal';
+  const em = prevEdge || (s ? M.edgeSel : st === 'demo' ? M.demoEdge : st === 'exist' ? M.existEdge : M.edge);
+  const phMat = st === 'demo' ? (plan ? M.pick : M.demo3D) : st === 'exist' ? (plan ? M.existFlat : (S.style === 'lines' ? M.lines : M.exist3D)) : null;
   const ops = opsOf(w, f.L), H = w.h, [c0, c1] = wallCuts(w);
   const layers = plan && S.detail === 'coarse' ? [{ m:'generic', s0:-w.t / 2, s1:w.t / 2 }] : wallLayers(w);
   const T0 = Math.min(...layers.map(l => l.s0)), T1 = Math.max(...layers.map(l => l.s1));
@@ -838,7 +863,7 @@ function buildWall(w, prevMat, prevEdge){
   for (const ly of layers){
     const poly = [{ x:cutX(c0, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s1), z:ly.s1 }, { x:cutX(c0, ly.s1), z:ly.s1 }];
     if (poly[1].x - poly[0].x < 1e-4 || poly[2].x - poly[3].x < 1e-4) continue;
-    const mat = prevMat || (s ? (plan || S.style === 'lines' ? M.selFlat : M.selShade) : layerMat(ly.m));
+    const mat = prevMat || (s ? (plan || S.style === 'lines' ? M.selFlat : M.selShade) : phMat || layerMat(ly.m));
     const add = (pp, y0, y1) => { const geo = prism(pp, y0, y1); if (!geo) return; const m = new THREE.Mesh(geo, mat); if (w.id) m.userData.id = w.id; m.castShadow = m.receiveShadow = !plan && S.style === 'shaded' && !mat.transparent; g.add(m); };
     const xmin = Math.min(poly[0].x, poly[3].x) - 1, xmax = Math.max(poly[1].x, poly[2].x) + 1;
     // piers between openings (full height), and the parts below and above each opening
@@ -884,14 +909,15 @@ function buildWall(w, prevMat, prevEdge){
   if (segs.length) g.add(lineOf(segs, em, true));
   if (plan) for (const o of ops) planSymbol(g, o, w.t);
   else for (const o of ops){
-    const os = isSel(o.o.id), oe = os ? M.edgeSel : M.edge;
-    if (o.o.type === 'window') g.add(part(new THREE.BoxGeometry(o.b - o.a, o.top - o.bot, 0.02), matFor('glass', os), oe, o.o.id, o.pos, (o.bot + o.top) / 2, 0));
-    else g.add(part(new THREE.BoxGeometry(o.b - o.a - 0.01, o.top - 0.005, 0.045), matFor('door', os), oe, o.o.id, o.pos, (o.top - 0.005) / 2, 0));
+    const os = isSel(o.o.id), ost = visState(o.o), oe = os ? M.edgeSel : ost === 'demo' ? M.demoEdge : ost === 'exist' ? M.existEdge : M.edge;
+    const pm = os ? null : ost === 'demo' ? M.demo3D : ost === 'exist' ? M.exist3D : null;
+    if (o.o.type === 'window') g.add(part(new THREE.BoxGeometry(o.b - o.a, o.top - o.bot, 0.02), pm || matFor('glass', os), oe, o.o.id, o.pos, (o.bot + o.top) / 2, 0));
+    else g.add(part(new THREE.BoxGeometry(o.b - o.a - 0.01, o.top - 0.005, 0.045), pm || matFor('door', os), oe, o.o.id, o.pos, (o.top - 0.005) / 2, 0));
   }
   return g;
 }
 function planSymbol(g, o, t){
-  const s = isSel(o.o.id), em = s ? M.edgeSel : M.edge, wd = o.b - o.a;
+  const ost = visState(o.o), s = isSel(o.o.id), em = s ? M.edgeSel : ost === 'demo' ? M.demoEdge : ost === 'exist' ? M.existEdge : M.edge, wd = o.b - o.a;
   if (o.o.type === 'window'){
     g.add(part(new THREE.BoxGeometry(wd, 0.4, t), s ? M.selFlat : M.glassFlat, em, o.o.id, o.pos, 0.2, 0));
     const y = 0.42;
@@ -906,8 +932,10 @@ function planSymbol(g, o, t){
   }
 }
 function buildBox(it, prevMat, prevEdge){
-  const s = it.id && isSel(it.id);
-  return part(new THREE.BoxGeometry(it.w, it.h, it.d), prevMat || matFor('mass', s), prevEdge || (s ? M.edgeSel : M.edge), it.id, it.x + it.w / 2, it.h / 2, it.z + it.d / 2);
+  const s = it.id && isSel(it.id), st = it.id ? visState(it) : 'normal', plan = S.view === 'plan';
+  const pm = s ? null : st === 'demo' ? (plan ? M.pick : M.demo3D) : st === 'exist' ? (plan ? M.existFlat : M.exist3D) : null;
+  const em = s ? M.edgeSel : st === 'demo' ? M.demoEdge : st === 'exist' ? M.existEdge : M.edge;
+  return part(new THREE.BoxGeometry(it.w, it.h, it.d), prevMat || pm || matFor('mass', s), prevEdge || em, it.id, it.x + it.w / 2, it.h / 2, it.z + it.d / 2);
 }
 // building grids (datum lines) are shown in every view, on the ground
 function buildDatum(){
@@ -918,10 +946,11 @@ function buildDatum(){
     datum.add(l);
   }
 }
-function rebuild(){
+function rebuild(quiet){
   disposeGroup(model);
   CUTS = computeCuts();
   for (const it of items){
+    if (!shown(it)) continue;
     const obj = it.type === 'wall' ? buildWall(it) : it.type === 'box' ? buildBox(it) : null;
     if (obj) model.add(obj);
   }
@@ -929,6 +958,8 @@ function rebuild(){
   shadowGround.visible = S.view !== 'plan' && S.style === 'shaded';
   const za = axesG.getObjectByName('zaxis'); if (za) za.visible = S.view !== 'plan';
   annoDirty = true;
+  updateCrop();
+  if (quiet) return;
   if (S.tool === 'select' && optSel !== [...sel].join(',')){ optSel = [...sel].join(','); renderOptbar(); }
   updateRibbonState(); updatePanel(); renderTree(); scheduleSave();
 }
@@ -937,7 +968,9 @@ let optSel = '';
 /* ---------- dimensions & 2D annotation (plan only) ---------- */
 let annoDirty = true, annoZoom = 0;
 const tickGeo = new THREE.BoxGeometry(1, 0.001, 1);
-const wpp = () => (planCam.top - planCam.bottom) / planCam.zoom / (cv.clientHeight || 1);
+// RENDER is set while a view is drawn into an image for a sheet: projection and pixel sizes then follow that image
+let RENDER = null;
+const wpp = () => { const c = RENDER && RENDER.cam.isOrthographicCamera ? RENDER.cam : planCam; return (c.top - c.bottom) / c.zoom / ((RENDER ? RENDER.h : cv.clientHeight) || 1); };
 function refPoint(r){
   if (!r) return null;
   if (r.k === 'p') return { x:r.x, z:r.z };
@@ -1016,7 +1049,8 @@ function tempDims(){
 function rebuildAnno(){
   disposeGroup(anno); annoZoom = planCam.zoom; annoDirty = false;
   if (S.view !== 'plan') return;
-  for (const d of items) if (d.type === 'dim') addDimGeom(d, isSel(d.id) ? M.dimSel : M.dim, isSel(d.id) ? M.dimTickSel : M.dimTick);
+  for (const d of items) if (d.type === 'dim' && dimShown(d)) addDimGeom(d, isSel(d.id) ? M.dimSel : M.dim, isSel(d.id) ? M.dimTickSel : M.dimTick);
+  if ((RENDER ? RENDER.view : curView()).kind === 'plan') for (const v of views) if (v.kind === 'detail' && v.region){ const r = v.region, Y = 29.5; anno.add(lineOf([new V3(r.x0, Y, r.z0), new V3(r.x1, Y, r.z0), new V3(r.x1, Y, r.z1), new V3(r.x0, Y, r.z1), new V3(r.x0, Y, r.z0)], M.callout)); }
   for (const d of tempDims()) addDimGeom(d, M.dimTmp, M.dimTickTmp);
   for (const it of items){
     const m = isSel(it.id) ? M.edgeSel : M.detail;
@@ -1048,6 +1082,7 @@ function pickFlat(px, py){
     if (it.type === 'grid'){ const A = toScreen(it.x1, 0, it.z1), B = toScreen(it.x2, 0, it.z2); take(it.id, segDist(px, py, A, B)); for (const e of gridBubbles(it)) take(it.id, Math.hypot(e.sx - px, e.sy - py) - 10); continue; }
     if (S.view !== 'plan') continue;
     if (it.type === 'dim'){
+      if (!dimShown(it)) continue;
       const G = dimGeom(it); if (!G) continue;
       const { u, n, o, arr, off } = G;
       const A = toScreen(o.x + u.x * arr[0].t + n.x * off, 0, o.z + u.z * arr[0].t + n.z * off), B = toScreen(o.x + u.x * arr[arr.length - 1].t + n.x * off, 0, o.z + u.z * arr[arr.length - 1].t + n.z * off);
@@ -1111,16 +1146,101 @@ function addGridSet(nx, sx, ny, sy, x0 = 0, z0 = 0){
 
 /* ---------- history ---------- */
 function snapshot(){ return JSON.stringify({ items, nextId, types }); }
-function pushUndo(){ undoStack.push(snapshot()); if (undoStack.length > 300) undoStack.shift(); redoStack.length = 0; }
+// history entries: { s: state before the action, label: optional (voice command text) }; names are worked out by comparing states
+function pushUndo(label){ undoStack.push({ s:snapshot(), label:label || null }); if (undoStack.length > 300) undoStack.shift(); redoStack.length = 0; }
 function restore(s){ const o = JSON.parse(s); items = o.items; nextId = o.nextId; if (o.types) types = o.types; setSel([...sel], selId); rebuild(); renderOptbar(); }
-function undo(){ if (!undoStack.length) return toast('Нечего отменять'); endDraw(); redoStack.push(snapshot()); restore(undoStack.pop()); }
-function redo(){ if (!redoStack.length) return toast('Нечего возвращать'); endDraw(); undoStack.push(snapshot()); restore(redoStack.pop()); }
+function undo(n = 1){
+  n = Math.min(Math.max(1, n | 0), undoStack.length); if (!n){ toast('Нечего отменять'); return []; }
+  endDraw(); let cur = snapshot(); const names = [];
+  for (let i = 0; i < n; i++){ const e = undoStack.pop(); names.push(histName(e, cur)); redoStack.push({ s:cur, label:e.label }); cur = e.s; }
+  restore(cur); toast(n === 1 ? 'Отменено: ' + names[0] : `Отменено действий: ${n}`); return names;
+}
+function redo(n = 1){
+  n = Math.min(Math.max(1, n | 0), redoStack.length); if (!n){ toast('Нечего возвращать'); return []; }
+  endDraw(); let cur = snapshot(); const names = [];
+  for (let i = 0; i < n; i++){ const e = redoStack.pop(); undoStack.push({ s:cur, label:e.label }); names.push(histName({ s:cur, label:e.label }, e.s)); cur = e.s; }
+  restore(cur); toast(n === 1 ? 'Возвращено: ' + names[0] : `Возвращено действий: ${n}`); return names;
+}
+function elWord(it){
+  if (!it) return 'элемент';
+  if (TAGGED.includes(it.type) && it.tag) return `${CAT[it.type].toLowerCase()} ${it.tag}`;
+  return { grid:'ось ' + (it.name || ''), dim:'размер', line:'линия', circle:'окружность', text:'текст «' + String(it.s || '').slice(0, 14) + '»' }[it.type] || it.type;
+}
+// "Добавлено: окно Д", "Удалено: стена Б", "Изменено: дверь А, окно Б"…
+function histName(e, afterS){
+  const d = histDiff(e, afterS);
+  return e.label ? `«${e.label.slice(0, 36)}» — ${d.charAt(0).toLowerCase() + d.slice(1)}` : d;
+}
+function histDiff(e, afterS){
+  let a, b; try { a = JSON.parse(e.s); b = JSON.parse(afterS); } catch(err){ return 'Изменение'; }
+  const A = new Map(a.items.map(i => [i.id, i])), B = new Map(b.items.map(i => [i.id, i]));
+  const add = b.items.filter(i => !A.has(i.id) && i.type !== 'dim'), del = a.items.filter(i => !B.has(i.id) && i.type !== 'dim');
+  const chg = b.items.filter(i => A.has(i.id) && JSON.stringify(A.get(i.id)) !== JSON.stringify(i) && i.type !== 'dim');
+  const list = arr => { const main = arr.filter(i => TAGGED.includes(i.type) || i.type === 'grid' || is2D(i)); const src = main.length ? main : arr; return src.slice(0, 3).map(elWord).join(', ') + (src.length > 3 ? ` и ещё ${src.length - 3}` : ''); };
+  const parts = [];
+  if (add.length) parts.push('Добавлено: ' + list(add));
+  if (del.length) parts.push('Удалено: ' + list(del));
+  if (chg.length && !add.length && !del.length) parts.push('Изменено: ' + list(chg));
+  if (!parts.length){
+    if (JSON.stringify(a.types) !== JSON.stringify(b.types)) return 'Изменён тип стены';
+    const dims = b.items.filter(i => i.type === 'dim').length - a.items.filter(i => i.type === 'dim').length;
+    return dims > 0 ? 'Добавлены размеры' : dims < 0 ? 'Удалены размеры' : 'Изменены размеры';
+  }
+  return parts.join('; ');
+}
+function historyList(max = 10){
+  const out = [], cur = snapshot();
+  for (let i = undoStack.length - 1, k = 0; i >= 0 && k < max; i--, k++) out.push(histName(undoStack[i], i + 1 < undoStack.length ? undoStack[i + 1].s : cur));
+  return out;
+}
 
 /* ---------- wall letters: A…Z, then AA, AB, AC… (kept for the life of a wall, so voice commands stay valid) ---------- */
-function tagOf(n){ let s = ''; n++; while (n > 0){ const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); } return s; }
-function nextWallTag(){ const used = new Set(items.filter(w => w.type === 'wall' && w.tag).map(w => w.tag)); let i = 0; while (used.has(tagOf(i))) i++; return tagOf(i); }
-function ensureTags(){ const seen = new Set(); for (const w of items) if (w.type === 'wall'){ if (!w.tag || seen.has(w.tag)) w.tag = null; else seen.add(w.tag); } for (const w of items) if (w.type === 'wall' && !w.tag){ w.tag = nextWallTag(); } }
-const wallByTag = t => items.find(w => w.type === 'wall' && w.tag === String(t).toUpperCase());
+// Russian letters without Ё, Й, Ъ, Ы, Ь (hard to say on their own); each category counts from А: walls А, Б…; doors А, Б…; windows А, Б…
+const RU = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ';
+const TAGGED = ['wall', 'door', 'window', 'box'];
+const TAG_RE = new RegExp('^[' + RU + ']{1,3}$');
+const CAT = { wall:'Стена', door:'Дверь', window:'Окно', box:'Объём' };
+function tagOf(n){ let s = ''; n++; while (n > 0){ const r = (n - 1) % RU.length; s = RU[r] + s; n = Math.floor((n - 1) / RU.length); } return s; }
+function nextTag(type){ const used = new Set(items.filter(i => i.type === type && i.tag).map(i => i.tag)); let i = 0; while (used.has(tagOf(i))) i++; return tagOf(i); }
+const nextWallTag = () => nextTag('wall');
+function ensureTags(){
+  for (const ty of TAGGED){
+    const seen = new Set();
+    for (const it of items) if (it.type === ty){ if (!it.tag || !TAG_RE.test(it.tag) || seen.has(it.tag)) it.tag = null; else seen.add(it.tag); }
+    for (const it of items) if (it.type === ty && !it.tag) it.tag = nextTag(ty);
+  }
+}
+const byTag = (type, t) => items.find(i => i.type === type && i.tag === String(t).toUpperCase().replace(/Ё/g, 'Е'));
+const wallByTag = t => byTag('wall', t);
+const tagName = it => it && it.tag ? `${CAT[it.type] || ''} ${it.tag}`.trim() : (it ? '№' + it.id : '');
+const tagNameL = it => it && it.tag ? `${(CAT[it.type] || '').toLowerCase()} ${it.tag}`.trim() : (it ? '№' + it.id : '');
+const fem = it => it && (it.type === 'wall' || it.type === 'door');
+
+/* ---------- phases (Revit "Стадии"): each element has a phase it was built in and, optionally, a phase it is demolished in ---------- */
+const PHASES = [{ k:'obmer', n:'Обмер' }, { k:'demontazh', n:'Демонтаж' }, { k:'montazh', n:'Монтаж' }, { k:'mebel', n:'Мебель' }];
+const PH_IDX = Object.fromEntries(PHASES.map((p, i) => [p.k, i]));
+const PHASED = ['wall', 'door', 'window', 'box'];
+const phName = k => k === 'all' ? 'Показать все' : (PHASES.find(p => p.k === k) || { n:'—' }).n;
+const newPhase = () => S.phase === 'all' ? 'montazh' : S.phase;
+// 'normal' — drawn as usual; 'exist' — built in an earlier phase (grey); 'demo' — demolished in this phase (red dashed); 'hide'
+function visState(it){
+  if (!it || !PHASED.includes(it.type)) return 'normal';
+  let host = 'normal';
+  if (isOp(it)){ host = visState(byId(it.wall)); if (host === 'hide') return 'hide'; }
+  const c = PH_IDX[it.ph] ?? 2, d = it.dem ? (PH_IDX[it.dem] ?? 99) : 99;
+  let st;
+  if (S.phase === 'all') st = d < 99 ? 'demo' : 'normal';
+  else {
+    const P = PH_IDX[S.phase] ?? 2;
+    if (c > P) return 'hide';
+    if (d <= P) st = d === P ? 'demo' : 'hide';
+    else st = c < P ? 'exist' : 'normal';
+  }
+  if (st === 'hide') return 'hide';
+  return host === 'demo' ? 'demo' : st;
+}
+const shown = it => visState(it) !== 'hide';
+const dimShown = d => d.refs.every(r => !r.id || shown(byId(r.id)));
 // moving a wall drags the ends of walls joined to it (corners and tees), like Revit
 function moveWallJoined(w, dx, dz){
   const f = wallFrame(w), P1 = new V3(w.x1, 0, w.z1), P2 = new V3(w.x2, 0, w.z2);
@@ -1140,7 +1260,7 @@ function moveWallJoined(w, dx, dz){
 function addWall(a, b, t, h = S.wallH, extra = {}){
   const wt = extra.wt !== undefined ? extra.wt : (t == null ? S.wallType : '');
   const ty = typeById(wt);
-  const it = { id:nextId++, type:'wall', x1:r4(a.x), z1:r4(a.z), x2:r4(b.x), z2:r4(b.z), t:ty ? typeT(ty) : (t || 0.2), h, wt:ty ? wt : '', flipL:!!extra.flipL, tag:nextWallTag() };
+  const it = { id:nextId++, type:'wall', x1:r4(a.x), z1:r4(a.z), x2:r4(b.x), z2:r4(b.z), t:ty ? typeT(ty) : (t || 0.2), h, wt:ty ? wt : '', flipL:!!extra.flipL, tag:nextWallTag(), ph:extra.ph || newPhase() };
   items.push(it); return it;
 }
 function addRect(a, b, h = S.wallH, extra = {}){
@@ -1151,11 +1271,11 @@ function addRect(a, b, h = S.wallH, extra = {}){
   return out;
 }
 function addBox(a, b, h = S.boxH){
-  const it = { id:nextId++, type:'box', x:r4(Math.min(a.x, b.x)), z:r4(Math.min(a.z, b.z)), w:r4(Math.abs(b.x - a.x)), d:r4(Math.abs(b.z - a.z)), h };
+  const it = { id:nextId++, type:'box', x:r4(Math.min(a.x, b.x)), z:r4(Math.min(a.z, b.z)), w:r4(Math.abs(b.x - a.x)), d:r4(Math.abs(b.z - a.z)), h, tag:nextTag('box'), ph:newPhase() };
   items.push(it); return it;
 }
 function addOp(type, wall, pos, w, h, sill = 0, extra = {}){
-  const it = { id:nextId++, type, wall, pos:r4(pos), w, h, sill:type === 'door' ? 0 : sill, flip:false, hand:false, ...extra };
+  const it = { id:nextId++, type, wall, pos:r4(pos), w, h, sill:type === 'door' ? 0 : sill, flip:false, hand:false, ...extra, tag:nextTag(type), ph:extra.ph || newPhase() };
   items.push(it); return it;
 }
 function loadSample(){
@@ -1163,19 +1283,44 @@ function loadSample(){
   addGrid(new V3(-3,0,-3.9), new V3(-3,0,3.9), '1'); addGrid(new V3(0.8,0,-3.9), new V3(0.8,0,3.9), '2'); addGrid(new V3(3,0,-3.9), new V3(3,0,3.9), '3');
   addGrid(new V3(-4.6,0,2.25), new V3(4.6,0,2.25), 'А'); addGrid(new V3(-4.6,0,-2.25), new V3(4.6,0,-2.25), 'Б');
   const [n, e, s, w] = addRect(new V3(-3,0,-2.25), new V3(3,0,2.25), 2.7, { wt:'ext' });
-  const mid = addWall(new V3(0.8,0,-2.25), new V3(0.8,0,2.25), null, 2.7, { wt:'part120' });
-  addBox(new V3(-2.7,0,-1.95), new V3(-0.4,0,-1.35), 0.9);
-  addBox(new V3(1.2,0,-1.95), new V3(2.7,0,0.05), 0.5);
-  addBox(new V3(-1.0,0,2.5), new V3(1.0,0,3.5), 0.15);
-  addOp('door', s.id, 3.0, 0.9, 2.1);
-  addOp('door', mid.id, 2.3, 0.8, 2.1, 0, { hand:true });
-  addOp('window', n.id, 1.4, 1.2, 1.4, 0.9);
-  addOp('window', n.id, 5.1, 1.0, 1.4, 0.9);
-  addOp('window', e.id, 3.25, 1.2, 1.4, 0.9);
-  addOp('window', w.id, 1.75, 1.5, 1.4, 0.9);
+  // phases: survey (existing house) → demolition of the old partition → new partition and porch → furniture
+  for (const x of [n, e, s, w]) x.ph = 'obmer';
+  const mid = addWall(new V3(0.8,0,-2.25), new V3(0.8,0,2.25), null, 2.7, { wt:'part120', ph:'obmer' });
+  mid.dem = 'demontazh';
+  const nw = addWall(new V3(0.3,0,-2.25), new V3(0.3,0,2.25), null, 2.7, { wt:'part120', ph:'montazh' });
+  addBox(new V3(-2.7,0,-1.95), new V3(-0.4,0,-1.35), 0.9).ph = 'mebel';
+  addBox(new V3(1.2,0,-1.95), new V3(2.7,0,0.05), 0.5).ph = 'mebel';
+  addBox(new V3(-1.0,0,2.5), new V3(1.0,0,3.5), 0.15).ph = 'montazh';
+  addOp('door', s.id, 3.0, 0.9, 2.1, 0, { ph:'obmer' });
+  addOp('door', mid.id, 2.3, 0.8, 2.1, 0, { hand:true, ph:'obmer' });
+  addOp('door', nw.id, 2.3, 0.8, 2.1, 0, { hand:true, ph:'montazh' });
+  addOp('window', n.id, 1.4, 1.2, 1.4, 0.9, { ph:'obmer' });
+  addOp('window', n.id, 5.1, 1.0, 1.4, 0.9, { ph:'obmer' });
+  addOp('window', e.id, 3.25, 1.2, 1.4, 0.9, { ph:'obmer' });
+  addOp('window', w.id, 1.75, 1.5, 1.4, 0.9, { ph:'obmer' });
   items.push({ id:nextId++, type:'text', x:-2.6, z:1.6, s:'Кухня-гостиная', size:14 });
   items.push({ id:nextId++, type:'text', x:1.2, z:1.6, s:'Спальня', size:14 });
   autoDims();
+  for (const it of items) if (!it.ph && PHASED.includes(it.type)) it.ph = 'obmer';
+  views = SAMPLE_VIEWS();
+}
+// the example project shows a typical renovation set: one plan per phase, a detail and sheets
+function SAMPLE_VIEWS(){
+  const v = DEFAULT_VIEWS();
+  v.find(x => x.id === 'v-3d').phase = 'mebel';
+  v.splice(1, 0,
+    { id:'v-p-obmer', kind:'plan', name:'Обмерный план', phase:'obmer' },
+    { id:'v-p-dem', kind:'plan', name:'План демонтажа', phase:'demontazh' },
+    { id:'v-p-mont', kind:'plan', name:'План монтажа', phase:'montazh' },
+    { id:'v-p-meb', kind:'plan', name:'План расстановки мебели', phase:'mebel' },
+    { id:'v-d1', kind:'detail', name:'Узел 1', region:{ x0:2.2, z0:-2.85, x1:3.6, z1:-1.45 }, scale:20, phase:'montazh' });
+  const sh = (id, num, name, vps) => ({ id, kind:'sheet', num, name, size:'A3', author:'', checker:'', stage:'П', vps });
+  v.push(
+    sh('s-1', 'А101', 'Обмерный план', [{ id:'vp1', view:'v-p-obmer', x:35, y:20, scale:50, w:150, h:110 }]),
+    sh('s-2', 'А102', 'План демонтажа', [{ id:'vp2', view:'v-p-dem', x:35, y:20, scale:50, w:150, h:110 }]),
+    sh('s-3', 'А103', 'План монтажа и узел 1', [{ id:'vp3', view:'v-p-mont', x:30, y:20, scale:50, w:150, h:110 }, { id:'vp4', view:'v-d1', x:250, y:20, scale:20, w:100, h:100 }]),
+    sh('s-4', 'А104', 'План мебели и 3D-вид', [{ id:'vp5', view:'v-p-meb', x:30, y:20, scale:50, w:150, h:110 }, { id:'vp6', view:'v-3d', x:250, y:20, scale:100, w:140, h:105 }]));
+  return v;
 }
 function markEdited(){ if (proj.sample){ proj.sample = false; } }
 
@@ -1219,10 +1364,10 @@ function copyItems(ids, dx, dz){
     const it = byId(id); if (!movable(it)) continue;
     const c = JSON.parse(JSON.stringify(it)); c.id = nextId++;
     if (c.type === 'grid') c.name = nextGridName(Math.abs(c.z2 - c.z1) >= Math.abs(c.x2 - c.x1));
-    if (c.type === 'wall') c.tag = null;
+    if (TAGGED.includes(c.type)) c.tag = null;
     if (c.type === 'dim' && c.refs.some(r => r.k !== 'p')) continue;
-    translateItem(c, dx, dz); items.push(c); if (c.type === 'wall') c.tag = nextWallTag(); map.set(id, c.id); made.push(c.id);
-    if (it.type === 'wall') for (const o of items.filter(o => isOp(o) && o.wall === it.id)){ const co = { ...o, id:nextId++, wall:c.id }; items.push(co); }
+    translateItem(c, dx, dz); items.push(c); if (TAGGED.includes(c.type)) c.tag = nextTag(c.type); map.set(id, c.id); made.push(c.id);
+    if (it.type === 'wall') for (const o of items.filter(o => isOp(o) && o.wall === it.id)){ const co = { ...o, id:nextId++, wall:c.id, tag:null }; co.tag = nextTag(o.type); items.push(co); }
   }
   return made;
 }
@@ -1253,13 +1398,14 @@ function pick(px, py){
   const h = ray.intersectObjects(model.children, true).find(x => x.object.isMesh && x.object.userData.id);
   return h ? h.object.userData.id : null;
 }
-function toScreen(x, y, z){ const v = new V3(x, y, z).project(cam()); return { x:(v.x + 1) / 2 * cv.clientWidth, y:(1 - v.y) / 2 * cv.clientHeight, ok:v.z > -1 && v.z < 1 }; }
+function toScreen(x, y, z){ const c = RENDER ? RENDER.cam : cam(), W = RENDER ? RENDER.w : cv.clientWidth, H = RENDER ? RENDER.h : cv.clientHeight; const v = new V3(x, y, z).project(c); return { x:(v.x + 1) / 2 * W, y:(1 - v.y) / 2 * H, ok:v.z > -1 && v.z < 1 }; }
 // world size of a few screen pixels at the cursor (works in plan, axonometry and perspective)
 function pxWorld(px, py, n){ const a = groundAt(px, py), b = groundAt(px + n, py); return a && b ? a.distanceTo(b) : n * wpp(); }
 function candidates(){
   const out = [];
   const grs = items.filter(g => g.type === 'grid');
   for (const it of items){
+    if (!shown(it)) continue;
     if (it.type === 'wall'){ out.push({ x:it.x1, z:it.z1, k:'end' }, { x:it.x2, z:it.z2, k:'end' }); }
     else if (it.type === 'box'){ out.push({ x:it.x, z:it.z, k:'end' }, { x:it.x + it.w, z:it.z, k:'end' }, { x:it.x, z:it.z + it.d, k:'end' }, { x:it.x + it.w, z:it.z + it.d, k:'end' }); }
     else if (it.type === 'line'){ out.push({ x:it.x1, z:it.z1, k:'end' }, { x:it.x2, z:it.z2, k:'end' }); }
@@ -1563,6 +1709,19 @@ function applyTyped(){
   markEdited(); lenInput.value = ''; updatePreview(); updateHint();
 }
 // run a drawing click at an exact model point (typed lengths)
+// Revit "Demolish": the element stays in the model and is marked as demolished in the current phase
+function demolishIt(it, voiceCall, undoOnly){
+  if (!it || !PHASED.includes(it.type)) return 'Это не стена, дверь, окно или объём';
+  const ph = S.phase;
+  if (ph === 'all' || PH_IDX[ph] < PH_IDX.demontazh) return 'Снос возможен на стадии «Демонтаж» и позже. Переключите стадию вида';
+  if (PH_IDX[it.ph] > PH_IDX[ph]) return 'Элемент ещё не возведён на этой стадии';
+  if (undoOnly && !it.dem) return tagNameL(it) + ' и так не сносится';
+  if (!voiceCall){ pushUndo(it.dem ? 'Отмена сноса' : 'Снос'); markEdited(); }
+  if (it.dem){ it.dem = null; rebuild(); return 'Снос отменён: ' + tagNameL(it); }
+  if (PH_IDX[it.ph] === PH_IDX[ph]){ items = items.filter(x => x !== it && !(isOp(x) && x.wall === it.id)); clearSel(); rebuild(); return 'Элемент новый на этой стадии, поэтому удалён'; }
+  it.dem = ph; rebuild(); return `Снесено на стадии «${phName(ph)}»: ${tagNameL(it)}`;
+}
+function demolishAt(x, y){ const id = pick(x, y); if (!id){ toast('Щёлкните элемент, который нужно снести'); return; } toast(demolishIt(byId(id))); }
 function clickAt(p){
   const s = toScreen(p.x, 0, p.z);
   const realSnap = snap;
@@ -1636,6 +1795,7 @@ cv.addEventListener('pointerdown', e => {
       if (!ctrl) startDrag(id, x, y);
     } else box = { x0:x, y0:y, ctrl };
   }
+  if (S.tool === 'callout' && e.button === 0 && S.view === 'plan') box = { x0:x, y0:y, callout:true };
   if (e.pointerType !== 'mouse'){
     clearTimeout(lpT);
     lpT = setTimeout(() => { if (down && !down.moved && !drag && (D.start || DD.refs.length)){ down = null; finishAction(); } }, 600);
@@ -1662,10 +1822,15 @@ cv.addEventListener('pointerup', e => {
   if (drag){ const moved = drag.pushed; drag = null; const d0 = down; down = null; if (!moved && d0 && !d0.moved) click(x, y, e.shiftKey, false); return; }
   if (box){
     const b0 = box; box = null; $('#selbox').hidden = true;
-    if (down && down.moved){ down = null; boxSelect(b0, x, y); return; }
+    if (down && down.moved){
+      down = null;
+      if (b0.callout){ const a = groundAt(b0.x0, b0.y0), b = groundAt(x, y); if (a && b) makeCallout(a, b); setTool('select'); return; }
+      boxSelect(b0, x, y); return;
+    }
   }
   if (!down) return;
   const d = down, moved = Math.hypot(x - d.x, y - d.y); down = null;
+  if (S.tool === 'demolish' && d.b === 0 && moved <= 6){ demolishAt(x, y); return; }
   if (moved > 6){
     if (d.b === 0 && d.type !== 'mouse' && drawing()){ if (!d.hadStart) click(d.x, d.y, e.shiftKey, false); click(x, y, e.shiftKey, false); }
     return;
@@ -1683,6 +1848,7 @@ function boxSelect(b, x, y){
   const hit = [];
   for (const it of items){
     if ((it.type === 'dim' || is2D(it)) && S.view !== 'plan') continue;
+    if (!shown(it) || (it.type === 'dim' && !dimShown(it))) continue;
     const pts = itemPts(it).map(p => toScreen(p.x, 0, p.z));
     if (it.type === 'wall' || it.type === 'box'){ const h = it.h; pts.push(...itemPts(it).map(p => toScreen(p.x, h, p.z))); }
     if (!pts.length) continue;
@@ -1737,7 +1903,7 @@ snap = function(px, py, from, ortho){ if (snapOverride){ GUIDES = []; return sna
 /* ---------- labels ---------- */
 const pool = [];
 let editing = null;
-function updateLabels(){
+function buildLabels(){
   const out = [], plan = S.view === 'plan';
   const onWall = (f, s, off, y, t, cls) => { const p = f.p1.clone().addScaledVector(f.dir, s).addScaledVector(f.nrm, off); out.push({ x:p.x, y, z:p.z, t, cls }); };
   if (S.dims){
@@ -1746,14 +1912,30 @@ function updateLabels(){
       else if (it.type === 'box' && !plan) out.push({ x:it.x + it.w / 2, y:it.h + 0.18, z:it.z + it.d / 2, t:`${mm(it.w)}×${mm(it.d)}×${mm(it.h)}` });
     }
   }
-  if (S.axes){
+  if (S.axes && !RENDER){
     out.push({ x:1.45, y:0, z:0, t:'X', cls:'ax x' }, { x:0, y:0, z:-1.45, t:'Y', cls:'ax y' });
     if (!plan) out.push({ x:0, y:1.45, z:0, t:'Z', cls:'ax z' });
   }
   for (const gr of items) if (gr.type === 'grid') for (const b of gridBubbles(gr)) if (b.ok) out.push({ sx:b.sx, sy:b.sy, t:gr.name, cls:'gb' + (isSel(gr.id) ? ' sel' : '') });
-  if (S.tags && plan) for (const w of items) if (w.type === 'wall' && w.tag){ const f = wallFrame(w); const ops = opsOf(w, f.L); let s = f.L / 2; for (const o of ops) if (s > o.a - 0.15 && s < o.b + 0.15) s = o.b + 0.35 < f.L ? o.b + 0.35 : o.a - 0.35; const p = f.p1.clone().addScaledVector(f.dir, s); out.push({ x:p.x, y:0, z:p.z, t:w.tag, cls:'wt' + (isSel(w.id) ? ' sel' : '') }); }
+  if (S.tags && plan) for (const w of items){
+    if (!w.tag || !shown(w)) continue;
+    const sc = isSel(w.id) ? ' sel' : '';
+    if (w.type === 'wall'){
+      const f = wallFrame(w), ops = opsOf(w, f.L); let s = f.L / 2;
+      for (const o of ops) if (s > o.a - 0.15 && s < o.b + 0.15) s = o.b + 0.35 < f.L ? o.b + 0.35 : o.a - 0.35;
+      const p = f.p1.clone().addScaledVector(f.dir, s); out.push({ x:p.x, y:0, z:p.z, t:w.tag, cls:'wt' + sc });
+    } else if (isOp(w)){
+      // door and window marks sit just inside the wall, on the side away from the dimension strings
+      const wl = byId(w.wall); if (!wl) continue;
+      const f = wallFrame(wl), op = opsOf(wl, f.L).find(o => o.o.id === w.id); if (!op) continue;
+      const c = bounds().getCenter(new V3()), mid = f.p1.clone().addScaledVector(f.dir, op.pos);
+      const inSide = Math.sign(c.clone().sub(mid).dot(f.nrm)) || 1;
+      const p = mid.addScaledVector(f.nrm, inSide * (wl.t / 2 + 0.32)); out.push({ x:p.x, y:0, z:p.z, t:w.tag, cls:(w.type === 'door' ? 'wt dr' : 'wt wn') + sc });
+    } else if (w.type === 'box') out.push({ x:w.x + w.w / 2, y:0, z:w.z + w.d / 2, t:w.tag, cls:'wt bx' + sc });
+  }
   if (plan){
-    for (const d of items) if (d.type === 'dim') dimTexts(d, isSel(d.id) ? 'dl sel' : 'dl', out);
+    for (const d of items) if (d.type === 'dim' && dimShown(d)) dimTexts(d, isSel(d.id) ? 'dl sel' : 'dl', out);
+    if ((RENDER ? RENDER.view : curView()).kind === 'plan') for (const v of views) if (v.kind === 'detail' && v.region) out.push({ x:v.region.x1, y:0, z:v.region.z0, t:v.name + ' · 1:' + (v.scale || 20), cls:'co', open:v.id });
     for (const d of tempDims()) dimTexts(d, 'temp', out);
     if (S.tool === 'dim' && DD.refs.length){ const refs = DD.hover ? [...DD.refs, DD.hover] : DD.refs; if (refs.length >= 2) dimTexts({ refs, off:DD.off, dir:DD.dir, mode:S.dimMode }, 'dl live', out); }
     for (const it of items) if (it.type === 'text') out.push({ x:it.x, y:0, z:it.z, t:it.s, cls:'tx' + (isSel(it.id) ? ' sel' : ''), size:it.size });
@@ -1774,22 +1956,28 @@ function updateLabels(){
     }
     for (const g of GUIDES) if (g.axis !== 'al' && g.b){ out.push({ x:g.b.x, y, z:g.b.z, t:g.axis === 'x' ? 'по оси X' : 'по оси Y', cls:'guide ' + g.axis, dy:22 }); }
   }
-  if (voice.pen) out.push({ x:voice.pen.x, y:0, z:voice.pen.z, t:'старт', cls:'pen' });
+  if (voice.pen && !RENDER) out.push({ x:voice.pen.x, y:0, z:voice.pen.z, t:'старт', cls:'pen' });
+  return out;
+}
+function updateLabels(){
+  if (S.view === 'sheet'){ for (const el of pool){ el.hidden = true; el._edit = el._open = null; } return; }
+  const out = buildLabels(), vw = curView(), reg = vw && vw.kind === 'detail' ? vw.region : null;
   const W = cv.clientWidth, H = cv.clientHeight; let n = 0;
   for (const L of out){
+    if (reg && (L.x == null ? /^gb/.test(L.cls) : (L.x < reg.x0 - 0.05 || L.x > reg.x1 + 0.05 || L.z < reg.z0 - 0.05 || L.z > reg.z1 + 0.05))) continue;
     const s = L.sx != null ? { x:L.sx, y:L.sy, ok:true } : toScreen(L.x, L.y, L.z);
     if (!s.ok || s.x < -60 || s.x > W + 60 || s.y < -30 || s.y > H + 30) continue;
-    let el = pool[n]; if (!el){ el = document.createElement('div'); labelsEl.appendChild(el); pool[n] = el; el.addEventListener('pointerdown', ev => { if (el._edit){ ev.stopPropagation(); ev.preventDefault(); startEdit(el); } }); }
+    let el = pool[n]; if (!el){ el = document.createElement('div'); labelsEl.appendChild(el); pool[n] = el; el.addEventListener('pointerdown', ev => { if (el._edit){ ev.stopPropagation(); ev.preventDefault(); startEdit(el); } else if (el._open){ ev.stopPropagation(); ev.preventDefault(); openView(el._open); } }); }
     n++;
     el.hidden = false; el.className = L.cls ? 'dim ' + L.cls : 'dim';
     if (el.textContent !== L.t) el.textContent = L.t;
     el.style.left = s.x + 'px'; el.style.top = (s.y + (L.dy || 0)) + 'px';
     el.style.transform = L.rot ? `translate(-50%,-50%) rotate(${L.rot}deg)` : '';
     el.style.fontSize = L.size ? L.size + 'px' : '';
-    el._edit = L.edit || null; el._val = L.val;
-    if (L.edit) el.title = 'Нажмите, чтобы ввести размер'; else el.removeAttribute('title');
+    el._edit = L.edit || null; el._val = L.val; el._open = L.open || null;
+    if (L.edit) el.title = 'Нажмите, чтобы ввести размер'; else if (L.open) el.title = 'Открыть узел'; else el.removeAttribute('title');
   }
-  for (let i = n; i < pool.length; i++){ pool[i].hidden = true; pool[i]._edit = null; }
+  for (let i = n; i < pool.length; i++){ pool[i].hidden = true; pool[i]._edit = pool[i]._open = null; }
   if (!cursorEl.hidden && D.cur){ const s = toScreen(D.cur.x, 0, D.cur.z); cursorEl.style.left = s.x + 'px'; cursorEl.style.top = s.y + 'px'; }
   if (editing && !editing.inp.isConnected) editing = null;
 }
@@ -1814,6 +2002,7 @@ const fitted = {};
 function bounds(){
   const b = new THREE.Box3();
   for (const it of items){
+    if (!shown(it)) continue;
     if (it.type === 'wall'){ b.expandByPoint(new V3(Math.min(it.x1, it.x2) - it.t, 0, Math.min(it.z1, it.z2) - it.t)); b.expandByPoint(new V3(Math.max(it.x1, it.x2) + it.t, it.h, Math.max(it.z1, it.z2) + it.t)); }
     else if (it.type === 'box'){ b.expandByPoint(new V3(it.x, 0, it.z)); b.expandByPoint(new V3(it.x + it.w, it.h, it.z + it.d)); }
     else if (it.type === 'grid' || it.type === 'line'){ b.expandByPoint(new V3(it.x1, 0, it.z1)); b.expandByPoint(new V3(it.x2, 0, it.z2)); }
@@ -1853,18 +2042,30 @@ function lookFrom(dir){
   cm.position.copy(c.target).addScaledVector(dir, dist); c.update();
 }
 const viewNames = { plan:'План этажа: Этаж 1', d3:'3D-вид: {3D}', axo:'Аксонометрия' };
+let OPENING = false;
 function setView(v){
+  // switching the display mode from buttons/voice also switches the active view in the Project Browser
+  const cur = curView();
+  if (!OPENING && (KIND_MODE[cur.kind] !== v || S.view === 'sheet')){
+    saveCam();
+    const nv = views.find(x => KIND_MODE[x.kind] === v && x.kind !== 'elev') || views.find(x => KIND_MODE[x.kind] === v);
+    if (nv){ S.viewId = nv.id; S.phase = nv.phase || 'all'; syncPhaseUI(); }
+    hideSheet();
+  }
   S.view = v; endDraw();
-  if (v !== 'plan' && ['dim', 'line', 'text'].includes(S.tool)) setTool('select');
+  if (v !== 'plan' && ['dim', 'line', 'text', 'callout'].includes(S.tool)) setTool('select');
   document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === v));
-  $('#viewtag').textContent = viewNames[v];
+  $('#viewtag').textContent = viewTitle(curView());
+  if (!OPENING) renderTree();
   $('#vcube').hidden = $('#vhome').hidden = v === 'plan';
   configControls(); rebuild();
   if (!fitted[v]) fit(v);
   updateHint(); renderVbar();
 }
 function setTool(t){
-  if (['dim', 'line', 'text'].includes(t) && S.view !== 'plan'){ setView('plan'); toast('Аннотации ставятся на плане'); }
+  if (['dim', 'line', 'text', 'callout'].includes(t) && S.view !== 'plan'){ setView('plan'); toast(t === 'callout' ? 'Узел обводится на плане' : 'Аннотации ставятся на плане'); }
+  if (t === 'demolish' && S.view === 'sheet') setView('plan');
+  if (t === 'demolish' && (S.phase === 'all' || S.phase === 'obmer')){ setPhase('demontazh'); }
   if ((t === 'move' || t === 'copy') && !sel.size){ toast('Сначала выберите элементы (рамкой или щелчком)'); t = 'select'; }
   endDraw(); S.tool = t;
   document.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tool === t));
@@ -1889,6 +2090,296 @@ function updateScale(){
   $('#scale').textContent = '1:' + best;
 }
 function updateRibbonState(){ const has = [...sel].some(id => movable(byId(id))); for (const id of ['rbRotate', 'rbDelete']) $('#' + id).disabled = id === 'rbDelete' ? !sel.size : !has; document.querySelectorAll('[data-tool=move],[data-tool=copy]').forEach(b => b.disabled = !has); }
+
+/* ---------- views, details and sheets (Revit Project Browser) ---------- */
+const KIND_MODE = { plan:'plan', detail:'plan', d3:'d3', axo:'axo', elev:'axo', sheet:'sheet' };
+const KIND_NAME = { plan:'План этажа', detail:'Узел', d3:'3D-вид', axo:'Аксонометрия', elev:'Фасад', sheet:'Лист' };
+const ELEV_DIR = { S:new V3(0, 0, 1), N:new V3(0, 0, -1), E:new V3(1, 0, 0), W:new V3(-1, 0, 0) };
+const SHEET_SIZES = { A3:[420, 297], A4:[297, 210], A4p:[210, 297], A2:[594, 420], A1:[841, 594] };
+const SHEET_SIZE_NAME = { A3:'А3 альбомный', A4:'А4 альбомный', A4p:'А4 книжный', A2:'А2 альбомный', A1:'А1 альбомный' };
+const VP_SCALES = [5, 10, 20, 25, 50, 75, 100, 150, 200, 250, 500];
+const vid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+function DEFAULT_VIEWS(){
+  return [
+    { id:'v-plan', kind:'plan', name:'Этаж 1', phase:'all' },
+    { id:'v-3d', kind:'d3', name:'{3D}', phase:'all' },
+    { id:'v-axo', kind:'axo', name:'Аксонометрия', phase:'all' },
+    { id:'v-elS', kind:'elev', side:'S', name:'Южный', phase:'all' }, { id:'v-elN', kind:'elev', side:'N', name:'Северный', phase:'all' },
+    { id:'v-elE', kind:'elev', side:'E', name:'Восточный', phase:'all' }, { id:'v-elW', kind:'elev', side:'W', name:'Западный', phase:'all' }
+  ];
+}
+let views = DEFAULT_VIEWS();
+const curView = () => views.find(v => v.id === S.viewId) || views[0] || { kind:'plan', name:'' };
+const viewTitle = v => v.kind === 'sheet' ? `Лист: ${v.num} — ${v.name}` : `${KIND_NAME[v.kind]}: ${v.name} · стадия: ${phName(v.phase || 'all')}${v.kind === 'detail' ? ' · 1:' + (v.scale || 20) : ''}`;
+function sanitizeViews(arr){
+  if (!Array.isArray(arr) || !arr.length) return null;
+  const out = [];
+  for (const v of arr){
+    if (!v || typeof v.id !== 'string' || !KIND_MODE[v.kind]) continue;
+    const o = { id:v.id.slice(0, 40), kind:v.kind, name:String(v.name || KIND_NAME[v.kind]).slice(0, 80), phase:PH_IDX[v.phase] != null || v.phase === 'all' ? v.phase : 'all' };
+    if (v.cam && Array.isArray(v.cam.p) && Array.isArray(v.cam.t)) o.cam = { p:v.cam.p.map(Number), t:v.cam.t.map(Number), z:Number(v.cam.z) || 1 };
+    if (v.kind === 'elev') o.side = ELEV_DIR[v.side] ? v.side : 'S';
+    if (v.kind === 'detail' && v.region){ const r = v.region; o.region = { x0:+r.x0, z0:+r.z0, x1:+r.x1, z1:+r.z1 }; o.scale = VP_SCALES.includes(+v.scale) ? +v.scale : 20; }
+    if (v.kind === 'sheet'){
+      Object.assign(o, { num:String(v.num || 'А101').slice(0, 12), size:SHEET_SIZES[v.size] ? v.size : 'A3', author:String(v.author || '').slice(0, 40), checker:String(v.checker || '').slice(0, 40), stage:String(v.stage || 'П').slice(0, 4) });
+      o.vps = (Array.isArray(v.vps) ? v.vps : []).filter(p => p && typeof p.view === 'string').map(p => ({ id:String(p.id || vid('vp')), view:p.view, x:+p.x || 25, y:+p.y || 10, scale:VP_SCALES.includes(+p.scale) ? +p.scale : 100, w:+p.w || 150, h:+p.h || 110 }));
+    }
+    out.push(o);
+  }
+  if (!out.some(v => v.kind === 'plan')) out.unshift(DEFAULT_VIEWS()[0]);
+  return out;
+}
+function saveCam(){
+  const v = curView(); if (!v || v.kind === 'sheet') return;
+  const m = KIND_MODE[v.kind], c = ctl[m], cm = cams[m]; if (!c) return;
+  v.cam = { p:cm.position.toArray().map(r4), t:c.target.toArray().map(r4), z:r4(cm.zoom || 1) };
+}
+function openView(id){
+  const v = views.find(x => x.id === id); if (!v) return;
+  if (S.viewId && S.viewId !== id) saveCam();
+  S.viewId = id; S.phase = v.phase || 'all';
+  const mode = KIND_MODE[v.kind];
+  if (mode === 'sheet'){ endDraw(); S.tool = 'select'; S.view = 'sheet'; clearSel(); SHEET.sel = null; showSheet(v); }
+  else {
+    hideSheet();
+    OPENING = true; try { setView(mode); } finally { OPENING = false; }
+    const c = ctl[mode], cm = cams[mode];
+    if (v.cam){ cm.position.fromArray(v.cam.p); c.target.fromArray(v.cam.t); if (cm.isOrthographicCamera) cm.zoom = v.cam.z; cm.updateProjectionMatrix(); c.update(); }
+    else if (v.kind === 'elev'){ const dir = ELEV_DIR[v.side]; const d = new V3(dir.x + 0.0001, dir.y, dir.z + 0.0001); axoCam.position.copy(ctl.axo.target).addScaledVector(d.normalize(), 200); ctl.axo.update(); fit('axo'); }
+    else if (v.kind === 'detail' && v.region) fitRegion(v.region);
+    else fit(mode);
+  }
+  syncPhaseUI(); rebuild(); renderOptbar(); updateHint(); renderVbar();
+  $('#viewtag').textContent = viewTitle(v);
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === mode));
+  scheduleSave();
+}
+function openViewKind(kind){
+  const cv0 = curView();
+  if (kind === 'plan' && (cv0.kind === 'plan' || cv0.kind === 'detail')) return;
+  if (cv0.kind === kind) return;
+  const v = views.find(x => x.kind === kind) || (kind === 'axo' ? views.find(x => x.kind === 'elev') : null);
+  if (v) openView(v.id);
+}
+function fitRegion(r){
+  const a = (cv.clientWidth / cv.clientHeight) || 1, cx = (r.x0 + r.x1) / 2, cz = (r.z0 + r.z1) / 2;
+  planCam.position.set(cx, 200, cz); ctl.plan.target.set(cx, 0, cz);
+  planCam.zoom = Math.min(2 * H0 * a / ((r.x1 - r.x0) * 1.12), 2 * H0 / ((r.z1 - r.z0) * 1.12));
+  planCam.updateProjectionMatrix(); ctl.plan.update(); annoDirty = true;
+}
+function syncPhaseUI(){ for (const id of ['#phaseSel', '#vbPhase']){ const el = $(id); if (el) el.value = S.phase; } }
+function setPhase(k){
+  if (k !== 'all' && PH_IDX[k] == null) return;
+  S.phase = k; const v = curView(); if (v.kind !== 'sheet') v.phase = k;
+  endDraw(); setSel([...sel].filter(id => shown(byId(id)))); syncPhaseUI(); rebuild();
+  $('#viewtag').textContent = viewTitle(curView()); toast('Стадия вида: ' + phName(k));
+}
+// detail views show only their region: everything outside is covered, like Revit's crop region
+const cropG = new THREE.Group(); scene.add(cropG);
+function updateCrop(){
+  disposeGroup(cropG);
+  const v = curView(); if (S.view !== 'plan' || v.kind !== 'detail' || !v.region || RENDER) return;
+  const r = v.region, s = new THREE.Shape([new THREE.Vector2(-3000, -3000), new THREE.Vector2(3000, -3000), new THREE.Vector2(3000, 3000), new THREE.Vector2(-3000, 3000)]);
+  s.holes.push(new THREE.Path([new THREE.Vector2(r.x0, -r.z0), new THREE.Vector2(r.x0, -r.z1), new THREE.Vector2(r.x1, -r.z1), new THREE.Vector2(r.x1, -r.z0)]));
+  const geo = new THREE.ShapeGeometry(s); geo.rotateX(-Math.PI / 2);
+  const m = new THREE.Mesh(geo, M.crop); m.position.y = 60; m.renderOrder = 1000; cropG.add(m);
+  const l = lineOf([new V3(r.x0, 61, r.z0), new V3(r.x1, 61, r.z0), new V3(r.x1, 61, r.z1), new V3(r.x0, 61, r.z1), new V3(r.x0, 61, r.z0)], M.cropEdge); l.renderOrder = 1001; cropG.add(l);
+}
+function makeCallout(a, b){
+  const r = { x0:r4(Math.min(a.x, b.x)), x1:r4(Math.max(a.x, b.x)), z0:r4(Math.min(a.z, b.z)), z1:r4(Math.max(a.z, b.z)) };
+  if (r.x1 - r.x0 < 0.2 || r.z1 - r.z0 < 0.2){ toast('Узел слишком маленький'); return; }
+  let n = 1; while (views.some(v => v.name === 'Узел ' + n)) n++;
+  const v = { id:vid('v'), kind:'detail', name:'Узел ' + n, region:r, scale:20, phase:S.phase };
+  views.push(v); renderTree(); annoDirty = true; scheduleSave();
+  toast(`${v.name} создан: откройте его в диспетчере проекта или щелчком по подписи`);
+}
+function newView(kind){
+  if (kind === 'detail'){ setTool('callout'); return; }
+  const same = views.filter(v => v.kind === kind);
+  let v;
+  if (kind === 'plan'){ let n = same.length + 1; while (views.some(x => x.name === 'План ' + n)) n++; v = { id:vid('v'), kind:'plan', name:'План ' + n, phase:S.phase }; }
+  else if (kind === 'd3'){ let n = same.length + 1; v = { id:vid('v'), kind:'d3', name:'3D-вид ' + n, phase:S.phase }; }
+  else if (kind === 'sheet'){
+    let n = 101; while (views.some(x => x.kind === 'sheet' && x.num === 'А' + n)) n++;
+    v = { id:vid('v'), kind:'sheet', num:'А' + n, name:'Новый лист', size:'A3', author:'', checker:'', stage:'П', vps:[] };
+  } else return;
+  views.push(v); openView(v.id); toast(`Создано: ${KIND_NAME[v.kind].toLowerCase()} «${v.kind === 'sheet' ? v.num : v.name}»`);
+}
+function deleteView(id){
+  const v = views.find(x => x.id === id); if (!v) return;
+  if (v.kind === 'plan' && views.filter(x => x.kind === 'plan').length === 1){ toast('Должен остаться хотя бы один план этажа'); return; }
+  views = views.filter(x => x !== v);
+  for (const s of views) if (s.kind === 'sheet') s.vps = s.vps.filter(p => p.view !== id);
+  if (S.viewId === id){ S.viewId = null; openView((views.find(x => x.kind === 'plan') || views[0]).id); }
+  renderTree(); scheduleSave(); toast(`Удалено: ${v.kind === 'sheet' ? 'лист ' + v.num : v.name}`);
+}
+
+/* sheets: drawn on a canvas in millimetres; views placed on them are rendered into images at their scale */
+const SHEET = { sel:null, zoom:1, k:2, drag:null };
+const vpImgs = new Map();
+const LIGHT = { sheet:'#ffffff', ink:'#1b252c', accent:'#1f6fd6', sel:'#1a73e8', temp:'#1f6fd6', bad:'#c62828', poche:'#2b3439', mass:'#c6d4e2', 'mass-plan':'#d6e1ec', grid:'#eef1f3', 'grid-major':'#d9dfe3', glass:'#8fbde3', door:'#b98d5e', datum:'#6d7a82', exist:'#cfd3d6', 'exist-edge':'#8a939a', demo:'#d43a2a' };
+function strHash(s){ let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; }
+function showSheet(v){
+  $('#sheetWrap').hidden = false; cv.style.visibility = 'hidden'; $('#vcube').hidden = $('#vhome').hidden = true; cursorEl.hidden = true;
+  drawSheet(); ensureVpImages(v);
+}
+function hideSheet(){ $('#sheetWrap').hidden = true; cv.style.visibility = ''; }
+let vpBusy = false;
+async function ensureVpImages(v, force){
+  if (vpBusy) return; vpBusy = true;
+  try {
+    const sig = strHash(snapshot());
+    for (const vp of v.vps){
+      const view = views.find(x => x.id === vp.view); if (!view) continue;
+      const key = [sig, vp.scale, vp.w, vp.h, view.phase, JSON.stringify(view.cam || ''), JSON.stringify(view.region || '')].join('|');
+      const c = vpImgs.get(vp.id); if (c && c.key === key && !force) continue;
+      await new Promise(r => setTimeout(r, 0));
+      if (curView() !== v) break;
+      const res = renderViewImage(view, vp), img = new Image();
+      await new Promise(r => { img.onload = r; img.onerror = r; img.src = res.url; });
+      vpImgs.set(vp.id, { img, key, wmm:res.wmm, hmm:res.hmm });
+      drawSheet();
+    }
+  } finally { vpBusy = false; }
+}
+function renderViewImage(v, vp){
+  const mode = KIND_MODE[v.kind];
+  const keep = { view:S.view, phase:S.phase, sel:[...sel], selId, axes:axesG.visible, grid:grids.visible, C, bg:scene.background, tool:S.tool, dims:S.dims };
+  S.view = mode; S.phase = v.phase || 'all'; clearSel(); S.tool = 'select'; S.dims = false;
+  C = { ...C, ...LIGHT }; makeMaterials(); scene.background = new THREE.Color('#ffffff');
+  axesG.visible = false; grids.visible = false; preview.visible = false;
+  rebuild(true);
+  const PX = 6; let camR, wmm, hmm;
+  if (mode === 'plan'){
+    let r = v.kind === 'detail' && v.region ? v.region : null;
+    if (!r){ const b = bounds(); r = { x0:b.min.x - 2, x1:b.max.x + 2, z0:b.min.z - 2, z1:b.max.z + 2 }; }
+    const W = r.x1 - r.x0, Hh = r.z1 - r.z0; wmm = W * 1000 / vp.scale; hmm = Hh * 1000 / vp.scale;
+    camR = new THREE.OrthographicCamera(-W / 2, W / 2, Hh / 2, -Hh / 2, 0.1, 2000); camR.up.set(0, 0, -1);
+    camR.position.set((r.x0 + r.x1) / 2, 200, (r.z0 + r.z1) / 2); camR.lookAt((r.x0 + r.x1) / 2, 0, (r.z0 + r.z1) / 2);
+  } else {
+    wmm = vp.w || 150; hmm = vp.h || 110; const asp = wmm / hmm;
+    const b = bounds(), c = b.getCenter(new V3()), diag = b.getSize(new V3()).length();
+    let dir = v.cam ? new V3().fromArray(v.cam.p).sub(new V3().fromArray(v.cam.t)).normalize() : v.kind === 'elev' ? ELEV_DIR[v.side].clone() : v.kind === 'axo' ? axoDir() : new V3(0.85, 0.7, 1.15).normalize();
+    if (Math.abs(dir.y) > 0.999) dir = new V3(0.0001, Math.sign(dir.y), 0.0001);
+    if (mode === 'd3'){ camR = new THREE.PerspectiveCamera(42, asp, 0.05, 1000); camR.position.copy(c).addScaledVector(dir, (diag / 2) / Math.tan(42 * Math.PI / 360) * 1.1 / Math.min(asp, 1)); }
+    else { const hh = diag * 0.55; camR = new THREE.OrthographicCamera(-hh * asp, hh * asp, hh, -hh, 0.1, 2000); camR.position.copy(c).addScaledVector(dir, 200); }
+    camR.lookAt(c);
+  }
+  camR.updateProjectionMatrix();
+  const w = clamp(Math.round(wmm * PX), 16, 3200), h = clamp(Math.round(hmm * PX), 16, 3200);
+  RENDER = { w, h, cam:camR, pxmm:PX, view:v };
+  renderer.setPixelRatio(1); renderer.setSize(w, h, false);
+  annoDirty = true; rebuildAnno(); renderer.render(scene, camR);
+  const can = document.createElement('canvas'); can.width = w; can.height = h; const g = can.getContext('2d');
+  g.drawImage(cv, 0, 0, w, h);
+  if (mode === 'plan') drawImageLabels(g, PX);
+  RENDER = null;
+  C = keep.C; makeMaterials(); scene.background = keep.bg; axesG.visible = keep.axes; grids.visible = keep.grid; preview.visible = true;
+  S.view = keep.view; S.phase = keep.phase; S.tool = keep.tool; S.dims = keep.dims; setSel(keep.sel, keep.selId);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); resize(); if (S.view !== 'sheet') rebuild(true); annoDirty = true;
+  return { url:can.toDataURL('image/png'), wmm, hmm };
+}
+function drawImageLabels(g, PX){
+  const font = (sz, b) => `${b ? '600 ' : ''}${sz}px "Golos Text", Arial, sans-serif`;
+  for (const L of buildLabels()){
+    const s = L.sx != null ? { x:L.sx, y:L.sy } : toScreen(L.x, L.y, L.z), cls = L.cls || '';
+    g.save(); g.translate(s.x, s.y);
+    if (/^dl/.test(cls)){ g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(2.5 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
+    else if (/^gb/.test(cls)){ g.beginPath(); g.arc(0, 0, 3.6 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.25 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(3 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.2 * PX); }
+    else if (/^wt/.test(cls)){ g.font = font(2.2 * PX, true); const tw = g.measureText(L.t).width + 1.2 * PX, th = 3.2 * PX; g.fillStyle = '#fff'; g.strokeStyle = '#1b252c'; g.lineWidth = 0.2 * PX; if (/dr/.test(cls)){ g.beginPath(); g.ellipse(0, 0, Math.max(tw, th) / 2, th / 2, 0, 0, Math.PI * 2); g.fill(); g.stroke(); } else { g.fillRect(-tw / 2, -th / 2, tw, th); g.strokeRect(-tw / 2, -th / 2, tw, th); } g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.1 * PX); }
+    else if (/^tx/.test(cls)){ g.font = font((L.size || 14) / 14 * 3 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText(L.t, 0, 0); }
+    g.restore();
+  }
+}
+function sheetPages(){ return views.filter(v => v.kind === 'sheet').length; }
+function paintSheet(g, v){
+  const [Wm, Hm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3;
+  g.fillStyle = '#ffffff'; g.fillRect(0, 0, Wm, Hm);
+  g.strokeStyle = '#111'; g.lineWidth = 0.6; g.strokeRect(20, 5, Wm - 25, Hm - 10);
+  v.vps.forEach((vp, i) => {
+    const im = vpImgs.get(vp.id), view = views.find(x => x.id === vp.view);
+    const w = im ? im.wmm : (view && KIND_MODE[view.kind] === 'plan' ? 100 : vp.w), h = im ? im.hmm : (view && KIND_MODE[view.kind] === 'plan' ? 70 : vp.h);
+    vp._w = w; vp._h = h;
+    if (im && im.img.complete && im.img.naturalWidth) g.drawImage(im.img, vp.x, vp.y, w, h);
+    else { g.fillStyle = '#f1f3f4'; g.fillRect(vp.x, vp.y, w, h); g.fillStyle = '#777'; g.font = '4px "Golos Text", Arial'; g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillText('Рисую вид…', vp.x + 4, vp.y + 8); }
+    const cy = vp.y + h + 6, title = view ? view.name : 'вид удалён';
+    g.strokeStyle = '#111'; g.lineWidth = 0.3; g.beginPath(); g.arc(vp.x + 4, cy, 3.4, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = '#111'; g.font = '600 3.4px "Golos Text", Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(i + 1), vp.x + 4, cy + 0.1);
+    g.textAlign = 'left'; g.font = '600 3.6px "Golos Text", Arial'; g.fillText(title, vp.x + 10, cy - 1.3);
+    const tw = g.measureText(title).width;
+    g.font = '2.8px "Golos Text", Arial'; g.fillText(view ? (KIND_MODE[view.kind] === 'plan' || view.kind === 'elev' ? 'М 1:' + vp.scale : KIND_NAME[view.kind]) + (view.phase && view.phase !== 'all' ? ' · ' + phName(view.phase) : '') : '', vp.x + 10, cy + 2.7);
+    g.lineWidth = 0.5; g.beginPath(); g.moveTo(vp.x + 8, cy + 0.6); g.lineTo(vp.x + 12 + Math.max(36, tw), cy + 0.6); g.stroke();
+    if (SHEET.sel === vp.id){ g.strokeStyle = '#1a73e8'; g.lineWidth = 0.6; g.setLineDash([2, 1.2]); g.strokeRect(vp.x - 1.5, vp.y - 1.5, w + 3, h + 3); g.setLineDash([]); }
+  });
+  paintStamp(g, v, Wm, Hm);
+}
+// title block after GOST 21.101 form 3 (simplified)
+function paintStamp(g, v, Wm, Hm){
+  const x0 = Wm - 5 - 185, y0 = Hm - 5 - 55;
+  g.fillStyle = '#fff'; g.fillRect(x0, y0, 185, 55); g.strokeStyle = '#111'; g.lineWidth = 0.6; g.strokeRect(x0, y0, 185, 55);
+  const line = (a, b, c, d, w = 0.35) => { g.lineWidth = w; g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke(); };
+  const txt = (s, x, y, sz = 2.5, b = false, al = 'left') => { g.fillStyle = '#111'; g.font = `${b ? '600 ' : ''}${sz}px "Golos Text", Arial`; g.textAlign = al; g.textBaseline = 'middle'; g.fillText(s, x, y); };
+  const cols = [7, 10, 10, 10, 15, 13]; let x = x0;
+  for (const c of cols){ x += c; line(x, y0, x, y0 + 55, x === x0 + 65 ? 0.6 : 0.35); }
+  for (let r = 1; r < 11; r++) line(x0, y0 + r * 5, x0 + 65, y0 + r * 5, r === 6 ? 0.6 : 0.25);
+  const heads = ['Изм.', 'Кол.уч', 'Лист', '№ док.', 'Подп.', 'Дата']; x = x0;
+  heads.forEach((hd, i) => { txt(hd, x + cols[i] / 2, y0 + 27.5, 2.2, false, 'center'); x += cols[i]; });
+  const rows = [['Разраб.', v.author || ''], ['Проверил', v.checker || ''], ['', ''], ['Н. контр.', ''], ['ГИП', '']];
+  rows.forEach((r, i) => { txt(r[0], x0 + 1, y0 + 32.5 + i * 5, 2.2); txt(r[1], x0 + 18, y0 + 32.5 + i * 5, 2.2); });
+  line(x0 + 65, y0 + 15, x0 + 185, y0 + 15, 0.6); line(x0 + 65, y0 + 30, x0 + 185, y0 + 30, 0.6); line(x0 + 135, y0 + 30, x0 + 135, y0 + 55, 0.6);
+  line(x0 + 135, y0 + 35, x0 + 185, y0 + 35); line(x0 + 150, y0 + 30, x0 + 150, y0 + 40); line(x0 + 165, y0 + 30, x0 + 165, y0 + 40); line(x0 + 135, y0 + 40, x0 + 185, y0 + 40, 0.6);
+  txt(proj.name || 'Проект', x0 + 125, y0 + 7.5, 4.2, true, 'center');
+  txt('Объект: ' + (proj.name || ''), x0 + 125, y0 + 22.5, 3, false, 'center');
+  txt(v.name || '', x0 + 100, y0 + 42.5, 3.4, true, 'center');
+  txt('Стадия', x0 + 142.5, y0 + 32.5, 2.2, false, 'center'); txt('Лист', x0 + 157.5, y0 + 32.5, 2.2, false, 'center'); txt('Листов', x0 + 175, y0 + 32.5, 2.2, false, 'center');
+  const sheets = views.filter(s => s.kind === 'sheet');
+  txt(v.stage || 'П', x0 + 142.5, y0 + 37.5, 2.8, false, 'center'); txt(String(sheets.indexOf(v) + 1), x0 + 157.5, y0 + 37.5, 2.8, false, 'center'); txt(String(sheets.length), x0 + 175, y0 + 37.5, 2.8, false, 'center');
+  txt('Kot project', x0 + 160, y0 + 47.5, 3.6, true, 'center');
+  txt(v.num || '', Wm - 6, 8.5, 3.4, true, 'right');
+}
+function drawSheet(){
+  const v = curView(); if (!v || v.kind !== 'sheet') return;
+  const [Wm, Hm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, wrap = $('#sheetWrap');
+  const k = Math.min(Math.max(200, wrap.clientWidth - 32) / Wm, Math.max(150, wrap.clientHeight - 32) / Hm) * SHEET.zoom; SHEET.k = k;
+  const can = $('#sheetCv'), dpr = Math.min(devicePixelRatio, 2);
+  can.width = Math.round(Wm * k * dpr); can.height = Math.round(Hm * k * dpr); can.style.width = Wm * k + 'px'; can.style.height = Hm * k + 'px';
+  const g = can.getContext('2d'); g.setTransform(dpr * k, 0, 0, dpr * k, 0, 0); paintSheet(g, v);
+}
+function sheetHit(e){
+  const v = curView(), r = $('#sheetCv').getBoundingClientRect(), x = (e.clientX - r.left) / SHEET.k, y = (e.clientY - r.top) / SHEET.k;
+  const vp = [...v.vps].reverse().find(p => x >= p.x - 2 && x <= p.x + (p._w || 0) + 2 && y >= p.y - 2 && y <= p.y + (p._h || 0) + 12);
+  return { v, vp, x, y };
+}
+$('#sheetCv').addEventListener('pointerdown', e => {
+  const h = sheetHit(e);
+  SHEET.sel = h.vp ? h.vp.id : null;
+  if (h.vp){ SHEET.drag = { vp:h.vp, dx:h.x - h.vp.x, dy:h.y - h.vp.y, moved:false }; $('#sheetCv').setPointerCapture(e.pointerId); }
+  drawSheet(); renderOptbar();
+});
+$('#sheetCv').addEventListener('pointermove', e => {
+  if (!SHEET.drag) return;
+  const h = sheetHit(e), d = SHEET.drag; d.moved = true;
+  d.vp.x = Math.round(h.x - d.dx); d.vp.y = Math.round(h.y - d.dy); drawSheet();
+});
+$('#sheetCv').addEventListener('pointerup', () => { if (SHEET.drag && SHEET.drag.moved) scheduleSave(); SHEET.drag = null; });
+$('#sheetCv').addEventListener('dblclick', e => { const h = sheetHit(e); if (h.vp) openView(h.vp.view); });
+new ResizeObserver(() => { if (S.view === 'sheet') drawSheet(); }).observe($('#sheetWrap'));
+function placeOnSheet(viewId){
+  const v = curView(); if (v.kind !== 'sheet') return;
+  const view = views.find(x => x.id === viewId); if (!view) return;
+  const n = v.vps.length, isPlan = KIND_MODE[view.kind] === 'plan';
+  const vp = { id:vid('vp'), view:viewId, x:25 + (n % 3) * 10, y:12 + (n % 3) * 10, scale:view.kind === 'detail' ? (view.scale || 20) : 100, w:150, h:110 };
+  if (!isPlan && view.kind !== 'elev'){ vp.w = 140; vp.h = 105; }
+  v.vps.push(vp); SHEET.sel = vp.id; drawSheet(); ensureVpImages(v); renderOptbar(); scheduleSave();
+}
+async function exportSheetPNG(){
+  const v = curView(); if (v.kind !== 'sheet') return;
+  await ensureVpImages(v);
+  const [Wm, Hm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, PX = 6;
+  const can = document.createElement('canvas'); can.width = Wm * PX; can.height = Hm * PX;
+  const g = can.getContext('2d'); g.setTransform(PX, 0, 0, PX, 0, 0); const keepSel = SHEET.sel; SHEET.sel = null; paintSheet(g, v); SHEET.sel = keepSel;
+  can.toBlob(b => { if (b) saveBlob(safeName(`${v.num} ${v.name}`), 'png', b, 'image/png', 'Лист PNG'); }, 'image/png');
+}
 
 /* ---------- ViewCube ---------- */
 const vcCanvas = $('#vcube');
@@ -1930,10 +2421,42 @@ function showTab(id){
   document.querySelectorAll('.rb-panel').forEach(p => p.hidden = p.id !== id);
 }
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => showTab(b.dataset.tab));
-const TOOL_NAMES = { select:'Изменить', wall:'Изменить | Разместить стену', rect:'Изменить | Комната из стен', door:'Изменить | Разместить дверь', window:'Изменить | Разместить окно', box:'Изменить | Разместить объём', dim:'Изменить | Разместить размеры', orbit:'Обзор', grid:'Изменить | Разместить ось', line:'Изменить | Линии детализации', text:'Изменить | Текст', move:'Переместить', copy:'Копировать' };
+const TOOL_NAMES = { select:'Изменить', wall:'Изменить | Разместить стену', rect:'Изменить | Комната из стен', door:'Изменить | Разместить дверь', window:'Изменить | Разместить окно', box:'Изменить | Разместить объём', dim:'Изменить | Разместить размеры', orbit:'Обзор', grid:'Изменить | Разместить ось', line:'Изменить | Линии детализации', text:'Изменить | Текст', move:'Переместить', copy:'Копировать', callout:'Изменить | Узел (выносной вид)', demolish:'Изменить | Снос элементов' };
 function typeOptions(s){ return types.map(t => `<option value="${esc(t.id)}"${t.id === s ? ' selected' : ''}>${esc(t.name)} — ${mm(typeT(t))}</option>`).join(''); }
+function renderSheetOptbar(ob){
+  const v = curView(), vp = v.vps.find(p => p.id === SHEET.sel), placed = new Set(v.vps.map(p => p.view));
+  const avail = views.filter(x => x.kind !== 'sheet' && !placed.has(x.id));
+  let h = `<span class="ctx">Лист ${esc(v.num)}</span>`
+    + `<label for="shNum">Номер<input id="shNum" class="n2" value="${esc(v.num)}"></label>`
+    + `<label for="shName">Название<input id="shName" value="${esc(v.name)}"></label>`
+    + `<label for="shSize">Формат<select id="shSize">${Object.keys(SHEET_SIZES).map(k => `<option value="${k}"${k === v.size ? ' selected' : ''}>${SHEET_SIZE_NAME[k]}</option>`).join('')}</select></label>`
+    + `<label for="shAdd">Разместить вид<select id="shAdd"><option value="">— выберите —</option>${avail.map(x => `<option value="${x.id}">${esc(KIND_NAME[x.kind] + ': ' + x.name)}</option>`).join('')}</select></label>`;
+  if (vp){
+    const view = views.find(x => x.id === vp.view), isPlan = view && (KIND_MODE[view.kind] === 'plan');
+    h += isPlan ? `<label for="shScale">Масштаб<select id="shScale">${VP_SCALES.map(s => `<option value="${s}"${s === vp.scale ? ' selected' : ''}>1:${s}</option>`).join('')}</select></label>`
+      : `<label for="shW">Ширина, мм<input id="shW" class="n2" type="number" min="40" max="800" value="${vp.w}"></label>`;
+    h += `<button class="btn sm" id="shOpen">Открыть вид</button><button class="btn sm danger" id="shDel">Убрать с листа</button>`;
+  }
+  h += `<label for="shAuth">Разраб.<input id="shAuth" value="${esc(v.author || '')}"></label><button class="btn sm" id="shPng">Сохранить PNG</button>`;
+  ob.innerHTML = h;
+  const q = id => ob.querySelector('#' + id);
+  const upd = fn => e => { fn(e.target.value); drawSheet(); scheduleSave(); renderTree(); };
+  q('shNum').onchange = upd(x => v.num = x.trim().slice(0, 12) || v.num);
+  q('shName').onchange = upd(x => v.name = x.trim().slice(0, 80) || v.name);
+  q('shAuth').onchange = upd(x => v.author = x.trim().slice(0, 40));
+  q('shSize').onchange = upd(x => v.size = x);
+  q('shAdd').onchange = e => { if (e.target.value) placeOnSheet(e.target.value); };
+  if (vp){
+    if (q('shScale')) q('shScale').onchange = e => { vp.scale = +e.target.value; ensureVpImages(v); scheduleSave(); };
+    if (q('shW')) q('shW').onchange = e => { const w = clamp(+e.target.value || 150, 40, 800); vp.h = Math.round(w * vp.h / vp.w); vp.w = w; ensureVpImages(v); scheduleSave(); };
+    q('shOpen').onclick = () => openView(vp.view);
+    q('shDel').onclick = () => { v.vps = v.vps.filter(p => p !== vp); SHEET.sel = null; drawSheet(); renderOptbar(); scheduleSave(); };
+  }
+  q('shPng').onclick = exportSheetPNG;
+}
 function renderOptbar(){
   const ob = $('#optbar'), t = S.tool;
+  if (S.view === 'sheet'){ renderSheetOptbar(ob); return; }
   const num = (id, label, v, step = 50) => `<label for="${id}">${label}<input id="${id}" type="number" min="1" step="${step}" value="${Math.round(v * 1000)}"></label>`;
   let h = `<span class="ctx">${TOOL_NAMES[t]}</span>`;
   if (t === 'wall' || t === 'rect'){
@@ -1950,6 +2473,8 @@ function renderOptbar(){
   else if (t === 'dim') h += `<label for="oDimRef">Привязка к<select id="oDimRef"><option value="faces">Граням стен</option><option value="axis">Осям стен</option></select></label>`
       + `<label for="oDimMode">Размер<select id="oDimMode"><option value="aligned">Параллельный</option><option value="h">Горизонтальный</option><option value="v">Вертикальный</option></select></label>`
       + `<span class="tip">Укажите точки, грани или оси, затем щёлкните место для размерной линии</span>`;
+  else if (t === 'callout') h += `<span class="tip">Обведите рамкой часть плана — получится узел (выносной вид) в масштабе 1:20. Он появится в диспетчере проекта.</span>`;
+  else if (t === 'demolish') h += `<span class="tip">${S.phase === 'all' || S.phase === 'obmer' ? 'Сначала выберите стадию «Демонтаж» или позже — снос отмечается в текущей стадии.' : `Щёлкните стену, дверь, окно или объём — он будет снесён на стадии «${phName(S.phase)}». Повторный щелчок отменяет снос.`}</span>`;
   else if (t === 'move' || t === 'copy') h += `<span class="tip">Выбрано: ${sel.size}. Укажите базовую точку, затем новое место (или длину в мм и Enter)</span>`;
   else if (t === 'select'){ h += `<span class="tip">${sel.size > 1 ? 'Выбрано элементов: ' + sel.size + '. Переместить (MV), копировать (CO), повернуть (RO), удалить (Delete).' : sel.size ? 'Выбран элемент №' + selId + '. Синие размеры можно нажать и ввести новое значение.' : 'Щёлкните элемент или обведите рамкой. Слева направо — только целиком внутри, справа налево — пересечение. Ctrl — добавить к выбору.'}</span>`; }
   if (['wall','rect','box','grid','line','move','copy'].includes(t)) h += `<label for="oSnap">Шаг привязки<select id="oSnap">${[[0.01,'10 мм'],[0.05,'50 мм'],[0.1,'100 мм'],[0.25,'250 мм'],[0.5,'500 мм'],[1,'1000 мм']].map(([v,l]) => `<option value="${v}"${v === S.snap ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`;
@@ -2000,7 +2525,8 @@ function updatePanel(){
       h += `<div class="typesel"><span class="tname">Стена</span><select id="pType">${typeOptions(S.wallType)}</select><span class="tsub">Толщина ${mm(typeT(ty))} мм · слоёв ${ty ? ty.layers.length : 1}</span><button class="btn sm" id="pTypeEdit">Изменить тип…</button></div>`;
     }
     const c = counts(), total = items.filter(i => i.type === 'wall').reduce((s, w) => s + Math.hypot(w.x2 - w.x1, w.z2 - w.z1), 0);
-    h += `<div class="pgrp">Вид</div>` + prow('Вид', `<span class="val">${esc(viewNames[S.view])}</span>`)
+    h += `<div class="pgrp">Вид</div>` + prow('Вид', `<span class="val">${esc(KIND_NAME[curView().kind] + ': ' + curView().name)}</span>`)
+      + prow('Стадия', `<select id="pVPhase">${[...PHASES, { k:'all', n:'Показать все' }].map(p => `<option value="${p.k}"${p.k === S.phase ? ' selected' : ''}>${p.n}</option>`).join('')}</select>`)
       + prow('Масштаб', `<span class="val">${$('#scale').textContent}</span>`)
       + prow('Детализация', `<select id="pDetail"><option value="medium">Средняя (слои)</option><option value="coarse">Низкая (заливка)</option></select>`)
       + prow('Стиль 3D', `<select id="pStyle"><option value="shaded">Тонированный</option><option value="lines">Скрытые линии</option></select>`)
@@ -2024,7 +2550,8 @@ function updatePanel(){
       + `<div class="pbtns"><button class="btn sm" id="sFlipL">Поменять стороны (Пробел)</button><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else if (isOp(it)){
     const door = it.type === 'door';
-    h += `<div class="typesel"><span class="tname">${door ? 'Дверь' : 'Окно'} №${it.id}</span><span class="tsub">${mm(it.w)} × ${mm(it.h)} мм · в стене №${it.wall}</span></div>`
+    h += `<div class="typesel"><span class="tname">${door ? 'Дверь' : 'Окно'} ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span><span class="tsub">${mm(it.w)} × ${mm(it.h)} мм · в стене ${esc(byId(it.wall)?.tag || '№' + it.wall)}</span></div>`
+      + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
       + `<div class="pgrp">Размеры</div>` + prow('Ширина, мм', pnum('sOW', it.w, 'min="100" step="50"')) + prow('Высота, мм', pnum('sOH', it.h, 'min="100" step="50"'))
       + (door ? '' : prow('Подоконник, мм', pnum('sOS', it.sill, 'min="50" step="50"')))
       + prow('От начала стены, мм', pnum('sOA', it.pos - it.w / 2, 'min="0" step="50"'))
@@ -2054,12 +2581,29 @@ function updatePanel(){
       + prow('Размер', `<select id="sTs"><option value="11">Мелкий</option><option value="14">Обычный</option><option value="18">Крупный</option><option value="24">Заголовок</option></select>`)
       + `<div class="pbtns"><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else {
-    h += `<div class="typesel"><span class="tname">Объём №${it.id}</span></div>`
+    h += `<div class="typesel"><span class="tname">Объём ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span></div>`
+      + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
       + prow('Ширина (X), мм', pnum('sW', it.w, 'min="10" step="10"')) + prow('Глубина (Y), мм', pnum('sD', it.d, 'min="10" step="10"')) + prow('Высота, мм', pnum('sH', it.h, 'min="10" step="50"'))
       + `<div class="pbtns"><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   }
+  if (it && PHASED.includes(it.type)){
+    const opts = (cur, none) => (none ? `<option value="">Нет</option>` : '') + PHASES.map(p => `<option value="${p.k}"${p.k === cur ? ' selected' : ''}>${p.n}</option>`).join('');
+    const host = isOp(it) ? byId(it.wall) : null;
+    const blk = `<div class="pgrp">Стадии</div>` + prow('Стадия возведения', `<select id="sPh">${opts(it.ph)}</select>`) + prow('Стадия сноса', `<select id="sDem">${opts(it.dem, true)}</select>`)
+      + (host && (host.dem || PH_IDX[host.ph] > PH_IDX[it.ph]) ? `<p class="pnote">Проём живёт вместе со стеной ${esc(host.tag || '')}: стадии стены важнее.</p>` : '');
+    const at = h.lastIndexOf('<div class="pbtns">'); h = at >= 0 ? h.slice(0, at) + blk + h.slice(at) : h + blk;
+  }
   el.innerHTML = h;
   const q = id => el.querySelector('#' + id);
+  if (q('pVPhase')) q('pVPhase').onchange = e => setPhase(e.target.value);
+  if (q('sPh')) q('sPh').onchange = e => {
+    const v = e.target.value; if (it.dem && PH_IDX[it.dem] <= PH_IDX[v]){ toast('Стадия сноса должна быть позже стадии возведения'); el.dataset.id = 'x'; updatePanel(); return; }
+    pushUndo('Стадия возведения'); markEdited(); it.ph = v; el.dataset.id = 'x'; if (!shown(it)) clearSel(); rebuild(); toast(`${tagNameL(it)}: возведение — ${phName(v)}`);
+  };
+  if (q('sDem')) q('sDem').onchange = e => {
+    const v = e.target.value || null; if (v && PH_IDX[v] <= PH_IDX[it.ph]){ toast('Снос возможен только на стадии после возведения'); el.dataset.id = 'x'; updatePanel(); return; }
+    pushUndo('Стадия сноса'); markEdited(); it.dem = v; el.dataset.id = 'x'; if (!shown(it)) clearSel(); rebuild(); toast(v ? `${tagNameL(it)}: снос — ${phName(v)}` : `${tagNameL(it)}: не сносится`);
+  };
   const bind = (id, fn, allowZero = false) => {
     const f = q(id); if (!f || f.readOnly) return;
     f.addEventListener('change', () => {
@@ -2083,12 +2627,6 @@ function updatePanel(){
     q('sType').onchange = e => { pushUndo(); markEdited(); it.wt = e.target.value; if (typeById(it.wt)) it.t = typeT(typeById(it.wt)); el.dataset.id = 'x'; rebuild(); };
     const te = q('sTypeEdit'); if (te) te.onclick = () => openTypes(it.wt);
     q('sFlipL').onclick = () => flipSelected();
-    q('sTag').onchange = e => {
-      const v = e.target.value.trim().toUpperCase().replace(/[^A-Z]/g, '');
-      const other = v && wallByTag(v);
-      if (!v || (other && other !== it)){ toast(v ? `Буква ${v} уже у другой стены` : 'Буква — латинские A–Z'); el.dataset.id = 'x'; updatePanel(); return; }
-      pushUndo(); markEdited(); it.tag = v; el.dataset.id = 'x'; rebuild();
-    };
   } else if (isOp(it)){
     bind('sOW', v => { it.pos = r4(it.pos - it.w / 2 + v / 2); it.w = v; });
     bind('sOH', v => it.h = v); bind('sOS', v => it.sill = v); bind('sOA', v => it.pos = r4(v + it.w / 2), true);
@@ -2105,6 +2643,13 @@ function updatePanel(){
     q('sTx').onchange = e => { const v = e.target.value.trim(); if (v){ pushUndo(); markEdited(); it.s = v.slice(0, 200); el.dataset.id = 'x'; rebuild(); } };
     q('sTs').value = String(it.size); q('sTs').onchange = e => { pushUndo(); markEdited(); it.size = Number(e.target.value); el.dataset.id = 'x'; rebuild(); };
   } else { bind('sW', v => it.w = v); bind('sD', v => it.d = v); bind('sH', v => it.h = v); }
+  const tgEl = q('sTag');
+  if (tgEl) tgEl.onchange = e => {
+    const v = e.target.value.trim().toUpperCase().replace(/Ё/g, 'Е').replace(new RegExp('[^' + RU + ']', 'g'), '');
+    const other = v && byTag(it.type, v);
+    if (!v || (other && other !== it)){ toast(v ? `Буква ${v} уже занята: ${tagName(other)}` : 'Буква — русские А–Я (без Ё, Й, Ъ, Ы, Ь)'); el.dataset.id = 'x'; updatePanel(); return; }
+    pushUndo(); markEdited(); it.tag = v; el.dataset.id = 'x'; rebuild();
+  };
   q('sDel').onclick = deleteSel;
   const dup = q('sDup');
   if (dup) dup.onclick = () => { pushUndo(); markEdited(); const made = copyItems([it.id], 1, 1); setSel(made); el.dataset.id = 'x'; rebuild(); toast('Копия сдвинута на 1000 мм'); };
@@ -2113,26 +2658,48 @@ function flipSelected(){
   const it = sel.size === 1 ? byId(selId) : null; if (!it || it.type !== 'wall') return;
   pushUndo(); markEdited(); it.flipL = !it.flipL; $('#propsBody').dataset.id = 'x'; rebuild(); toast('Наружная сторона стены изменена');
 }
+function renameViewInline(b, id){
+  const v = views.find(x => x.id === id); if (!v) return;
+  const inp = document.createElement('input'); inp.value = v.name; inp.maxLength = 80; inp.setAttribute('aria-label', 'Новое имя');
+  b.replaceWith(inp); inp.focus(); inp.select();
+  let done = false;
+  const fin = ok => { if (done) return; done = true; const n = inp.value.trim(); if (ok && n){ v.name = n; scheduleSave(); if (S.viewId === id) $('#viewtag').textContent = viewTitle(v); annoDirty = true; if (S.view === 'sheet') drawSheet(); } renderTree(); };
+  inp.onkeydown = e => { if (e.key === 'Enter') fin(true); else if (e.key === 'Escape') fin(false); e.stopPropagation(); };
+  inp.onblur = () => fin(true);
+}
 function renderTree(){
   const ul = $('#tree');
   const btn = (label, act, cur) => `<li><button data-tree="${act}"${cur ? ' aria-current="true"' : ''}>${label}</button></li>`;
   const grs = items.filter(g => g.type === 'grid');
-  ul.innerHTML = `<li><div class="node">Виды</div><ul>
-      ${btn('Планы этажей · Этаж 1', 'v:plan', S.view === 'plan')}
-      ${btn('3D-виды · {3D}', 'v:d3', S.view === 'd3')}
-      ${btn('Аксонометрия · изометрия', 'v:iso', false)}
-      ${btn('Аксонометрия · диметрия', 'v:dim', false)}
+  const onSheet = new Set(views.filter(s => s.kind === 'sheet').flatMap(s => s.vps.map(p => p.view)));
+  const vItem = v => {
+    const cur = v.id === S.viewId, label = v.kind === 'sheet' ? `${esc(v.num)} — ${esc(v.name)}` : esc(v.name);
+    const ph = v.kind !== 'sheet' && v.phase && v.phase !== 'all' ? `<span class="ph">${esc(phName(v.phase))}</span>` : '';
+    const mark = v.kind !== 'sheet' && onSheet.has(v.id) ? ' <span class="ph" title="Размещён на листе">▣</span>' : '';
+    return `<li class="it"><button data-tree="o:${v.id}"${cur ? ' aria-current="true"' : ''} title="Двойной щелчок — переименовать">${label}${ph}${mark}</button>`
+      + (S.view === 'sheet' && v.kind !== 'sheet' && !onSheet.has(v.id) ? `<button class="add" data-tree="p:${v.id}" title="Разместить на открытом листе" aria-label="Разместить на листе">+▣</button>` : '')
+      + `<button class="x" data-tree="d:${v.id}" title="Удалить" aria-label="Удалить ${label}">×</button></li>`;
+  };
+  const group = (title, kind, list, add) => `<li><div class="node">${title}${add ? `<button class="add" data-tree="n:${kind}" title="${add}" aria-label="${add}">+</button>` : ''}</div><ul>${list.map(vItem).join('') || '<li class="it"><span class="ph">пусто</span></li>'}</ul></li>`;
+  const of = k => views.filter(v => v.kind === k);
+  ul.innerHTML = `<li><div class="node">Виды (все)</div><ul>
+      ${group('Планы этажей', 'plan', of('plan'), 'Новый план')}
+      ${group('Узлы', 'detail', of('detail'), 'Новый узел — обвести на плане')}
+      ${group('3D-виды', 'd3', of('d3'), 'Новый 3D-вид')}
+      ${group('Аксонометрия', 'axo', of('axo'))}
+      ${group('Фасады', 'elev', of('elev'))}
     </ul></li>
-    <li><div class="node">Фасады</div><ul>
-      ${btn('Южный (перед)', 'f:S')}${btn('Северный (зад)', 'f:N')}${btn('Восточный (право)', 'f:E')}${btn('Западный (лево)', 'f:W')}
-    </ul></li>
+    ${group('Листы (все)', 'sheet', of('sheet').sort((a, b) => a.num.localeCompare(b.num, 'ru', { numeric:true })), 'Новый лист')}
     ${grs.length ? `<li><div class="node">Оси</div><ul>${grs.map(g => btn('Ось ' + esc(g.name), 'g:' + g.id, isSel(g.id))).join('')}</ul></li>` : ''}
     <li><div class="node">Семейства · Стены</div><ul>${types.map(t => btn(`<span class="swatch" style="background:${(MATS[t.layers[Math.floor(t.layers.length / 2)]?.m] || MATS.generic).c}"></span>${esc(t.name)}`, 't:' + t.id, false)).join('')}</ul></li>
     <li><div class="node">Проекты</div><ul>${btn('Мои проекты…', 'lib')}</ul></li>`;
+  ul.querySelectorAll('[data-tree^="o:"]').forEach(b => b.ondblclick = e => { e.preventDefault(); renameViewInline(b, b.dataset.tree.slice(2)); });
   ul.querySelectorAll('[data-tree]').forEach(b => b.onclick = () => {
-    const [k, v] = b.dataset.tree.split(':');
-    if (k === 'v'){ if (v === 'iso'){ setView('axo'); setAxo(45, 35.264); } else if (v === 'dim'){ setView('axo'); setAxo(22.208, 20.705); } else setView(v); }
-    else if (k === 'f'){ setView('axo'); lookFrom({ S:new V3(0, 0, 1), N:new V3(0, 0, -1), E:new V3(1, 0, 0), W:new V3(-1, 0, 0) }[v]); fit(); }
+    const i = b.dataset.tree.indexOf(':'), k = b.dataset.tree.slice(0, i), v = b.dataset.tree.slice(i + 1);
+    if (k === 'o'){ if (v !== S.viewId) openView(v); }
+    else if (k === 'n'){ newView(v); return; }
+    else if (k === 'd'){ const x = views.find(y => y.id === v); if (x && confirm(`Удалить ${x.kind === 'sheet' ? 'лист ' + x.num : '«' + x.name + '»'}?`)) deleteView(v); return; }
+    else if (k === 'p'){ placeOnSheet(v); renderTree(); return; }
     else if (k === 'g'){ setTool('select'); setSel([Number(v)]); rebuild(); }
     else if (k === 't') openTypes(v);
     else if (k === 'lib') openLib();
@@ -2142,7 +2709,7 @@ function renderTree(){
 function updateHint(){
   const s = !!D.start, touchy = coarsePtr || penSeen;
   const end = touchy ? 'долгое нажатие или «Завершить» — закончить' : 'Esc или правый щелчок — закончить';
-  const msg = {
+  const msg = S.view === 'sheet' ? 'Лист: разместите виды через «Разместить вид» или «+▣» в диспетчере проекта. Тяните вид по листу, двойной щелчок — открыть его.' : {
     select:'Щёлкните элемент или обведите рамкой (слева направо — целиком внутри, справа налево — пересечение). Ctrl — добавить. Тяните выбранное, чтобы переместить.',
     wall: s ? `Укажите следующую точку стены или введите длину в мм и Enter. Красная/зелёная линия — строго по оси X/Y; ${end}.`
             : `Укажите начальную точку стены${touchy ? ' или проведите стену целиком' : ''}. Точки липнут к осям здания, их пересечениям и концам стен.`,
@@ -2157,6 +2724,8 @@ function updateHint(){
     copy: s ? 'Укажите место копии или введите расстояние в мм и Enter.' : 'Укажите базовую точку копирования.',
     dim: DD.refs.length >= 2 ? `Добавьте ещё точки или щёлкните свободное место, чтобы поставить размерную линию${touchy ? ' («Поставить размер»)' : ' (или Enter)'}.`
        : DD.refs.length ? 'Укажите следующую точку, грань или ось.' : 'Укажите первую точку, грань стены или ось.',
+    callout:'Обведите рамкой участок плана: получится узел 1:20. Он появится в диспетчере проекта в разделе «Узлы».',
+    demolish:`Стадия «${phName(S.phase)}»: щёлкните элемент, чтобы снести его (красный пунктир). Повторный щелчок отменяет снос.`,
     orbit: S.view === 'plan' ? 'Тяните, чтобы сдвинуть лист. Колесо или два пальца — масштаб.' : 'Тяните, чтобы вращать. Два пальца — сдвиг и масштаб.'
   }[S.tool];
   $('#hint').textContent = msg;
@@ -2263,6 +2832,7 @@ function sanitizeTypes(arr){
   for (const d of DEFAULT_TYPES) if (!out.some(t => t.id === d.id)) out.push(JSON.parse(JSON.stringify(d)));
   return out;
 }
+const phOf = it => ({ ph:PH_IDX[it.ph] != null ? it.ph : 'montazh', dem:PH_IDX[it.dem] != null ? it.dem : null });
 function sanitizeItems(arr){
   const out = [], N = v => v !== null && v !== '' && Number.isFinite(+v), seen = new Set();
   const okRef = r => r && typeof r === 'object' && ['p','w','wf','o','b','g'].includes(r.k);
@@ -2271,9 +2841,9 @@ function sanitizeItems(arr){
     if (!it || typeof it !== 'object') continue;
     const id = Math.round(+it.id); if (!(id > 0) || seen.has(id)) continue;
     let o = null;
-    if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:/^[A-Z]{1,3}$/.test(it.tag) ? it.tag : null };
-    else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01) };
-    else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand };
+    if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+    else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+    else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
     else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto };
     else if (it.type === 'grid' && seg(it)) o = { id, type:'grid', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, name:String(it.name || '?').slice(0, 6) };
     else if (it.type === 'line' && seg(it)) o = { id, type:'line', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2 };
@@ -2295,8 +2865,10 @@ function makeThumb(){
   } catch(e){ return null; }
 }
 function record(){
+  saveCam();
   return { id:proj.id, name:proj.name, created:proj.created, updated:Date.now(), sample:proj.sample,
-    items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), thumb:makeThumb() || proj.thumb || null, counts:counts(), ver:3 };
+    items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), thumb:(S.view !== 'sheet' && makeThumb()) || proj.thumb || null, counts:counts(),
+    views:JSON.parse(JSON.stringify(views)), viewId:S.viewId, ver:4 };
 }
 let saveT = null;
 function setSaveState(s){ const el = $('#saveState'); el.dataset.s = s; el.textContent = { dirty:'· изменён', saving:'· сохраняю…', saved:'· сохранено', mem:'· не сохраняется на этом устройстве' }[s] || ''; }
@@ -2322,7 +2894,10 @@ function loadRecord(rec){
   fileHandle = null;
   applySettings(rec.settings); showName();
   for (const k in fitted) delete fitted[k];
-  rebuild(); fit(); renderOptbar();
+  views = sanitizeViews(rec.views) || DEFAULT_VIEWS(); vpImgs.clear(); SHEET.sel = null;
+  S.viewId = null;
+  const start = views.find(v => v.id === rec.viewId) || views.find(v => v.kind === 'plan');
+  openView(start.id); renderTree();
   setSaveState(store.ok ? 'saved' : 'mem'); lsSet('kot.last', proj.id);
 }
 async function openProject(id){
@@ -2352,7 +2927,7 @@ const downloadsP = claudeUse('downloads');
 const safeName = s => String(s || 'Проект').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'Проект';
 function fileJSON(rec){
   return JSON.stringify({ format:'kot-project', version:3, app:'Kot project', id:rec.id, name:rec.name, created:rec.created, updated:rec.updated || Date.now(),
-    units:'m', settings:rec.settings, types:rec.types, nextId:rec.nextId, items:rec.items }, null, 1);
+    units:'m', settings:rec.settings, types:rec.types, nextId:rec.nextId, items:rec.items, views:rec.views, viewId:rec.viewId }, null, 1);
 }
 async function saveBlob(base, ext, blob, mime, desc){
   const dl = await downloadsP;
@@ -2409,7 +2984,7 @@ async function importFile(f, handle){
   const same = data.id && list.find(p => p.id === data.id);
   const name = String(data.name || f.name.replace(/(\.kot)?(\.json)?$/i, '')).slice(0, 80);
   let rec, msg;
-  const body = { items:data.items, nextId:data.nextId, settings:data.settings, types:data.types };
+  const body = { items:data.items, nextId:data.nextId, settings:data.settings, types:data.types, views:data.views, viewId:data.viewId };
   if (same && (Number(data.updated) || 0) > (same.updated || 0)){ rec = { ...same, ...body, name, updated:Date.now() }; msg = `«${name}» обновлён из файла`; }
   else if (same){ rec = { id:uid(), name:nextName(list, name + ' (из файла)'), created:Date.now(), ...body }; msg = `Открыт как копия: «${rec.name}»`; }
   else { rec = { id:data.id || uid(), name, created:Number(data.created) || Date.now(), ...body }; msg = `Открыт «${name}»`; }
@@ -2527,7 +3102,31 @@ $('#rightClose').onclick = () => setSide('right', false);
 /* ---------- UI wiring ---------- */
 document.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
-$('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo; $('#qSave').onclick = saveNow;
+for (const id of ['#phaseSel', '#vbPhase']) $(id).onchange = e => setPhase(e.target.value);
+$('#rbSheet').onclick = () => newView('sheet');
+$('#undoBtn').onclick = () => undo(1); $('#redoBtn').onclick = () => redo(1); $('#qSave').onclick = saveNow;
+// Revit-style undo list: pick an action and everything after it is undone too
+const histMenu = $('#histMenu');
+function openHist(){
+  const h = historyList(10), b = $('#histBtn').getBoundingClientRect();
+  histMenu.replaceChildren();
+  const head = document.createElement('div'); head.className = 'mh'; head.textContent = h.length ? 'Отменить до выбранного действия (сверху — последнее):' : 'Журнал пуст: отменять нечего'; histMenu.append(head);
+  const btns = h.map((t, i) => {
+    const bt = document.createElement('button'); bt.setAttribute('role', 'menuitem');
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = i + 1;
+    const l = document.createElement('span'); l.className = 'lbl'; l.textContent = t; l.title = t;
+    bt.append(n, l);
+    bt.onmouseenter = bt.onfocus = () => btns.forEach((x, k) => x.classList.toggle('on', k <= i));
+    bt.onclick = () => { closeHist(); undo(i + 1); };
+    histMenu.append(bt); return bt;
+  });
+  if (undoStack.length > 10){ const more = document.createElement('div'); more.className = 'mh'; more.textContent = `Ещё ${undoStack.length - 10} действий глубже: Ctrl+Z`; histMenu.append(more); }
+  histMenu.style.left = b.left + 'px'; histMenu.style.top = (b.bottom + 2) + 'px'; histMenu.hidden = false;
+  (btns[0] || histMenu).focus && btns[0] && btns[0].focus();
+}
+function closeHist(){ histMenu.hidden = true; }
+$('#histBtn').onclick = () => histMenu.hidden ? openHist() : closeHist();
+document.addEventListener('pointerdown', e => { if (!histMenu.hidden && !histMenu.contains(e.target) && !e.target.closest('#histBtn')) closeHist(); });
 $('#rbFit').onclick = () => fit();
 $('#rbRotate').onclick = rotateSel;
 $('#rbDelete').onclick = deleteSel;
@@ -2553,6 +3152,7 @@ addEventListener('keydown', e => {
   if (mod && e.code === 'KeyO'){ e.preventDefault(); openLib(); return; }
   for (const dlg of [lib, typeDlg, $('#aiDlg'), $('#installDlg')]) if (!dlg.hidden){ if (e.key === 'Escape'){ dlg.hidden = true; if (dlg === typeDlg) closeTypes(); } return; }
   if (e.key === 'Escape' && !fileMenu.hidden){ closeFileMenu(); fileBtn.focus(); return; }
+  if (e.key === 'Escape' && !histMenu.hidden){ closeHist(); $('#histBtn').focus(); return; }
   if (e.key === 'Shift' && mouse.inside) hover(mouse.x, mouse.y, true);
   if (e.target === lenInput){
     if (e.key === 'Enter'){ e.preventDefault(); applyTyped(); }
@@ -2609,6 +3209,7 @@ function wordsToNums(s){
 function normalize(s){
   s = s.toLowerCase().replace(/ё/g, 'е').replace(/(\d),(\d)/g, '$1.$2').replace(/[«»"!?]/g, ' ').replace(/3\s*d|3\s*д/g, '3д');
   s = s.replace(/(\d)\s*[xх×*]\s*(\d)/g, '$1 на $2').replace(/(\d)(мм|см|м)(?![а-я])/g, '$1 $2');
+  s = s.replace(/((?:стен|двер|окн|окон|объем)[а-я]*)\s+и(?=[\s,.]|$)/g, '$1 и_');
   s = wordsToNums(s.replace(/\s+/g, ' ').trim());
   s = s.replace(/(\d+(?:\.\d+)?)\s+с\s+половин[а-я]*/g, (m, n) => String(Number(n) + 0.5));
   s = s.replace(/(\d+(?:\.\d+)?)\s*тысяч[а-я]*/g, (m, n) => String(Number(n) * 1000));
@@ -2643,52 +3244,108 @@ function dirOf(s){
   if (/вниз|(?:^|[^а-я])юг|назад/.test(s)) return 270;
   return null;
 }
-// wall letters in speech or typing: Latin letters, Russian letter names ("дэ", "цэ"), and Cyrillic look-alikes (С → C)
-const LOOK = { 'а':'A','в':'B','с':'C','е':'E','н':'H','к':'K','м':'M','о':'O','р':'P','т':'T','х':'X','у':'Y' };
-const PHON = { 'б':'B','д':'D','ф':'F','г':'G','и':'I','л':'L','п':'P','з':'Z','ж':'J','й':'J','ц':'C','ш':'W','я':'Y' };
-const LNAMES = { 'бэ':'B','бе':'B','би':'B','цэ':'C','це':'C','си':'C','дэ':'D','де':'D','ди':'D','эф':'F','эфф':'F','гэ':'G','джи':'G','аш':'H','эйч':'H','ай':'I','жи':'J','джей':'J','йот':'J','кей':'K','эль':'L','эл':'L','эм':'M','эн':'N','пэ':'P','пе':'P','пи':'P','ку':'Q','кью':'Q','эр':'R','ар':'R','эс':'S','тэ':'T','ти':'T','ю':'U','вэ':'V','ве':'V','ви':'V','икс':'X','игрек':'Y','уай':'Y','зэт':'Z','зет':'Z','зед':'Z','зи':'Z' };
-const STOP2 = new Set(['на','от','до','по','за','из','во','ко','со','об','не','но','же','ли','бы','ее','её','их','ей','им','мы','вы','он','то','та','те']);
+// element letters in speech or typing: the Russian letter itself ("стена Д") or its name ("стена дэ", "окно эль")
+const RNAMES = { 'а':'А','бэ':'Б','бе':'Б','вэ':'В','ве':'В','гэ':'Г','ге':'Г','дэ':'Д','де':'Д','е':'Е','йе':'Е','жэ':'Ж','же':'Ж','зэ':'З','зе':'З','и':'И','и_':'И',
+  'ка':'К','эль':'Л','эл':'Л','эм':'М','эн':'Н','о':'О','пэ':'П','пе':'П','эр':'Р','эс':'С','тэ':'Т','те':'Т','у':'У','эф':'Ф','ха':'Х','цэ':'Ц','це':'Ц','че':'Ч','чэ':'Ч','ша':'Ш','ща':'Щ','э':'Э','ю':'Ю','я':'Я' };
+const AMBIG = new Set(['в','к','с','у','о','и','а','я']);
+const STOP = new Set(['на','от','до','по','за','из','во','ко','со','об','не','но','ли','бы','ее','их','ей','им','мы','вы','он','то','та','все','эту','эта','это','для','над','под','при','про','без','или','как','так','где','мм','см','шаг','ось','оси','два','три']);
+const NOUNS = [[/^стен/, 'wall'], [/^двер/, 'door'], [/^(окн|окон)/, 'window'], [/^(объем|блок|шкаф|стол|кроват|диван|тумб|короб|куб|крыльц)/, 'box']];
+const AFTER_TAG = /^(на|от|до|к|добав|постав|сдел|удал|сдвин|передвин|перемест|отодвин|подвин|смест|выдел|выбер|покаж|ширин|высот|подоконник|измен|увелич|уменьш)/;
 function letterTok(tok){
-  tok = (tok || '').replace(/[.,:;]$/, '');
-  if (/^[a-z]{1,3}$/.test(tok)) return tok.toUpperCase();
-  if (LNAMES[tok]) return LNAMES[tok];
-  if (/^[а-я]$/.test(tok)) return LOOK[tok] || PHON[tok] || null;
-  if (/^[а-я]{2}$/.test(tok) && !STOP2.has(tok)){ const a = LOOK[tok[0]] || PHON[tok[0]], b = LOOK[tok[1]] || PHON[tok[1]]; return a && b ? a + b : null; }
+  tok = (tok || '').replace(/[.,:;]$/, '').replace(/ё/g, 'е');
+  if (RNAMES[tok]) return RNAMES[tok];
+  const U = tok.toUpperCase();
+  if (TAG_RE.test(U) && (tok.length === 1 || !STOP.has(tok))) return U;
   return null;
 }
-function wallTagsIn(f){
+// finds "стена Б", "окно А", "дверь В", "объём Г"… in a phrase; prep is the word before the noun ("от стены А")
+function elTagsIn(f){
   const toks = f.split(/\s+/), out = [];
   for (let i = 0; i < toks.length - 1; i++){
-    if (!/^стен/.test(toks[i])) continue;
+    const nn = NOUNS.find(([re]) => re.test(toks[i])); if (!nn) continue;
+    const type = nn[1];
     let j = i + 1; if (/^(номер|№)$/.test(toks[j])) j++;
-    const t = toks[j]; let tag = letterTok(t); if (!tag) continue;
-    if (/^[а-я]$/.test(t) && /^\d/.test(toks[j + 1] || '')) continue;
-    if (tag.length === 1 && toks[j + 1]){ const t2 = letterTok(toks[j + 1]); if (t2 && t2.length === 1 && wallByTag(tag + t2)) tag = tag + t2; }
-    if (wallByTag(tag)) out.push({ tag, prep:toks[i - 1] || '' });
-    else if (/^[a-z]{1,3}$/.test(t) || LNAMES[t]) out.missing = out.missing || tag;
+    const t = (toks[j] || '').replace(/[.,:;]$/, ''); let tag = letterTok(t); if (!tag) continue;
+    const next = toks[j + 1];
+    if (/^[а-я]$/.test(t) && next && /^\d/.test(next)) continue;
+    if (AMBIG.has(t) && next && !AFTER_TAG.test(next)) continue;
+    if (tag.length === 1 && next){ const t2 = letterTok(next); if (t2 && t2.length === 1 && byTag(type, tag + t2)) tag = tag + t2; }
+    if (byTag(type, tag)) out.push({ type, tag, prep:toks[i - 1] || '', ref:type === 'wall' ? '@' + tag : `@${type}:${tag}` });
+    else if (!AMBIG.has(t)) out.missing = out.missing || `${CAT[type].toLowerCase()} ${tag}`;
   }
   return out;
 }
-const CMD = /букв|сдвин|передвин|перемест|отодвин|подвин|смест|стен|перегород|комнат|помещени|двер|окн|объем|блок|шкаф|стол|кроват|диван|крыльц|тумб|куб|вид|план|аксоном|изометр|диметр|3д|перспектив|фасад|отмен|верни|повтор|покажи|очист|лист|удали|замкн|начн|точк|высот[а-я]* стен|толщин|лини|тонир|выбер|выдели|сетк|размер|ос[ия](?:[^а-я]|$)|осей|поверн/;
+const wallTagsIn = f => { const r = elTagsIn(f), w = r.filter(t => t.type === 'wall'); w.missing = r.missing; return w; };
+// '@Д' — wall Д; '@window:А', '@door:Б', '@box:В' — other categories
+function findEl(spec){
+  const m = String(spec).match(/^@(?:(wall|door|window|box):)?(.+)$/); if (!m) return null;
+  const type = m[1] || 'wall', it = byTag(type, m[2]);
+  if (!it) throw new Error(`Нет элемента: ${CAT[type].toLowerCase()} ${m[2].toUpperCase()}`);
+  return it;
+}
+const CMD = /стади|снес|снос|демонтир|узел|обмер|монтаж|мебел|откр|диспетчер|букв|сдвин|передвин|перемест|отодвин|подвин|смест|стен|перегород|комнат|помещени|двер|окн|объем|блок|шкаф|стол|кроват|диван|крыльц|тумб|куб|вид|план|аксоном|изометр|диметр|3д|перспектив|фасад|отмен|верни|повтор|покажи|очист|лист|удали|замкн|начн|точк|высот[а-я]* стен|толщин|лини|тонир|выбер|выдели|сетк|размер|ос[ия](?:[^а-я]|$)|осей|поверн/;
 function splitFrags(s){
   const parts = s.split(/\s*(?:[,;]|\.(?!\d))\s*|\s+(?:и|затем|потом|далее|после этого)\s+/).filter(p => p && p.trim());
   const out = [];
   for (const p of parts){ if (out.length && !CMD.test(p)) out[out.length - 1] += ' ' + p; else out.push(p); }
   return out;
 }
+function phaseIn(f){
+  if (/демонтаж/.test(f)) return 'demontazh';
+  if (/монтаж/.test(f)) return 'montazh';
+  if (/обмер|существующ/.test(f)) return 'obmer';
+  if (/мебел|расстанов/.test(f)) return 'mebel';
+  return null;
+}
+// finds a view or sheet named in a phrase: «лист а101», «лист 2», «узел 1», «план демонтажа», «3д», «южный фасад»
+function viewIn(f){
+  const norm = s => s.toLowerCase().replace(/ё/g, 'е').replace(/[{}«»"]/g, '').replace(/3d/g, '3д').trim();
+  const g = norm(f);
+  const sm = g.match(/лист[а-я]*\s*(?:номер\s*)?([а-яa-z]?)\s*(\d+)/);
+  if (sm){
+    const sheets = views.filter(v => v.kind === 'sheet'), n = Number(sm[2]);
+    return sheets.find(v => norm(v.num).replace(/\s/g, '') === (sm[1] || '') + sm[2] || norm(v.num).replace(/\D/g, '') === sm[2]) || (n >= 1 && n <= sheets.length && n < 100 ? sheets.sort((a, b) => a.num.localeCompare(b.num, 'ru', { numeric:true }))[n - 1] : null);
+  }
+  const um = g.match(/узел\s*(\d+)/); if (um){ const v = views.find(x => x.kind === 'detail' && norm(x.name) === 'узел ' + um[1]); if (v) return v; }
+  let best = null;
+  for (const v of views){ const nm = norm(v.name); if (nm.length > 2 && g.includes(nm) && (!best || nm.length > norm(best.name).length)) best = v; }
+  if (best) return best;
+  const ph = phaseIn(g);
+  if (/план/.test(g) && ph) return views.find(v => v.kind === 'plan' && v.phase === ph) || null;
+  if (/фасад/.test(g)){ const sd = /север/.test(g) ? 'N' : /восто/.test(g) ? 'E' : /запад/.test(g) ? 'W' : 'S'; return views.find(v => v.kind === 'elev' && v.side === sd) || null; }
+  return null;
+}
 function parseOne(f){
-  if (/отмен/.test(f) || /^назад$/.test(f)) return { a:'undo' };
-  if (/верни|повтори/.test(f)) return { a:'redo' };
-  if (/очист|нов[а-я]* лист|удали вс/.test(f)) return { a:'clear' };
+  const stepsN = () => { const m = f.match(/(\d+)\s*(?:шаг|действ|раз|изменен)/); return m ? Number(m[1]) : /(?:все|всё)\s+(?:последн|десять)/.test(f) ? 10 : 1; };
+  if ((/отмен|откат/.test(f) && !/снос|снес/.test(f)) || /^назад$/.test(f) || (/назад/.test(f) && /шаг|действ/.test(f))) return { a:'undo', n:stepsN() };
+  if (/верни|повтори/.test(f)) return { a:'redo', n:stepsN() };
+  if (/истори|журнал/.test(f)) return { a:'history' };
+  if (/(?:нов|созда|добав|сделай)[а-я]*\s+лист/.test(f)) return { a:'newview', kind:'sheet' };
+  if (/(?:нов|созда|добав|сделай)[а-я]*\s+(?:3д|трехмерн)/.test(f)) return { a:'newview', kind:'d3' };
+  if (/(?:нов|созда|добав|сделай)[а-я]*\s+план/.test(f)) return { a:'newview', kind:'plan' };
+  if (/(?:нов|созда|добав|сделай)[а-я]*\s+узел/.test(f)) return { a:'newview', kind:'detail' };
+  if (/очист|удали вс/.test(f)) return { a:'clear' };
+  if (/стади|^(?:обмер|демонтаж|монтаж|мебель)$/.test(f) || /покажи\s+вс[её]\s+стади/.test(f)){
+    const k = phaseIn(f);
+    if (k) return { a:'phase', k };
+    if (/вс[её]|все/.test(f)) return { a:'phase', k:'all' };
+    return { err:'Назовите стадию: обмер, демонтаж, монтаж, мебель или «показать все»' };
+  }
+  if (/откр|перейд|покажи|диспетчер/.test(f)){ const v = viewIn(f); if (v) return { a:'openview', id:v.id }; }
   if (/покажи вс|целиком|покажи модель|по размеру/.test(f)) return { a:'fit' };
   if (/замкн/.test(f)) return { a:'close' };
   if (/(?:проставь|поставь|добавь|сделай|нанеси)[а-я]*\s+размер|размер[а-я]*\s+по\s+(?:наружн|стен)/.test(f)) return { a:'autodim' };
   if (/поверн/.test(f)) return { a:'rotate' };
   if (/букв/.test(f)) return { a:'tags', on:!/скрой|скрыть|убер|спрячь|выключ|без|отключ/.test(f) };
-  if (/сдвин|передвин|перемест|отодвин|подвин|смест/.test(f) && /стен/.test(f)){
+  if (/сдвин|передвин|перемест|отодвин|подвин|смест/.test(f) && /стен|двер|окн|окон/.test(f)){
     const tg = wallTagsIn(f);
     const ref = tg.find(t => /^(от|к|до|относительно)$/.test(t.prep)), target = tg.find(t => t !== ref);
-    if (!target) return { err:tg.missing ? `Нет стены ${tg.missing}. Буквы стен видны на плане` : 'Назовите стену буквой, например «сдвинь стену C на 1200 мм»' };
+    const anyEl = elTagsIn(f).find(t => t.type !== 'wall');
+    if (!target && anyEl && isOp(byTag(anyEl.type, anyEl.tag))){
+      const L = lensOf(f), d = L[0]; if (!d) return { err:'Назовите расстояние, например «на 500 мм»' };
+      return { a:'moveop', el:anyEl.ref, by:d, angle:dirOf(f) };
+    }
+    if (!target) return { err:tg.missing ? `Нет: ${tg.missing}. Буквы видны на плане` : 'Назовите стену буквой, например «сдвинь стену В на 1200 мм»' };
     const at = f.match(new RegExp('на расстоянии\\s*' + NUM)), by = f.match(new RegExp('на\\s*(?:расстояние\\s*)?' + NUM));
     const L = lensOf(f);
     const dist = at ? toM(at[1], at[2]) : by ? toM(by[1], by[2]) : L[0];
@@ -2697,13 +3354,25 @@ function parseOne(f){
   }
   const og = f.match(/(?:^|\s)(?:сетк[а-я]*\s+)?(?:ос[ия]|осей)\s+(\d+)\s+(?:по|шаг[а-я]*)?\s*(\d+(?:\.\d+)?)\s*(?:мм|м|метр[а-я]*)?\s*(?:на|и|,)?\s*(\d+)\s+(?:по|шаг[а-я]*)?\s*(\d+(?:\.\d+)?)/);
   if (og) return { a:'grids', nx:Number(og[1]), sx:toM(og[2]), ny:Number(og[3]), sy:toM(og[4]) };
-  const tagsHere = /стен/.test(f) ? wallTagsIn(f) : [];
-  if (!tagsHere.length && tagsHere.missing) return { err:`Нет стены ${tagsHere.missing}. Буквы стен видны на плане` };
-  if (/(?:выбер|выдели)/.test(f) && tagsHere.length) return { a:'select', id:'@' + tagsHere[0].tag };
+  const allTags = elTagsIn(f), tagsHere = allTags.filter(t => t.type === 'wall'), others = allTags.filter(t => t.type !== 'wall');
+  if (!allTags.length && allTags.missing) return { err:`Нет: ${allTags.missing}. Буквы видны на плане` };
+  if (/снес|снос|демонтир|разбер/.test(f)){
+    const undoDem = /(?:отмени|убери|не)\s+(?:снос|снес)|восстанов|верни/.test(f);
+    if (allTags.length) return { a:'demolish', el:allTags[0].ref, undo:undoDem };
+    return { a:'demolish', el:'selected', undo:undoDem };
+  }
+  if (/восстанов/.test(f) && allTags.length) return { a:'demolish', el:allTags[0].ref, undo:true };
+  if (/(?:выбер|выдели)/.test(f) && allTags.length) return { a:'select', id:allTags[0].ref };
   const sel1 = f.match(/(?:выбер|выдели)[а-я]*\s+[а-я]*\s*(?:номер|№)?\s*(\d+)/); if (sel1) return { a:'select', id:Number(sel1[1]) };
-  if (/удали/.test(f) && tagsHere.length && !/двер|окн/.test(f)) return { a:'delete', target:'@' + tagsHere[0].tag };
-  if (/удали/.test(f) && !/двер|окн/.test(f)) return { a:'delete', target:/последн/.test(f) ? 'last' : 'selected' };
-  if (/двер|окн/.test(f)){
+  if (/удали/.test(f) && others.length) return { a:'delete', target:others[0].ref };
+  if (/удали/.test(f) && tagsHere.length && !/двер|окн|окон/.test(f)) return { a:'delete', target:tagsHere[0].ref };
+  if (/удали/.test(f) && !/двер|окн|окон/.test(f)) return { a:'delete', target:/последн/.test(f) ? 'last' : 'selected' };
+  const op1 = others.find(t => t.type === 'door' || t.type === 'window');
+  if (op1 && !/добав|постав|встав|нов/.test(f)){
+    const w = numAfter(f, 'ширин'), h = numAfter(f, 'высот'), sill = numAfter(f, 'подоконник|от пола|на высоте');
+    if (w || h || sill) return { a:'setop', el:op1.ref, w, h, sill };
+  }
+  if (/двер|окн|окон/.test(f)){
     const kind = /двер/.test(f) ? 'door' : 'window';
     const cm = f.match(/(\d+)\s+(?:окн|двер)/);
     const off = f.match(new RegExp(NUM + '\\s*от\\s*(?:угла|начала|края|левого|правого)'));
@@ -2748,7 +3417,7 @@ const SIDE_NAME = { N:'северной', S:'южной', E:'восточной'
 const DIR_NAME = { 0:'вправо', 90:'вверх', 180:'влево', 270:'вниз' };
 function findWall(spec, refs){
   if (refs && typeof spec === 'string' && refs[spec]) return byId(refs[spec]);
-  if (typeof spec === 'string' && spec[0] === '@'){ const w = wallByTag(spec.slice(1)); if (w) return w; throw new Error(`Нет стены ${spec.slice(1)}`); }
+  if (typeof spec === 'string' && spec[0] === '@'){ const w = findEl(spec.includes(':') ? spec : '@wall:' + spec.slice(1)); if (w.type !== 'wall') throw new Error('Это не стена'); return w; }
   const walls = items.filter(i => i.type === 'wall' && wallFrame(i).L > 0.3);
   if (!walls.length) throw new Error('В проекте нет стен');
   if (typeof spec === 'number' || /^\d+$/.test(String(spec))){ const w = byId(Number(spec)); if (w && w.type === 'wall') return w; throw new Error(`Нет стены №${spec}`); }
@@ -2769,7 +3438,7 @@ function placeOpening(kind, wall, w, h, sill, pref){
   const lo = w / 2, hi = L - w / 2, p = clamp(pref, lo, hi);
   for (let k = 0; k <= Math.ceil(L / 0.05); k++) for (const sg of [1, -1]){
     const q = r4(clamp(p + sg * k * 0.05, lo, hi));
-    if (!overlaps(wall.id, q, w, null)){ addOp(kind, wall.id, q, w, h, sill); return q; }
+    if (!overlaps(wall.id, q, w, null)) return addOp(kind, wall.id, q, w, h, sill);
   }
   throw new Error(`В стене №${wall.id} нет свободного места`);
 }
@@ -2842,11 +3511,13 @@ function execOne(a, ctx){
       const n = Math.max(1, Math.min(12, Math.round(Number(a.count) || 1)));
       const { L } = wallFrame(wall);
       const off = a.offset != null && Number.isFinite(Number(a.offset)) ? Number(a.offset) : null;
-      for (let k = 0; k < n; k++){ const pref = off != null ? off + w / 2 + k * (w + 0.6) : L * (k + 1) / (n + 1); placeOpening(kind, wall, w, h, sill, pref); }
+      const made = [];
+      for (let k = 0; k < n; k++){ const pref = off != null ? off + w / 2 + k * (w + 0.6) : L * (k + 1) / (n + 1); made.push(placeOpening(kind, wall, w, h, sill, pref)); }
+      if (a.ref && made[0]) ctx.refs[a.ref] = made[0].id;
       if (ctx.quiet){ ctx.ops = (ctx.ops || 0) + n; return null; }
       const side = typeof a.wall === 'string' && SIDE_NAME[a.wall] ? `в ${SIDE_NAME[a.wall]} стене (${wall.tag})` : `в стене ${wall.tag}`;
-      const what = kind === 'door' ? (n > 1 ? `${n} двери` : 'Дверь') : (n > 1 ? `${n} окна` : 'Окно');
-      return `${what} ${mm(w)} × ${mm(h)} мм ${side}`;
+      const what = kind === 'door' ? (n > 1 ? 'Двери' : 'Дверь') : (n > 1 ? 'Окна' : 'Окно');
+      return `${what} ${made.map(m => m.tag).join(', ')} — ${mm(w)} × ${mm(h)} мм ${side}`;
     }
     case 'box': {
       const w = okNum(a.w), d = okNum(a.d ?? a.w); if (!w || !d) throw new Error('Не понял размеры объёма');
@@ -2889,7 +3560,7 @@ function execOne(a, ctx){
         msg = a.dist != null ? `Стена ${w.tag} поставлена на ${mm(d)} мм от стены ${r.tag} (между осями)` : `Стена ${w.tag} сдвинута на ${mm(d)} мм ${a.toward ? 'к стене' : 'от стены'} ${r.tag}`;
         const fw = wallFrame(w); if (Math.abs(fw.dir.x * fr.dir.z - fw.dir.z * fr.dir.x) < 0.05) msg += ` · между осями теперь ${mm(now)} мм`;
       } else {
-        if (a.angle == null || !Number.isFinite(Number(a.angle))) throw new Error(`Скажите, куда сдвинуть стену ${w.tag}: вправо, влево, вверх, вниз — или «от стены A»`);
+        if (a.angle == null || !Number.isFinite(Number(a.angle))) throw new Error(`Скажите, куда сдвинуть стену ${w.tag}: вправо, влево, вверх, вниз — или «от стены А»`);
         const r = Number(a.angle) * Math.PI / 180; vx = Math.cos(r) * d; vz = -Math.sin(r) * d;
         moveWallJoined(w, r4(vx), r4(vz));
         msg = `Стена ${w.tag} сдвинута на ${mm(d)} мм ${DIR_NAME[((Number(a.angle) % 360) + 360) % 360] || ''}`.trim();
@@ -2911,13 +3582,40 @@ function execOne(a, ctx){
         const ids = new Set(sel); items = items.filter(i => !ids.has(i.id) && !ids.has(i.wall)); pruneDims(); clearSel();
         return `Удалено элементов: ${ids.size}`;
       }
-      const it = a.target === 'last' ? [...items].reverse().find(i => !isOp(i) && i.type !== 'dim') || items[items.length - 1] : String(a.target)[0] === '@' ? findWall(a.target) : byId(Number(a.target));
+      const it = a.target === 'last' ? [...items].reverse().find(i => !isOp(i) && i.type !== 'dim') || items[items.length - 1] : String(a.target)[0] === '@' ? findEl(a.target) : byId(Number(a.target));
       if (!it) throw new Error('Нечего удалять');
       items = items.filter(i => i.id !== it.id && i.wall !== it.id); pruneDims(); if (sel.has(it.id)) clearSel();
-      return `Удалено: №${it.id}`;
+      return `Удалено: ${tagNameL(it)}`;
     }
     case 'clear': items = []; clearSel(); voice.pen = voice.chainStart = voice.room = null; return 'Лист очищен';
-    case 'select': { const it = String(a.id)[0] === '@' ? findWall(a.id) : byId(Number(a.id)); if (!it) throw new Error(`Нет элемента №${a.id}`); setSel([it.id]); rebuild(); return it.type === 'wall' ? `Выбрана стена ${it.tag}` : `Выбран №${it.id}`; }
+    case 'select': { const it = String(a.id)[0] === '@' ? findEl(a.id) : byId(Number(a.id)); if (!it) throw new Error(`Нет элемента №${a.id}`); setSel([it.id]); rebuild(); return `Выбрано: ${tagNameL(it)}`; }
+    case 'setop': {
+      const it = findEl(a.el); if (!isOp(it)) throw new Error('Это не окно и не дверь');
+      const w = okNum(a.w), h = okNum(a.h), sill = okNum(a.sill);
+      if (w){ it.pos = r4(it.pos - it.w / 2 + w / 2); it.w = w; } if (h) it.h = h; if (sill && it.type === 'window') it.sill = sill;
+      return `${tagName(it)}: ${mm(it.w)} × ${mm(it.h)} мм${it.type === 'window' ? ', подоконник ' + mm(it.sill) : ''}`;
+    }
+    case 'moveop': {
+      const it = findEl(a.el); if (!isOp(it)) throw new Error('Это не окно и не дверь');
+      const w = byId(it.wall), f = wallFrame(w), d = okNum(a.by, 0.001, 100); if (!d) throw new Error('Назовите расстояние');
+      let sg = 1;
+      if (a.angle != null && Number.isFinite(Number(a.angle))){ const r = Number(a.angle) * Math.PI / 180; sg = Math.sign(Math.cos(r) * f.dir.x - Math.sin(r) * f.dir.z) || 1; }
+      const pos = r4(clamp(it.pos + sg * d, it.w / 2, f.L - it.w / 2));
+      if (overlaps(w.id, pos, it.w, it.id)) throw new Error('Мешает соседний проём');
+      it.pos = pos; return `${tagName(it)} ${fem(it) ? 'сдвинута' : 'сдвинуто'} на ${mm(d)} мм вдоль стены ${w.tag}`;
+    }
+    case 'phase': setPhase(a.k); return 'Стадия вида: ' + phName(a.k);
+    case 'openview': { const v = views.find(x => x.id === a.id); if (!v) throw new Error('Нет такого вида'); openView(v.id); return 'Открыт: ' + (v.kind === 'sheet' ? 'лист ' + v.num + ' — ' + v.name : v.name); }
+    case 'newview': { newView(a.kind); return a.kind === 'detail' ? 'Обведите рамкой участок плана для узла' : 'Создано: ' + viewTitle(curView()); }
+    case 'demolish': {
+      const it = a.el === 'selected' || a.el == null ? (sel.size === 1 ? byId(selId) : null) : findEl(a.el);
+      if (!it) throw new Error('Назовите элемент буквой, например «снеси стену Д»');
+      if (S.view === 'sheet') openView((views.find(x => x.kind === 'plan' && x.phase === 'demontazh') || views.find(x => x.kind === 'plan')).id);
+      if (S.phase === 'all' || PH_IDX[S.phase] < PH_IDX.demontazh) setPhase('demontazh');
+      const r = demolishIt(it, true, a.undo);
+      if (/^(Это|Снос возможен|Элемент ещё)/.test(r)) throw new Error(r);
+      return r;
+    }
     case 'facade': { setView('axo'); lookFrom({ S:new V3(0, 0, 1), N:new V3(0, 0, -1), E:new V3(1, 0, 0), W:new V3(-1, 0, 0) }[a.side] || new V3(0, 0, 1)); fit(); return 'Фасад: ' + ({ S:'южный', N:'северный', E:'восточный', W:'западный' }[a.side] || 'южный'); }
     case 'view': {
       if (a.v === 'dim'){ setView('axo'); setAxo(22.208, 20.705); return 'Диметрия'; }
@@ -2927,8 +3625,8 @@ function execOne(a, ctx){
     case 'style': setStyle(a.s === 'lines' ? 'lines' : 'shaded'); return a.s === 'lines' ? 'Стиль: скрытые линии' : 'Стиль: тонированный';
     case 'grid': S.grid = !!a.on; grids.visible = S.grid; $('#cGrid').checked = S.grid; return S.grid ? 'Сетка включена' : 'Сетка скрыта';
     case 'fit': fit(); return 'Показываю всё';
-    case 'undo': undo(); return 'Отменено';
-    case 'redo': redo(); return 'Возвращено';
+    case 'undo': { const names = undo(a.n || 1); return names.length ? 'Отменено: ' + names.join('; ') : 'Нечего отменять'; }
+    case 'redo': { const names = redo(a.n || 1); return names.length ? 'Возвращено: ' + names.join('; ') : 'Нечего возвращать'; }
     default: throw new Error('Неизвестное действие: ' + String(a.a).slice(0, 20));
   }
 }
@@ -2937,10 +3635,10 @@ function outerWalls(){
   const b = bounds(), e = 0.4;
   return walls.filter(w => [w.x1, w.x2].every(x => Math.abs(x - b.min.x) < e + w.t) || [w.x1, w.x2].every(x => Math.abs(x - b.max.x) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.min.z) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.max.z) < e + w.t));
 }
-const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags'];
+const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags', 'phase', 'openview', 'newview'];
 function execAll(actions, opt = {}){
   const mutating = actions.some(a => a && !PASSIVE.includes(a.a));
-  if (mutating) pushUndo();
+  if (mutating) pushUndo(opt.label);
   const ctx = { refs:{}, origin:opt.origin, quiet:opt.quiet };
   const res = []; let ok = 0;
   for (const a of actions){
@@ -3007,8 +3705,8 @@ function aiErrText(e){
 function modelSummary(){
   const r2 = v => Math.round(v * 100) / 100;
   const walls = items.filter(i => i.type === 'wall').slice(-80).map(w => ({ id:w.id, letter:w.tag, x1:r2(w.x1), z1:r2(w.z1), x2:r2(w.x2), z2:r2(w.z2), t:w.t, h:w.h, type:w.wt }));
-  const ops = items.filter(isOp).slice(-80).map(o => ({ id:o.id, type:o.type, wall:o.wall, w:o.w, h:o.h }));
-  const boxes = items.filter(i => i.type === 'box').slice(-40).map(b => ({ id:b.id, x:r2(b.x), z:r2(b.z), w:b.w, d:b.d, h:b.h }));
+  const ops = items.filter(isOp).slice(-80).map(o => ({ id:o.id, letter:o.tag, type:o.type, wall:o.wall, w:o.w, h:o.h }));
+  const boxes = items.filter(i => i.type === 'box').slice(-40).map(b => ({ id:b.id, letter:b.tag, x:r2(b.x), z:r2(b.z), w:b.w, d:b.d, h:b.h }));
   const gridsL = items.filter(i => i.type === 'grid').slice(-40).map(g => ({ id:g.id, name:g.name, x1:r2(g.x1), z1:r2(g.z1), x2:r2(g.x2), z2:r2(g.z2) }));
   return JSON.stringify({ walls, openings:ops, boxes, grids:gridsL, start:voice.pen ? { x:r2(voice.pen.x), z:r2(voice.pen.z) } : null, selected:[...sel],
     wallTypes:types.map(t => ({ id:t.id, name:t.name, thickness:typeT(t) })), defaults:{ wallType:S.wallType, wallH:S.wallH, doorW:S.doorW, doorH:S.doorH, winW:S.winW, winH:S.winH, winSill:S.winSill } });
@@ -3023,16 +3721,21 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 {"a":"room","w":4,"d":3,"x":0,"z":0,"h":2.7,"type":"ext","ref":"r1"} — прямоугольная комната из 4 стен; (x,z) — левый верхний угол; ref "r1" даёт стены "r1N","r1E","r1S","r1W"
 {"a":"opening","kind":"door","wall":"w1","w":0.9,"h":2.1,"sill":0.9,"offset":0.5,"count":1} — проём; wall: ref, "N","S","E","W","last" или номер стены; offset — от начала стены до края проёма, без него проём ставится по центру; sill только для окна
 {"a":"box","w":2,"d":0.6,"h":0.9,"x":0,"z":0} — объём (мебель, крыльцо, блок), x,z — угол на плане
-У каждой стены есть буква (поле letter): чтобы сослаться на стену по букве, пиши "@C". Буквы — латинские A…Z, затем AA, AB…; пользователь может назвать их по-русски («стена цэ», «стена С»).
-{"a":"movewall","wall":"@C","from":"@A","by":1.2} — сдвинуть стену C на 1,2 м от стены A (по нормали к A; "toward":true — к стене A); "dist" вместо "by" — поставить на это расстояние от A между осями; без "from" — с "angle" как у "wall". Примыкающие стены тянутся следом.
-{"a":"delop","kind":"window","wall":"@D"} — удалить последнее окно или дверь из стены
+У стен, дверей, окон и объёмов есть русские буквы (поле letter), в каждой категории свой счёт с «А»: стены А, Б, В…, окна А, Б…, двери А, Б… После «Я» идут АА, АБ… Буквы Ё, Й, Ъ, Ы, Ь не используются. Ссылки: стена Д — "@Д"; окно А — "@window:А"; дверь Б — "@door:Б"; объём В — "@box:В". Пользователь может называть буквы словами («дэ», «эль», «эм»).
+{"a":"movewall","wall":"@В","from":"@А","by":1.2} — сдвинуть стену В на 1,2 м от стены А (по нормали к А; "toward":true — к стене А); "dist" вместо "by" — поставить на это расстояние от А между осями; без "from" — с "angle" как у "wall". Примыкающие стены тянутся следом.
+{"a":"setop","el":"@window:А","w":1.5,"h":1.4,"sill":0.8} — изменить размеры окна или двери
+{"a":"moveop","el":"@door:Б","by":0.5,"angle":0} — сдвинуть окно или дверь вдоль своей стены
+{"a":"delop","kind":"window","wall":"@Д"} — удалить последнее окно или дверь из стены
 {"a":"tags","on":false} — скрыть или показать буквы стен
 {"a":"walltype","type":"brick","target":"all"} — сменить тип стен: target "all", "outer" или "selected"
 {"a":"set","what":"wallH","value":3} — высота всех стен
 {"a":"autodim"} — проставить размеры по наружным стенам
 {"a":"rotate"} — повернуть выбранное на 90°
 {"a":"delete","target":"selected"} — "selected", "last" или номер; {"a":"select","id":5}
-{"a":"view","v":"plan"} — "plan","d3","axo","dim"; {"a":"facade","side":"S"}; {"a":"style","s":"lines"}; {"a":"fit"}; {"a":"undo"}; {"a":"redo"}; {"a":"clear"}`;
+{"a":"view","v":"plan"} — "plan","d3","axo","dim"; {"a":"facade","side":"S"}; {"a":"style","s":"lines"}; {"a":"fit"}; {"a":"undo"}; {"a":"redo"}; {"a":"clear"}
+Стадии как в Revit: "obmer" (обмер, существующее), "demontazh", "montazh", "mebel"; новые элементы создаются в текущей стадии вида.
+{"a":"phase","k":"demontazh"} — стадия вида, "all" = показать все; {"a":"demolish","el":"@Д"} — снести элемент в текущей стадии (undo:true — отменить снос);
+{"a":"openview","id":"<id вида>"}; {"a":"newview","kind":"sheet"} — "plan","d3","sheet","detail".`;
 function commandPrompt(text){
   return `Ты переводишь команду пользователя для программы архитектурного черчения «Kot project» в список действий JSON.
 ${ACTIONS_DOC}
@@ -3080,10 +3783,20 @@ async function runCommand(raw){
   cmdEl.value = '';
   if (attached) return runPhoto(text);
   addMsg('user', [text]);
-  const parsed = splitFrags(normalize(text)).map(parseOne);
-  if (parsed.length && parsed.every(p => p && !p.err)){ const res = execAll(parsed); addMsg('app', res.length ? res : [{ ok:true, t:'Готово' }]); speak(res); return; }
+  const nt = normalize(text);
+  if (pendingUndo){
+    const p = pendingUndo;
+    if (/^(да|ага|угу|подтвер|верно|выполн|ок|окей|давай|конечно|отменяй|отмени(?!\s*\d)|возвращай|верни(?!\s*\d))/.test(nt)){ resolvePending(true); return; }
+    if (/^(нет|не надо|не нужно|не отменяй|отбой|стоп|оставь|не)(?:\s|$)/.test(nt)){ resolvePending(false); return; }
+    resolvePending(false, true);
+    if (p) addMsg('app', [{ ok:false, t:'Отмена не выполнена: сначала нужно ответить «да» или «нет». Выполняю новую команду.' }]);
+  }
+  const parsed = splitFrags(nt).map(parseOne);
+  const hist = parsed.find(p => p && (p.a === 'undo' || p.a === 'redo' || p.a === 'history'));
+  if (hist){ askUndo(hist.a, hist.n || 1); return; }
+  if (parsed.length && parsed.every(p => p && !p.err)){ const res = execAll(parsed, { label:text }); addMsg('app', res.length ? res : [{ ok:true, t:'Готово' }]); speak(res); return; }
   if (!(await aiMode())){
-    const res = execAll(parsed.filter(p => p && !p.err));
+    const res = execAll(parsed.filter(p => p && !p.err), { label:text });
     const frags = splitFrags(normalize(text));
     parsed.forEach((p, i) => { if (!p) res.push({ ok:false, t:'Не понял: «' + frags[i] + '»' }); else if (p.err) res.push({ ok:false, t:p.err }); });
     res.push({ ok:false, t:'Сложные фразы понимает Claude — включите его шестерёнкой вверху чата.' });
@@ -3091,11 +3804,48 @@ async function runCommand(raw){
   }
   await withAI(async signal => {
     const r = await askAI(commandPrompt(text), null, signal);
-    const acts = Array.isArray(r && r.actions) ? r.actions.slice(0, 60) : [];
-    const res = acts.length ? execAll(acts) : [];
-    if (r && r.reply) res.push({ ok:true, t:String(r.reply).slice(0, 400) });
-    return res.length ? res : [{ ok:false, t:'Не понял команду' }];
+    let acts = Array.isArray(r && r.actions) ? r.actions.slice(0, 60) : [];
+    const u = acts.find(a => a && (a.a === 'undo' || a.a === 'redo'));
+    if (u){ setTimeout(() => askUndo(u.a, u.n || 1), 0); acts = acts.filter(a => a !== u && a.a !== 'undo' && a.a !== 'redo'); }
+    const res = acts.length ? execAll(acts, { label:text }) : [];
+    if (r && r.reply && !u) res.push({ ok:true, t:String(r.reply).slice(0, 400) });
+    return res.length ? res : u ? [{ ok:true, t:'Нужно подтверждение отмены — ответьте ниже.' }] : [{ ok:false, t:'Не понял команду' }];
   }, 'Думаю…');
+}
+// undo and redo by voice or chat always ask first; at most 10 steps per command
+let pendingUndo = null;
+function askUndo(kind, n){
+  if (kind === 'history'){
+    const h = historyList(10);
+    addMsg('app', h.length ? ['Последние действия (сверху — самое новое):', ...h.map((t, i) => `${i + 1}. ${t}`), 'Скажите, например, «отмени 3 шага».'] : ['Журнал пуст: отменять нечего.']);
+    return;
+  }
+  const stack = kind === 'undo' ? undoStack : redoStack;
+  if (!stack.length){ addMsg('app', [{ ok:false, t:kind === 'undo' ? 'Нечего отменять' : 'Нечего возвращать' }]); return; }
+  let warn = '';
+  if (n > 10){ warn = 'За один раз — не больше 10 шагов. '; n = 10; }
+  n = Math.min(n, stack.length);
+  let names;
+  if (kind === 'undo') names = historyList(n);
+  else { names = []; let cur = snapshot(); for (let i = redoStack.length - 1; i >= redoStack.length - n; i--){ names.push(histName({ s:cur, label:redoStack[i].label }, redoStack[i].s)); cur = redoStack[i].s; } }
+  pendingUndo = { kind, n };
+  const verb = kind === 'undo' ? 'Отменить' : 'Вернуть';
+  const m = addMsg('app', [warn + `${verb} ${n === 1 ? 'последнее действие' : n + ' ' + (n < 5 ? 'действия' : 'действий')}?`, ...names.map((t, i) => `${i + 1}. ${t}`), 'Скажите «да» или «нет».']);
+  const row = document.createElement('div'); row.className = 'row'; row.style.marginTop = '6px';
+  const yes = document.createElement('button'); yes.className = 'btn sm primary'; yes.textContent = `Да, ${verb.toLowerCase()}`;
+  const no = document.createElement('button'); no.className = 'btn sm'; no.textContent = 'Нет';
+  yes.onclick = () => { addMsg('user', ['Да']); resolvePending(true); };
+  no.onclick = () => { addMsg('user', ['Нет']); resolvePending(false); };
+  row.append(yes, no); m.append(row); pendingUndo.row = row;
+  speak([{ t:`${verb} ${n === 1 ? 'последнее действие' : n + ' шагов'}? Скажите да или нет.` }]);
+}
+function resolvePending(ok, silent){
+  const p = pendingUndo; pendingUndo = null; if (!p) return;
+  if (p.row) p.row.remove();
+  if (!ok){ if (!silent) addMsg('app', [{ ok:true, t:'Хорошо, ничего не отменяю.' }]); return; }
+  const names = p.kind === 'undo' ? undo(p.n) : redo(p.n);
+  const res = [{ ok:true, t:(p.kind === 'undo' ? 'Отменено' : 'Возвращено') + ` (${names.length}): ` + names.join('; ') }];
+  addMsg('app', res); speak(res);
 }
 async function runPhoto(text){
   const ph = attached; clearAttach();
@@ -3196,6 +3946,7 @@ setView('axo');
 showName(); greet(); renderVbar();
 (function loop(){
   requestAnimationFrame(loop);
+  if (S.view === 'sheet') return;
   ctl[S.view].update();
   if (annoDirty || (S.view === 'plan' && planCam.zoom !== annoZoom)) rebuildAnno();
   renderer.render(scene, cam());
@@ -3205,11 +3956,16 @@ showName(); greet(); renderVbar();
 async function boot(){
   let list = await store.all();
   if (!list.length){
-    const sample = { id:uid(), name:'Пример — дом 6 × 4,5 м', created:Date.now(), updated:Date.now(), sample:true, items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), ver:3 };
+    const sample = { id:uid(), name:'Пример — дом 6 × 4,5 м', created:Date.now(), updated:Date.now(), sample:true, items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), views:SAMPLE_VIEWS(), viewId:'v-plan', ver:4 };
     await store.put(sample); list = [sample];
   } else {
-    // examples saved by earlier versions get the current example (grids, joins, annotations)
-    for (const p of list) if (p.sample && (p.ver || 0) < 3){ Object.assign(p, { items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), updated:Date.now(), ver:3 }); await store.put(p); }
+    // examples saved by earlier versions get the current example (phases, views, sheets)
+    for (const p of list) if (p.sample && (p.ver || 0) < 4){ Object.assign(p, { items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), views:SAMPLE_VIEWS(), viewId:'v-plan', updated:Date.now(), ver:4 }); await store.put(p); }
+    // users whose old example was already edited get the new phases example once, as a separate project
+    if (!list.some(p => p.sample && p.ver >= 4) && lsGet('kot.sample4') !== '1'){
+      const ex = { id:uid(), name:'Пример — стадии и листы', created:Date.now(), updated:Date.now(), sample:true, items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), views:SAMPLE_VIEWS(), viewId:'v-plan', ver:4 };
+      await store.put(ex); list.push(ex); lsSet('kot.sample4', '1'); lsSet('kot.last', ex.id);
+    }
   }
   const last = lsGet('kot.last');
   const rec = list.find(p => p.id === last) || list.sort((a, b) => (b.updated || 0) - (a.updated || 0))[0];
@@ -3218,6 +3974,3 @@ async function boot(){
 }
 boot();
 </script>
-
-</body>
-</html>
