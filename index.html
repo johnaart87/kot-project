@@ -312,6 +312,7 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .tree .add:hover{background:var(--accent-soft)}
 .tree .node{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;border-radius:4px}
 .tree .node:hover{background:var(--accent-soft)}.tree .node:focus-visible{outline:2px solid var(--accent)}
+.tree .shpool{margin-left:auto;max-width:150px;font:11px "Segoe UI",Tahoma,var(--font-ui);padding:0 2px;height:19px;border:1px solid var(--line);border-radius:2px;background:var(--sheet);color:var(--ink)}
 .tree .node .tg{width:12px;flex:none;margin-right:2px;display:inline-flex;justify-content:center}.tree .node .tg::before{content:'▾';font-size:10px}
 .tree li.closed>.node .tg::before{content:'▸'}.tree li.closed>ul{display:none}
 .tree .node{justify-content:flex-start}.tree .node .add{margin-left:auto}
@@ -690,7 +691,8 @@ details.more summary::-webkit-details-marker{display:none}
       <div class="grp"><div class="grp-items">
         <button class="rbtn" data-tool="fam" title="Разместить семейство: мебель, оборудование, сантехника, свои элементы (FA)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h14v3H3zM5 12v5M15 12v5M5 9V5h10v4"/></svg>Компонент<span class="k">FA</span></button>
         <button class="rbtn" id="rbFamNew" title="Создать семейство: выдавливание, вращение, сдвиг"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M3 15l5-3 5 3-5 3zM3 15V8l5-3 5 3v7M8 12V5"/><path d="M15 3v5M12.5 5.5h5"/></svg>Новое<br>семейство</button>
-        <button class="rbtn" id="rbFurnLib" title="Библиотека мебели: диваны, кресла, столы, кровати, шкафы, стеллажи, кухня, свет, растения">Библиотека мебели</button><button class="rbtn" id="rbModelImp" title="Импорт модели: .glb, .gltf (с .bin и текстурами) или .obj (с .mtl и текстурами) — выберите все файлы модели сразу">Импорт модели</button><input type="file" id="mdlFile" multiple accept=".glb,.gltf,.obj,.mtl,.bin,.png,.jpg,.jpeg,.webp" hidden> title="Загрузить семейство из файла .kotfam"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 6h5l2 2h7v9H3z"/><path d="M10 10v5M8 13l2 2 2-2"/></svg>Загрузить<br>семейство</button>
+        <button class="rbtn" id="rbFurnLib" title="Библиотека мебели: диваны, кресла, столы, кровати, шкафы, стеллажи, кухня, свет, растения">Библиотека мебели</button><button class="rbtn" id="rbModelImp" title="Импорт модели: .glb, .gltf (с .bin и текстурами) или .obj (с .mtl и текстурами) — выберите все файлы модели сразу">Импорт модели</button><input type="file" id="mdlFile" multiple accept=".glb,.gltf,.obj,.mtl,.bin,.png,.jpg,.jpeg,.webp" hidden>
+        <button class="rbtn" id="rbFamLoad" title="Загрузить семейство из файла .kotfam"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 6h5l2 2h7v9H3z"/><path d="M10 10v5M8 13l2 2 2-2"/></svg>Загрузить<br>семейство</button>
         <button class="rbtn" id="rbFamEdit" title="Редактировать семейство выбранного элемента или любое из списка"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M3 15l5-3 5 3-5 3zM3 15V8l5-3 5 3"/><path d="M12 13l5-5 1.5 1.5-5 5H12z"/></svg>Редакти-<br>ровать</button>
         <input type="file" id="famFile" accept=".kotfam,.json,application/json" hidden>
       </div><div class="grp-label">Семейства</div></div>
@@ -2294,7 +2296,229 @@ const FURN_LIB = {
   rug:{ n:'Ковёр', cat:'furniture', p:{ w:2000, d:1400, h:12 } }, plant:{ n:'Растение в кашпо', cat:'generic', p:{ w:550, d:550, h:1300 } },
   radiator:{ n:'Радиатор', cat:'equipment', p:{ w:800, d:100, h:550 } }
 };
+/* ---------- BOCA ROOM collection (boca-room.com / boca.su): parametric models after the brand's catalogue photos,
+   with a short own description, designer, sizes of the catalogue configurations and prices «from» (indicative, as on the site) ---------- */
+const BOCA = {
+  tommy:{ n:'Диван TOMMY', cat:'furniture', g:'Диваны', p:{ w:2000, d:1200, h:680 }, by:'Михаил Шапошников', y:2020, cfg:[['2000×1200', 402200], ['3200×1600', 726000], ['4000×1800', 879800], ['4400×2000', 1051900]], mat:'Ткань (50+ вариантов), съёмные чехлы', d:'Модульный диван из низких платформ-сидений; спинки — отдельные блоки, которые ставятся в любое место модуля. Отмечен премией Red Dot.' },
+  foofive:{ n:'Диван FOO-FIVE', cat:'furniture', g:'Диваны', p:{ w:2400, d:1100, h:720 }, by:'Михаил Шапошников', y:2022, cfg:[['1600×1100', 397900], ['2400×1100', 622200], ['2800×1100', 576500], ['3450×1100', 723500], ['4450×1100', 948200], ['4450×1600', 1187800]], mat:'Ткань, стёганая обивка', d:'Модульный диван со стёганой «дутой» обивкой, как у тёплой куртки: сиденья и спинки из горизонтальных валиков; упругое наполнение быстро восстанавливает форму.' },
+  cosmo:{ n:'Диван COSMO', cat:'furniture', g:'Диваны', p:{ w:2400, d:1100, h:760 }, by:'Михаил Шапошников', y:2023, cfg:[['2400×1100', 440600], ['3000×1100', 548000], ['3300×1300', 670300], ['4100×1900', 875800], ['4800×1300', 933200]], mat:'Ткань, бесшовная обивка', d:'Объёмный диван с мягким округлым силуэтом без швов, широкими подлокотниками и «дутыми» подушками.' },
+  cosmo_s:{ n:'Угловой модуль COSMO S', cat:'furniture', g:'Диваны', p:{ w:2400, d:2400, h:760 }, by:'Михаил Шапошников', y:2025, cfg:[], mat:'Ткань', d:'Изогнутый угловой модуль коллекции COSMO: те же мягкие формы, сиденья и спинка идут по дуге.' },
+  flux:{ n:'Диван FLUX', cat:'furniture', g:'Диваны', p:{ w:2600, d:1300, h:740 }, by:'Михаил Шапошников', y:2025, cfg:[['2600×1300', 667800], ['3900×2000', 1135300], ['4600×2600', 1322000], ['5200×2000', 1567400]], mat:'Ткань', d:'Диван с гибкими мягкими спинками-подушками, которые подстраиваются под позу; без механизмов.' },
+  soho:{ n:'Диван SOHO', cat:'furniture', g:'Диваны', p:{ w:2600, d:1100, h:700 }, by:'Михаил Шапошников', y:2022, cfg:[['2100×1100', 556900], ['2600×1100', 762200], ['3500×1400', 1016300], ['4900×3000', 1884400]], mat:'Ткань, деревянный цоколь', d:'Модульный диван в духе современной классики: низкое основание-подиум с полкой, высокие мягкие подушки спинки.' },
+  navi:{ n:'Диван NAVI', cat:'furniture', g:'Диваны', p:{ w:2500, d:1100, h:740 }, by:'Михаил Шапошников', y:2021, cfg:[['1500×1100', 265800], ['2500×1100', 415700], ['2800×1700', 557000], ['3400×2100', 779500], ['4400×1700', 793400]], mat:'Ткань', d:'Модульный диван со скруглёнными краями: мягкие сиденья, спинки и подлокотники; модуль можно использовать как пуф.' },
+  vera:{ n:'Кресло VERO', cat:'furniture', g:'Кресла', p:{ w:700, d:1100, h:720 }, by:'Palo Nero', y:2025, cfg:[], mat:'Натуральная кожа, металл, дерево', d:'Кресло-гамак: полотно натуральной кожи натянуто между двумя массивными цилиндрами из металла и дерева.' },
+  soho_armchair:{ n:'Кресло SOHO', cat:'furniture', g:'Кресла', p:{ w:1000, d:950, h:720 }, by:'Михаил Шапошников', y:2025, cfg:[], mat:'Ткань', d:'Кресло коллекции SOHO: классический силуэт без лишних деталей, глубокая посадка и широкие мягкие подлокотники.' },
+  moovi:{ n:'Кресло MOOVI', cat:'furniture', g:'Кресла', p:{ w:900, d:900, h:760 }, by:'Достонбек Дадамирзаев', y:2025, cfg:[], mat:'Букле', d:'Округлое мягкое кресло без лишних деталей; образ — маленькая пушистая лошадка. Победитель конкурса дизайна BOCA ROOM.' },
+  leedman:{ n:'Кресло LEEDMAN', cat:'furniture', g:'Уличная мебель', p:{ w:760, d:820, h:780 }, by:'Дмитрий Чих', y:2025, cfg:[], mat:'Металлический каркас, плетение', d:'Уличное кресло с выразительным металлическим каркасом и тонким плетением сиденья и спинки.' },
+  mono:{ n:'Кресло MONO', cat:'furniture', g:'Уличная мебель', p:{ w:750, d:850, h:760 }, by:'Михаил Шапошников', y:2025, cfg:[], mat:'Металл, всесезонные материалы', d:'Первое кресло уличной коллекции: лаконичный каркас и выверенная эргономика посадки.' },
+  airblade:{ n:'Кровать AIRBLADE', cat:'furniture', g:'Кровати', p:{ w:1800, d:2150, h:780 }, by:'Михаил Шапошников', y:2023, cfg:[['Изголовье 90 мм', 217900], ['Изголовье 250 мм', 225600]], mat:'Ткань, специальный матрас', d:'«Парящая» кровать: форму задаёт толстый матрас над утопленным основанием; изголовье 90 или 250 мм.' },
+  slimbed:{ n:'Кровать SLIMBED', cat:'furniture', g:'Кровати', p:{ w:1760, d:2120, h:1050 }, by:'Михаил Шапошников', y:2021, cfg:[['Без подъёмного механизма', 289100], ['С подъёмным механизмом', 307500]], mat:'Ткань', d:'Стройная кровать с тонким основанием и тонким изголовьем; можно встроить подъёмный механизм.' },
+  soft:{ n:'Кровать SOFT', cat:'furniture', g:'Кровати', p:{ w:1800, d:2250, h:900 }, by:'Михаил Шапошников', y:2020, cfg:[['Изголовье 250 мм', 300200], ['Изголовье 350 мм', 300200]], mat:'Ткань, лебяжий пух', d:'Низкая кровать с пухлым мягким изголовьем 250 или 350 мм и тонким основанием.' },
+  lomo:{ n:'Кровать LOMO', cat:'furniture', g:'Кровати', p:{ w:1840, d:2200, h:1150 }, by:'Михаил Шапошников', y:2019, cfg:[['Без подъёмного механизма', 309800], ['С подъёмным механизмом', 328200]], mat:'Ткань', d:'Высокая кровать с высокими мягкими царгами, высоким изголовьем и скруглёнными углами; есть вариант с местом для хранения.' },
+  navi_bed:{ n:'Кровать NAVIBED', cat:'furniture', g:'Кровати', p:{ w:1800, d:2150, h:1050 }, by:'Михаил Шапошников', y:2021, cfg:[['Без подъёмного механизма', 316300], ['С подъёмным механизмом', 334700]], mat:'Ткань', d:'Кровать в линии дивана NAVI; изголовье регулируется: вровень с царгами или шире, с нишей для тумб.' },
+  minibed_foo:{ n:'Кровать MINIBED FOO-FIVE', cat:'furniture', g:'Кровати', p:{ w:2080, d:1000, h:800 }, by:'Михаил Шапошников', y:2021, cfg:[['Без подъёмного механизма', 381800], ['С подъёмным механизмом', 395900]], mat:'Ткань, стёганая обивка', d:'Детская кровать-диван со стёганой боковой спинкой: защищает стену и превращает кровать в диван для гостей.' },
+  minibed_navi:{ n:'Кровать MINIBED NAVI', cat:'furniture', g:'Кровати', p:{ w:2080, d:1000, h:800 }, by:'Михаил Шапошников', y:2021, cfg:[['Без подъёмного механизма', 306700], ['С подъёмным механизмом', 322000]], mat:'Ткань', d:'Детская кровать с мягкой боковой спинкой; легко становится диваном.' },
+  sapp_air:{ n:'Матрас SAPP AIR (МС01)', cat:'furniture', g:'Кровати', p:{ w:1600, d:2000, h:250 }, by:'Михаил Шапошников', y:2024, cfg:[], mat:'Многослойный матрас, средняя жёсткость', d:'Матрас средней жёсткости к кроватям BOCA.' },
+  pixel:{ n:'Столик PIXEL', cat:'furniture', g:'Столы', p:{ w:2000, d:1600, h:330 }, by:'Михаил Шапошников', y:2024, cfg:[['2000×1600', 431300], ['1500×1260', 237000], ['1700×1260', 256700], ['1860×1600', 409200]], mat:'Шпон, эмаль', d:'Модульный кофейный стол из блоков разной высоты — архитектурный объект в ритм модульным диванам.' },
+  string:{ n:'Столик STRING', cat:'furniture', g:'Столы', p:{ w:500, d:500, h:520 }, by:'Сергей Алтунбеков', y:2025, cfg:[], mat:'Дерево, металл', d:'Приставной столик, который встраивается между модулями дивана; круглая столешница на тонкой опоре.' },
+  ava:{ n:'Стол AVA', cat:'furniture', g:'Столы', p:{ w:2200, d:1000, h:750 }, by:'Сергей Алтунбеков, Ангелина Мадатян', y:2025, cfg:[], mat:'Дерево', d:'Обеденный стол с выразительным силуэтом опор; сделан вместе с Британской высшей школой дизайна.' },
+  trino:{ n:'Стол TRINO', cat:'furniture', g:'Столы', p:{ w:2100, d:950, h:750 }, by:'Михаил Шапошников', y:2019, cfg:[['1600×800', 0], ['1600×900', 0], ['1900×950', 0], ['2100×950', 0], ['2200×1200', 0], ['2400×1200', 0], ['2800×1200', 0]], mat:'Керамогранит, металл', d:'Обеденный стол с керамогранитной столешницей, стойкой к пятнам, и тонким металлическим подстольем.' },
+  lumi:{ n:'Столик LUMI', cat:'furniture', g:'Столы', p:{ w:540, d:450, h:370 }, by:'Сергей Алтунбеков', y:2025, cfg:[['540×450×370', 0], ['460×370×370', 0], ['300×500×450', 0], ['300×370×450', 0], ['200×1000×680', 0], ['200×900×500', 0]], mat:'Металл, эмаль (любой цвет RAL/NCS)', d:'Журнальный столик-короб из окрашенного металла; несколько размеров и любой цвет эмали.' },
+  cubi:{ n:'Столик CUBI', cat:'furniture', g:'Столы', p:{ w:500, d:500, h:450 }, by:'Михаил Шапошников', y:2026, cfg:[], mat:'Дерево, шпон', d:'Модульный столик-куб с бортиком по периметру; встраивается в диваны COSMO, FOO-FIVE, NAVI или стоит отдельно.' },
+  steel:{ n:'Столик STEEL', cat:'furniture', g:'Столы', p:{ w:450, d:350, h:550 }, by:'Сергей Алтунбеков', y:2024, cfg:[], mat:'Металл, порошковая окраска', d:'Металлический приставной столик для дивана; мягкие подпятники берегут пол.' },
+  sit:{ n:'Лавка SIT', cat:'furniture', g:'Прихожая', p:{ w:1000, d:350, h:420 }, by:'Михаил Шапошников', y:2017, cfg:[['1000×350×420 с ключницей', 77500], ['600×350×420 без ключницы', 62800]], mat:'Металл, мягкое сиденье', d:'Лавка для прихожей на тонком металлическом каркасе; длинная версия — с лотком-ключницей.' },
+  hanger:{ n:'Вешалка HANGER', cat:'furniture', g:'Прихожая', p:{ w:1000, d:40, h:900 }, by:'Михаил Шапошников', y:2017, cfg:[['600×900', 0], ['1000×900', 0], ['600×1000', 0], ['1200×1050', 0]], mat:'Металл', d:'Настенная вешалка-рамка, «парящая» в 1 см от стены.' },
+  selfie:{ n:'Зеркало SELFIE', cat:'furniture', g:'Прихожая', p:{ w:700, d:60, h:1900 }, by:'Михаил Шапошников', y:2017, cfg:[], mat:'Зеркало, металлическая рама', d:'Крупное напольное зеркало в металлической раме; вешается на стену или ставится под углом.' },
+  bright:{ n:'Зеркало BRIGHT', cat:'furniture', g:'Прихожая', p:{ w:600, d:30, h:1800 }, by:'Михаил Шапошников', y:2024, cfg:[], mat:'Зеркало, металл, подсветка', d:'Зеркало в тонкой металлической рамке с мягкой подсветкой по периметру — для прихожих и гардеробных.' },
+  pouf:{ n:'Пуф POUF', cat:'furniture', g:'Прихожая', p:{ w:600, d:600, h:450 }, by:'Михаил Шапошников', y:2018, cfg:[['Высота 450, Ø 500–700', 49900], ['Высота 350, Ø 700–1000', 60800]], mat:'Ткань', d:'Круглый мягкий пуф разных высот и диаметров; с подносом — кофейный столик.' },
+  line:{ n:'Полка LINE', cat:'equipment', g:'Ванная', p:{ w:800, d:110, h:90 }, by:'Михаил Шапошников', y:2019, cfg:[], mat:'Нержавеющая сталь, порошковая окраска', d:'Настенная полка для ванной: прячет флаконы, оставляя видимыми дозаторы; отверстия против застоя воды.' },
+  stripe:{ n:'Перегородки STRIPE', cat:'generic', g:'Прочее', p:{ w:2400, d:80, h:2700 }, by:'Михаил Шапошников', y:2019, cfg:[], mat:'Металлические рейки', d:'Раздвижные перегородки из вертикальных реек — вместо штор и для зонирования.' },
+  sortage:{ n:'Стеллаж SORTAGE', cat:'casework', g:'Прочее', p:{ w:1200, d:400, h:2200 }, by:'Михаил Шапошников', y:2022, cfg:[], mat:'Металл', d:'Тонкий металлический стеллаж для зонирования, гардеробных или у стены.' },
+  botty:{ n:'Тумба BOTTY', cat:'casework', g:'Прочее', p:{ w:2000, d:420, h:420 }, by:'Михаил Шапошников', y:2021, cfg:[], mat:'МДФ, эмаль', d:'Тумба под ТВ с теневым швом, регулируемой высотой и вентилируемой конструкцией.' },
+  point:{ n:'Костровая чаша POINT', cat:'generic', g:'Уличная мебель', p:{ w:1200, d:1200, h:420 }, by:'Михаил Шапошников', y:2024, cfg:[], mat:'Бетон, металл', d:'Костровая чаша с бетонной столешницей-кольцом.' },
+  mishka:{ n:'Скульптура МИШКА', cat:'generic', g:'Прочее', p:{ w:250, d:180, h:350 }, by:'Михаил Шапошников', y:2022, cfg:[], mat:'Глина, чёрный угольный цвет', d:'Архитектурная скульптура-маскот BOCA ROOM высотой 35 см.' }
+};
+// every BOCA model goes into the library next to the basic ones (with its brand)
+// test stage: only one sofa is in the library for now (the other models are ready in bocaGen, add their keys here)
+const BOCA_ON = ['tommy'];
+for (const k of BOCA_ON) { const b = BOCA[k]; FURN_LIB['boca_' + k] = { n:b.n, cat:b.cat, p:b.p, brand:'BOCA ROOM', spec:b }; }
+const rub = n => n ? 'от ' + n.toLocaleString('ru-RU') + ' ₽' : '';
+// «Свойства» of a library model: catalogue configurations, designer, materials, description
+function bocaSpecRows(f){
+  const L = f && f.mesh && f.mesh.kind === 'gen' && FURN_LIB[f.mesh.g], b = L && L.spec; if (!b) return '';
+  const cur = f.mesh.p.w + '×' + f.mesh.p.d;
+  return `<div class="pgrp">Спецификация · ${esc(L.brand)}</div>`
+    + (b.cfg.length ? prow('Конфигурация', `<select id="fMCfg"><option value="">Свой размер</option>${b.cfg.map(([s, pr]) => `<option value="${esc(s)}"${s.replace(/\s/g, '') === cur ? ' selected' : ''}>${esc(s)}${pr ? ' — ' + rub(pr) : ''}</option>`).join('')}</select>`) : '')
+    + prow('Производитель', `<span class="val">${esc(L.brand)}</span>`) + prow('Дизайнер', `<span class="val">${esc(b.by)}, ${b.y}</span>`)
+    + prow('Группа', `<span class="val">${esc(b.g)}</span>`) + prow('Материалы', `<span class="val">${esc(b.mat)}</span>`)
+    + `<div class="pdesc" style="padding:4px 8px 6px;font-size:11.5px;line-height:1.4;color:var(--mut,#555)">${esc(b.d)}<br><span style="opacity:.75">Цены ориентировочные, по сайту boca-room.com.</span></div>`;
+}
+Object.assign(FMAT, {
+  bGrey:() => new THREE.MeshStandardMaterial({ color:'#a8a6a1', roughness:0.97 }), bLight:() => new THREE.MeshStandardMaterial({ color:'#d8d4cc', roughness:0.97 }),
+  bDark:() => new THREE.MeshStandardMaterial({ color:'#2c2c2e', roughness:0.95 }), bBoucle:() => new THREE.MeshStandardMaterial({ color:'#6f7f3f', roughness:1 }),
+  bPlaid:() => new THREE.MeshStandardMaterial({ color:'#ebe5d8', roughness:0.97 }), leather:() => new THREE.MeshStandardMaterial({ color:'#1f1c1a', roughness:0.45, side:THREE.DoubleSide }),
+  blackMetal:() => new THREE.MeshStandardMaterial({ color:'#1c1d1f', roughness:0.4, metalness:0.7 }), walnut:() => new THREE.MeshStandardMaterial({ color:'#5a3e2b', roughness:0.55 }),
+  stone:() => new THREE.MeshStandardMaterial({ color:'#8c8a86', roughness:0.6 }), concrete2:() => new THREE.MeshStandardMaterial({ color:'#9d9a94', roughness:0.95 }),
+  mirror:() => new THREE.MeshStandardMaterial({ color:'#e6eef2', roughness:0.02, metalness:1 }), led:() => new THREE.MeshStandardMaterial({ color:'#fff4dd', emissive:'#fff1d6', emissiveIntensity:2.5 }),
+  enamel:() => new THREE.MeshStandardMaterial({ color:'#c4583c', roughness:0.35 }), clay:() => new THREE.MeshStandardMaterial({ color:'#1e1e20', roughness:0.8 })
+});
+async function bocaGen(kind, p){
+  const RB = await rbox(), W = p.w / 1000, D = p.d / 1000, H = p.h / 1000, g = new THREE.Group(), mats = {};
+  const M_ = k => mats[k] || (mats[k] = FMAT[k]());
+  const box = (x, y, z, w, h, d, r, mk) => { if (w <= 0 || h <= 0 || d <= 0) return; const rr = Math.max(0.0005, Math.min(r, w / 2 - 1e-4, h / 2 - 1e-4, d / 2 - 1e-4)); const geo = new RB(w, h, d, 3, rr); geo.translate(x + w / 2, y + h / 2, z + d / 2); const m = new THREE.Mesh(geo, M_(mk)); g.add(m); return m; };
+  const cylX = (x0, x1, y, z, r, mk) => { const geo = new THREE.CylinderGeometry(r, r, x1 - x0, 28); geo.rotateZ(Math.PI / 2); geo.translate((x0 + x1) / 2, y, z); g.add(new THREE.Mesh(geo, M_(mk))); };
+  const cylY = (x, y, z, r, h, mk, seg = 20) => { const geo = new THREE.CylinderGeometry(r, r, h, seg); geo.translate(x, y + h / 2, z); g.add(new THREE.Mesh(geo, M_(mk))); };
+  const tube = (pts, r, mk) => { const c = new THREE.CatmullRomCurve3(pts.map(q => new V3(...q)), false, 'catmullrom', 0.1); g.add(new THREE.Mesh(new THREE.TubeGeometry(c, Math.max(12, pts.length * 10), r, 8), M_(mk))); };
+  const lathe = (pts, x, y, z, mk, seg = 48) => { const geo = new THREE.LatheGeometry(pts.map(([a, b]) => new THREE.Vector2(a, b)), seg); geo.translate(x, y, z); g.add(new THREE.Mesh(geo, M_(mk))); };
+  const x0 = -W / 2, z0 = -D / 2; // z0 — front, z0 + D — back
+  const mods = n => Math.max(1, Math.round(n));
+  switch (kind){
+    case 'tommy': { // low soft platforms on a recessed plinth + loose back blocks that stand anywhere on the platform
+      const plinth = 0.05, base = Math.min(0.4, H * 0.55), n = mods(W / 1.0), mw = W / n, bd = 0.22, bh = H - base;
+      box(x0 + 0.04, 0, z0 + 0.04, W - 0.08, plinth + 0.01, D - 0.08, 0.005, 'bDark');
+      for (let i = 0; i < n; i++){
+        box(x0 + i * mw + 0.003, plinth, z0, mw - 0.006, base - plinth - 0.11, D, 0.03, 'bGrey');            // upholstered platform
+        box(x0 + i * mw + 0.006, base - 0.115, z0 + 0.004, mw - 0.012, 0.115, D - 0.008, 0.05, 'bGrey');   // seat cushion
+      }
+      const nb = mods(W / 1.0), bw = W / nb;
+      for (let i = 0; i < nb; i++) box(x0 + i * bw + 0.008, base - 0.005, z0 + D - bd - 0.01, bw - 0.016, bh, bd, 0.07, 'bGrey'); // back blocks
+      if (D > 1.4) box(x0 + 0.01, base - 0.005, z0 + 0.25, bd, bh * 0.8, Math.min(0.95, D - bd - 0.3), 0.07, 'bGrey'); // side block (lounge)
+      for (let i = 0; i < Math.min(3, nb); i++){ const px = x0 + (i + 0.5) * bw, cu = box(px - 0.24, base + 0.02, z0 + D - bd - 0.16, 0.48, Math.min(0.42, bh * 0.8), 0.14, 0.06, i % 2 ? 'bLight' : 'bPlaid');
+        if (cu){ cu.geometry.translate(-px, -(base + 0.02), -(z0 + D - bd - 0.09)); cu.geometry.rotateX(-0.18); cu.geometry.translate(px, base + 0.02, z0 + D - bd - 0.09); } } // throw cushions
+      break; }
+    case 'foofive': { const base = 0.08, n = mods(W / 1.1), mw = W / n, roll = 0.11, seatD = D - 0.24;
+      for (let i = 0; i < n; i++){ const mx = x0 + i * mw + 0.006, ww = mw - 0.012;
+        box(mx, 0, z0 + 0.02, ww, base, D - 0.04, 0.02, 'bDark');
+        const nr = Math.max(3, Math.round(seatD / roll)); for (let j = 0; j < nr; j++) box(mx, base, z0 + j * seatD / nr, ww, 0.33, seatD / nr + 0.01, 0.05, 'bDark');
+        const nb = Math.max(3, Math.round((H - base) / roll)); for (let j = 0; j < nb; j++) box(mx, base + j * (H - base) / nb, z0 + D - 0.25, ww, (H - base) / nb + 0.01, 0.25, 0.05, 'bDark'); }
+      break; }
+    case 'cosmo': { const arm = 0.26, base = 0.24;
+      box(x0, 0, z0, W, base, D, 0.1, 'bLight');
+      box(x0, 0, z0, arm, 0.6, D, 0.12, 'bLight'); box(x0 + W - arm, 0, z0, arm, 0.6, D, 0.12, 'bLight');
+      box(x0 + arm - 0.02, base - 0.03, z0 + D - 0.3, W - 2 * arm + 0.04, H - base + 0.03, 0.3, 0.13, 'bLight');
+      const n = mods((W - 2 * arm) / 0.9), cw = (W - 2 * arm) / n;
+      for (let i = 0; i < n; i++) box(x0 + arm + i * cw + 0.004, base - 0.02, z0 + 0.02, cw - 0.008, 0.22, D - 0.32, 0.1, 'bLight');
+      break; }
+    case 'cosmo_s': { // a curved corner: segments along a quarter arc around the back corner
+      const R1 = Math.min(W, D), seg = 7, base = 0.24, sd = 0.78, back = 0.3;
+      for (let i = 0; i < seg; i++){
+        const a = (i + 0.5) / seg * Math.PI / 2, len = R1 * Math.PI / 2 / seg + 0.02, cx = x0 + W - Math.cos(a) * (R1 - sd / 2 - back), cz = z0 + D - Math.sin(a) * (R1 - sd / 2 - back);
+        const mk2 = (h, y, dd, off) => { const geo = new RB(len, h, dd, 3, Math.min(0.1, h / 2 - 1e-3)); geo.translate(0, y + h / 2, 0); const m = new THREE.Mesh(geo, M_('bLight')); m.position.set(x0 + W - Math.cos(a) * off, 0, z0 + D - Math.sin(a) * off); m.rotation.y = -a + Math.PI / 2; m.updateMatrix(); geo.applyMatrix4(m.matrix); m.position.set(0, 0, 0); m.rotation.set(0, 0, 0); g.add(m); };
+        mk2(base, 0, sd + back, R1 - (sd + back) / 2); mk2(0.22, base - 0.02, sd - 0.04, R1 - back - sd / 2); mk2(H - base, base - 0.02, back, R1 - back / 2);
+        void cx; void cz;
+      }
+      break; }
+    case 'flux': { const base = 0.3, n = mods(W / 1.3), mw = W / n;
+      box(x0, 0, z0, W, base, D, 0.06, 'bPlaid');
+      for (let i = 0; i < n; i++){
+        box(x0 + i * mw + 0.01, base - 0.02, z0 + 0.03, mw - 0.02, 0.18, D - 0.38, 0.09, 'bPlaid');
+        const m = box(x0 + i * mw + 0.03, base, z0 + D - 0.36, mw - 0.06, H - base + 0.06, 0.26, 0.12, 'bPlaid');
+        if (m){ m.geometry.translate(0, -(base), -(z0 + D - 0.23)); m.geometry.rotateX(-0.22); m.geometry.translate(0, base, z0 + D - 0.23); }
+      }
+      break; }
+    case 'soho': { const base = 0.2, plat = 0.06;
+      box(x0, 0, z0, W, base, D, 0.01, 'walnut');
+      const sw = W - 0.55; box(x0 + 0.02, base, z0 + 0.04, sw, 0.2, D - 0.08, 0.06, 'bGrey');
+      const n = mods(sw / 0.9), cw = sw / n;
+      for (let i = 0; i < n; i++) box(x0 + 0.02 + i * cw + 0.005, base + 0.18, z0 + D - 0.3, cw - 0.01, H - base - 0.18, 0.26, 0.1, 'bGrey');
+      box(x0 + sw + 0.06, base, z0 + 0.06, 0.45, plat, D - 0.12, 0.01, 'walnut');
+      break; }
+    case 'navi': { const arm = 0.2, base = 0.2;
+      box(x0, 0, z0, W, base, D, 0.05, 'bGrey');
+      box(x0, 0, z0, arm, 0.58, D, 0.08, 'bGrey'); box(x0 + W - arm, 0, z0, arm, 0.58, D, 0.08, 'bGrey');
+      box(x0 + arm, base, z0 + D - 0.22, W - 2 * arm, H - base, 0.22, 0.07, 'bGrey');
+      const n = mods((W - 2 * arm) / 0.95), cw = (W - 2 * arm) / n;
+      for (let i = 0; i < n; i++){ box(x0 + arm + i * cw + 0.004, base, z0 + 0.02, cw - 0.008, 0.22, D - 0.26, 0.08, 'bGrey'); box(x0 + arm + i * cw + 0.01, base + 0.2, z0 + D - 0.4, cw - 0.02, H - base - 0.22, 0.2, 0.09, 'bGrey'); }
+      break; }
+    case 'vera': { const r1 = 0.11, r2 = 0.13;
+      cylX(x0 + 0.02, x0 + W - 0.02, r1, z0 + r1, r1, 'chrome'); cylX(x0 + 0.02, x0 + W - 0.02, H - r2, z0 + D - r2, r2, 'walnut');
+      const sw = W - 0.12, pts = []; for (let i = 0; i <= 16; i++){ const t = i / 16, zz = z0 + r1 * 2 + t * (D - r1 * 2 - r2 * 2), sag = Math.sin(t * Math.PI) * 0.22, yy = 2 * r1 + t * (H - 2 * r2 - 2 * r1) - sag + 0.04; pts.push([zz, Math.max(0.12, yy)]); }
+      const shape = new THREE.Shape(); shape.moveTo(-sw / 2, -0.004); shape.lineTo(sw / 2, -0.004); shape.lineTo(sw / 2, 0.004); shape.lineTo(-sw / 2, 0.004);
+      const path = new THREE.CatmullRomCurve3(pts.map(([zz, yy]) => new V3(0, yy, zz)));
+      const geo = new THREE.ExtrudeGeometry(shape, { steps:40, bevelEnabled:false, extrudePath:path }); g.add(new THREE.Mesh(geo, M_('leather')));
+      break; }
+    case 'soho_armchair': { const arm = 0.22, base = 0.2;
+      box(x0, 0, z0, W, base, D, 0.02, 'walnut');
+      box(x0, base, z0, arm, 0.36, D, 0.07, 'bGrey'); box(x0 + W - arm, base, z0, arm, 0.36, D, 0.07, 'bGrey');
+      box(x0 + arm, base, z0 + 0.03, W - 2 * arm, 0.22, D - 0.28, 0.07, 'bGrey'); box(x0 + arm, base + 0.12, z0 + D - 0.27, W - 2 * arm, H - base - 0.12, 0.25, 0.08, 'bGrey');
+      break; }
+    case 'moovi': { // soft rounded «pony»: two round legs at the front, a deep seat and a curved back
+      box(x0 + 0.04, 0, z0 + 0.04, 0.26, 0.32, D - 0.12, 0.13, 'bBoucle'); box(x0 + W - 0.3, 0, z0 + 0.04, 0.26, 0.32, D - 0.12, 0.13, 'bBoucle');
+      box(x0, 0.26, z0, W, 0.2, D, 0.1, 'bBoucle');
+      box(x0 + 0.04, 0.4, z0 + D - 0.3, W - 0.08, H - 0.4, 0.3, 0.15, 'bBoucle');
+      box(x0, 0.4, z0 + 0.1, 0.2, 0.22, D - 0.4, 0.1, 'bBoucle'); box(x0 + W - 0.2, 0.4, z0 + 0.1, 0.2, 0.22, D - 0.4, 0.1, 'bBoucle');
+      break; }
+    case 'leedman': case 'mono': { const r = 0.012, sh = kind === 'mono' ? 0.36 : 0.42, mk = 'blackMetal';
+      for (const sx of [x0 + 0.03, x0 + W - 0.03]){ tube([[sx, 0, z0 + 0.04], [sx, sh, z0 + 0.06], [sx, sh + 0.02, z0 + D * 0.7], [sx, H, z0 + D - 0.02], [sx, 0, z0 + D - 0.06]], r, mk); if (kind === 'leedman') tube([[sx, sh + 0.2, z0 + 0.06], [sx, sh + 0.22, z0 + D * 0.6]], r, mk); }
+      const seat = box(x0 + 0.04, sh, z0 + 0.06, W - 0.08, 0.04, D * 0.62, 0.015, kind === 'mono' ? 'bLight' : 'bDark');
+      const back = box(x0 + 0.04, sh + 0.05, z0 + D * 0.7, W - 0.08, H - sh - 0.08, 0.03, 0.012, kind === 'mono' ? 'bLight' : 'bDark');
+      if (back){ back.geometry.translate(0, -sh, -(z0 + D * 0.7)); back.geometry.rotateX(-0.32); back.geometry.translate(0, sh, z0 + D * 0.7); }
+      void seat; break; }
+    case 'airblade': { const head = Math.max(0.09, p.head ? p.head / 1000 : 0.09);
+      box(x0 + 0.15, 0.06, z0 + 0.18, W - 0.3, 0.12, D - head - 0.3, 0.01, 'bDark');
+      box(x0, 0.18, z0, W, 0.26, D - head, 0.07, 'bLight');
+      box(x0, 0, z0 + D - head, W, H, head, 0.03, 'bLight');
+      for (const px of [0.15, W / 2 + 0.05]) box(x0 + px, 0.44, z0 + D - head - 0.5, W / 2 - 0.2, 0.13, 0.42, 0.06, 'white');
+      break; }
+    case 'slimbed': { box(x0, 0.04, z0, W, 0.26, D - 0.06, 0.015, 'bGrey'); box(x0, 0, z0 + D - 0.06, W, H, 0.06, 0.02, 'bGrey');
+      box(x0 + 0.04, 0.3, z0 + 0.04, W - 0.08, 0.22, D - 0.14, 0.05, 'linen'); for (const px of [0.12, W / 2 + 0.04]) box(x0 + px, 0.5, z0 + D - 0.55, W / 2 - 0.16, 0.13, 0.42, 0.06, 'white'); break; }
+    case 'soft': { const head = 0.25; box(x0 + 0.03, 0.03, z0, W - 0.06, 0.12, D - head, 0.01, 'bLight'); box(x0, 0, z0 + D - head, W, H, head, 0.12, 'bLight');
+      box(x0 + 0.05, 0.15, z0 + 0.02, W - 0.1, 0.24, D - head - 0.05, 0.06, 'linen'); for (const px of [0.12, W / 2 + 0.04]) box(x0 + px, 0.37, z0 + D - head - 0.5, W / 2 - 0.16, 0.13, 0.42, 0.06, 'white'); break; }
+    case 'lomo': { const rail = 0.12, rh = 0.55;
+      box(x0, 0, z0, rail, rh, D, 0.05, 'bGrey'); box(x0 + W - rail, 0, z0, rail, rh, D, 0.05, 'bGrey'); box(x0, 0, z0, W, rh, rail, 0.05, 'bGrey'); box(x0, 0, z0 + D - rail, W, H, rail, 0.06, 'bGrey');
+      box(x0 + rail, 0.2, z0 + rail, W - 2 * rail, 0.3, D - 2 * rail, 0.02, 'bGrey'); box(x0 + rail + 0.01, 0.42, z0 + rail + 0.01, W - 2 * rail - 0.02, 0.22, D - 2 * rail - 0.02, 0.05, 'linen');
+      for (const px of [rail + 0.1, W / 2 + 0.04]) box(x0 + px, 0.62, z0 + D - rail - 0.5, W / 2 - rail - 0.14, 0.13, 0.42, 0.06, 'white'); break; }
+    case 'navi_bed': { const rail = 0.1, rh = 0.36;
+      box(x0, 0, z0, W, rh, D - 0.1, 0.06, 'bGrey'); box(x0, 0, z0 + D - 0.1, W, H, 0.1, 0.05, 'bGrey');
+      box(x0 + rail, rh - 0.06, z0 + rail, W - 2 * rail, 0.26, D - 0.1 - 2 * rail, 0.05, 'linen'); for (const px of [0.15, W / 2 + 0.04]) box(x0 + px, rh + 0.16, z0 + D - 0.6, W / 2 - 0.2, 0.13, 0.42, 0.06, 'white'); break; }
+    case 'minibed_foo': case 'minibed_navi': { const fab = kind === 'minibed_foo' ? 'bDark' : 'bGrey', ends = 0.1, back = 0.14, bh = 0.36;
+      box(x0, 0, z0, W, bh, D, 0.05, fab); box(x0, 0, z0, ends, H, D, 0.05, fab); box(x0 + W - ends, 0, z0, ends, H, D, 0.05, fab);
+      if (kind === 'minibed_foo'){ const nb = 4; for (let j = 0; j < nb; j++) box(x0 + ends, bh + j * (H - bh) / nb, z0 + D - back, W - 2 * ends, (H - bh) / nb + 0.01, back, 0.05, fab); }
+      else box(x0 + ends, bh, z0 + D - back, W - 2 * ends, H - bh, back, 0.06, fab);
+      box(x0 + ends + 0.01, bh - 0.05, z0 + 0.02, W - 2 * ends - 0.02, 0.2, D - back - 0.03, 0.05, 'linen'); break; }
+    case 'sapp_air': box(x0, 0, z0, W, H, D, 0.06, 'linen'); break;
+    case 'pixel': { const nx = mods(W / 0.5), nz = mods(D / 0.5), cw = W / nx, cd = D / nz;
+      for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++){ const hh = H * (((i * 7 + j * 3) % 4) < 1 ? 0.82 : ((i + j) % 3 === 0 ? 0.91 : 1)); box(x0 + i * cw + 0.002, 0, z0 + j * cd + 0.002, cw - 0.004, hh, cd - 0.004, 0.004, (i + j) % 2 ? 'walnut' : 'oak'); }
+      break; }
+    case 'string': { const r = Math.min(W, D) / 2; lathe([[0, 0], [r * 0.55, 0], [r * 0.55, 0.008], [0, 0.008]], 0, 0, 0, 'blackMetal'); box(-0.004, 0.008, -r * 0.45, 0.008, H - 0.03, r * 0.9, 0.002, 'blackMetal');
+      lathe([[0, 0], [r, 0], [r, 0.03], [r - 0.012, 0.03], [r - 0.012, 0.012], [0, 0.012]], 0, H - 0.03, 0, 'oak'); break; }
+    case 'ava': { const tt = 0.045; box(x0, H - tt, z0, W, tt, D, 0.02, 'walnut');
+      for (const lx of [0.22, W - 0.42]){ const m = box(x0 + lx, 0, z0 + 0.12, 0.2, H - tt, D - 0.24, 0.08, 'walnut'); void m; }
+      box(x0 + 0.3, 0.3, -0.04, W - 0.6, 0.08, 0.08, 0.03, 'walnut'); break; }
+    case 'trino': { const tt = 0.012; box(x0, H - tt, z0, W, tt, D, 0.003, 'stone'); box(x0 + 0.05, H - tt - 0.05, z0 + 0.05, W - 0.1, 0.05, D - 0.1, 0.004, 'blackMetal');
+      for (const lx of [0.05, W - 0.07]) for (const lz of [0.05, D - 0.07]) box(x0 + lx, 0, z0 + lz, 0.02, H - tt - 0.05, 0.02, 0.003, 'blackMetal'); break; }
+    case 'lumi': { const t = 0.006; box(x0, H - t, z0, W, t, D, 0.002, 'enamel'); box(x0, 0, z0, t, H, D, 0.002, 'enamel'); box(x0 + W - t, 0, z0, t, H, D, 0.002, 'enamel'); box(x0, 0, z0 + D - t, W, H, t, 0.002, 'enamel'); break; }
+    case 'cubi': { box(x0, 0, z0, W, H - 0.02, D, 0.008, 'oak'); const rim = 0.025; box(x0, H - 0.04, z0, W, 0.04, rim, 0.006, 'walnut'); box(x0, H - 0.04, z0 + D - rim, W, 0.04, rim, 0.006, 'walnut'); box(x0, H - 0.04, z0, rim, 0.04, D, 0.006, 'walnut'); box(x0 + W - rim, H - 0.04, z0, rim, 0.04, D, 0.006, 'walnut'); break; }
+    case 'steel': { const t = 0.006; box(x0, H - t, z0, W, t, D, 0.002, 'blackMetal'); box(x0, 0, z0, W, t, D, 0.002, 'blackMetal'); box(x0 + W * 0.3, t, z0, t, H - 2 * t, D, 0.002, 'blackMetal'); box(x0 + W * 0.7, t, z0, t, H - 2 * t, D, 0.002, 'chrome'); break; }
+    case 'sit': { const r = 0.008; for (const sx of [x0 + 0.02, x0 + W - 0.02]) for (const sz of [z0 + 0.02, z0 + D - 0.02]) cylY(sx, 0, sz, r, H - 0.06, 'blackMetal', 10);
+      box(x0, H - 0.08, z0, W, 0.02, D, 0.003, 'blackMetal'); const key = W > 0.8; box(x0 + 0.01, H - 0.06, z0 + 0.01, key ? W - 0.3 : W - 0.02, 0.06, D - 0.02, 0.02, 'bLight'); if (key) box(x0 + W - 0.28, H - 0.06, z0 + 0.02, 0.27, 0.03, D - 0.04, 0.006, 'enamel'); break; }
+    case 'hanger': { const r = 0.006, y0 = 0.9, fh = H; g.userData.keepY = true;
+      tube([[x0, y0, z0 + D], [x0, y0 + fh, z0 + D], [x0 + W, y0 + fh, z0 + D], [x0 + W, y0, z0 + D], [x0, y0, z0 + D]], r, 'blackMetal'); tube([[x0, y0 + fh * 0.82, z0 + 0.01], [x0 + W, y0 + fh * 0.82, z0 + 0.01]], r, 'blackMetal'); break; }
+    case 'selfie': { const m = new THREE.Group(), t = 0.012;
+      const fr = (x, y, w, h) => { const geo = new RB(w, h, D * 0.5, 2, 0.003); geo.translate(x + w / 2, y + h / 2, 0); m.add(new THREE.Mesh(geo, M_('blackMetal'))); };
+      fr(x0, 0, W, t); fr(x0, H - t, W, t); fr(x0, 0, t, H); fr(x0 + W - t, 0, t, H);
+      const mg = new THREE.PlaneGeometry(W - 2 * t, H - 2 * t); mg.translate(x0 + W / 2, H / 2, 0.002); m.add(new THREE.Mesh(mg, M_('mirror')));
+      m.rotation.x = -0.12; m.updateMatrixWorld(true); m.traverse(o => { if (o.isMesh){ o.geometry.applyMatrix4(o.matrixWorld); g.add(new THREE.Mesh(o.geometry, o.material)); } }); break; }
+    case 'bright': { g.userData.keepY = true; const y0 = 0.15, t = 0.01;
+      box(x0, y0, z0, W, H, D, 0.004, 'blackMetal'); const mg = new THREE.PlaneGeometry(W - 2 * t, H - 2 * t); mg.translate(0, y0 + H / 2, z0 - 0.001); mg.rotateY(Math.PI); mg.translate(0, 0, 2 * z0 - 0.002); g.add(new THREE.Mesh(mg, M_('mirror')));
+      box(x0 - 0.005, y0 - 0.005, z0 + D - 0.004, W + 0.01, H + 0.01, 0.003, 0.002, 'led'); break; }
+    case 'pouf': { const r = Math.min(W, D) / 2, rr = Math.min(0.08, H / 3), pts = [[0, 0], [r - rr * 0.5, 0]]; for (let i = 0; i <= 8; i++){ const a = -Math.PI / 2 + i / 8 * Math.PI / 2; pts.push([r - rr + Math.cos(a) * rr, rr + Math.sin(a) * rr]); } for (let i = 0; i <= 8; i++){ const a = i / 8 * Math.PI / 2; pts.push([r - rr + Math.cos(a) * rr, H - rr + Math.sin(a) * rr]); } pts.push([0, H]); lathe(pts, 0, 0, 0, 'bLight'); break; }
+    case 'line': { g.userData.keepY = true; const y0 = 1.1; box(x0, y0, z0, W, H, D, 0.004, 'blackMetal'); for (let i = 1; i < W / 0.06; i++) cylY(x0 + i * 0.06, y0 - 0.001, z0 + D / 2, 0.006, 0.004, 'chrome', 8); break; }
+    case 'stripe': { const slat = 0.03, gap = 0.025, n = Math.floor(W / (slat + gap)); box(x0, H - 0.04, z0, W, 0.04, D, 0.004, 'blackMetal');
+      for (let i = 0; i < n; i++) box(x0 + i * (slat + gap) + gap / 2, 0.01, z0 + D * 0.3 + ((i % 2) ? 0.018 : 0), slat, H - 0.06, 0.012, 0.003, 'blackMetal'); break; }
+    case 'sortage': { const r = 0.008, ns = mods(H / 0.4);
+      for (const sx of [x0 + r, x0 + W - r]) for (const sz of [z0 + r, z0 + D - r]) cylY(sx, 0, sz, r, H, 'blackMetal', 10);
+      for (let i = 1; i <= ns; i++) box(x0, i * H / (ns + 0.15) - 0.01, z0, W, 0.008, D, 0.002, 'blackMetal'); break; }
+    case 'botty': { box(x0 + 0.03, 0, z0 + 0.04, W - 0.06, 0.08, D - 0.08, 0.004, 'blackMetal'); box(x0, 0.1, z0, W, H - 0.1, D, 0.004, 'white'); for (let i = 1; i < 3; i++) box(x0 + i * W / 3 - 0.002, 0.11, z0 - 0.003, 0.004, H - 0.12, 0.004, 0.001, 'blackMetal'); break; }
+    case 'point': { const R = Math.min(W, D) / 2, ri = R * 0.42; lathe([[ri, 0], [R, 0], [R, H], [ri, H]], 0, 0, 0, 'concrete2', 64); lathe([[0, 0.15], [ri * 0.95, 0.2], [ri, H - 0.02], [ri * 0.9, H - 0.02], [ri * 0.85, 0.22], [0, 0.17]], 0, 0, 0, 'blackMetal', 48); break; }
+    case 'mishka': { const k = H / 0.35; const sph = (x, y, z, r, sx = 1, sy = 1, sz = 1) => { const geo = new THREE.SphereGeometry(r * k, 20, 14); geo.scale(sx, sy, sz); geo.translate(x * k, y * k, z * k); g.add(new THREE.Mesh(geo, M_('clay'))); };
+      sph(0, 0.1, 0, 0.09, 1, 1.1, 0.9); sph(0, 0.25, 0, 0.075); sph(-0.055, 0.315, 0, 0.025); sph(0.055, 0.315, 0, 0.025); sph(-0.08, 0.13, -0.01, 0.03, 0.8, 1.4, 0.8); sph(0.08, 0.13, -0.01, 0.03, 0.8, 1.4, 0.8); sph(-0.045, 0.02, -0.02, 0.035, 1, 0.6, 1.2); sph(0.045, 0.02, -0.02, 0.035, 1, 0.6, 1.2); break; }
+    default: box(x0, 0, z0, W, H, D, 0.01, 'white');
+  }
+  return g;
+}
 async function furnGen(kind, p0){
+  if (kind.startsWith('boca_') && BOCA[kind.slice(5)]){ const b = BOCA[kind.slice(5)]; return bocaGen(kind.slice(5), { ...b.p, ...p0 }); }
   const RB = await rbox(), L = FURN_LIB[kind], p = { ...(L ? L.p : {}), ...p0 }, W = p.w / 1000, D = p.d / 1000, H = p.h / 1000, g = new THREE.Group();
   const mats = {}; const M_ = k => mats[k] || (mats[k] = FMAT[k]());
   // a rounded box by its min corner and size (metres)
@@ -2441,7 +2665,7 @@ async function libPreview(kind){
 function openFurnLib(){
   const d = mkModal('libDlgF', 'Библиотека мебели', '<p class="libnote" style="margin:0 0 8px">Щёлкните модель, затем место на плане. Размеры модели меняются в «Свойствах» (для всех её экземпляров). Свои модели — «Импорт модели» (.glb, .gltf, .obj).</p><div id="libGrid" class="furngrid"></div>', 760);
   const G = d.querySelector('#libGrid');
-  G.innerHTML = Object.entries(FURN_LIB).map(([k, L]) => `<button class="furncard" data-k="${k}" title="${esc(L.n)}"><img alt="" data-pk="${k}"><span>${esc(L.n)}</span><small>${L.p.w} × ${L.p.d} × ${L.p.h} мм</small></button>`).join('');
+  G.innerHTML = Object.entries(FURN_LIB).map(([k, L]) => `<button class="furncard" data-k="${k}" title="${esc(L.n)}"><img alt="" data-pk="${k}"><span>${esc(L.n)}</span><small>${L.p.w} × ${L.p.d} × ${L.p.h} мм</small>${L.spec ? `<small style="color:#1f6fd6">${esc(L.brand)}${L.spec.cfg[0] && L.spec.cfg[0][1] ? ' · ' + rub(L.spec.cfg[0][1]) : ''}</small>` : ''}</button>`).join('');
   G.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const f = famModelFamily(b.dataset.k); if (!f) return; S.famId = f.id; d.hidden = true; renderTree(); scheduleSave(); setTool('fam'); toast(`«${f.name}»: щёлкните, где поставить; Пробел — повернуть на 90°`); });
   d.hidden = false;
   (async () => { for (const k of Object.keys(FURN_LIB)){ try { const url = await libPreview(k); const im = G.querySelector(`[data-pk="${k}"]`); if (im) im.src = url; } catch (e){ console.warn('preview', k, e); } } })();
@@ -5744,6 +5968,7 @@ function sanitizeViews(arr){
     if (v.kind === 'sheet'){
       Object.assign(o, { num:String(v.num || 'А101').slice(0, 12), size:SHEET_SIZES[v.size] ? v.size : 'A3', author:String(v.author || '').slice(0, 40), checker:String(v.checker || '').slice(0, 40), stage:String(v.stage || 'П').slice(0, 4) });
       if (typeof v.stamp === 'string') o.stamp = v.stamp.slice(0, 24);
+      if (v.pool) o.pool = true; if (typeof v.autoFor === 'string') o.autoFor = v.autoFor.slice(0, 40);
       if (v.f && typeof v.f === 'object'){ const f = {}; for (const [k] of STAMP_FIELDS) if (typeof v.f[k] === 'string') f[k] = v.f[k].slice(0, 120); if (Object.keys(f).length) o.f = f; }
       o.vps = (Array.isArray(v.vps) ? v.vps : []).filter(p => p && typeof p.view === 'string').map(p => ({ id:String(p.id || vid('vp')), view:p.view, x:+p.x || 25, y:+p.y || 10, scale:VP_SCALES.includes(+p.scale) ? +p.scale : 100, w:+p.w || 150, h:+p.h || 110 }));
     }
@@ -5953,6 +6178,13 @@ function makeCallout(a, b){
   views.push(v); renderTree(); annoDirty = true; scheduleSave();
   toast(`${v.name} создан: откройте его в диспетчере проекта или щелчком по подписи`);
 }
+// a new floor plan gets its own sheet (named after the plan, the plan placed on it); the sheet waits outside «Листы (все)»
+// until it is added from the list next to that heading
+function autoSheetFor(v){
+  let n = 101; while (views.some(x => x.kind === 'sheet' && x.num === 'А' + n)) n++;
+  const s = { id:vid('v'), kind:'sheet', num:'А' + n, name:v.name, size:'A3', author:'', checker:'', stage:'П', vps:[{ id:vid('vp'), view:v.id, x:25, y:12, scale:100, w:150, h:110 }], pool:true, autoFor:v.id };
+  views.push(s); return s;
+}
 function newView(kind){
   if (kind === 'detail'){ setTool('callout'); return; }
   if (kind === 'section' || kind === 'ielev' || kind === 'camera'){ setTool(kind); return; }
@@ -5964,7 +6196,7 @@ function newView(kind){
     let n = 101; while (views.some(x => x.kind === 'sheet' && x.num === 'А' + n)) n++;
     v = { id:vid('v'), kind:'sheet', num:'А' + n, name:'Новый лист', size:'A3', author:'', checker:'', stage:'П', vps:[] };
   } else return;
-  views.push(v); openView(v.id); toast(`Создано: ${KIND_NAME[v.kind].toLowerCase()} «${v.kind === 'sheet' ? v.num : v.name}»`);
+  views.push(v); if (kind === 'plan') autoSheetFor(v); openView(v.id); toast(`Создано: ${KIND_NAME[v.kind].toLowerCase()} «${v.kind === 'sheet' ? v.num : v.name}»${kind === 'plan' ? '. Лист для него — в списке «Добавить лист» у «Листы (все)»' : ''}`);
 }
 function deleteView(id){
   const v = views.find(x => x.id === id); if (!v) return;
@@ -6135,7 +6367,7 @@ function sanitizeStamps(arr){
 const stamps = () => STD.stamps && STD.stamps.length ? STD.stamps : (STD.stamps = [GOST_STAMP()]);
 const stampOf = v => stamps().find(s => s.id === v.stamp) || stamps()[0];
 function stampVal(v, k){
-  const sheets = views.filter(s => s.kind === 'sheet'), f = v.f || {};
+  const sheets = views.filter(s => s.kind === 'sheet' && (!s.pool || s === v)), f = v.f || {};
   switch (k){
     case 'proj': return proj.name || 'Проект';
     case 'sheet': return v.name || ''; case 'num': return v.num || '';
@@ -8586,7 +8818,7 @@ function renderPanel(_el, _it){
       + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
       + `<div class="pgrp">Размещение</div>` + prow('Поворот, °', `<input id="fRot" type="number" step="15" value="${r4(it.rot || 0)}">`) + prow('Отражено', `<label class="pchk"><input type="checkbox" id="fMir"${it.mir ? ' checked' : ''}> зеркально</label>`)
       + prow('Материал', matPick('fM', it.m, f && f.mesh ? 'Как в модели' : 'По семейству'))
-      + (f && f.mesh ? `<div class="pgrp">Модель (для всех экземпляров)</div>` + (f.mesh.kind === 'gen' ? prow('Ширина, мм', pnum('fMW', f.mesh.p.w / 1000, 'min="50" step="10"')) + prow('Глубина, мм', pnum('fMD', f.mesh.p.d / 1000, 'min="50" step="10"')) + prow('Высота, мм', pnum('fMH', f.mesh.p.h / 1000, 'min="5" step="10"')) : prow('Масштаб модели', `<input id="fMS" type="number" step="0.05" min="0.01" value="${f.mesh.s || 1}">`) + prow('Ось Z вверх', `<label class="pchk"><input type="checkbox" id="fMZ"${f.mesh.zUp ? ' checked' : ''}> модель лежала на боку</label>`)) : '')
+      + (f && f.mesh ? `<div class="pgrp">Модель (для всех экземпляров)</div>` + (f.mesh.kind === 'gen' ? prow('Ширина, мм', pnum('fMW', f.mesh.p.w / 1000, 'min="50" step="10"')) + prow('Глубина, мм', pnum('fMD', f.mesh.p.d / 1000, 'min="50" step="10"')) + prow('Высота, мм', pnum('fMH', f.mesh.p.h / 1000, 'min="5" step="10"')) + bocaSpecRows(f) : prow('Масштаб модели', `<input id="fMS" type="number" step="0.05" min="0.01" value="${f.mesh.s || 1}">`) + prow('Ось Z вверх', `<label class="pchk"><input type="checkbox" id="fMZ"${f.mesh.zUp ? ' checked' : ''}> модель лежала на боку</label>`)) : '')
       + prow('Положение (X, Y), мм', `<span class="val">${mm(it.x)}, ${mm(-it.z)}</span>`)
       + `<div class="pbtns"><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else if (it.type === 'part'){
@@ -8653,7 +8885,7 @@ function renderPanel(_el, _it){
     if (q('fEdit')) q('fEdit').onclick = () => openFamEditor(it.f);
     const fm2 = famById(it.f);
     if (fm2 && fm2.mesh){ const mch = (id, fn) => { const x = q(id); if (x) x.onchange = e => { pushUndo('Размеры модели'); markEdited(); fn(e.target); FBOX.delete(fm2.id); el.dataset.id = 'x'; rebuild(); scheduleSave(); }; };
-      mch('fMW', t => { fm2.mesh.p = { ...fm2.mesh.p, w:clamp(Math.round(+t.value) || fm2.mesh.p.w, 50, 20000) }; }); mch('fMD', t => { fm2.mesh.p = { ...fm2.mesh.p, d:clamp(Math.round(+t.value) || fm2.mesh.p.d, 50, 20000) }; }); mch('fMH', t => { fm2.mesh.p = { ...fm2.mesh.p, h:clamp(Math.round(+t.value) || fm2.mesh.p.h, 5, 20000) }; });
+      mch('fMCfg', t => { const L = FURN_LIB[fm2.mesh.g], c = L && L.spec && L.spec.cfg.find(q => q[0] === t.value); const s = c && c[0].match(/(\d+)\s*[×x]\s*(\d+)(?:\s*[×x]\s*(\d+))?/); if (s) fm2.mesh.p = { ...fm2.mesh.p, w:+s[1], d:+s[2], ...(s[3] ? { h:+s[3] } : {}) }; }); mch('fMW', t => { fm2.mesh.p = { ...fm2.mesh.p, w:clamp(Math.round(+t.value) || fm2.mesh.p.w, 50, 20000) }; }); mch('fMD', t => { fm2.mesh.p = { ...fm2.mesh.p, d:clamp(Math.round(+t.value) || fm2.mesh.p.d, 50, 20000) }; }); mch('fMH', t => { fm2.mesh.p = { ...fm2.mesh.p, h:clamp(Math.round(+t.value) || fm2.mesh.p.h, 5, 20000) }; });
       mch('fMS', t => { fm2.mesh.s = clamp(+t.value || 1, 0.001, 1000); }); mch('fMZ', t => { fm2.mesh.zUp = t.checked; }); }
   }
   if (it && it.type === 'part'){
@@ -8765,7 +8997,7 @@ function treeFolds(ul){
     const tg = document.createElement('span'); tg.className = 'tg'; tg.setAttribute('aria-hidden', 'true'); n.prepend(tg);
     n.setAttribute('role', 'button'); n.tabIndex = 0; li.classList.toggle('closed', TREE_CLOSED.has(k)); n.setAttribute('aria-expanded', !TREE_CLOSED.has(k));
     const flip = () => { if (TREE_CLOSED.has(k)) TREE_CLOSED.delete(k); else TREE_CLOSED.add(k); li.classList.toggle('closed', TREE_CLOSED.has(k)); n.setAttribute('aria-expanded', !TREE_CLOSED.has(k)); treeSave(); };
-    n.onclick = e => { if (e.target.closest('button')) return; flip(); };
+    n.onclick = e => { if (e.target.closest('button, select')) return; flip(); };
     n.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } };
   });
 }
@@ -8793,7 +9025,7 @@ function openFolderAdd(fid){
   d.querySelector('#fldNew').onclick = () => {
     const L = levels.find(l => l.id === B.querySelector('#fldLv').value); if (!L) return;
     const nm = (B.querySelector('#fldNm').value.trim() || `${L.name} — ${F.n}`).slice(0, 80), ph = B.querySelector('#fldPh').value;
-    const v = { id:vid('v'), kind:'plan', name:nm, phase:ph, lv:L.id, folder:fid }; views.push(v); scheduleSave(); renderTree(); d.hidden = true; openView(v.id);
+    const v = { id:vid('v'), kind:'plan', name:nm, phase:ph, lv:L.id, folder:fid }; views.push(v); autoSheetFor(v); scheduleSave(); renderTree(); d.hidden = true; openView(v.id);
     toast(`План «${v.name}» создан в разделе «${F.n}»`);
   };
   d.querySelector('#fldOk').onclick = () => { B.querySelectorAll('[data-v]').forEach(cb => { const v = views.find(x => x.id === cb.dataset.v); if (!v) return; if (cb.checked) v.folder = fid; else if (v.folder === fid) delete v.folder; }); scheduleSave(); renderTree(); d.hidden = true; };
@@ -8829,12 +9061,16 @@ function renderTree(){
       ${group('Разрезы', 'section', of('section'), 'Новый разрез — линия на плане')}
       ${group('Развёртки', 'ielev', of('ielev'), 'Новые развёртки — щелчок в помещении')}
     </ul></li>
-    ${group('Листы (все)', 'sheet', of('sheet').sort((a, b) => a.num.localeCompare(b.num, 'ru', { numeric:true })), 'Новый лист')}
+    ${(() => { const all = of('sheet').sort((a, b) => a.num.localeCompare(b.num, 'ru', { numeric:true })), pool = all.filter(x => x.pool), shown2 = all.filter(x => !x.pool);
+      const pick = pool.length ? `<select class="shpool" data-shpool="1" title="Листы, которые ещё не добавлены в структуру" aria-label="Добавить лист в структуру"><option value="">Добавить лист (${pool.length})…</option>${pool.map(x => `<option value="${x.id}">${esc(x.num + ' — ' + x.name)}</option>`).join('')}</select>` : '';
+      return `<li><div class="node">Листы (все)${pick}<button class="add" data-tree="n:sheet" title="Новый лист" aria-label="Новый лист">+</button></div><ul>${shown2.map(vItem).join('') || '<li class="it"><span class="ph">пусто</span></li>'}</ul></li>`; })()}
     ${grs.length ? `<li><div class="node">Оси</div><ul>${grs.map(g => btn('Ось ' + esc(g.name), 'g:' + g.id, isSel(g.id))).join('')}</ul></li>` : ''}
     <li><div class="node">Семейства · Компоненты<button class="add" data-tree="famnew:" title="Новое семейство" aria-label="Новое семейство">+</button></div><ul>${fams.map(f => `<li class="it"><button data-tree="fam:${f.id}" title="Разместить">${esc(f.name)}<span class="ph">${esc(FAM_CATS[f.cat])}</span></button><button class="x" data-tree="famed:${f.id}" title="Редактировать семейство" aria-label="Редактировать ${esc(f.name)}">✎</button></li>`).join('')}<li class="it"><button data-tree="furnlib:">Библиотека мебели…</button></li><li class="it"><button data-tree="mdlimp:">Импорт модели (glTF, OBJ)…</button></li><li class="it"><button data-tree="famload:">Загрузить семейство…</button></li></ul></li>
     <li><div class="node">Семейства · Стены</div><ul>${types.map(t => btn(`<span class="swatch" style="background:${(MATS[t.layers[Math.floor(t.layers.length / 2)]?.m] || MATS.generic).c}"></span>${esc(t.name)}`, 't:' + t.id, false)).join('')}</ul></li>
     <li><div class="node">Проекты</div><ul>${btn('Мои проекты…', 'lib')}</ul></li>`;
-  treeFolds(ul); treeFilter(); $('#treeTitle').textContent = 'Диспетчер проекта — ' + (proj.name || 'Без названия');
+  for (const s of views) if (s.kind === 'sheet' && s.pool && s.autoFor){ const pv = views.find(x => x.id === s.autoFor); if (pv) s.name = pv.name; } // the waiting sheet keeps the name of its plan
+  treeFolds(ul); treeFilter();
+  const shp = ul.querySelector('[data-shpool]'); if (shp){ shp.onclick = e => e.stopPropagation(); shp.onchange = e => { const s = views.find(x => x.id === e.target.value); if (!s) return; delete s.pool; scheduleSave(); renderTree(); toast(`Лист ${s.num} «${s.name}» добавлен в «Листы (все)»`); }; } $('#treeTitle').textContent = 'Диспетчер проекта — ' + (proj.name || 'Без названия');
   ul.querySelectorAll('[data-tree^="o:"]').forEach(b => b.ondblclick = e => { e.preventDefault(); renameViewInline(b, b.dataset.tree.slice(2)); });
   ul.querySelectorAll('[data-tree]').forEach(b => b.onclick = () => {
     const i = b.dataset.tree.indexOf(':'), k = b.dataset.tree.slice(0, i), v = b.dataset.tree.slice(i + 1);
