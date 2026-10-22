@@ -504,6 +504,35 @@ details.more summary::-webkit-details-marker{display:none}
   .mic{min-height:40px}
 }
 @media (prefers-reduced-motion:reduce){#toast{transition:none}.mic[aria-pressed="true"]{animation:none}}
+/* Revit-like colour picker («Цвет») — replaces the system picker of every colour field */
+#clrDlg{position:fixed;inset:0;z-index:9000;background:var(--scrim);display:flex;align-items:center;justify-content:center;padding:16px}
+#clrDlg[hidden]{display:none}
+.clrwin{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 40px var(--shade);padding:12px 14px;max-width:100%;max-height:100%;overflow:auto;font:13px var(--font-ui)}
+.clrwin h4{margin:0 0 8px;font-size:14px}
+.clrcols{display:flex;gap:16px;flex-wrap:wrap}
+.clrcols>div{min-width:0}
+.clrlbl{margin:6px 0 4px;color:var(--muted)}
+.clrgrid{display:grid;grid-template-columns:repeat(12,20px);gap:3px}
+.clrgrid button{width:20px;height:20px;padding:0;border:1px solid #6b767d;border-radius:2px;cursor:pointer;background:var(--c)}
+.clrgrid button:hover{outline:2px solid var(--accent);outline-offset:0}
+.clrgrid button.on{outline:2px solid var(--ink);outline-offset:1px}
+.clrgrid .empty{width:20px;height:20px;border:1px dashed var(--line);border-radius:2px}
+.clrpick{display:flex;gap:8px}
+.clrpick canvas{display:block;border:1px solid var(--line);touch-action:none;cursor:crosshair}
+.clrsvw,.clrhw{position:relative}
+.clrsvw i{position:absolute;width:10px;height:10px;margin:-6px 0 0 -6px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #000;pointer-events:none}
+.clrhw i{position:absolute;left:-5px;right:-5px;height:0;pointer-events:none;border-top:1px solid #000}
+.clrhw i::before,.clrhw i::after{content:"";position:absolute;top:-5px;border:5px solid transparent}
+.clrhw i::before{left:-4px;border-left-color:#000}.clrhw i::after{right:-4px;border-right-color:#000}
+.clrnow{display:flex;gap:10px;align-items:center;margin:10px 0}
+.clrnow .sw{flex:1;height:30px;border:1px solid var(--line);border-radius:3px;display:flex}
+.clrnow .sw span{flex:1}
+.clrnow input{width:92px;font:13px var(--font-num);padding:5px 6px;border:1px solid var(--line);border-radius:3px;background:var(--sheet);color:var(--ink);text-transform:uppercase}
+.clrrgb{display:grid;grid-template-columns:auto 1fr 52px 24px 24px;gap:6px 8px;align-items:center}
+.clrrgb input[type=range]{width:100%;min-width:90px}
+.clrrgb input[type=number]{width:52px;padding:3px 4px;border:1px solid var(--line);border-radius:3px;background:var(--sheet);color:var(--ink);font:13px var(--font-num)}
+.clrrgb button{width:24px;height:24px;padding:0;border:1px solid var(--line);border-radius:3px;background:var(--sheet);color:var(--ink);cursor:pointer}
+.clrbtns{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 </style>
 
 <div id="app">
@@ -616,7 +645,6 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" data-tool="ielev" title="Развёртка стен помещения (EL)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2.5l2 3h-4zM10 17.5l2-3h-4zM2.5 10l3-2v4zM17.5 10l-3-2v4z" fill="currentColor" stroke="none"/></svg>Развёртка<span class="k">EL</span></button>
         <button class="rbtn" id="rbBox" title="Границы 3D-вида: обрезать модель рамкой с ручками"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8" stroke-dasharray="2 1.3"/><rect x="8.5" y="1" width="3" height="3" fill="currentColor" stroke="none"/></svg>Границы<br>3D-вида</button>
         <button class="rbtn" data-tool="callout" title="Узел: обведите рамкой участок плана (CL)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="9" height="9" stroke-dasharray="2 1.5"/><path d="M12 12l4 4"/><circle cx="16" cy="16" r="2"/></svg>Узел<span class="k">CL</span></button>
-        <button class="rbtn" id="rbVG" title="Видимость/графика этого вида: категории, линии, штриховки, полутон, прозрачность (VV)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/><path d="M14 15h5M16.5 12.5v5" stroke-width="1.1"/></svg>Видимость/<br>графика<span class="k">VV</span></button>
         <button class="rbtn" id="rbTpl" title="Шаблоны видов: видимость и графика категорий и семейств"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="3" width="15" height="14" rx="1"/><path d="M2.5 7h15M7 7v10"/><path d="M9.5 10h5M9.5 13h3"/></svg>Шаблоны<br>видов</button>
         <button class="rbtn" id="rbRender" title="Визуализация: красивая картинка 3D-вида с тенями, небом и материалами (RR)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="14.5" cy="5.5" r="2.5"/><path d="M14.5 1.5v1M18.5 5.5h-1M17.3 2.7l-.7.7"/><path d="M2 17l5-6 3 3 2-2 4 5z" stroke-linejoin="round"/></svg>Визуали-<br>зация<span class="k">RR</span></button>
         <button class="rbtn" id="rbSheet" title="Новый лист"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12"/><rect x="11" y="12" width="6.5" height="4"/></svg>Лист</button>
@@ -1365,6 +1393,7 @@ const PAT_GLSL = `
 function patMat(o){
   const P = { color:o.color, ...(o.opacity < 1 ? { transparent:true, opacity:o.opacity, depthWrite:false } : {}), ...(o.extra || {}) };
   const mat = o.lit ? new THREE.MeshStandardMaterial({ roughness:0.9, ...P }) : new THREE.MeshBasicMaterial(P);
+  if (o.pats) mat.userData.pats = o.pats; // what this material draws: overrides keep the layers they do not change
   let L = [patLayer(o.pats && o.pats.bg), patLayer(o.pats && o.pats.fg)].filter(Boolean);
   const top = L.map(l => l.k).lastIndexOf(0); if (top >= 0){ mat.color.copy(L[top].c); L = L.slice(top + 1); } // a solid layer covers what is under it
   if (!L.length) return mat;
@@ -1413,7 +1442,7 @@ function makeMaterials(){
   if (typeof OVM !== 'undefined'){ for (const m of OVM.values()) m.dispose(); OVM.clear(); }
   const po = { polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 };
   M.lines = new THREE.MeshBasicMaterial({ color:C.sheet, ...po });
-  M.poche = new THREE.MeshBasicMaterial({ color:C.poche, ...po });
+  M.poche = new THREE.MeshBasicMaterial({ color:C.poche, ...po }); M.poche.userData.pats = { fg:{ p:'none', c:'#2b3439' }, bg:{ p:'solid', c:C.poche } };
   M.mass = new THREE.MeshStandardMaterial({ color:C.mass, roughness:0.85, ...po });
   M.massPlan = new THREE.MeshBasicMaterial({ color:C['mass-plan'], ...po });
   M.glass = new THREE.MeshStandardMaterial({ color:C.glass, roughness:0.2, transparent:true, opacity:0.5, depthWrite:false });
@@ -1615,6 +1644,39 @@ function prism(poly, y0, y1, holes){
   g.rotateX(Math.PI / 2); g.translate(0, y1, 0);
   return g;
 }
+/* Revit join cleanup on plans: where a wall's end touches another wall's side (tee), layers of the same material merge —
+   neither the end of the joining wall nor the face of the other wall is drawn there */
+const planLayersOf = w => S.view === 'plan' && S.detail === 'coarse' ? [{ m:'generic', s0:-w.t / 2, s1:w.t / 2 }] : wallLayers(w);
+const faceLayer = (L, side) => side > 0 ? L.reduce((a, b) => b.s1 > a.s1 ? b : a) : L.reduce((a, b) => b.s0 < a.s0 ? b : a);
+function teeHost(o, end){
+  const c = (CUTS.get(o.id) || [])[end]; if (!c || c.kind !== 'tee') return null;
+  const h = byId(c.other); if (!h || h.type !== 'wall' || !shown(h) || visState(h) !== visState(o)) return null;
+  const f = wallFrame(h), far = end ? new V3(o.x1, 0, o.z1) : new V3(o.x2, 0, o.z2);
+  return { h, f, side:Math.sign(far.sub(f.p1).dot(f.nrm)) || 1 };
+}
+function teeGaps(w, L){
+  const res = { lo:[], hi:[] }; if (!w.id) return res;
+  const T0 = Math.min(...L.map(l => l.s0)), T1 = Math.max(...L.map(l => l.s1));
+  for (const o of items){
+    if (o.type !== 'wall' || o === w || !shown(o)) continue;
+    for (const end of [0, 1]){
+      const t = teeHost(o, end); if (!t || t.h !== w) continue;
+      const f = t.f, zf = t.side > 0 ? T1 : T0, hm = faceLayer(L, t.side).m, fo = wallFrame(o);
+      const P0 = end ? new V3(o.x2, 0, o.z2) : fo.p1.clone();
+      for (const ly of planLayersOf(o)){
+        if (ly.m !== hm) continue;
+        const xs = [ly.s0, ly.s1].map(z => { const X = xLines(P0.clone().addScaledVector(fo.nrm, z), fo.dir, f.p1.clone().addScaledVector(f.nrm, zf), f.dir); return X ? X.sub(f.p1).dot(f.dir) : null; });
+        if (xs.every(x => x != null)) (t.side > 0 ? res.hi : res.lo).push([Math.min(...xs), Math.max(...xs)]);
+      }
+    }
+  }
+  return res;
+}
+function cutGaps(a, b, gaps){
+  let out = [[a, b]];
+  for (const [g0, g1] of gaps) out = out.flatMap(([x0, x1]) => g1 <= x0 + 1e-5 || g0 >= x1 - 1e-5 ? [[x0, x1]] : [[x0, g0], [g1, x1]].filter(([p, q]) => q - p > 1e-4));
+  return out;
+}
 // one wall: every layer is a prism with exact end cuts, split around openings; edges are drawn by hand so faces show no seams
 function buildWall(w, prevMat, prevEdge){
   const f = wallFrame(w); if (f.L < 1e-4) return null;
@@ -1631,6 +1693,8 @@ function buildWall(w, prevMat, prevEdge){
   const P = (x, y, z) => new V3(x, y, z);
   const seg = (a, b) => segs.push(a, b);
   const doors = ops.filter(o => o.bot <= 1e-4);
+  const gaps = plan ? teeGaps(w, layers) : { lo:[], hi:[] };
+  const tees = plan && w.id ? [0, 1].map(e => { const t = teeHost(w, e); return t ? faceLayer(planLayersOf(t.h), t.side).m : null; }) : [null, null];
   for (const [li, ly] of layers.entries()){
     const pt = parts.find(q => q.li === li); if (pt && pt.ex && !S.reveal) continue;
     const poly = [{ x:cutX(c0, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s1), z:ly.s1 }, { x:cutX(c0, ly.s1), z:ly.s1 }];
@@ -1648,14 +1712,14 @@ function buildWall(w, prevMat, prevEdge){
     if (!plan) for (const o of ops){ const pp = clipX(poly, o.a, o.b); if (o.bot > 1e-4) add(pp, 0, o.bot); add(pp, o.top, H); }
     // outlines: layer faces, jambs, square ends (mitred corners stay clean, like Revit's join cleanup)
     // on plans the cut outline is drawn with the «cut» line style and the borders between layers with the «layer» style
-    const faceSeg = (z, y, a, b) => { const xa = Math.max(cutX(c0, z), a), xb = Math.min(cutX(c1, z), b); if (xb - xa > 1e-4){ if (plan && Math.abs(z - T0) > 1e-6 && Math.abs(z - T1) > 1e-6) segsI.push(P(xa, y, z), P(xb, y, z)); else seg(P(xa, y, z), P(xb, y, z)); } };
+    const faceSeg = (z, y, a, b) => { const xa = Math.max(cutX(c0, z), a), xb = Math.min(cutX(c1, z), b); if (xb - xa > 1e-4){ if (plan && Math.abs(z - T0) > 1e-6 && Math.abs(z - T1) > 1e-6) segsI.push(P(xa, y, z), P(xb, y, z)); else for (const [p, q] of cutGaps(xa, xb, !plan ? [] : Math.abs(z - T0) < 1e-6 ? gaps.lo : gaps.hi)) seg(P(p, y, z), P(q, y, z)); } };
     if (plan){
       for (const [a, b] of piers){
         faceSeg(ly.s0, Y, a, b); faceSeg(ly.s1, Y, a, b);
         for (const x of [a, b]) if (x > xmin && x < xmax) seg(P(x, Y, ly.s0), P(x, Y, ly.s1));
       }
-      if (c0.kind !== 'corner') seg(P(cutX(c0, ly.s0), Y, ly.s0), P(cutX(c0, ly.s1), Y, ly.s1));
-      if (c1.kind !== 'corner') seg(P(cutX(c1, ly.s0), Y, ly.s0), P(cutX(c1, ly.s1), Y, ly.s1));
+      if (c0.kind !== 'corner' && tees[0] !== ly.m) seg(P(cutX(c0, ly.s0), Y, ly.s0), P(cutX(c0, ly.s1), Y, ly.s1));
+      if (c1.kind !== 'corner' && tees[1] !== ly.m) seg(P(cutX(c1, ly.s0), Y, ly.s0), P(cutX(c1, ly.s1), Y, ly.s1));
     } else {
       faceSeg(ly.s0, H, xmin, xmax); faceSeg(ly.s1, H, xmin, xmax);
       for (const c of [c0, c1]) if (c.kind !== 'corner') seg(P(cutX(c, ly.s0), H, ly.s0), P(cutX(c, ly.s1), H, ly.s1));
@@ -2059,10 +2123,10 @@ function applyOv(obj, o){
         if (patsOn(mp) && !base.userData.glass){
           // surface (3D, elevations) or cut (plan) pattern of the category over the material's own layers
           const col = '#' + (base.color ? base.color.getHexString() : 'ffffff'), mk = base.userData.mk, cutHere = plan && !q.userData.proj;
-          const under = mk && MATS[mk] ? (cutHere ? matSpec(mk).cut : matSpec(mk).surf) : (cutHere ? { fg:{ p:'none', c:'#2b3439' }, bg:{ p:'solid', c:col } } : null);
+          const under = mk && MATS[mk] ? (cutHere ? matSpec(mk).cut : matSpec(mk).surf) : base.userData.pats ? base.userData.pats : (cutHere ? { fg:{ p:'none', c:'#2b3439' }, bg:{ p:'solid', c:col } } : null);
           const fin = resolvePats(mp, under);
           m = plan ? patMat({ color:cutHere ? '#ffffff' : col, pats:fin, proj:'xz', extra:PO }) : patMat({ lit:true, color:col, pats:fin, proj:'tri', extra:{ ...PO, clippingPlanes:CLIP } });
-          m.userData = { ...base.userData };
+          m.userData = { ...base.userData, pats:fin };
         } else m = cloneMat(base);
         if (!plan && patsOn(o.cp)) m.userData.cutOv = o.cp; // section caps of this category
         const op = Math.min(o.half ? 0.35 : 1, o.tr ? 1 - o.tr : 1);
@@ -6102,8 +6166,9 @@ function vgPop(k, col, td){
     const lay = (L, I, lbl, id) => { const shownC = L.p || L.co ? L.c : (I && I.p ? I.c : L.c); return `<fieldset><legend>${lbl}</legend><div class="gr"><span>Видимый</span><label class="pchk"><input type="checkbox" id="${id}v"${L.p === 'none' ? '' : ' checked'}> показывать</label><span>Образец</span><select id="${id}p">${fOpts(L.p === 'none' ? '' : L.p, I)}</select><span>Цвет</span><input type="color" id="${id}c" value="${shownC || '#2b3439'}"></div></fieldset>`; };
     html = `<h4>Графика штриховки — ${esc(nm)}${col === 'cp' ? ' (сечение)' : ''}</h4>${lay(pp.fg, inh && inh.fg, 'Передний план', 'vpf')}${lay(pp.bg, inh && inh.bg, 'Фон', 'vpb')}<p class="libnote" style="margin:0">«Нет переопределения» — слой остаётся как у ${VGD.target.from || 'материала'}: можно поменять только фон или только узор.</p>`;
     apply = () => {
-      const L = (id, src, I) => { const vis = $('#' + id + 'v').checked, p = vis ? $('#' + id + 'p').value : 'none', c2 = $('#' + id + 'c').value, was = src.p || src.co ? src.c : (I && I.p ? I.c : src.c);
-        return p ? { p, c:c2 } : (src.co || c2.toLowerCase() !== String(was || '').toLowerCase() ? { p:'', c:c2, co:true } : { p:'', c:c2 }); };
+      const L = (id, src, I) => { const vis = $('#' + id + 'v').checked, p = vis ? $('#' + id + 'p').value : 'none', ci = $('#' + id + 'c'), c2 = ci.value, was = src.p || src.co ? src.c : (I && I.p ? I.c : src.c);
+        // a colour picked by hand is an override even if it equals the default shown in the box (white background)
+        return p ? { p, c:c2 } : (src.co || ci.dataset.t || c2.toLowerCase() !== String(was || '').toLowerCase() ? { p:'', c:c2, co:true } : { p:'', c:c2 }); };
       const v2 = { fg:L('vpf', pp.fg, inh && inh.fg), bg:L('vpb', pp.bg, inh && inh.bg) }; vgSet(k, kp, patsOn(v2) ? v2 : null);
     };
   } else {
@@ -6114,6 +6179,7 @@ function vgPop(k, col, td){
   pop.hidden = false;
   const x = Math.min(Math.max(8, r.left - win.left), win.width - pop.offsetWidth - 8), y = Math.min(r.bottom - win.top + 4, win.height - pop.offsetHeight - 8); pop.style.left = x + 'px'; pop.style.top = Math.max(8, y) + 'px';
   if ($('#vpt')) $('#vpt').oninput = e => { $('#vptv').textContent = e.target.value; };
+  for (const id of ['vpfc', 'vpbc']) if ($('#' + id)) $('#' + id).oninput = e => { e.target.dataset.t = '1'; };
   $('#vpOk').onclick = () => { apply(); pop.hidden = true; renderVG(); };
   $('#vpNo').onclick = () => { pop.hidden = true; };
   $('#vpClr').onclick = () => { const f = { pl:['c', 'w'], cl:['cc', 'cw'], pp:['sp'], cp:['cp'], tr:['tr'] }[col]; for (const x2 of f) vgSet(k, x2, null); pop.hidden = true; renderVG(); };
@@ -6134,7 +6200,7 @@ $('#vgApply').onclick = vgApply;
 $('#vgOk').onclick = () => { vgApply(); vgDlg.hidden = true; if (!tplDlg.hidden) renderTpl(); };
 $('#vgCancel').onclick = () => { vgDlg.hidden = true; };
 $('#rbTpl').onclick = () => openTpl(curView().tpl);
-$('#rbVG').onclick = () => openVG();
+if ($('#rbVG')) $('#rbVG').onclick = () => openVG();
 $('#tplSel').onchange = e => { TPL_CUR = e.target.value; renderTpl(); };
 $('#tplNew').onclick = () => { const t = { id:vid('t'), name:'Новый шаблон', ov:{} }; TPLS.push(t); TPL_CUR = t.id; renderTpl(); scheduleSave(); };
 $('#tplDup').onclick = () => { const s0 = TPLS.find(t => t.id === TPL_CUR); if (!s0) return; const t = { id:vid('t'), name:s0.name + ' (копия)', ov:JSON.parse(JSON.stringify(s0.ov)), ...(s0.look ? { look:JSON.parse(JSON.stringify(s0.look)) } : {}) }; TPLS.push(t); TPL_CUR = t.id; renderTpl(); scheduleSave(); };
@@ -9213,6 +9279,96 @@ async function boot(){
   loadRecord(rec);
   if (!store.ok) toast('Это устройство не даёт хранить проекты. Сохраняйте их файлом .kot');
 }
+/* ---------- «Цвет»: Revit-like colour picker for every <input type="color"> ----------
+   basic colours, standard colours, recent colours, a saturation/brightness field with a hue bar, the code and R/G/B sliders */
+const CLR = (() => {
+  const hex2 = n => n.toString(16).padStart(2, '0');
+  const toHex = (r, g, b) => '#' + hex2(r) + hex2(g) + hex2(b);
+  const parse = h => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || '').trim()); if (!m) return null; const v = parseInt(m[1], 16); return [v >> 16 & 255, v >> 8 & 255, v & 255]; };
+  const hsv2rgb = (h, s, v) => { const f = n => { const k = (n + h / 60) % 6; return Math.round(255 * (v - v * s * Math.max(0, Math.min(k, 4 - k, 1)))); }; return [f(5), f(3), f(1)]; };
+  const rgb2hsv = (r, g, b) => { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0;
+    if (d){ h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; if (h < 0) h += 360; } return [h, mx ? d / mx : 0, mx]; };
+  const hsl = (h, s, l) => { s /= 100; l /= 100; const a = s * Math.min(l, 1 - l), f = n => { const k = (n + h / 30) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); }; return toHex(f(0), f(8), f(4)); };
+  // basic colours: a grey row, then twelve hues from light to dark
+  const BASIC = [...Array(12)].map((_, i) => { const v = Math.round(255 - i * 255 / 11); return toHex(v, v, v); });
+  for (const [s, l] of [[100, 92], [90, 80], [85, 68], [80, 56], [80, 46], [75, 36], [70, 26], [60, 16]]) for (let i = 0; i < 12; i++) BASIC.push(hsl(i * 30, s, l));
+  const STDC = ['#ffffff', '#808080', '#000000', '#ff0000', '#008000', '#0000ff', '#ffff00', '#ffa500', '#800080', '#2b3439', '#1b252c', '#d9d9d9'];
+  const RKEY = 'kot-recent-colors';
+  const recent = () => { try { const a = JSON.parse(localStorage.getItem(RKEY) || '[]'); return Array.isArray(a) ? a.filter(parse).slice(0, 24) : []; } catch (e){ return []; } };
+  const remember = h => { try { localStorage.setItem(RKEY, JSON.stringify([h, ...recent().filter(x => x !== h)].slice(0, 24))); } catch (e){} };
+  let dlg = null, input = null, H = 0, Sv = 0, V = 0, was = '#000000';
+  const W = 240, HH = 160;
+  function build(){
+    dlg = document.createElement('div'); dlg.id = 'clrDlg'; dlg.hidden = true;
+    dlg.innerHTML = `<div class="clrwin" role="dialog" aria-modal="true" aria-label="Цвет"><h4>Цвет</h4><div class="clrcols">
+      <div><div class="clrlbl">Основные цвета</div><div class="clrgrid" id="clrBasic"></div>
+        <div class="clrlbl">Стандартные цвета</div><div class="clrgrid" id="clrStd"></div>
+        <div class="clrlbl">Последние цвета</div><div class="clrgrid" id="clrRec"></div></div>
+      <div><div class="clrpick"><div class="clrsvw"><canvas id="clrSV" width="${W}" height="${HH}"></canvas><i id="clrSVm"></i></div><div class="clrhw"><canvas id="clrHue" width="18" height="${HH}"></canvas><i id="clrHm"></i></div></div>
+        <div class="clrnow"><div class="sw" title="Новый / прежний"><span id="clrNew"></span><span id="clrOld"></span></div><input id="clrHex" maxlength="7" aria-label="Код цвета" spellcheck="false"></div>
+        <div class="clrrgb">${[['r', 'Красный'], ['g', 'Зелёный'], ['b', 'Синий']].map(([k, n]) => `<span>${n}:</span><input type="range" id="clr_${k}" min="0" max="255"><input type="number" id="clrN_${k}" min="0" max="255"><button data-st="${k}" data-d="1" aria-label="${n} +1">+</button><button data-st="${k}" data-d="-1" aria-label="${n} −1">−</button>`).join('')}</div></div>
+    </div><div class="clrbtns"><button class="btn sm primary" id="clrOk">ОК</button><button class="btn sm" id="clrNo">Отмена</button></div></div>`;
+    document.body.append(dlg);
+    const q = id => dlg.querySelector('#' + id);
+    const cells = (el, list, n) => { el.innerHTML = list.map(c => `<button style="--c:${c}" data-c="${c}" title="${c.toUpperCase()}"></button>`).join('') + (n ? '<span class="empty"></span>'.repeat(Math.max(0, n - list.length)) : ''); };
+    cells(q('clrBasic'), BASIC); cells(q('clrStd'), STDC);
+    dlg._cells = cells;
+    dlg.addEventListener('click', e => { const b = e.target.closest('button[data-c]'); if (b) setHex(b.dataset.c); const st = e.target.closest('button[data-st]'); if (st){ const k = st.dataset.st, rgb = cur(); rgb['rgb'.indexOf(k)] = Math.max(0, Math.min(255, rgb['rgb'.indexOf(k)] + +st.dataset.d)); setRGB(rgb); } });
+    dlg.addEventListener('dblclick', e => { if (e.target.closest('button[data-c]')) ok(); });
+    const drag = (cv, fn) => { cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); fn(e); const mv = ev => fn(ev), up = () => { cv.removeEventListener('pointermove', mv); cv.removeEventListener('pointerup', up); }; cv.addEventListener('pointermove', mv); cv.addEventListener('pointerup', up); }); };
+    drag(q('clrSV'), e => { const r = e.currentTarget.getBoundingClientRect(); Sv = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); V = 1 - Math.max(0, Math.min(1, (e.clientY - r.top) / r.height)); show(); });
+    drag(q('clrHue'), e => { const r = e.currentTarget.getBoundingClientRect(); H = 360 * Math.max(0, Math.min(0.9999, (e.clientY - r.top) / r.height)); paintSV(); show(); });
+    for (const k of 'rgb'){
+      q('clr_' + k).oninput = () => { const rgb = cur(); rgb['rgb'.indexOf(k)] = +q('clr_' + k).value; setRGB(rgb); };
+      q('clrN_' + k).onchange = () => { const rgb = cur(); rgb['rgb'.indexOf(k)] = Math.max(0, Math.min(255, Math.round(+q('clrN_' + k).value || 0))); setRGB(rgb); };
+    }
+    q('clrHex').onchange = () => { const v = q('clrHex').value.trim(); if (parse(v)) setHex(v.startsWith('#') ? v : '#' + v); else show(); };
+    q('clrHex').onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); q('clrHex').onchange(); ok(); } };
+    q('clrOk').onclick = ok; q('clrNo').onclick = close;
+    dlg.addEventListener('keydown', e => { if (e.key === 'Escape'){ e.stopPropagation(); close(); } });
+    dlg.addEventListener('pointerdown', e => { if (e.target === dlg) close(); });
+    // hue bar
+    const hg = q('clrHue').getContext('2d'), gr = hg.createLinearGradient(0, 0, 0, HH);
+    for (let i = 0; i <= 6; i++) gr.addColorStop(i / 6, `hsl(${i * 60},100%,50%)`);
+    hg.fillStyle = gr; hg.fillRect(0, 0, 18, HH);
+  }
+  const cur = () => hsv2rgb(H, Sv, V);
+  function paintSV(){
+    const g = dlg.querySelector('#clrSV').getContext('2d');
+    g.fillStyle = `hsl(${H},100%,50%)`; g.fillRect(0, 0, W, HH);
+    const a = g.createLinearGradient(0, 0, W, 0); a.addColorStop(0, '#fff'); a.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = a; g.fillRect(0, 0, W, HH);
+    const b = g.createLinearGradient(0, 0, 0, HH); b.addColorStop(0, 'rgba(0,0,0,0)'); b.addColorStop(1, '#000'); g.fillStyle = b; g.fillRect(0, 0, W, HH);
+  }
+  function show(){
+    const q = id => dlg.querySelector('#' + id), rgb = cur(), h = toHex(...rgb);
+    q('clrSVm').style.left = Sv * W + 1 + 'px'; q('clrSVm').style.top = (1 - V) * HH + 1 + 'px'; q('clrHm').style.top = H / 360 * HH + 1 + 'px';
+    q('clrNew').style.background = h; q('clrOld').style.background = was;
+    if (document.activeElement !== q('clrHex')) q('clrHex').value = h.toUpperCase();
+    'rgb'.split('').forEach((k, i) => { q('clr_' + k).value = rgb[i]; q('clrN_' + k).value = rgb[i]; });
+    dlg.querySelectorAll('.clrgrid button').forEach(b => b.classList.toggle('on', b.dataset.c.toLowerCase() === h));
+  }
+  function setRGB(rgb){ const [h, s, v] = rgb2hsv(...rgb); if (s > 0 && v > 0) H = h; Sv = s; V = v; paintSV(); show(); }
+  function setHex(h){ const rgb = parse(h); if (rgb) setRGB(rgb); }
+  function open(inp){
+    if (!dlg) build();
+    input = inp; was = parse(inp.value) ? inp.value.toLowerCase() : '#000000';
+    dlg._cells(dlg.querySelector('#clrRec'), recent(), 24);
+    const [h, s, v] = rgb2hsv(...parse(was)); H = h; Sv = s; V = v;
+    dlg.hidden = false; paintSV(); show(); dlg.querySelector('#clrOk').focus();
+  }
+  function close(){ dlg.hidden = true; const i = input; input = null; if (i && i.isConnected) i.focus(); }
+  function ok(){
+    const i = input, h = toHex(...cur()); close(); if (!i || !i.isConnected) return;
+    remember(h); i.dataset.t = '1';
+    if (i.value.toLowerCase() !== h){ i.value = h; }
+    i.dispatchEvent(new Event('input', { bubbles:true })); i.dispatchEvent(new Event('change', { bubbles:true }));
+  }
+  // every colour field of the program opens this window instead of the system one
+  document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('input[type="color"]'); if (!t || t.disabled) return; e.preventDefault(); open(t); }, true);
+  document.addEventListener('keydown', e => { const t = e.target; if (t && t.matches && t.matches('input[type="color"]') && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); open(t); } }, true);
+  return { open };
+})();
+
 boot();
 </script>
 
