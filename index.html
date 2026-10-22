@@ -95,7 +95,7 @@ select,input[type=text]{font-family:var(--font-ui);font-size:13px}
 .rbtn .k{display:block}
 /* «Изменить» tab like Revit: big buttons, then columns of three small buttons (icon + text, or icon only) */
 .rb-panel .grp-items{gap:3px;align-items:flex-start}
-.rbtn.mbig{min-width:52px;padding:3px 4px}.rbtn.mbig svg.mi{width:32px;height:32px}
+.rbtn.mbig{min-width:52px;padding:3px 4px}.rbtn.mbig svg.mi{width:32px;height:32px}.rbtn.mbig svg.mi *{vector-effect:non-scaling-stroke}
 .mcol{display:grid;grid-template-rows:repeat(3,24px);grid-auto-flow:column;gap:1px 2px;align-content:start}
 .msm,.mic{display:flex;align-items:center;gap:5px;height:24px;border:1px solid transparent;background:transparent;border-radius:3px;cursor:pointer;color:var(--ink);font-size:12px;white-space:nowrap;padding:0 5px 0 3px}
 .mic{width:26px;justify-content:center;padding:0}
@@ -8836,7 +8836,20 @@ $('#rbBox').onclick = () => toggleBox();
 // Revit «Изменить» tab: large buttons for the main commands, the rest as small buttons in three rows (like Revit's panels)
 const IC = d => `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">${d}</svg>`;
 // colour icons in Revit's manner: blue elements, red axes and cut lines, green arrows, grey tools
-const MI = d => `<svg class="mi" viewBox="0 0 16 16" fill="none" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">${d}</svg>`;
+// Revit's ribbon look: thin dark-grey line icons with blue accents and white or pale-blue fills (red only for delete/cut marks)
+const RVT_C = new Map();
+function rvtColor(h, isFill){
+  const k = (isFill ? 'f' : 's') + h; if (RVT_C.has(k)) return RVT_C.get(k);
+  const m = /^#([0-9a-f]{6})$/i.exec(h); if (!m){ RVT_C.set(k, h); return h; }
+  const v = parseInt(m[1], 16), r = v >> 16 & 255, g = v >> 8 & 255, b = v & 255, lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  const blue = b > r + 35 && b > g - 5, red = r > 200 && g < 90 && b < 90, green = g > r + 30 && g > b + 10, yellow = r > 220 && g > 170 && b < 140, white = lum > 0.95;
+  let o;
+  if (isFill) o = white ? '#ffffff' : blue ? (lum < 0.6 ? '#4f93dd' : '#dde9f8') : red ? '#d23c2e' : yellow ? '#f2d16a' : lum < 0.32 ? '#3c3c3c' : '#ffffff';
+  else o = white ? '#ffffff' : blue || green ? '#1d64b5' : red ? '#d23c2e' : yellow ? '#b8891c' : '#3c3c3c';
+  RVT_C.set(k, o); return o;
+}
+const rvtIcon = d => d.replace(/(fill|stroke)="(#[0-9a-fA-F]{6})"/g, (m0, a, h) => `${a}="${rvtColor(h, a === 'fill')}"`);
+const MI = d => `<svg class="mi" viewBox="0 0 16 16" fill="none" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">${rvtIcon(d)}</svg>`;
 const cB = '#1f6fc5', cF = '#cfe2f6', cR = '#d6332a', cG = '#2f9a3a', cK = '#4a5560', cY = '#e8a317';
 const EYE = `<path d="M1.5 8s2.5-4 6.5-4 6.5 4 6.5 4-2.5 4-6.5 4-6.5-4-6.5-4z" fill="#fff" stroke="${cK}"/><circle cx="8" cy="8" r="2" fill="${cB}" stroke="none"/>`;
 const BULB = (f, x = '') => `<path d="M8 1.5a4.2 4.2 0 0 0-2.6 7.5V11h5.2V9A4.2 4.2 0 0 0 8 1.5z" fill="${f}" stroke="${cK}"/><path d="M6 12.5h4M6.5 14.2h3" stroke="${cK}"/>${x}`;
@@ -8947,11 +8960,11 @@ const RB_ICONS = {
   rbTypes:`<rect x="1.5" y="2" width="4" height="12" fill="#ece4d6" stroke="${cK}"/><rect x="5.5" y="2" width="5" height="12" fill="#b8664b" stroke="${cK}"/><rect x="10.5" y="2" width="4" height="12" fill="#e6cc5c" stroke="${cK}"/>`,
   orbit:`<circle cx="8" cy="8" r="6.3" fill="${cF}" stroke="${cB}"/><ellipse cx="8" cy="8" rx="6.3" ry="2.4" stroke="${cB}"/><path d="M12.5 3.5l1.6-1.6M12.3 1.9h1.9v1.9" stroke="${cG}" stroke-width="1.2"/>`,
   demolish:`<path d="M2 7l5-4.5 3 3-5 4.5z" fill="#9aa3a9" stroke="${cK}"/><path d="M7.5 8l6.5 6.5" stroke="#7a5326" stroke-width="2"/><path d="M10 2l4 4M14 2l-4 4" stroke="${cR}" stroke-width="1.3"/>`,
-  rbDimAl:`<path d="M2.5 3v10M13.5 3v10" stroke="${cK}"/><path d="M2.5 8h11" stroke="${cB}" stroke-width="1.2"/><path d="M1.3 9.2l2.4-2.4M12.3 9.2l2.4-2.4" stroke="${cB}" stroke-width="1.2"/><path d="M6 6h4" stroke="${cK}" stroke-width=".9"/>`,
-  rbDimLin:`<path d="M2 13l3-9M12 13l3-9" stroke="${cK}"/><path d="M2.5 6.5h11" stroke="${cB}" stroke-width="1.2"/><path d="M1.3 7.7l2.4-2.4M12.3 7.7l2.4-2.4" stroke="${cB}" stroke-width="1.2"/>`,
-  adim:`<path d="M2 14L14 14M2 14L11 3" stroke="${cK}"/><path d="M9.5 14A7.5 7.5 0 0 0 7 8.2" stroke="${cB}" stroke-width="1.3"/>`,
-  rdim:`<circle cx="7" cy="9" r="5.5" stroke="${cK}"/><path d="M7 9l4-4" stroke="${cB}" stroke-width="1.3"/><path d="M9.5 4.5h2v2" stroke="${cB}" stroke-width="1.2"/><text x="11" y="15.5" font-size="5" font-family="Arial" fill="${cB}" stroke="none">R</text>`,
-  ddim:`<circle cx="8" cy="8" r="6" stroke="${cK}"/><path d="M3.5 12.5l9-9" stroke="${cB}" stroke-width="1.3"/><path d="M10.5 3.5h2v2M5.5 12.5h-2v-2" stroke="${cB}" stroke-width="1.2"/>`,
+  rbDimAl:`<path d="M2 9.5l6.5-6.5M7 14.5l6.5-6.5" stroke="${cK}"/><path d="M4 11.5L11.5 4" stroke="${cB}" stroke-width="1.1"/><path d="M3 11l2 1.5M10.5 3.5l2 1.5" stroke="${cB}" stroke-width="1.1"/>`,
+  rbDimLin:`<path d="M2.5 2v12M13.5 2v12" stroke="${cK}"/><path d="M2.5 5.5h11" stroke="${cB}" stroke-width="1.1"/><path d="M1.5 6.5l2-2M12.5 6.5l2-2" stroke="${cB}" stroke-width="1.1"/><path d="M5 13l6-4" stroke="${cK}" stroke-width=".8" stroke-dasharray="1.5 1"/>`,
+  adim:`<path d="M2 14h12.5M2 14L11 2.5" stroke="${cK}"/><path d="M11 14A9 9 0 0 0 7.6 6.9" stroke="${cB}" stroke-width="1.1"/><path d="M10 12.2l1 1.8 1-1.8M6.4 8.3l1.2-1.4.4 1.8" stroke="${cB}"/>`,
+  rdim:`<path d="M2 14V3.5A10.5 10.5 0 0 1 12.5 14z" stroke="${cK}"/><path d="M2 14l7.5-7.5" stroke="${cB}" stroke-width="1.1"/><path d="M7.2 6.6h2.3v2.3" stroke="${cB}" stroke-width="1.1"/>`,
+  ddim:`<circle cx="8" cy="8" r="6.2" stroke="${cK}"/><path d="M3.6 12.4l8.8-8.8" stroke="${cB}" stroke-width="1.1"/><path d="M10.2 3.6h2.2v2.2M5.8 12.4H3.6v-2.2" stroke="${cB}" stroke-width="1.1"/>`,
   rbAutoDim:`<rect x="3" y="5.5" width="10" height="8" fill="#d9d2c3" stroke="#6b5f4b"/><path d="M3 2.5h10" stroke="${cB}" stroke-width="1.2"/><path d="M3 1v3M8 1v3M13 1v3" stroke="${cB}"/>`,
   rbGridVis:`<circle cx="8" cy="4" r="3" fill="#fff" stroke="${cB}" stroke-width="1.2"/><path d="M8 7v8.5" stroke="${cB}" stroke-dasharray="3 1 1 1"/><path d="M2 14L14 2" stroke="${cR}" stroke-width="1.3"/>`,
   measure:`<rect x="1" y="5.5" width="14" height="5" rx=".6" fill="${cY}" stroke="#8a6a2b"/><path d="M3.5 5.5v2M6 5.5v3M8.5 5.5v2M11 5.5v3M13.5 5.5v2" stroke="#8a6a2b"/>`,
@@ -8994,10 +9007,10 @@ const RB_LAYOUT = [
     ['Свойства и вид', { t:[['#rbTypes', 'rbTypes', 'Типы стен'], ['[data-tool="orbit"]', 'orbit', 'Обзор'], ['[data-tool="demolish"]', 'demolish', 'Снести']] }]
   ], ['[data-tool="move"]', '[data-tool="copy"]', '#rbRotate', '#rbDelete']],
   ['rbAnno', [
-    ['Размер', { b:[['#rbDimAl', 'rbDimAl', 'Параллельный']], t:[['#rbDimLin', 'rbDimLin', 'Линейный'], ['[data-tool="adim"]', 'adim', 'Угловой'], ['[data-tool="rdim"]', 'rdim', 'Радиальный']],
-      t2:[['[data-tool="ddim"]', 'ddim', 'Диаметр'], ['#rbAutoDim', 'rbAutoDim', 'По стенам']] }],
-    ['Детализация', { b:[['[data-tool="line"]', 'line', 'Линия детализации']] }],
-    ['Текст', { b:[['[data-tool="text"]', 'text', 'Текст']] }],
+    ['Размер', { b:[['#rbDimAl', 'rbDimAl', 'Параллельный'], ['#rbDimLin', 'rbDimLin', 'Линейный'], ['[data-tool="adim"]', 'adim', 'Угловой']],
+      t:[['[data-tool="rdim"]', 'rdim', 'Радиус'], ['[data-tool="ddim"]', 'ddim', 'Диаметр'], ['#rbAutoDim', 'rbAutoDim', 'Размеры по стенам']] }],
+    ['Узел', { t:[['[data-tool="line"]', 'line', 'Линия детализации']] }],
+    ['Текст', { t:[['[data-tool="text"]', 'text', 'Текст']] }],
     ['Оси', { t:[['[data-tool="grid"]', 'grid', 'Ось'], ['#rbGridVis', 'rbGridVis', null]] }],
     ['Измерить', { t:[['[data-tool="measure"]', 'measure', 'Линейка']] }]
   ]],
