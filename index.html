@@ -338,6 +338,29 @@ details.more summary::-webkit-details-marker{display:none}
 .matprev{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
 .matprev figure{margin:0;display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted)}
 .matphoto{width:160px;height:120px;border:1px dashed var(--line);border-radius:6px;background:var(--chrome) center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
+/* «Образец штриховки»: gallery of patterns on the left, editor of the chosen one on the right */
+.patwrap{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.1fr);gap:16px;min-height:min(560px,70vh)}
+.patgal{overflow:auto;max-height:min(580px,68vh);border:1px solid var(--line);border-radius:6px;padding:8px}
+.patgal h3{margin:6px 2px;font-size:13px;font-weight:600;color:var(--muted)}
+.patgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px;margin-bottom:8px}
+.patgrid button{display:flex;flex-direction:column;align-items:center;gap:3px;border:1px solid var(--line-soft);border-radius:5px;background:var(--panel);color:var(--ink);padding:4px;font-size:11px;line-height:1.2;cursor:pointer;text-align:center}
+.patgrid button:hover{border-color:var(--accent);background:var(--accent-soft)}
+.patgrid canvas{border:1px solid var(--line-soft);border-radius:3px;background:#fff}
+.pated{display:flex;flex-direction:column;gap:10px;overflow:auto;max-height:min(580px,68vh)}
+.pated .mrow{display:grid;grid-template-columns:130px 1fr;gap:8px;align-items:center;font-size:13px}
+.pated .mrow > span:first-child{color:var(--muted)}
+.pated select,.pated input[type=text],.pated input[type=number]{width:100%;min-width:0}
+.pated canvas{border:1px solid var(--line);border-radius:5px;background:#fff;max-width:100%}
+.famtab{width:100%;border-collapse:collapse;font-size:12px}
+.famtab th{text-align:left;font-weight:500;color:var(--muted);padding:3px 4px;border-bottom:1px solid var(--line)}
+.famtab td{padding:2px 3px}
+.famtab input{width:100%;min-width:44px;font-size:12px}
+@media (max-width:760px){ .patwrap{grid-template-columns:1fr} .patgal{max-height:240px} .pated{max-height:none} }
+.stdtab canvas.pick{cursor:pointer}
+.stdtab canvas.pick:hover{outline:2px solid var(--accent);outline-offset:1px}
+/* camera views: the frame of the shot, the rest of the viewport dimmed */
+#camFrame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 100vmax rgba(18,24,30,.34);outline:1px solid rgba(255,255,255,.85);pointer-events:none;z-index:2}
+#camFrame span{position:absolute;left:6px;bottom:6px;font:500 11px var(--font-num,monospace);color:#fff;background:rgba(18,24,30,.55);padding:2px 6px;border-radius:3px;white-space:nowrap}
 .matpick{display:flex;gap:4px;align-items:center;min-width:0}
 .matpick select{flex:1;min-width:0}
 @media (max-width:700px){ .matwrap{grid-template-columns:1fr} #matList{max-height:200px} .matbody{max-height:none} .matbody .mrow{grid-template-columns:110px 1fr auto} }
@@ -521,6 +544,7 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" data-view="plan" title="План этажа (1)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="14" height="14"/><path d="M3 10h7v7M10 3v4"/></svg>План</button>
         <button class="rbtn" data-view="d3" title="3D-вид (2)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8"/></svg>3D</button>
         <button class="rbtn" data-view="axo" title="Аксонометрия (3)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 3l7 3.5v7L10 17l-7-3.5v-7z M3 6.5L10 10l7-3.5M10 10v7"/></svg>Аксоно-<br>метрия</button>
+        <button class="rbtn" data-tool="camera" title="Камера: на плане щёлкните точку съёмки, затем цель. Ракурс сохраняется как вид (CA)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="11" height="8" rx="1.2"/><path d="M13 9l5-3v8l-5-3z"/><circle cx="6" cy="10" r="1.6"/></svg>Камера<span class="k">CA</span></button>
         <button class="rbtn" data-tool="section" title="Разрез: линия на плане (SC)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 10h14" stroke-dasharray="4 1.5 1 1.5"/><path d="M3 6v8M17 6v8" stroke-width="2.2"/><path d="M3 6h3M17 6h-3"/></svg>Разрез<span class="k">SC</span></button>
         <button class="rbtn" data-tool="ielev" title="Развёртка стен помещения (EL)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2.5l2 3h-4zM10 17.5l2-3h-4zM2.5 10l3-2v4zM17.5 10l-3-2v4z" fill="currentColor" stroke="none"/></svg>Развёртка<span class="k">EL</span></button>
         <button class="rbtn" id="rbBox" title="Границы 3D-вида: обрезать модель рамкой с ручками"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8" stroke-dasharray="2 1.3"/><rect x="8.5" y="1" width="3" height="3" fill="currentColor" stroke="none"/></svg>Границы<br>3D-вида</button>
@@ -750,6 +774,17 @@ details.more summary::-webkit-details-marker{display:none}
   </div>
 </div>
 
+<div class="modal" id="patDlg" hidden role="dialog" aria-modal="true" aria-labelledby="patTitle">
+  <div class="sheetd">
+    <header><h2 id="patTitle">Образец штриховки</h2><div class="row"><button class="btn" id="patFileBtn" title="Файл штриховок Revit или AutoCAD (.pat)">Загрузить .pat…</button><button class="btn" id="patCancel">Отмена</button><button class="btn primary" id="patOk">Применить</button></div></header>
+    <div class="patwrap">
+      <div class="patgal" id="patGal" aria-label="Готовые образцы"></div>
+      <div class="pated" id="patEd"></div>
+    </div>
+    <input type="file" id="patFile" accept=".pat,text/plain" hidden>
+  </div>
+</div>
+
 <div class="modal" id="matDlg" hidden role="dialog" aria-modal="true" aria-labelledby="matTitle">
   <div class="sheetd">
     <header><h2 id="matTitle">Материалы</h2><div class="row"><button class="btn" id="matNew">Новый материал</button><button class="btn" id="matDup">Копия</button><button class="btn primary" id="matClose">Готово</button></div></header>
@@ -771,19 +806,25 @@ details.more summary::-webkit-details-marker{display:none}
 
 <div class="modal" id="renderDlg" hidden role="dialog" aria-modal="true" aria-labelledby="renderTitle">
   <div class="sheetd">
-    <header><h2 id="renderTitle">Визуализация</h2><div class="row"><button class="btn primary" id="rnGo">Визуализировать</button><button class="btn" id="rnSave" disabled>Сохранить PNG</button><button class="btn" id="rnClose">Закрыть</button></div></header>
+    <header><h2 id="renderTitle">Визуализация</h2><div class="row"><button class="btn primary" id="rnGo">Визуализировать</button><button class="btn danger" id="rnStop" hidden>Остановить</button><button class="btn" id="rnSave" disabled>Сохранить PNG</button><button class="btn" id="rnClose">Закрыть</button></div></header>
     <div class="rn-body">
-      <div class="rn-prev" id="rnPrev"><img id="rnImg" alt="Результат визуализации" hidden><p id="rnState" class="libnote">Выберите вид и настройки, затем нажмите «Визуализировать». Картинка рисуется на этом устройстве, без интернета.</p></div>
+      <div class="rn-prev" id="rnPrev"><img id="rnImg" alt="Результат визуализации" hidden><canvas id="rnLive" hidden style="max-width:100%;max-height:100%;display:block;margin:auto"></canvas><p id="rnState" class="libnote">Выберите вид и настройки, затем нажмите «Визуализировать». Картинка рисуется на этом устройстве, без интернета.</p></div>
       <div class="rn-set">
         <label for="rnView">Вид</label><select id="rnView"></select>
+        <label for="rnEng">Движок</label><select id="rnEng"><option value="pt" selected>Физически точный — трассировка лучей</option><option value="fast">Быстрый — растровый</option></select>
+        <label for="rnSamp">Качество</label><select id="rnSamp"><option value="64">Черновик — 64 прохода</option><option value="256" selected>Хорошо — 256 проходов</option><option value="1000">Отлично — 1000 проходов</option><option value="3000">Финал — 3000 проходов</option></select>
+        <label for="rnBnc">Отскоков света</label><select id="rnBnc"><option value="3">3 — быстрее</option><option value="6" selected>6 — интерьеры</option><option value="10">10 — светлые комнаты</option><option value="16">16 — максимум</option></select>
         <label for="rnSize">Размер картинки</label><select id="rnSize"><option value="1280x720">1280 × 720 (быстро)</option><option value="1920x1080" selected>1920 × 1080 (Full HD)</option><option value="2560x1440">2560 × 1440</option><option value="3840x2160">3840 × 2160 (4K)</option><option value="2480x3508">2480 × 3508 (А4 книжный)</option><option value="3508x2480">3508 × 2480 (А4 альбомный)</option></select>
-        <label for="rnTime">Время суток</label><select id="rnTime"><option value="morning">Утро</option><option value="day" selected>День</option><option value="evening">Вечер</option><option value="overcast">Пасмурно</option></select>
+        <label for="rnTime">Время суток</label><select id="rnTime"><option value="morning">Утро</option><option value="day" selected>День</option><option value="evening">Вечер</option><option value="night">Ночь</option></select>
+        <label for="rnSky">Погода</label><select id="rnSky"><option value="clear">Ясно</option><option value="sunny" selected>Солнечно, облака</option><option value="cloudy">Облачно</option><option value="overcast">Пасмурно</option></select>
         <label for="rnAz">Солнце: сторона света <span id="rnAzV"></span></label><input id="rnAz" type="range" min="0" max="359" step="1" value="150">
+        <label for="rnEv">Экспокоррекция <span id="rnEvV">0 EV</span></label><input id="rnEv" type="range" min="-4" max="4" step="0.5" value="0">
         <label for="rnGround">Окружение</label><select id="rnGround"><option value="grass">Газон</option><option value="paving">Мощение</option><option value="white">Белый фон</option></select>
+        <label class="pchk"><input type="checkbox" id="rnClay"> Белая модель (clay)</label>
         <label class="pchk"><input type="checkbox" id="rnTex" checked> Материалы с фактурой</label>
         <label class="pchk"><input type="checkbox" id="rnAO" checked> Мягкие тени в углах</label>
         <label class="pchk"><input type="checkbox" id="rnEdges"> Контурные линии</label>
-        <p class="libnote">Снесённые на стадии вида элементы не показываются. Чтобы заглянуть внутрь дома, включите у 3D-вида «Границы 3D-вида».</p>
+        <p class="libnote">Трассировка честно считает свет: отскоки от стен и пола, свет неба через окна, преломление в стекле. Картинка проявляется постепенно — её можно остановить в любой момент. Для интерьера поставьте камеру внутри комнаты (Вид → Камера) или отрежьте стену ближней плоскостью камеры. «Границы 3D-вида» работают только в быстром движке.</p>
       </div>
     </div>
   </div>
@@ -808,7 +849,10 @@ details.more summary::-webkit-details-marker{display:none}
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+  "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+  "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.8/src/index.js",
+  "three-gpu-pathtracer": "https://cdn.jsdelivr.net/npm/three-gpu-pathtracer@0.0.23/src/index.js"
 } }
 </script>
 <script type="module">
@@ -1012,7 +1056,7 @@ function resize(){
   renderer.setSize(w, h, false);
   const a = w / h;
   for (const oc of [planCam, axoCam, sectCam]){ oc.left = -H0 * a; oc.right = H0 * a; oc.top = H0; oc.bottom = -H0; oc.updateProjectionMatrix(); }
-  perspCam.aspect = a; perspCam.updateProjectionMatrix();
+  perspCam.aspect = a; perspCam.updateProjectionMatrix(); if (typeof applyLens === 'function') applyLens();
   for (const m of FATM.values()) if (!RENDER) m.resolution.set(cv.width, cv.height);
   annoDirty = true;
 }
@@ -1060,7 +1104,9 @@ function sanitizeStd(o){
   const list = (arr, def, fix) => { const m = new Map(def.map(x => [x.id, { ...x }])); if (Array.isArray(arr)) for (const x of arr){ if (!x || typeof x.id !== 'string') continue; const f = fix(x); if (f) m.set(x.id, { ...(m.get(x.id) || {}), ...f, sys:!!(m.get(x.id) || {}).sys }); } return [...m.values()]; };
   out.patterns = list(o.patterns, d.patterns, x => ({ id:x.id.slice(0, 20), n:String(x.n || 'Образец').slice(0, 40), seq:Array.isArray(x.seq) ? x.seq.filter(N).map(v => clamp(+v, 0.1, 100)).slice(0, 12) : [] }));
   out.styles = list(o.styles, d.styles, x => ({ id:x.id.slice(0, 20), n:String(x.n || 'Стиль').slice(0, 40), w:clamp(Math.round(+x.w) || 1, 1, 16), c:/^#[0-9a-f]{6}$/i.test(x.c) ? x.c : '#1b252c', p:typeof x.p === 'string' ? x.p : 'solid' }));
-  out.fills = list(o.fills, d.fills, x => ({ id:x.id.slice(0, 20), n:String(x.n || 'Штриховка').slice(0, 40), k:['solid','none','lines','cross','concrete','insul','wood','dots','brick'].includes(x.k) ? x.k : 'lines', s:N(x.s) ? clamp(+x.s, 0.3, x.u === 'model' ? 5000 : 50) : 2, a:N(x.a) ? +x.a : 0, u:x.u === 'model' ? 'model' : undefined }));
+  const fam = arr => Array.isArray(arr) ? arr.slice(0, 6).filter(q => q && N(q.off) && Math.abs(+q.off) > 1e-6).map(q => ({ a:N(q.a) ? +q.a : 0, x:N(q.x) ? +q.x : 0, y:N(q.y) ? +q.y : 0, sh:N(q.sh) ? +q.sh : 0, off:Math.abs(+q.off), d:Array.isArray(q.d) ? q.d.filter(N).map(Number).slice(0, 4) : [] })) : undefined;
+  out.fills = list(o.fills, d.fills, x => { const k = ['solid','none','lines','cross','concrete','insul','wood','dots','brick','pat','woodg'].includes(x.k) ? x.k : 'lines';
+    return { id:x.id.slice(0, 20), n:String(x.n || 'Штриховка').slice(0, 40), k, s:N(x.s) ? clamp(+x.s, k === 'pat' ? 0.01 : 0.3, x.u === 'model' ? 5000 : 50) : (k === 'pat' ? 1 : 2), a:N(x.a) ? +x.a : 0, u:x.u === 'model' ? 'model' : undefined, fam:k === 'pat' ? fam(x.fam) || [] : undefined, v:k === 'woodg' ? clamp(Math.round(+x.v) || 1, 1, 6) : undefined }; });
   out.mat = { ...d.mat }; if (o.mat) for (const [k, v] of Object.entries(o.mat)) if (MATS[k] && v) out.mat[k] = { f:typeof v.f === 'string' ? v.f : (d.mat[k] || {}).f || 'diag', ...(/^#[0-9a-f]{6}$/i.test(v.fg) ? { fg:v.fg } : {}), ...(/^#[0-9a-f]{6}$/i.test(v.bg) ? { bg:v.bg } : {}) };
   const a = o.anno || {};
   out.anno = { tick:['tick','arrow','dot'].includes(a.tick) ? a.tick : d.anno.tick, textMm:N(a.textMm) ? clamp(+a.textMm, 1, 10) : d.anno.textMm, units:['mm','cm','m'].includes(a.units) ? a.units : 'mm', dec:clamp(Math.round(+a.dec) || 0, 0, 3),
@@ -1109,28 +1155,104 @@ const polyPairs = pts => { const o = []; for (let i = 0; i < pts.length - 1; i++
 // cut hatch of a material on plans: drawn in the shader on paper scale, so it stays the same size when zooming
 const HATCH = { mm:{ value:0.03 } };
 let SHADER_N = 0; // each custom material gets its own program, so its uniforms are always its own
-const FILL_KIND = { solid:0, none:1, lines:2, cross:3, dots:4, concrete:5, insul:6, wood:7, brick:8 };
+const FILL_KIND = { solid:0, none:1, lines:2, cross:3, dots:4, concrete:5, insul:6, wood:7, brick:8, pat:9, woodg:10 };
+const PAT_FAM_MAX = 6;
+// line families of a custom («.pat») fill, scaled: angle (rad), origin, shift along the line, offset between lines, signed dashes
+function famsOf(f){
+  const k = f.s || 1;
+  return (f.fam || []).slice(0, PAT_FAM_MAX).map(q => ({ a:(q.a || 0) * Math.PI / 180, x:(q.x || 0) * k, y:(q.y || 0) * k, sh:(q.sh || 0) * k, off:Math.max(Math.abs(q.off || 1) * k, 1e-3), d:(q.d || []).slice(0, 4).map(v => v * k) }));
+}
 // one pattern layer of a material: the fill it uses and its colour (null when there is nothing to draw)
 function patLayer(q){
   const f = q && STD.fills.find(x => x.id === q.p); if (!f || f.k === 'none') return null;
-  return { k:FILL_KIND[f.k] ?? 2, s:f.s, a:f.a * Math.PI / 180, c:new THREE.Color(q.c || '#2b3439'), model:f.u === 'model' };
+  if (f.k === 'pat' && !(f.fam && f.fam.length)) return null;
+  return { k:f.k === 'woodg' ? 10 + clamp(Math.round(f.v || 1), 1, 6) - 1 : FILL_KIND[f.k] ?? 2, s:f.s, a:f.a * Math.PI / 180, c:new THREE.Color(q.c || '#2b3439'), model:f.u === 'model', fam:f.k === 'pat' ? famsOf(f) : [] };
 }
 const hasPats = pp => !!(pp && (patLayer(pp.fg) || patLayer(pp.bg)));
+// uniforms of the custom line families of the two layers (6 slots each)
+function famUniforms(Ls){
+  const fa = [], fd = [], fo = [], fn = [0, 0];
+  for (let i = 0; i < 2; i++){
+    const F = (Ls[i] && Ls[i].fam) || []; fn[i] = F.length;
+    for (let j = 0; j < PAT_FAM_MAX; j++){ const q = F[j]; fa.push(new THREE.Vector4(q ? q.a : 0, q ? q.x : 0, q ? q.y : 0, q ? q.sh : 0)); const d = q ? q.d : []; fd.push(new THREE.Vector4(d[0] || 0, d[1] || 0, d[2] || 0, d[3] || 0)); fo.push(new THREE.Vector2(q ? q.off : 1, d.length)); }
+  }
+  return { uFn:{ value:fn }, uFa:{ value:fa }, uFd:{ value:fd }, uFo:{ value:fo } };
+}
 const PAT_GLSL = `
   uniform float uMm; uniform int uN; uniform int uK[2]; uniform float uS[2]; uniform float uA[2]; uniform vec3 uC[2]; uniform vec2 uMod;
+  uniform int uFn[2]; uniform vec4 uFa[12]; uniform vec4 uFd[12]; uniform vec2 uFo[12];
   uniform int uProj; uniform vec3 uU; uniform vec3 uV; varying vec3 vPW; varying vec3 vPN;
   float hl(float s, float st, float lw, float fw){ float d = abs(fract(s / st) - 0.5) * st; float hw = max(lw, fw * 0.55); return 1.0 - smoothstep(hw, hw + fw, d); }
   float hsh(vec2 c){ return fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453); }
-  float patM(vec2 p, int k, float st, float ang, float lw, float fw){
+  // custom fill: up to 6 families of parallel dashed lines (Revit / AutoCAD .pat)
+  float famM(vec2 q, int L, float lw, float fw){
+    float m = 0.0, hw = max(lw, fw * 0.55);
+    for (int j = 0; j < 6; j++){
+      if (j >= uFn[L]) break;
+      int id = L * 6 + j; vec4 A = uFa[id]; vec4 D = uFd[id]; vec2 O = uFo[id];
+      vec2 dir = vec2(cos(A.x), sin(A.x)), nr = vec2(-dir.y, dir.x), r = q - A.yz;
+      float u = dot(r, dir), v = dot(r, nr), n = floor(v / O.x + 0.5);
+      float lm = 1.0 - smoothstep(hw, hw + fw, abs(v - n * O.x));
+      int dn = int(O.y + 0.5); float T = abs(D.x) + abs(D.y) + abs(D.z) + abs(D.w);
+      if (dn > 0 && T > 1e-6 && lm > 0.0){
+        float t = mod(u - n * A.w, T), s0 = 0.0, best = 1e9;
+        for (int e = 0; e < 4; e++){
+          if (e >= dn) break;
+          float val = e == 0 ? D.x : (e == 1 ? D.y : (e == 2 ? D.z : D.w)), len = abs(val);
+          if (val >= 0.0) for (int w = -1; w <= 1; w++){ float tt = t + float(w) * T; best = min(best, max(max(s0 - tt, tt - s0 - len), 0.0)); }
+          s0 += len;
+        }
+        lm *= 1.0 - smoothstep(hw, hw + fw, best);
+      }
+      m = max(m, lm);
+    }
+    return m;
+  }
+  // wood grain (6 variants): growth lines are the whole-number contours of a continuous field (value noise + knots),
+  // computed for every point — so there are no tiles and no seams anywhere on a face
+  float vn(vec2 p){ vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hsh(i), hsh(i + vec2(1.0, 0.0)), u.x), mix(hsh(i + vec2(0.0, 1.0)), hsh(i + vec2(1.0, 1.0)), u.x), u.y); }
+  float fbm2(vec2 p){ return vn(p) * 0.62 + vn(p * 2.07 + 5.3) * 0.28 + vn(p * 4.13 + 1.7) * 0.1; }
+  float woodF(vec2 q, int v){
+    if (v == 2) q = vec2(q.y, -q.x);
+    float A = 1.3, fx = 0.09, fy = 0.03, KH = 0.0, KR = 4.0, KE = 1.5, KP = 0.0; vec2 KC = vec2(14.0, 46.0);
+    if (v == 0){ A = 1.6; fx = 0.12; fy = 0.05; }
+    else if (v == 1){ A = 1.2; fy = 0.03; KH = 4.5; KR = 3.2; KE = 4.0; KP = 0.9; KC = vec2(9.0, 30.0); }
+    else if (v == 2){ A = 2.0; fx = 0.15; fy = 0.09; }
+    else if (v == 3){ A = 2.6; fx = 0.14; fy = 0.08; }
+    else if (v == 4){ A = 0.9; fx = 0.18; fy = 0.025; }
+    else if (v == 5){ A = 1.4; fy = 0.05; KH = 6.0; KR = 2.6; KE = 1.25; KP = 0.5; KC = vec2(12.0, 26.0); }
+    float f = q.x + A * (fbm2(vec2(q.x * fx, q.y * fy)) - 0.5) * 2.0 + 0.6 * A * sin(q.y * fy * 2.0 + q.x * 0.05);
+    if (KH > 0.0){
+      vec2 c0 = floor(q / KC);
+      for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++){
+        vec2 c = c0 + vec2(float(i), float(j));
+        if (hsh(c + 11.3) > KP) continue;
+        vec2 o = (c + 0.2 + 0.6 * vec2(hsh(c + 2.1), hsh(c + 5.7))) * KC, d = q - o; d.y /= KE;
+        f += KH * (0.6 + 0.4 * hsh(c + 9.2)) * exp(-dot(d, d) / (KR * KR));
+      }
+    }
+    return f;
+  }
+  float woodM(vec2 p, int v, float st, float lw, float fw){
+    vec2 q = p / st; float e = 0.05;
+    float f0 = woodF(q, v), gx = woodF(q + vec2(e, 0.0), v) - f0, gy = woodF(q + vec2(0.0, e), v) - f0;
+    float g = length(vec2(gx, gy)) / (e * st) + 1e-6, d = abs(fract(f0 + 0.5) - 0.5) / g, hw = max(lw, fw * 0.55);
+    return (1.0 - smoothstep(hw, hw + fw, d)) * smoothstep(2.0, 4.0, st / fw); // fades out when lines get denser than ~3 px
+  }
+  float patM(vec2 p, int k, float st, float ang, float lw, float fw, int L){
     float cs = cos(ang), sn = sin(ang); vec2 q = vec2(cs * p.x + sn * p.y, -sn * p.x + cs * p.y);
-    if (k == 2) return hl(q.y, st, lw, fw);
-    if (k == 3) return max(hl(q.y, st, lw, fw), hl(q.x, st, lw, fw));
+    float lod = smoothstep(1.6, 3.2, st / fw); // too dense to read on screen: fade the pattern instead of a dark moire
+    if (k == 2) return hl(q.y, st, lw, fw) * lod;
+    if (k == 3) return max(hl(q.y, st, lw, fw), hl(q.x, st, lw, fw)) * lod;
     if (k == 4){ vec2 c = fract(q / st) - 0.5; float d = length(c) * st; float r = max(lw > 0.0 ? 0.16 : st * 0.07, fw * 0.7); return 1.0 - smoothstep(r, r + fw, d); }
     if (k == 5){ vec2 c = floor(q / st); vec2 f = fract(q / st); float r = hsh(c); vec2 o = vec2(hsh(c + 7.0), hsh(c + 3.0)) * 0.6 + 0.2; float d = length(f - o) * st;
       float rr = lw > 0.0 ? (r > 0.6 ? 0.32 : 0.14) : st * (r > 0.6 ? 0.13 : 0.06); rr = max(rr, fw * 0.7); return (1.0 - smoothstep(rr, rr + fw, d)) * step(0.25, r); }
     if (k == 6) return hl(q.y - abs(fract(q.x / st) - 0.5) * 2.0 * st, st, lw, fw);
     if (k == 7) return hl(q.y + 0.3 * st * sin(q.x / st * 1.7), st, lw, fw);
-    if (k == 8){ float r = floor(q.y / st + 0.5); float L = st * 3.4; return max(hl(q.y, st, lw, fw), hl(q.x + 0.5 * L * mod(r, 2.0), L, lw, fw)); }
+    if (k == 8){ float r = floor(q.y / st + 0.5); float BL = st * 3.4; return max(hl(q.y, st, lw, fw), hl(q.x + 0.5 * BL * mod(r, 2.0), BL, lw, fw)) * lod; }
+    if (k == 9) return famM(q, L, lw, fw);
+    if (k >= 10) return woodM(q, k - 10, st, lw, fw);
     return 0.0;
   }`;
 /* a material with pattern layers drawn in the shader: proj 'xz' — on the plan; 'plane' — on a section cap (u, v axes);
@@ -1145,18 +1267,18 @@ function patMat(o){
   mat.onBeforeCompile = sh => {
     Object.assign(sh.uniforms, { uMm:HATCH.mm, uN:{ value:L.length }, uK:{ value:[two(0).k, two(1).k] }, uS:{ value:[two(0).s, two(1).s] }, uA:{ value:[two(0).a, two(1).a] },
       uC:{ value:[two(0).c, two(1).c] }, uMod:{ value:new THREE.Vector2(two(0).model ? 1 : 0, two(1).model ? 1 : 0) }, uProj:{ value:{ xz:0, plane:1, tri:2 }[o.proj] || 0 },
-      uU:{ value:o.U || new V3(1, 0, 0) }, uV:{ value:o.V || new V3(0, 1, 0) } });
+      uU:{ value:o.U || new V3(1, 0, 0) }, uV:{ value:o.V || new V3(0, 1, 0) }, ...famUniforms(L.length > 1 ? L : [L[0], null]) });
     sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vPW; varying vec3 vPN;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvPW = (modelMatrix * vec4(transformed, 1.0)).xyz; vPN = normalize(mat3(modelMatrix) * normal);');
     sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\n' + PAT_GLSL)
       .replace('#include <color_fragment>', `#include <color_fragment>
       { vec2 P;
         if (uProj == 1) P = vec2(dot(vPW, uU), dot(vPW, uV));
-        else if (uProj == 2){ vec3 n = normalize(vPN); if (abs(n.y) > 0.7) P = vPW.xz; else { vec2 h = normalize(vec2(-n.z, n.x)); P = vec2(dot(vPW.xz, h), vPW.y); } }
-        else P = vPW.xz;
+        else if (uProj == 2){ vec3 n = normalize(vPN); if (abs(n.y) > 0.7) P = vec2(vPW.x, -vPW.z); else { vec2 h = normalize(vec2(-n.z, n.x)); P = vec2(dot(vPW.xz, h), vPW.y); } }
+        else P = vec2(vPW.x, -vPW.z); // plan: Y of the drawing points up (north)
         // pixel size in world units, taken outside loops and branches (derivatives there are undefined on some GPUs)
         float pxW = max(length(vec2(dFdx(P.x), dFdy(P.x))), length(vec2(dFdx(P.y), dFdy(P.y)))) + 1e-9;
-        for (int i = 0; i < 2; i++){ if (i >= uN) break; bool md = (i == 0 ? uMod.x : uMod.y) > 0.5; float dv = md ? 0.001 : uMm; float m = patM(P / dv, uK[i], uS[i], uA[i], md ? 0.0 : 0.09, pxW / dv);
+        for (int i = 0; i < 2; i++){ if (i >= uN) break; bool md = (i == 0 ? uMod.x : uMod.y) > 0.5; float dv = md ? 0.001 : uMm; float m = patM(P / dv, uK[i], uS[i], uA[i], md ? 0.0 : 0.09, pxW / dv, i);
           diffuseColor.rgb = mix(diffuseColor.rgb, uC[i], clamp(m, 0.0, 1.0)); } }`);
   };
   const ck = 'pat|' + (++SHADER_N); mat.customProgramCacheKey = () => ck;
@@ -2148,6 +2270,22 @@ function drawViewMarks(){
   const k = wpp(), Y = 30.5, at = (p, y = Y) => new V3(p.x, y, p.z), mks = new Map();
   for (const v of views){
     if (v.kind === 'ielev' && v.mk){ if (!mks.has(v.mk.id)) mks.set(v.mk.id, []); mks.get(v.mk.id).push(v); continue; }
+    if (v.kind === 'camera' && v.cam){
+      // camera on the plan: body and lens, field of view; when selected — line of sight, near and far clipping
+      const P = at({ x:v.cam.p[0], z:v.cam.p[2] }), T = at({ x:v.cam.t[0], z:v.cam.t[2] }), d = T.clone().sub(P), D0 = d.length(); if (D0 < 1e-6) continue; d.divideScalar(D0);
+      const sel = S.selView === v.id && !RV, mat = sel ? M.secMarkSel : M.secMark, L = camLens(v), up = new V3(0, 1, 0), hf = hfovOf(L) * Math.PI / 360;
+      const s1 = strip(P.clone().addScaledVector(d, -5 * k), P.clone().addScaledVector(d, -0.5 * k), 4 * k, mat); if (s1) anno.add(s1);
+      anno.add(tri(P.clone().addScaledVector(d, -0.6 * k), d, 3.2 * k, 3.6 * k, mat));
+      const reach = sel ? Math.max(D0, L.far || 0) : Math.min(D0, 40 * k), rays = [-1, 1].map(s2 => d.clone().applyAxisAngle(up, s2 * hf));
+      anno.add(lineOf([P.clone().addScaledVector(rays[0], reach / Math.cos(hf)), P, P.clone().addScaledVector(rays[1], reach / Math.cos(hf))], sel ? M.edgeSel : M.dim));
+      if (sel){
+        anno.add(lineOf([P, T], M.secLine));
+        const cut = (dist, m2) => { const a = P.clone().addScaledVector(rays[0], dist / Math.cos(hf)), b = P.clone().addScaledVector(rays[1], dist / Math.cos(hf)); anno.add(lineOf([a, b], m2)); };
+        if (L.near > 0.31) cut(L.near, M.secMark ? M.edgeSel : M.dim);
+        if (L.far > L.near + 0.1) cut(L.far, M.secFar);
+      }
+      continue;
+    }
     if (v.kind !== 'section') continue;
     const f = sectFrame(v), sel = S.selView === v.id && !RV, mat = sel ? M.secMarkSel : M.secMark;
     const A = at(f.p1), B = at(f.p2), sl = Math.min(12 * k, f.L / 3);
@@ -2179,6 +2317,9 @@ function viewMarkLabels(out){
     if (v.kind === 'section'){
       const f = sectFrame(v);
       for (const [P, u] of [[f.p1, f.dir], [f.p2, f.dir.clone().negate()]]){ const q = P.clone().addScaledVector(f.d, 7 * k).addScaledVector(u, -5 * k); out.push({ x:q.x, y:0, z:q.z, t:v.code, cls:'sx' + (S.selView === v.id ? ' sel' : ''), open:v.id }); }
+    } else if (v.kind === 'camera' && v.cam){
+      const P = new V3(v.cam.p[0], 0, v.cam.p[2]), d = new V3(v.cam.t[0] - P.x, 0, v.cam.t[2] - P.z); if (d.lengthSq() < 1e-9) continue; d.normalize();
+      const q = P.clone().addScaledVector(d, -11 * k); out.push({ x:q.x, y:0, z:q.z, t:v.code || 'К', cls:'sx cam' + (S.selView === v.id ? ' sel' : ''), open:v.id });
     } else if (v.kind === 'ielev' && v.mk){
       const d = sectFrame(v).d, q = new V3(v.mk.x, 0, v.mk.z).addScaledVector(d, 15 * k);
       out.push({ x:q.x, y:0, z:q.z, t:v.code, cls:'sx ie' + (S.selView === v.id ? ' sel' : ''), open:v.id });
@@ -2191,6 +2332,7 @@ function pickViewMark(px, py){
   let best = null, bd = coarsePtr ? 14 : 9;
   for (const v of views){
     if (v.kind === 'section'){ const f = sectFrame(v), A = toScreen(f.p1.x, 0, f.p1.z), B = toScreen(f.p2.x, 0, f.p2.z), d = segDist(px, py, A, B); if (d < bd){ bd = d; best = v.id; } }
+    else if (v.kind === 'camera' && v.cam){ const A = toScreen(v.cam.p[0], 0, v.cam.p[2]), B = toScreen(v.cam.t[0], 0, v.cam.t[2]), d = Math.min(Math.hypot(A.x - px, A.y - py) - 3, S.selView === v.id ? segDist(px, py, A, B) : 1e9); if (d < bd){ bd = d; best = v.id; } }
     else if (v.kind === 'ielev' && v.mk){ const c = toScreen(v.mk.x, 0, v.mk.z), d = sectFrame(v).d, t = toScreen(v.mk.x + d.x * 8 * wpp(), 0, v.mk.z + d.z * 8 * wpp()), dd = Math.hypot(t.x - px, t.y - py) - 2; if (Math.hypot(c.x - px, c.y - py) < 12 && dd < bd){ bd = dd; best = v.id; } }
   }
   return best;
@@ -3022,7 +3164,7 @@ function opTarget(px, py){
 /* ---------- drawing ---------- */
 const D = { start:null, first:null, cur:null, kind:null, op:null, flip:false, prevWall:null, firstWall:null, poly:null };
 const DD = { refs:[], hover:null, off:0.8, dir:null };
-const drawing = () => ['wall','rect','box','grid','line','move','copy','floor','ceiling','roof','stair','section'].includes(S.tool);
+const drawing = () => ['wall','rect','box','grid','line','move','copy','floor','ceiling','roof','stair','section','camera'].includes(S.tool);
 const pointTool = () => ['column','room','ielev','fam'].includes(S.tool);
 const placing = () => S.tool === 'door' || S.tool === 'window';
 function endDraw(){ if (typeof E !== 'undefined'){ E.step = 0; E.ref = null; E.pts = []; E.picks = []; E.center = null; E.hover = null; E.lastLock = null; } D.start = D.first = D.op = D.prevWall = D.firstWall = D.poly = null; DD.refs = []; DD.hover = null; DD.dir = null; GUIDES = []; disposeGroup(preview); lenInput.value = ''; annoDirty = true; updateHint(); }
@@ -3064,6 +3206,14 @@ function updatePreview(){
   if (!D.start || !D.cur) return;
   const a = D.start, b = D.cur, Y = Yp;
   if (S.tool === 'stair'){ if (a.distanceTo(b) > 0.2){ const o = buildStair({ type:'stair', x1:a.x, z1:a.z, x2:b.x, z2:b.z, w:S.stairW, h:S.stairH }); if (o) addPreview(o); } return; }
+  if (S.tool === 'camera'){
+    // eye point → target, with the field of view of the default 35 mm lens
+    const d = b.clone().sub(a).setY(0), D0 = d.length(); if (D0 < 1e-6) return; d.divideScalar(D0);
+    const hf = Math.atan((LENS0.sensor / 2) / LENS0.f), up = new V3(0, 1, 0), A = new V3(a.x, Y, a.z);
+    addPreview(lineOf([A, new V3(b.x, Y, b.z)], M.edgePrev));
+    for (const s2 of [-1, 1]) addPreview(lineOf([A, A.clone().addScaledVector(d.clone().applyAxisAngle(up, s2 * hf), D0 / Math.cos(hf))], M.gAl));
+    return;
+  }
   if (S.tool === 'section'){
     const d = b.clone().sub(a); if (d.lengthSq() < 1e-6) return; d.normalize(); const n = new V3(d.z, 0, -d.x), k = wpp() * 14;
     addPreview(lineOf([new V3(a.x, Y, a.z), new V3(b.x, Y, b.z)], M.edgePrev));
@@ -3205,6 +3355,7 @@ function click(px, py, shift, ctrl){
       if (S.tool === 'line' && S.lineMode === 'circle'){ const r = r4(p.distanceTo(D.start)); if (r < 0.01) return; pushUndo(); items.push({ id:nextId++, type:'circle', x:D.start.x, z:D.start.z, r }); markEdited(); rebuild(); endDraw(); return; }
       if (S.tool === 'stair'){ if (p.distanceTo(D.start) < 0.5) return; pushUndo(); const st = addStair(D.start, p); markEdited(); rebuild(); endDraw(); const I = stairInfo(st); toast(`Лестница ${st.tag}: ${I.n} подступенков по ${mm(I.rise)} мм, проступь ${mm(I.go)} мм`); return; }
       if (S.tool === 'section'){ if (p.distanceTo(D.start) < 0.5) return; const a = D.start.clone(); endDraw(); makeSection(a, p); setTool('select'); return; }
+      if (S.tool === 'camera'){ if (p.distanceTo(D.start) < 0.3) return; const a = D.start.clone(); endDraw(); setTool('select'); makeCamera(a, p); return; }
       if (Math.abs(p.x - D.start.x) < 1e-3 || Math.abs(p.z - D.start.z) < 1e-3) return;
       if (S.tool === 'floor' || S.tool === 'ceiling' || S.tool === 'roof'){ const a = D.start.clone(); endDraw(); createFromOutline(S.tool, rectPts(a, p)); return; }
       pushUndo();
@@ -4181,7 +4332,7 @@ function setView(v){
     if (nv){ S.viewId = nv.id; S.phase = nv.phase || 'all'; syncPhaseUI(); }
     hideSheet();
   }
-  S.view = v; endDraw();
+  S.view = v; endDraw(); applyLens();
   if (v !== 'plan' && ['dim', 'line', 'text', 'callout'].includes(S.tool)) setTool('select');
   document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === v));
   $('#viewtag').textContent = viewTitle(curView());
@@ -4189,7 +4340,7 @@ function setView(v){
   $('#vcube').hidden = $('#vhome').hidden = v === 'plan' || v === 'sect';
   configControls(); rebuild();
   if (!fitted[v]) fit(v);
-  updateHint(); renderVbar();
+  updateHint(); renderVbar(); realSky();
 }
 function setTool(t){
   if (t === 'grid' && curView().noGrid){ delete curView().noGrid; annoDirty = true; rebuild(); scheduleSave(); setTimeout(renderVbar); }
@@ -4198,21 +4349,21 @@ function setTool(t){
   if (['adim', 'rdim', 'ddim', 'measure', 'align', 'offset', 'trimcorner', 'trim1', 'trimn', 'split', 'splitgap', 'mirror', 'mirror2', 'cutgeo', 'uncutgeo', 'joingeo', 'unjoingeo'].includes(t) && S.view !== 'plan') setView('plan');
   if (['dim', 'line', 'text', 'callout'].includes(t) && S.view !== 'plan'){ setView('plan'); toast(t === 'callout' ? 'Узел обводится на плане' : 'Аннотации ставятся на плане'); }
   if (t === 'demolish' && S.view === 'sheet') setView('plan');
-  if (['section', 'ielev', 'room'].includes(t) && S.view !== 'plan'){ setView('plan'); toast('Это ставится на плане'); }
+  if (['section', 'ielev', 'room', 'camera'].includes(t) && S.view !== 'plan'){ setView('plan'); toast('Это ставится на плане'); }
   if (S.view === 'sect' && !['select', 'orbit', 'demolish'].includes(t)) setView('plan');
   if (t === 'demolish' && (S.phase === 'all' || S.phase === 'obmer')){ setPhase('demontazh'); }
   if ((t === 'move' || t === 'copy') && !sel.size){ toast('Сначала выберите элементы (рамкой или щелчком)'); t = 'select'; }
   endDraw(); S.tool = t; if (t !== 'select') hovHide();
   document.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tool === t));
   if (['wall','rect','door','window','box','orbit','grid','move','copy','floor','ceiling','roof','column','stair','room','fam'].includes(t)) showTab('rbArch'); else if (['dim', 'line', 'text'].includes(t)) showTab('rbAnno');
-  else if (['section', 'ielev', 'callout'].includes(t)) showTab('rbView');
+  else if (['section', 'ielev', 'callout', 'camera'].includes(t)) showTab('rbView');
   else if (EDIT_TOOLS.includes(t)) showTab('rbModify');
   configControls();
   cursorEl.hidden = true;
   cv.style.cursor = drawing() || placing() || pointTool() || ['dim', 'text'].includes(t) ? 'crosshair' : t === 'orbit' ? 'grab' : 'default';
   renderOptbar(); updateHint(); updatePanel();
 }
-function setStyle(s){ S.style = s; rebuild(); renderVbar(); }
+function setStyle(s){ S.style = s; rebuild(); renderVbar(); realSky(); }
 function setDetail(d){ S.detail = d; rebuild(); renderVbar(); }
 function renderVbar(){
   $('#vbDetail').textContent = 'Детализация: ' + (S.detail === 'coarse' ? 'низкая' : 'средняя');
@@ -4244,8 +4395,92 @@ function updateScale(){
 function updateRibbonState(){ const has = [...sel].some(id => movable(byId(id))); for (const id of ['rbRotate', 'rbDelete']) $('#' + id).disabled = id === 'rbDelete' ? !sel.size : !has; document.querySelectorAll('[data-tool=move],[data-tool=copy]').forEach(b => b.disabled = !has); }
 
 /* ---------- views, details and sheets (Revit Project Browser) ---------- */
-const KIND_MODE = { plan:'plan', detail:'plan', d3:'d3', axo:'axo', elev:'axo', sheet:'sheet', section:'sect', ielev:'sect' };
-const KIND_NAME = { plan:'План этажа', detail:'Узел', d3:'3D-вид', axo:'Аксонометрия', elev:'Фасад', sheet:'Лист', section:'Разрез', ielev:'Развёртка' };
+const KIND_MODE = { plan:'plan', detail:'plan', d3:'d3', camera:'d3', axo:'axo', elev:'axo', sheet:'sheet', section:'sect', ielev:'sect' };
+const KIND_NAME = { plan:'План этажа', detail:'Узел', d3:'3D-вид', camera:'Камера', axo:'Аксонометрия', elev:'Фасад', sheet:'Лист', section:'Разрез', ielev:'Развёртка' };
+/* ---------- cameras (Revit «Вид → 3D-вид → Камера»): saved viewpoints with a real lens ----------
+   f — focal length, mm; sensor — sensor (film) width, mm; sx/sy — lens shift, share of the frame width/height;
+   near/far — clipping planes, m (far 0 — none); fs, sh, iso, ev — f-stop, shutter 1/sh s, ISO, exposure compensation;
+   wb — white balance, K; dof/focus/blades — depth of field; ratio — frame format; eye/tgt heights live in cam.p/cam.t */
+const LENS0 = { f:35, sensor:36, sx:0, sy:0, near:0.3, far:0, fs:8, sh:125, iso:100, ev:0, wb:6500, dof:false, focus:0, blades:7, ratio:'16:9' };
+const RATIOS = { '16:9':16 / 9, '3:2':1.5, '4:3':4 / 3, '5:4':1.25, '1:1':1, '4:5':0.8, '2:3':2 / 3, '9:16':9 / 16, '21:9':21 / 9, 'A':Math.SQRT2 };
+const RATIO_NAME = { '16:9':'16:9 (экран)', '3:2':'3:2 (фото)', '4:3':'4:3', '5:4':'5:4', '1:1':'1:1 (квадрат)', '4:5':'4:5 (портрет)', '2:3':'2:3 (портрет)', '9:16':'9:16 (телефон)', '21:9':'21:9 (панорама)', 'A':'А-формат (√2)' };
+const camLens = v => ({ ...LENS0, ...((v && v.lens) || {}) });
+const ratioOf = L => RATIOS[L.ratio] || 16 / 9;
+const vfovOf = (L, a) => 2 * Math.atan((L.sensor / a) / (2 * L.f)) * 180 / Math.PI; // vertical field of view of a frame with aspect a
+const hfovOf = L => 2 * Math.atan(L.sensor / (2 * L.f)) * 180 / Math.PI;
+// physical exposure, relative to f/8 · 1/125 s · ISO 100 (= 1)
+const exposureOf = L => (L.iso / 100) * (125 / L.sh) * (64 / (L.fs * L.fs)) * Math.pow(2, L.ev || 0);
+// lens shift moves the frame without tilting the camera (verticals stay vertical)
+function shiftProj(cm){ const s = cm.userData.shiftNdc; if (!s || (!s[0] && !s[1])) return; const e = cm.projectionMatrix.elements; e[8] += s[0]; e[9] += s[1]; cm.projectionMatrixInverse.copy(cm.projectionMatrix).invert(); }
+function patchShift(cm){ if (cm.userData.patched) return; const up = cm.updateProjectionMatrix.bind(cm); cm.updateProjectionMatrix = function(){ up(); shiftProj(this); }; cm.userData.patched = true; }
+patchShift(perspCam);
+// the frame of the camera inside the viewport: share of its width and height, and the vertical FOV of the viewport
+function frameFit(L, a){ const ra = ratioOf(L); return a >= ra ? { fw:ra / a, fh:1, vf:vfovOf(L, ra) } : { fw:1, fh:a / ra, vf:vfovOf(L, a) }; }
+const camFrameEl = (() => { const d = document.createElement('div'); d.id = 'camFrame'; d.hidden = true; d.innerHTML = '<span></span>'; vp.append(d); return d; })();
+function applyLens(){
+  const v = curView(), cm = perspCam;
+  // a camera may look up or down freely; the plain 3D view keeps the orbit above the ground
+  ctl.d3.maxPolarAngle = S.view === 'd3' && v.kind === 'camera' ? Math.PI - 0.01 : Math.PI * 0.495; ctl.d3.minPolarAngle = S.view === 'd3' && v.kind === 'camera' ? 0.01 : 0;
+  if (S.view === 'd3' && v.kind === 'camera'){
+    const L = camLens(v), F = frameFit(L, cm.aspect || 1);
+    cm.fov = F.vf; cm.near = Math.max(0.01, L.near); cm.far = L.far > L.near + 0.1 ? L.far : 5000;
+    cm.userData.shiftNdc = [2 * L.sx * F.fw, 2 * L.sy * F.fh];
+    Object.assign(camFrameEl.style, { width:(F.fw * 100) + '%', height:(F.fh * 100) + '%' }); camFrameEl.hidden = false;
+    camFrameEl.firstChild.textContent = `${L.f} мм · f/${L.fs} · 1/${L.sh} с · ISO ${L.iso}${L.near > 0.31 ? ' · отсечение ' + mm(L.near) + ' мм' : ''}`;
+  } else { cm.fov = 42; cm.near = 0.05; cm.far = 1000; cm.userData.shiftNdc = null; camFrameEl.hidden = true; }
+  cm.updateProjectionMatrix();
+}
+// a camera for drawing a camera view into an image of aspect asp (render, sheet)
+function camFromView(v, asp){
+  const L = camLens(v), live = v.id === S.viewId && S.view === 'd3';
+  const cm = new THREE.PerspectiveCamera(vfovOf(L, asp), asp, Math.max(0.01, L.near), L.far > L.near + 0.1 ? L.far : 5000);
+  if (live){ cm.position.copy(perspCam.position); cm.quaternion.copy(perspCam.quaternion); }
+  else if (v.cam){ cm.position.fromArray(v.cam.p); cm.lookAt(new V3().fromArray(v.cam.t)); }
+  cm.userData.shiftNdc = [2 * L.sx, 2 * L.sy]; patchShift(cm); cm.updateProjectionMatrix(); cm.updateMatrixWorld(true);
+  return cm;
+}
+function makeCamera(a, b){
+  const n0 = views.filter(v => v.kind === 'camera').length + 1; let n = n0; while (views.some(v => v.kind === 'camera' && v.name === 'Камера ' + n)) n++;
+  const L = levels.find(l => l.id === actLv()) || levels[0], y = r4((L ? L.elev : 0) + 1.6);
+  const v = { id:vid('v'), kind:'camera', code:'К' + n, name:'Камера ' + n, phase:S.phase, cam:{ p:[r4(a.x), y, r4(a.z)], t:[r4(b.x), y, r4(b.z)], z:1 }, lens:{ ...LENS0 } };
+  views.push(v); renderTree(); scheduleSave(); openView(v.id);
+  toast(`${v.name}: объектив ${LENS0.f} мм, высота глаз ${mm(y)} мм. Настройки — в «Свойствах», ракурс сохраняется сам`);
+  return v;
+}
+// current eye and target of a camera view (from the live view when it is open)
+function camPT(v){ if (v.id === S.viewId && S.view === 'd3') saveCam(); return { P:new V3().fromArray(v.cam.p), T:new V3().fromArray(v.cam.t) }; }
+function setCamPT(v, P, T){
+  v.cam = { p:P.toArray().map(r4), t:T.toArray().map(r4), z:1 };
+  if (v.id === S.viewId && S.view === 'd3'){ const c = ctl.d3, dmp = c.enableDamping; c.enableDamping = false; perspCam.position.copy(P); c.target.copy(T); perspCam.lookAt(T); c.update(); c.enableDamping = dmp; }
+}
+// where a point lands in the frame of a level-free test camera (no shift)
+function ndcIn(v, P, T, X){ const L = camLens(v), c = new THREE.PerspectiveCamera(vfovOf(L, ratioOf(L)), ratioOf(L), 0.01, 5000); c.position.copy(P); c.lookAt(T); c.updateMatrixWorld(true); c.updateProjectionMatrix(); return X.clone().project(c); }
+// «Выровнять вертикали»: level the camera (two-point perspective) and frame the old target with a vertical lens shift
+function alignCamV(v){
+  const { P, T } = camPT(v), T2 = new V3(T.x, P.y, T.z);
+  if (Math.hypot(T.x - P.x, T.z - P.z) < 0.05){ toast('Камера смотрит прямо вверх или вниз — выровнять нельзя'); return; }
+  const q = ndcIn(v, P, T2, T); v.lens = { ...camLens(v), sy:r4(q.y / 2) }; setCamPT(v, P, T2);
+  camChanged(v); toast('Вертикали выровнены: камера горизонтальна, кадр поднят сдвигом объектива');
+}
+// «Выровнять горизонтали»: turn the camera square to the building (the main wall direction), so its horizontal lines run parallel to the frame
+function alignCamH(v){
+  const { P, T } = camPT(v), dx = T.x - P.x, dz = T.z - P.z, D0 = Math.hypot(dx, dz);
+  if (D0 < 0.05){ toast('Камера смотрит прямо вверх или вниз — выровнять нельзя'); return; }
+  let C = 0, Sn = 0; for (const w of items) if (w.type === 'wall'){ const a = Math.atan2(w.z2 - w.z1, w.x2 - w.x1), l = Math.hypot(w.x2 - w.x1, w.z2 - w.z1); C += Math.cos(4 * a) * l; Sn += Math.sin(4 * a) * l; }
+  const base = C || Sn ? Math.atan2(Sn, C) / 4 : 0, ang = Math.atan2(dz, dx), snapA = base + Math.round((ang - base) / (Math.PI / 2)) * (Math.PI / 2);
+  const T2 = new V3(P.x + Math.cos(snapA) * D0, T.y, P.z + Math.sin(snapA) * D0);
+  v.lens = { ...camLens(v), sx:0 }; setCamPT(v, P, T2);
+  camChanged(v); toast('Горизонтали выровнены: камера развёрнута прямо на здание, линии фасада параллельны кадру');
+}
+function camChanged(v){ if (v.id === S.viewId) applyLens(); annoDirty = true; scheduleSave(); $('#propsBody').dataset.id = 'x'; updatePanel(); }
+// white balance: the camera is set for wb K, the scene is lit by daylight (6500 K)
+function kelvinRGB(K){
+  const t = K / 100; let r, g, b;
+  if (t <= 66){ r = 255; g = 99.4708025861 * Math.log(t) - 161.1195681661; b = t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307; }
+  else { r = 329.698727446 * Math.pow(t - 60, -0.1332047592); g = 288.1221695283 * Math.pow(t - 60, -0.0755148492); b = 255; }
+  return [r, g, b].map(x => clamp(x, 1, 255) / 255);
+}
+function wbFactors(K){ const a = kelvinRGB(6500), b = kelvinRGB(K), f = a.map((x, i) => x / b[i]); return f.map(x => x / f[1]); }
 // orthographic camera looking along a section: the crop rectangle fills the view
 function sectCamFor(v, cm, aspect){
   const f = sectFrame(v), mid = f.p1.clone().addScaledVector(f.dir, f.L / 2); mid.y = (f.y0 + f.y1) / 2;
@@ -4301,7 +4536,15 @@ function sanitizeViews(arr){
     if ((v.kind === 'detail' || v.kind === 'plan') && v.region){ const r = v.region; o.region = { x0:+r.x0, z0:+r.z0, x1:+r.x1, z1:+r.z1 }; if (v.kind === 'detail') o.scale = VP_SCALES.includes(+v.scale) ? +v.scale : 20; }
     if (v.kind === 'plan') o.crop = !!v.crop && !!o.region;
     if (typeof v.tpl === 'string') o.tpl = v.tpl.slice(0, 40);
-    if ((v.kind === 'd3' || v.kind === 'axo') && v.box && ['x0','x1','y0','y1','z0','z1'].every(k => N(v.box[k]))){ o.box = { on:!!v.box.on }; for (const k of ['x0','x1','y0','y1','z0','z1']) o.box[k] = +v.box[k]; }
+    if (v.kind === 'camera'){
+      if (!o.cam) continue;
+      o.code = String(v.code || 'К').slice(0, 6); const l = v.lens || {}, L = {};
+      for (const [k, d] of Object.entries(LENS0)){ if (k === 'ratio') L.ratio = RATIOS[l.ratio] ? l.ratio : d; else if (k === 'dof') L.dof = !!l.dof; else L[k] = N(l[k]) ? +l[k] : d; }
+      L.f = clamp(L.f, 4, 1200); L.sensor = clamp(L.sensor, 4, 100); L.sx = clamp(L.sx, -2, 2); L.sy = clamp(L.sy, -2, 2); L.near = clamp(L.near, 0.01, 500); L.far = clamp(L.far, 0, 5000);
+      L.fs = clamp(L.fs, 0.7, 64); L.sh = clamp(L.sh, 0.01, 16000); L.iso = clamp(L.iso, 25, 102400); L.ev = clamp(L.ev, -10, 10); L.wb = clamp(L.wb, 1500, 15000); L.focus = clamp(L.focus, 0, 1000); L.blades = clamp(Math.round(L.blades), 0, 12);
+      o.lens = L;
+    }
+    if ((v.kind === 'd3' || v.kind === 'camera' || v.kind === 'axo') && v.box && ['x0','x1','y0','y1','z0','z1'].every(k => N(v.box[k]))){ o.box = { on:!!v.box.on }; for (const k of ['x0','x1','y0','y1','z0','z1']) o.box[k] = +v.box[k]; }
     if (v.kind === 'section' || v.kind === 'ielev'){
       if (!v.p1 || !v.p2 || ![v.p1.x, v.p1.z, v.p2.x, v.p2.z].every(N)) continue;
       Object.assign(o, { code:String(v.code || '1').slice(0, 6), p1:{ x:+v.p1.x, z:+v.p1.z }, p2:{ x:+v.p2.x, z:+v.p2.z }, flip:v.flip !== false, crop:v.crop !== false, far:N(v.far) ? clamp(+v.far, 0.1, 200) : 5, y0:N(v.y0) ? +v.y0 : -0.5, y1:N(v.y1) ? +v.y1 : 4 });
@@ -4327,11 +4570,12 @@ function openView(id){
   S.viewId = id; S.phase = v.phase || 'all';
   if (v.kind === 'plan' || v.kind === 'detail') S.level = v.lv && levels.some(l => l.id === v.lv) ? v.lv : levels[0].id;
   const mode = KIND_MODE[v.kind];
-  if (mode === 'sheet'){ endDraw(); S.tool = 'select'; S.view = 'sheet'; clearSel(); SHEET.sel = null; showSheet(v); }
+  if (mode === 'sheet'){ endDraw(); S.tool = 'select'; S.view = 'sheet'; clearSel(); SHEET.sel = null; showSheet(v); applyLens(); }
   else {
     hideSheet();
     OPENING = true; try { setView(mode); } finally { OPENING = false; }
     const c = ctl[mode], cm = cams[mode];
+    applyLens();
     if (v.cam){ cm.position.fromArray(v.cam.p); c.target.fromArray(v.cam.t); if (cm.isOrthographicCamera) cm.zoom = v.cam.z; cm.updateProjectionMatrix(); c.update(); }
     else if (v.kind === 'elev'){ const dir = ELEV_DIR[v.side]; const d = new V3(dir.x + 0.0001, dir.y, dir.z + 0.0001); axoCam.position.copy(ctl.axo.target).addScaledVector(d.normalize(), 200); ctl.axo.update(); fit('axo'); }
     else if ((v.kind === 'detail' || v.crop) && v.region) fitRegion(v.region);
@@ -4428,6 +4672,10 @@ function handleSpecs(){
     }
   }
   const sv = S.selView && views.find(x => x.id === S.selView);
+  if (mode === 'plan' && sv && sv.kind === 'camera' && sv.cam){
+    out.push({ key:'ce', pos:new V3(sv.cam.p[0], 0, sv.cam.p[2]), ground:true, tgt:sv, apply:(s, p) => { sv.cam.p = [p.x, s.cam.p[1], p.z]; }, title:'Точка съёмки камеры' });
+    out.push({ key:'ct', pos:new V3(sv.cam.t[0], 0, sv.cam.t[2]), ground:true, tgt:sv, apply:(s, p) => { sv.cam.t = [p.x, s.cam.t[1], p.z]; }, title:'Цель камеры' });
+  }
   if (mode === 'plan' && sv && (sv.kind === 'section' || sv.kind === 'ielev')){
     const f = sectFrame(sv), mid = f.p1.clone().addScaledVector(f.dir, f.L / 2);
     out.push({ key:'e1', pos:f.p1.clone(), ground:true, tgt:sv, apply:(s, p) => { sv.p1 = { x:p.x, z:p.z }; if (sectFrame(sv).L < 0.3) sv.p1 = s.p1; }, title:'Конец линии' });
@@ -4507,7 +4755,7 @@ function makeCallout(a, b){
 }
 function newView(kind){
   if (kind === 'detail'){ setTool('callout'); return; }
-  if (kind === 'section' || kind === 'ielev'){ setTool(kind); return; }
+  if (kind === 'section' || kind === 'ielev' || kind === 'camera'){ setTool(kind); return; }
   const same = views.filter(v => v.kind === kind);
   let v;
   if (kind === 'plan'){ let n = same.length + 1; while (views.some(x => x.name === 'План ' + n)) n++; v = { id:vid('v'), kind:'plan', name:'План ' + n, phase:S.phase, lv:actLv() }; }
@@ -4572,6 +4820,8 @@ function renderViewImage(v, vp){
     const W = r.x1 - r.x0, Hh = r.z1 - r.z0; wmm = W * 1000 / vp.scale; hmm = Hh * 1000 / vp.scale;
     camR = new THREE.OrthographicCamera(-W / 2, W / 2, Hh / 2, -Hh / 2, 0.1, 2000); camR.up.set(0, 0, -1);
     camR.position.set((r.x0 + r.x1) / 2, 200, (r.z0 + r.z1) / 2); camR.lookAt((r.x0 + r.x1) / 2, 0, (r.z0 + r.z1) / 2);
+  } else if (v.kind === 'camera' && v.cam){
+    const L = camLens(v); wmm = vp.w || 150; hmm = wmm / ratioOf(L); camR = camFromView(v, wmm / hmm);
   } else {
     wmm = vp.w || 150; hmm = vp.h || 110; const asp = wmm / hmm;
     const b = viewBounds(v), c = b.getCenter(new V3()), diag = b.getSize(new V3()).length();
@@ -4581,7 +4831,7 @@ function renderViewImage(v, vp){
     else { const hh = diag * 0.55; camR = new THREE.OrthographicCamera(-hh * asp, hh * asp, hh, -hh, 0.1, 2000); camR.position.copy(c).addScaledVector(dir, 200); }
     camR.lookAt(c);
   }
-  camR.updateProjectionMatrix();
+  camR.updateProjectionMatrix(); camR.updateMatrixWorld(true);
   const w = clamp(Math.round(wmm * PX), 16, 3200), h = clamp(Math.round(hmm * PX), 16, 3200);
   RENDER = { w, h, cam:camR, pxmm:PX, view:v };
   renderer.setPixelRatio(1); renderer.setSize(w, h, false);
@@ -4722,11 +4972,61 @@ function prevPats(cv2, base, pats){
   const g = cv2.getContext('2d'); g.fillStyle = base; g.fillRect(0, 0, cv2.width, cv2.height);
   for (const q of [pats.bg, pats.fg]){ const f = q && STD.fills.find(x => x.id === q.p); if (!f || f.k === 'none') continue; if (f.k === 'solid'){ g.fillStyle = q.c; g.fillRect(0, 0, cv2.width, cv2.height); } else drawPat(g, cv2.width, cv2.height, f, q.c); }
 }
+// the same wood field as in the shader (woodF), for previews
+const fr = x => x - Math.floor(x);
+const hshJ = (x, y) => fr(Math.sin(x * 127.1 + y * 311.7) * 43758.5453);
+function vnJ(x, y){ const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy, ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+  const a = hshJ(ix, iy), b = hshJ(ix + 1, iy), c = hshJ(ix, iy + 1), d = hshJ(ix + 1, iy + 1); return (a + (b - a) * ux) + ((c + (d - c) * ux) - (a + (b - a) * ux)) * uy; }
+const fbmJ = (x, y) => vnJ(x, y) * 0.62 + vnJ(x * 2.07 + 5.3, y * 2.07 + 5.3) * 0.28 + vnJ(x * 4.13 + 1.7, y * 4.13 + 1.7) * 0.1;
+const WOOD_V = [
+  { A:1.6, fx:0.12, fy:0.05 }, { A:1.2, fx:0.09, fy:0.03, KH:4.5, KR:3.2, KE:4, KP:0.9, KC:[9, 30] }, { A:2.0, fx:0.15, fy:0.09, swap:true },
+  { A:2.6, fx:0.14, fy:0.08 }, { A:0.9, fx:0.18, fy:0.025 }, { A:1.4, fx:0.09, fy:0.05, KH:6, KR:2.6, KE:1.25, KP:0.5, KC:[12, 26] }
+];
+function woodFJ(x, y, v){
+  const P = WOOD_V[v] || WOOD_V[0]; if (P.swap){ const t = x; x = y; y = -t; }
+  let f = x + P.A * (fbmJ(x * P.fx, y * P.fy) - 0.5) * 2 + 0.6 * P.A * Math.sin(y * P.fy * 2 + x * 0.05);
+  if (P.KH){ const cx0 = Math.floor(x / P.KC[0]), cy0 = Math.floor(y / P.KC[1]);
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++){ const cx = cx0 + i, cy = cy0 + j; if (hshJ(cx + 11.3, cy + 11.3) > P.KP) continue;
+      const ox = (cx + 0.2 + 0.6 * hshJ(cx + 2.1, cy + 2.1)) * P.KC[0], oy = (cy + 0.2 + 0.6 * hshJ(cx + 5.7, cy + 5.7)) * P.KC[1], dx = x - ox, dy = (y - oy) / P.KE;
+      f += P.KH * (0.6 + 0.4 * hshJ(cx + 9.2, cy + 9.2)) * Math.exp(-(dx * dx + dy * dy) / (P.KR * P.KR)); } }
+  return f;
+}
+function drawWood(g, W, H, f, fg){
+  const k = (f.u === 'model' ? 1 / 20 : 1) * PREV_K, st = f.s || 1.5, v = clamp(Math.round(f.v || 1), 1, 6) - 1, a = (f.a || 0) * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+  const img = g.getImageData(0, 0, W, H), D = img.data, col = new THREE.Color(fg), cr = col.r * 255, cg = col.g * 255, cb = col.b * 255, e = 0.05, fw = 1 / (k * st);
+  for (let py = 0; py < H; py++) for (let px = 0; px < W; px++){
+    const X = (px - W / 2) / k, Y = (H / 2 - py) / k, qx = (ca * X + sa * Y) / st, qy = (-sa * X + ca * Y) / st;
+    const f0 = woodFJ(qx, qy, v), gx = woodFJ(qx + e, qy, v) - f0, gy = woodFJ(qx, qy + e, v) - f0, gr = Math.hypot(gx, gy) / e + 1e-6;
+    const d = Math.abs(fr(f0 + 0.5) - 0.5) / gr, hw = fw * 0.6, m = d < hw ? 1 : d < hw + fw ? 1 - (d - hw) / fw : 0;
+    if (m > 0){ const i = (py * W + px) * 4; D[i] += (cr - D[i]) * m; D[i + 1] += (cg - D[i + 1]) * m; D[i + 2] += (cb - D[i + 2]) * m; }
+  }
+  g.putImageData(img, 0, 0);
+}
 function drawPat(g, W, H, f, fg){
   if (f.k === 'solid' || f.k === 'none') return;
+  if (f.k === 'woodg'){ drawWood(g, W, H, f, fg); return; }
   const st = Math.max(2, (f.u === 'model' ? f.s / 20 : f.s) * PREV_K);
   g.save(); g.strokeStyle = fg; g.fillStyle = fg; g.lineWidth = 0.8;
-  if (f.k === 'brick'){ const a = f.a * Math.PI / 180, L = st * 3.4; g.translate(W / 2, H / 2); g.rotate(-a); const R = Math.hypot(W, H);
+  g.translate(0, H); g.scale(1, -1); // Y up, as on the drawing
+  if (f.k === 'pat'){
+    const k = (f.u === 'model' ? 1 / 20 : 1) * PREV_K, R = Math.hypot(W, H);
+    g.translate(W / 2, H / 2); g.rotate(f.a * Math.PI / 180); g.lineCap = 'round';
+    for (const q of famsOf(f)){
+      const dir = { x:Math.cos(q.a), y:Math.sin(q.a) }, nr = { x:-dir.y, y:dir.x }, off = q.off * k, T = q.d.reduce((s2, v) => s2 + Math.abs(v), 0) * k;
+      if (off < 0.6) continue;
+      const n0 = Math.floor(-R / off) - 1, n1 = Math.ceil(R / off) + 1;
+      for (let n = n0; n <= n1; n++){
+        const ox = q.x * k + nr.x * n * off + dir.x * n * q.sh * k, oy = q.y * k + nr.y * n * off + dir.y * n * q.sh * k;
+        const seg = (t0, t1) => { g.beginPath(); g.moveTo(ox + dir.x * t0, oy + dir.y * t0); g.lineTo(ox + dir.x * (t1 + (t1 === t0 ? 0.01 : 0)), oy + dir.y * (t1 + (t1 === t0 ? 0.01 : 0))); g.stroke(); };
+        if (!q.d.length || T < 0.5){ seg(-R * 2, R * 2); continue; }
+        // walk the dashes from far left so the pattern lines up with the line origin
+        let t = -Math.ceil(2 * R / T) * T;
+        while (t < 2 * R){ for (const v of q.d){ const L = Math.abs(v) * k; if (v >= 0) seg(t, t + L); t += L; } }
+      }
+    }
+    g.restore(); return;
+  }
+  if (f.k === 'brick'){ const a = f.a * Math.PI / 180, L = st * 3.4; g.translate(W / 2, H / 2); g.rotate(a); const R = Math.hypot(W, H);
     for (let r = Math.floor(-R / st); r * st < R; r++){ const y = (r + 0.5) * st; g.beginPath(); g.moveTo(-R, y); g.lineTo(R, y); g.stroke(); const off = (r % 2 ? 0.5 : 0) * L; for (let x = -R - off; x < R; x += L){ g.beginPath(); g.moveTo(x + L / 2, y - st); g.lineTo(x + L / 2, y); g.stroke(); } }
     g.restore(); return; }
   const lines = ang => { const a = ang * Math.PI / 180, n = { x:-Math.sin(a), y:Math.cos(a) }, R = Math.hypot(W, H); for (let t = -R; t < R; t += st){ g.beginPath(); g.moveTo(W / 2 + n.x * t - Math.cos(a) * R, H / 2 + n.y * t - Math.sin(a) * R); g.lineTo(W / 2 + n.x * t + Math.cos(a) * R, H / 2 + n.y * t + Math.sin(a) * R); g.stroke(); } };
@@ -4786,19 +5086,21 @@ function renderStd(){
     addBtn('Новый образец', () => { STD.patterns.push({ id:newId('p', STD.patterns), n:'Мой образец', seq:[8, 2, 2, 2] }); renderStd(); applyStd(); });
   } else if (STD_TAB === 'fills'){
     note('Чертёжная штриховка задаётся в миллиметрах на бумаге и не меняется при увеличении. Модельная — в реальных миллиметрах (плитка 300×300, кирпич 250×65): она растёт и уменьшается вместе с моделью. Какую штриховку показывать у материала на поверхности и в сечении — в окне «Материалы».');
-    const kinds = [['lines', 'Линии'], ['cross', 'Сетка'], ['brick', 'Кирпичная кладка'], ['dots', 'Точки'], ['concrete', 'Бетон'], ['insul', 'Утеплитель (зигзаг)'], ['wood', 'Дерево (волна)'], ['solid', 'Сплошная заливка'], ['none', 'Без штриховки']];
+    const kinds = PAT_KINDS.map(([v, n]) => [v, v === 'pat' ? 'Пользовательская' : n]);
     const tb = table(['Штриховка', 'Тип', 'Вид', 'Шаг, мм', 'Угол, °', 'Образец', '']);
     for (const f of STD.fills){
       const tr = document.createElement('tr'), pv = canvasEl(64, 28), draw = () => prevFill(pv, f);
       const nm = inp('text', f.n, { maxLength:40 }); nm.onchange = () => { f.n = nm.value.trim() || f.n; applyStd(); renderStd(); };
       const u = sel([['paper', 'Чертёжная'], ['model', 'Модельная']], f.u === 'model' ? 'model' : 'paper'); u.onchange = () => { if (u.value === 'model'){ f.u = 'model'; if (f.s < 20) f.s = 300; } else { delete f.u; f.s = clamp(f.s, 0.3, 50); } renderStd(); applyStd(); };
-      const k = sel(kinds, f.k); k.onchange = () => { f.k = k.value; draw(); applyStd(); };
-      const st = inp('number', f.s, { step:f.u === 'model' ? 10 : 0.1, min:0.3 }); st.onchange = () => { if (+st.value > 0){ f.s = clamp(+st.value, 0.3, f.u === 'model' ? 5000 : 50); draw(); applyStd(); } };
+      const k = sel(kinds, f.k); k.onchange = () => { if (k.value === 'pat'){ openPat(f, () => renderStd()); k.value = f.k; return; } f.k = k.value; delete f.fam; if (f.k === 'woodg') f.v = f.v || 1; else delete f.v; draw(); applyStd(); };
+      pv.classList.add('pick'); pv.title = 'Щёлкните, чтобы выбрать образец из библиотеки или создать свой'; pv.tabIndex = 0; pv.setAttribute('role', 'button'); pv.setAttribute('aria-label', 'Образец штриховки «' + f.n + '»');
+      pv.onclick = () => openPat(f, () => renderStd()); pv.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openPat(f, () => renderStd()); } };
+      const st = inp('number', f.s, { step:f.u === 'model' ? 10 : 0.1, min:0.3 }); st.onchange = () => { if (+st.value > 0){ f.s = clamp(+st.value, f.k === 'pat' ? 0.01 : 0.3, f.u === 'model' ? 5000 : 50); draw(); applyStd(); } };
       const an = inp('number', f.a, { step:5 }); an.onchange = () => { f.a = +an.value || 0; draw(); applyStd(); };
       td(tr, nm); td(tr, u); td(tr, k); td(tr, st); td(tr, an); td(tr, pv); td(tr, f.sys ? '' : delBtn(() => { STD.fills = STD.fills.filter(x => x !== f); for (const v of Object.values(STD.mat)) if (v.f === f.id) v.f = 'diag'; for (const x of Object.values(MATX)) for (const pp of [x.surf, x.cut]) if (pp) for (const q of [pp.fg, pp.bg]) if (q.p === f.id) q.p = 'none'; renderStd(); applyMats(); }));
       draw(); tb.append(tr);
     }
-    addBtn('Новая штриховка', () => { STD.fills.push({ id:newId('f', STD.fills), n:'Моя штриховка', k:'lines', s:3, a:30 }); renderStd(); applyStd(); });
+    addBtn('Новая штриховка', () => { const f = { id:newId('f', STD.fills), n:'Моя штриховка', k:'lines', s:3, a:30 }; STD.fills.push(f); renderStd(); applyStd(); openPat(f, () => renderStd()); });
     addBtn('Открыть «Материалы»…', () => { stdDlg.hidden = true; openMats(); });
   } else {
     note('Настройки размеров и марок для всех планов и листов проекта. Размеры в миллиметрах на бумаге.');
@@ -4826,6 +5128,133 @@ $('#stdReset').onclick = () => {
   if (!confirm('Вернуть значения по умолчанию на этой вкладке?')) return;
   if (STD_TAB === 'fills'){ STD.fills = d.fills; STD.mat = d.mat; } else STD[map[STD_TAB]] = d[map[STD_TAB]];
   renderStd(); applyStd();
+};
+
+/* ---------- «Образец штриховки» (Revit «Образцы штриховки»): pick a ready pattern, build your own from line families, or load a .pat file ---------- */
+const PAT_LIB = [
+  { n:'Диагональ 45°', k:'lines', s:1.6, a:45 }, { n:'Диагональ −45°', k:'lines', s:1.6, a:-45 },
+  { n:'Горизонтальные линии', k:'lines', s:1.5, a:0 }, { n:'Вертикальные линии', k:'lines', s:1.5, a:90 },
+  { n:'Сетка', k:'cross', s:2, a:0 }, { n:'Сетка 45°', k:'cross', s:2, a:45 },
+  { n:'Металл (ГОСТ 2.306)', k:'lines', s:1, a:45 }, { n:'Неметалл (ГОСТ 2.306)', k:'cross', s:1.2, a:45 },
+  { n:'Железобетон (ГОСТ)', k:'pat', s:1, a:0, fam:[{ a:45, x:0, y:0, sh:0, off:3, d:[] }, { a:45, x:-1.06, y:1.06, sh:0, off:3, d:[0, -2] }] },
+  { n:'Бетон', k:'concrete', s:2.5, a:0 },
+  { n:'Камень естественный (ГОСТ)', k:'pat', s:1, a:0, fam:[{ a:45, x:0, y:0, sh:0, off:2.4, d:[] }, { a:-45, x:0, y:0, sh:2, off:4.8, d:[4, -4] }] },
+  { n:'Керамика (ГОСТ)', k:'pat', s:1, a:0, fam:[{ a:45, x:0, y:0, sh:0, off:1.5, d:[] }, { a:0, x:0, y:0, sh:0, off:4, d:[] }] },
+  { n:'Стекло (ГОСТ)', k:'pat', s:1, a:0, fam:[{ a:45, x:0, y:0, sh:3, off:3, d:[2, -6] }] },
+  { n:'Грунт (ГОСТ)', k:'pat', s:1, a:0, fam:[{ a:45, x:0, y:0, sh:0, off:3, d:[4, -2] }, { a:45, x:-1.06, y:1.06, sh:1.5, off:3, d:[1, -5] }] },
+  { n:'Засыпка, песок', k:'pat', s:1, a:0, fam:[{ a:0, x:0, y:0, sh:0.75, off:1.5, d:[0, -1.5] }, { a:60, x:0.4, y:0.4, sh:0, off:2.6, d:[0, -3] }] },
+  { n:'Утеплитель', k:'insul', s:2.5, a:0 }, { n:'Дерево (волна)', k:'wood', s:1.8, a:0 },
+  { n:'Дерево 1 — тонкие волокна', k:'woodg', v:1, s:2.4, a:0 }, { n:'Дерево 2 — арки (тангенциальный)', k:'woodg', v:2, s:3, a:0 },
+  { n:'Дерево 3 — поперечная волна', k:'woodg', v:3, s:2.6, a:0 }, { n:'Дерево 4 — свилеватое', k:'woodg', v:4, s:2.6, a:0 },
+  { n:'Дерево 5 — прямослойное', k:'woodg', v:5, s:2.2, a:0 }, { n:'Дерево 6 — с сучками', k:'woodg', v:6, s:2.6, a:0 },
+  { n:'Точки (штукатурка)', k:'dots', s:1.2, a:0 }, { n:'Гидроизоляция', k:'lines', s:0.8, a:0 },
+  { n:'Кирпичная кладка', k:'brick', s:1.2, a:0 },
+  { n:'Штриховая диагональ', k:'pat', s:1, a:0, fam:[{ a:45, x:0, y:0, sh:1.5, off:2, d:[3, -1.5] }] },
+  { n:'Штрихпунктир', k:'pat', s:1, a:0, fam:[{ a:0, x:0, y:0, sh:3, off:2.5, d:[6, -1.5, 0, -1.5] }] },
+  { n:'Ромбы', k:'pat', s:1, a:0, fam:[{ a:60, x:0, y:0, sh:0, off:3, d:[] }, { a:120, x:0, y:0, sh:0, off:3, d:[] }] },
+  { n:'Треугольники', k:'pat', s:1, a:0, fam:[{ a:0, x:0, y:0, sh:0, off:2.6, d:[] }, { a:60, x:0, y:0, sh:0, off:2.6, d:[] }, { a:120, x:0, y:0, sh:0, off:2.6, d:[] }] },
+  { n:'Сплошная заливка', k:'solid', s:1, a:0 },
+  { n:'Плитка 300×300', k:'cross', s:300, a:0, u:'model' }, { n:'Плитка 600×600', k:'cross', s:600, a:0, u:'model' },
+  { n:'Плитка 600×300 вразбежку', k:'pat', s:1, a:0, u:'model', fam:[{ a:0, x:0, y:0, sh:0, off:300, d:[] }, { a:90, x:0, y:0, sh:300, off:300, d:[300, -300] }] },
+  { n:'Кирпич 250×65 (облицовка)', k:'brick', s:75, a:0, u:'model' },
+  { n:'Паркетная доска 140', k:'pat', s:1, a:0, u:'model', fam:[{ a:0, x:0, y:0, sh:0, off:140, d:[] }, { a:90, x:0, y:0, sh:140, off:400, d:[140, -280] }] },
+  { n:'Доска 150', k:'lines', s:150, a:0, u:'model' }, { n:'Сайдинг 200', k:'lines', s:200, a:0, u:'model' },
+  { n:'Древесина 1 — тонкие волокна', k:'woodg', v:1, s:10, a:0, u:'model' }, { n:'Древесина 2 — арки', k:'woodg', v:2, s:12, a:0, u:'model' },
+  { n:'Древесина 3 — поперечная волна', k:'woodg', v:3, s:10, a:0, u:'model' }, { n:'Древесина 4 — свилеватая', k:'woodg', v:4, s:10, a:0, u:'model' },
+  { n:'Древесина 5 — прямослойная', k:'woodg', v:5, s:8, a:0, u:'model' }, { n:'Древесина 6 — с сучками', k:'woodg', v:6, s:10, a:0, u:'model' },
+  { n:'Профлист С-20', k:'pat', s:1, a:0, u:'model', fam:[{ a:90, x:0, y:0, sh:0, off:200, d:[] }, { a:90, x:40, y:0, sh:0, off:200, d:[] }] }
+];
+const PAT_KINDS = [['lines', 'Линии'], ['cross', 'Сетка (перекрёстная)'], ['brick', 'Кирпичная кладка'], ['dots', 'Точки'], ['concrete', 'Бетон'], ['insul', 'Утеплитель (зигзаг)'], ['wood', 'Дерево (волна)'], ['woodg', 'Древесина (волокна, 6 вариантов)'], ['pat', 'Пользовательская (семейства линий)'], ['solid', 'Сплошная заливка'], ['none', 'Без штриховки']];
+const patDlg = $('#patDlg'); const PE = { fill:null, d:null, file:[], cb:null };
+const patCopy = f => ({ n:f.n, k:f.k, s:f.s, a:f.a || 0, ...(f.u === 'model' ? { u:'model' } : {}), ...(f.k === 'pat' ? { fam:JSON.parse(JSON.stringify(f.fam || [])) } : {}), ...(f.k === 'woodg' ? { v:f.v || 1 } : {}) });
+// Revit / AutoCAD .pat: «*Name, description», optional «;%UNITS=MM|INCH» and «;%TYPE=MODEL|DRAFTING», then «angle, x, y, shift, offset, dash…» lines
+function parsePat(text){
+  const out = []; let unit = 1, cur = null, nextModel = false;
+  for (const raw of String(text).split(/\r?\n/)){
+    const line = raw.trim(); if (!line) continue;
+    if (/^;%UNITS\s*=\s*INCH/i.test(line)){ unit = 25.4; continue; }
+    if (/^;%UNITS\s*=\s*MM/i.test(line)){ unit = 1; continue; }
+    if (/^;%TYPE\s*=\s*MODEL/i.test(line)){ if (cur && !cur.fam.length) cur.u = 'model'; else nextModel = true; continue; }
+    if (/^;%TYPE\s*=\s*DRAFTING/i.test(line)){ if (cur && !cur.fam.length) delete cur.u; continue; }
+    if (line[0] === ';') continue;
+    if (line[0] === '*'){ cur = { n:(line.slice(1).split(',')[0].trim() || 'Образец').slice(0, 40), k:'pat', s:1, a:0, fam:[] }; if (nextModel){ cur.u = 'model'; nextModel = false; } out.push(cur); continue; }
+    if (!cur) continue;
+    const v = line.split(',').map(x => parseFloat(x)); if (v.length < 5 || v.slice(0, 5).some(x => !Number.isFinite(x))) continue;
+    if (cur.fam.length >= PAT_FAM_MAX){ cur.cut = true; continue; }
+    const d = v.slice(5).filter(Number.isFinite); if (d.length > 4) cur.cut = true;
+    cur.fam.push({ a:v[0], x:v[1] * unit, y:v[2] * unit, sh:v[3] * unit, off:Math.abs(v[4] * unit), d:d.slice(0, 4).map(x => x * unit) });
+  }
+  return out.filter(p => p.fam.length && p.fam.every(q => q.off > 1e-6));
+}
+function patTile(f, onPick){
+  const b = document.createElement('button'), c = canvasEl(80, 50); b.type = 'button'; b.title = f.n + (f.u === 'model' ? ' · модельная' : ''); prevFill(c, f);
+  const t = document.createElement('span'); t.textContent = f.n; b.append(c, t); b.onclick = () => onPick(f); return b;
+}
+function renderPatGal(){
+  const gal = $('#patGal'); gal.replaceChildren();
+  const sec = (title, list) => { if (!list.length) return; const h = document.createElement('h3'); h.textContent = title; const g = document.createElement('div'); g.className = 'patgrid'; for (const f of list) g.append(patTile(f, p => { Object.assign(PE.d, patCopy(p)); if (p.k !== 'pat') delete PE.d.fam; if (p.k !== 'woodg') delete PE.d.v; if (p.u !== 'model') delete PE.d.u; renderPatEd(); })); gal.append(h, g); };
+  if (PE.file.length) sec('Из файла .pat', PE.file);
+  sec('Чертёжные (на бумаге, мм)', PAT_LIB.filter(f => f.u !== 'model'));
+  sec('Модельные (реальный размер, мм)', PAT_LIB.filter(f => f.u === 'model'));
+  sec('Уже в проекте', STD.fills.filter(f => f !== PE.fill && f.k !== 'none'));
+}
+function renderPatEd(){
+  const d = PE.d, ed = $('#patEd'), pat = d.k === 'pat', simple = !pat && d.k !== 'solid' && d.k !== 'none';
+  const row = (label, html) => `<div class="mrow"><span>${label}</span><div>${html}</div></div>`;
+  const fams = pat ? (d.fam = d.fam || []) : [];
+  ed.innerHTML = row('Название', `<input type="text" id="peN" maxlength="40" value="${esc(d.n)}">`)
+    + row('Тип', `<select id="peU"><option value="paper">Чертёжная — мм на бумаге</option><option value="model"${d.u === 'model' ? ' selected' : ''}>Модельная — реальные мм</option></select>`)
+    + row('Вид', `<select id="peK">${PAT_KINDS.map(([v, n]) => `<option value="${v}"${v === d.k ? ' selected' : ''}>${n}</option>`).join('')}</select>`)
+    + (d.k === 'woodg' ? row('Вариант рисунка', `<select id="peV">${['1 — тонкие волокна', '2 — арки (тангенциальный распил)', '3 — поперечная волна', '4 — свилеватое', '5 — прямослойное', '6 — с сучками'].map((n, i) => `<option value="${i + 1}"${i + 1 === (d.v || 1) ? ' selected' : ''}>${n}</option>`).join('')}</select>`) : '')
+    + (simple ? row(d.k === 'brick' ? 'Высота ряда, мм' : d.k === 'woodg' ? 'Шаг волокон, мм' : 'Шаг, мм', `<input type="number" id="peS" min="0.3" step="${d.u === 'model' ? 10 : 0.1}" value="${d.s}">`) : '')
+    + (pat ? row('Масштаб', `<input type="number" id="peS" min="0.01" step="0.1" value="${d.s}">`) : '')
+    + (simple || pat ? row('Угол поворота, °', `<input type="number" id="peA" step="5" value="${d.a || 0}">`) : '')
+    + `<canvas id="pePv" width="360" height="190"></canvas>`
+    + (pat ? `<p class="libnote">Каждая строка — семейство параллельных линий, как в файле .pat: угол, начало (X, Y), сдвиг соседних линий вдоль линии, шаг между линиями и штрихи. Штрихи: плюс — штрих, минус — пробел, 0 — точка, например «6 -3 0 -3». Пусто — сплошная линия.</p>
+      <table class="famtab"><thead><tr><th>Угол°</th><th>X</th><th>Y</th><th>Сдвиг</th><th>Шаг</th><th>Штрихи</th><th></th></tr></thead><tbody>${fams.map((q, i) => `<tr data-i="${i}"><td><input data-f="a" type="number" step="5" value="${q.a}"></td><td><input data-f="x" type="number" step="0.5" value="${q.x}"></td><td><input data-f="y" type="number" step="0.5" value="${q.y}"></td><td><input data-f="sh" type="number" step="0.5" value="${q.sh}"></td><td><input data-f="off" type="number" min="0.05" step="0.5" value="${q.off}"></td><td><input data-f="d" type="text" value="${q.d.join(' ')}" placeholder="сплошная"></td><td><button class="btn sm danger" data-del="${i}" aria-label="Удалить семейство">×</button></td></tr>`).join('')}</tbody></table>
+      ${fams.length < PAT_FAM_MAX ? '<button class="btn sm" id="peAdd" style="align-self:flex-start">Добавить семейство линий</button>' : ''}` : '')
+    + (d.k === 'solid' ? '<p class="libnote">Сплошная заливка цветом переднего плана или фона материала.</p>' : '');
+  const q = id => ed.querySelector('#' + id), pv = () => { const c = q('pePv'); prevFill(c, d); };
+  pv();
+  q('peN').oninput = e => { d.n = e.target.value.slice(0, 40); };
+  q('peU').onchange = e => { if (e.target.value === 'model'){ d.u = 'model'; if (simple && d.s < 20) d.s = d.k === 'woodg' ? 6 : d.k === 'brick' ? 75 : 300; if (pat && d.s < 5) d.s = 50; } else { delete d.u; if (simple && (d.s > 50 || (d.k === 'woodg' && d.s > 4))) d.s = d.k === 'woodg' ? 1.5 : d.k === 'brick' ? 1.2 : 2; if (pat && d.s > 5) d.s = 1; } renderPatEd(); };
+  q('peK').onchange = e => { d.k = e.target.value; if (d.k === 'woodg'){ d.v = d.v || 1; d.s = d.u === 'model' ? 10 : 2.5; } else delete d.v; if (d.k === 'pat'){ if (!d.fam || !d.fam.length) d.fam = [{ a:45, x:0, y:0, sh:0, off:d.u === 'model' ? 100 : 2, d:[] }]; d.s = 1; } else { delete d.fam; if (!(d.s > 0.3)) d.s = 2; } renderPatEd(); };
+  if (q('peS')) q('peS').onchange = e => { const v = +e.target.value; if (v > 0){ d.s = v; pv(); } };
+  if (q('peV')) q('peV').onchange = e => { d.v = +e.target.value || 1; pv(); };
+  if (q('peA')) q('peA').onchange = e => { d.a = +e.target.value || 0; pv(); };
+  ed.querySelectorAll('.famtab input').forEach(inp => inp.onchange = () => {
+    const f = fams[+inp.closest('tr').dataset.i], k = inp.dataset.f;
+    if (k === 'd') f.d = inp.value.replace(/,/g, '.').split(/[\s;]+/).map(Number).filter(Number.isFinite).slice(0, 4);
+    else { const v = +inp.value; if (!Number.isFinite(v)) return; f[k] = k === 'off' ? Math.max(Math.abs(v), 0.05) : v; }
+    pv();
+  });
+  ed.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { fams.splice(+b.dataset.del, 1); if (!fams.length) fams.push({ a:0, x:0, y:0, sh:0, off:2, d:[] }); renderPatEd(); });
+  if (q('peAdd')) q('peAdd').onclick = () => { fams.push({ a:-45, x:0, y:0, sh:0, off:fams[0] ? fams[0].off : 2, d:[] }); renderPatEd(); };
+}
+// open for a fill of the project (Revit: «Изменить образец»); cb runs after «Применить»
+function openPat(fill, cb){
+  PE.fill = fill; PE.cb = cb || null; PE.d = patCopy(fill);
+  $('#patTitle').textContent = 'Образец штриховки — ' + fill.n;
+  renderPatGal(); renderPatEd(); patDlg.hidden = false;
+}
+$('#patCancel').onclick = () => { patDlg.hidden = true; };
+$('#patOk').onclick = () => {
+  const f = PE.fill, d = PE.d; if (!f) return;
+  f.n = (d.n || '').trim() || f.n; f.k = d.k; f.s = d.k === 'pat' ? clamp(d.s || 1, 0.01, d.u === 'model' ? 5000 : 50) : clamp(d.s || 1, 0.3, d.u === 'model' ? 5000 : 50); f.a = d.a || 0;
+  if (d.u === 'model') f.u = 'model'; else delete f.u;
+  if (d.k === 'pat') f.fam = JSON.parse(JSON.stringify(d.fam || [])); else delete f.fam;
+  if (d.k === 'woodg') f.v = d.v || 1; else delete f.v;
+  patDlg.hidden = true; applyMats(); if (PE.cb) PE.cb(f); toast(`Штриховка «${f.n}» обновлена`);
+};
+$('#patFileBtn').onclick = () => { const i = $('#patFile'); i.value = ''; i.click(); };
+$('#patFile').onchange = async e => {
+  const file = e.target.files && e.target.files[0]; if (!file) return;
+  let text = ''; try { text = await file.text(); } catch (err){ toast('Не удалось прочитать файл'); return; }
+  const list = parsePat(text);
+  if (!list.length){ toast('В файле не найдено ни одного образца штриховки'); return; }
+  PE.file = list; renderPatGal(); $('#patGal').scrollTop = 0;
+  const cut = list.filter(p => p.cut).length;
+  toast(`Найдено образцов: ${list.length}. Щёлкните нужный, затем «Применить»` + (cut ? `. У ${cut} образцов слишком много линий — взяты первые ${PAT_FAM_MAX} семейств и 4 штриха` : ''));
 };
 
 /* ---------- «Материалы» (Revit «Управление → Материалы»): graphics (shading, surface and cut patterns) and appearance (photo) ---------- */
@@ -5271,6 +5700,7 @@ function texFor(kind, base){
 function triMat(tex, scale, opt = {}){
   const m = new THREE.MeshStandardMaterial({ color:0xffffff, roughness:opt.r ?? 0.85, metalness:opt.met ?? 0, envMapIntensity:opt.env ?? 0.55, clippingPlanes:CLIP, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
   const sc2 = typeof scale === 'number' ? new THREE.Vector2(scale, scale) : scale;
+  m.userData.triTex = tex; m.userData.triScale = sc2; // the path tracer maps the same texture with world UVs
   m.onBeforeCompile = sh => {
     sh.uniforms.triMap = { value:tex }; sh.uniforms.triScale = { value:sc2 };
     sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vTriP; varying vec3 vTriN;')
@@ -5285,8 +5715,9 @@ function triMat(tex, scale, opt = {}){
 }
 const R_KIND = { brick:'brick', facade:'brick', wood:'wood', tile:'tile', concrete:'concrete', screed:'concrete', block:'concrete', steel:'plain', glass:'glass', mass:'mass' };
 function rMat(m){
-  const o = S.render || {}, key = m + (o.tex ? ':t' : ':p');
+  const o = S.render || {}, key = o.clay && m !== 'glass' ? 'clay' : m + (o.tex ? ':t' : ':p');
   if (RMAT[key]) return RMAT[key];
+  if (key === 'clay') return RMAT[key] = new THREE.MeshStandardMaterial({ color:'#f2f1ee', roughness:0.9, envMapIntensity:0.6, clippingPlanes:CLIP, ...PO });
   const base = (MATS[m] || MATS.generic).c, sp = MATS[m] ? matSpec(m) : null;
   let mat;
   // the project's own material: its photo (when textures are on), else its shading colour and transparency
@@ -5294,7 +5725,7 @@ function rMat(m){
     mat = sp.img && o.tex ? photoMat(m, sp) : new THREE.MeshStandardMaterial({ color:sp.c, roughness:0.8, envMapIntensity:0.55, clippingPlanes:CLIP, ...PO, ...(sp.tr ? { transparent:true, opacity:1 - sp.tr, depthWrite:false } : {}) });
     return RMAT[key] = mat;
   }
-  if (m === 'glass') mat = new THREE.MeshStandardMaterial({ color:'#a9c8dc', roughness:0.04, metalness:0.2, transparent:true, opacity:0.32, depthWrite:false, envMapIntensity:1.4, clippingPlanes:CLIP });
+  if (m === 'glass'){ mat = new THREE.MeshStandardMaterial({ color:'#a9c8dc', roughness:0.04, metalness:0.2, transparent:true, opacity:0.32, depthWrite:false, envMapIntensity:1.4, clippingPlanes:CLIP }); mat.userData.glass = true; }
   else if (m === 'mass') mat = new THREE.MeshStandardMaterial({ color:'#d9d2c6', roughness:0.8, envMapIntensity:0.5, clippingPlanes:CLIP, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
   else if (m === 'steel') mat = new THREE.MeshStandardMaterial({ color:base, roughness:0.35, metalness:0.75, envMapIntensity:1, clippingPlanes:CLIP });
   else {
@@ -5303,6 +5734,71 @@ function rMat(m){
       : new THREE.MeshStandardMaterial({ color:base, roughness:opt.r ?? 0.85, metalness:opt.met ?? 0, envMapIntensity:0.55, clippingPlanes:CLIP, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
   }
   return RMAT[key] = mat;
+}
+/* ---------- sky with clouds (as in D5 Render): time of day × weather → a linear HDR panorama that lights the scene ----------
+   the sun (the moon at night) is a directional light; clouds dim it and brighten the diffuse sky */
+const SKY_TIME = {
+  morning:{ el:14, sun:[1.0, 0.78, 0.56], si:2.4, zen:[0.20, 0.36, 0.70], hor:[0.98, 0.80, 0.64], k:0.30, cl:[1.0, 0.86, 0.74] },
+  day:    { el:52, sun:[1.0, 0.96, 0.90], si:3.2, zen:[0.14, 0.34, 0.80], hor:[0.66, 0.80, 0.95], k:0.34, cl:[1.0, 1.0, 1.0] },
+  evening:{ el:5,  sun:[1.0, 0.54, 0.26], si:1.9, zen:[0.15, 0.20, 0.46], hor:[1.0, 0.56, 0.30], k:0.24, cl:[1.0, 0.66, 0.48] },
+  night:  { el:38, sun:[0.62, 0.72, 1.0], si:0.07, zen:[0.006, 0.010, 0.028], hor:[0.022, 0.030, 0.060], k:0.4, cl:[0.10, 0.11, 0.14], night:true }
+};
+const SKY_WX = { clear:{ cov:0, n:'Ясно' }, sunny:{ cov:0.3, n:'Солнечно, облака' }, cloudy:{ cov:0.6, n:'Облачно' }, overcast:{ cov:0.96, n:'Пасмурно' } };
+const SKY_CACHE = new Map();
+function fbm5J(x, y){ let s = 0, a = 0.5, f = 1; for (let i = 0; i < 5; i++){ s += a * vnJ(x * f + i * 17.3, y * f - i * 9.1); f *= 2.03; a *= 0.5; } return s / 0.97; }
+function makeSky(time, wx, az, w = 2048){
+  const key = [time, wx, az, w].join('|'); if (SKY_CACHE.has(key)) return SKY_CACHE.get(key);
+  const T = SKY_TIME[time] || SKY_TIME.day, X = SKY_WX[wx] || SKY_WX.sunny, cov = X.cov, h = w / 2;
+  const el = T.el * Math.PI / 180, a = az * Math.PI / 180, sd = new V3(Math.sin(a) * Math.cos(el), Math.sin(el), -Math.cos(a) * Math.cos(el));
+  const data = new Float32Array(w * h * 4), k = T.k * (1 + 0.5 * cov), grey = T.night ? [0.03, 0.035, 0.05] : [0.78, 0.80, 0.84];
+  const th = 0.78 - 0.62 * cov; // cloud density threshold: fewer, then more and joined clouds
+  for (let y = 0; y < h; y++){
+    const lat = ((y + 0.5) / h - 0.5) * Math.PI, sy = Math.sin(lat), cy = Math.cos(lat);
+    for (let x = 0; x < w; x++){
+      const phi = ((x + 0.5) / w - 0.5) * 2 * Math.PI, dx = Math.cos(phi) * cy, dz = Math.sin(phi) * cy, i = (y * w + x) * 4;
+      let r, g, b;
+      if (sy < 0){ const f = 0.16 * (1 + cov * 0.3) * (T.night ? 0.05 : 1); r = f; g = f * 0.97; b = f * 0.92; }
+      else {
+        const t = Math.pow(1 - sy, 3.2), ca = dx * sd.x + sy * sd.y + dz * sd.z;
+        r = T.zen[0] + (T.hor[0] - T.zen[0]) * t; g = T.zen[1] + (T.hor[1] - T.zen[1]) * t; b = T.zen[2] + (T.hor[2] - T.zen[2]) * t;
+        // the overcast sky turns into an even, brighter grey
+        const oc = Math.min(1, cov * 1.05); r += (grey[0] - r) * oc * 0.9; g += (grey[1] - g) * oc * 0.9; b += (grey[2] - b) * oc * 0.9;
+        // glow around the sun (or the moon)
+        const glow = (Math.pow(Math.max(ca, 0), 48) * 1.2 + Math.pow(Math.max(ca, 0), 6) * 0.18) * (1 - 0.8 * cov);
+        r += T.sun[0] * glow; g += T.sun[1] * glow; b += T.sun[2] * glow;
+        if (ca > 0.99996) { const d0 = (T.night ? 8 : 40) * (1 - cov); r += T.sun[0] * d0; g += T.sun[1] * d0; b += T.sun[2] * d0; }
+        // stars
+        if (T.night && hshJ(x * 1.7, y * 3.1) > 0.9988){ const s2 = 0.4 + hshJ(x, y) * 1.4; r += s2; g += s2; b += s2 * 1.1; }
+        // clouds on a sky plane: domain-warped noise, shaded towards the sun, thinning at the horizon
+        if (sy > 0.015 && cov > 0){
+          const px = dx / sy * 0.55, pz = dz / sy * 0.55, wx2 = fbm5J(px * 0.6 + 3.1, pz * 0.6 - 7.7) * 1.6;
+          const dn = fbm5J(px + wx2, pz - wx2 * 0.7), dn2 = fbm5J(px + wx2 + sd.x * 0.09, pz - wx2 * 0.7 + sd.z * 0.09);
+          let cd = Math.min(1, Math.max(0, (dn - th) / 0.22)); cd = cd * cd * (3 - 2 * cd); cd *= Math.min(1, sy / 0.12) * 0.92 + 0.08 * Math.min(1, cov);
+          if (cd > 0){
+            const lit = Math.min(1, Math.max(0.35, 1 - (dn2 - dn) * 4)) * (1 - 0.45 * cov), rim = Math.pow(Math.max(ca, 0), 10) * (1 - cov) * 1.4;
+            const cr = T.cl[0] * (0.62 + 0.5 * lit) + T.sun[0] * rim, cg = T.cl[1] * (0.62 + 0.5 * lit) + T.sun[1] * rim, cb = T.cl[2] * (0.64 + 0.5 * lit) + T.sun[2] * rim;
+            r += (cr - r) * cd; g += (cg - g) * cd; b += (cb - b) * cd;
+          }
+        }
+      }
+      data[i] = r * k; data[i + 1] = g * k; data[i + 2] = b * k; data[i + 3] = 1;
+    }
+  }
+  const tex = new THREE.DataTexture(data, w, h, THREE.RGBAFormat, THREE.FloatType);
+  tex.mapping = THREE.EquirectangularReflectionMapping; tex.colorSpace = THREE.LinearSRGBColorSpace; tex.magFilter = tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false; tex.needsUpdate = true;
+  const out = { tex, sunDir:sd, sunColor:new THREE.Color(...T.sun), sunI:T.si * (1 - 0.97 * Math.pow(cov, 1.5)), night:!!T.night, cov, zen:new THREE.Color(...T.zen), hor:new THREE.Color(...T.hor) };
+  if (SKY_CACHE.size > 6){ const [k0, v0] = SKY_CACHE.entries().next().value; v0.tex.dispose(); SKY_CACHE.delete(k0); }
+  SKY_CACHE.set(key, out); return out;
+}
+// «Реалистичный» 3D view: the same sky as in the last render settings, behind the model
+let REAL_BG = null;
+function realSky(){
+  const want = S.style === 'real' && (S.view === 'd3' || S.view === 'axo') && !S.render && !RENDER;
+  if (want){
+    const st = (() => { try { return JSON.parse(lsGet('kot.render') || '{}'); } catch(e){ return {}; } })();
+    if (!REAL_BG) REAL_BG = { prev:scene.background };
+    scene.background = makeSky(SKY_TIME[st.time] ? st.time : 'day', SKY_WX[st.sky] ? st.sky : 'sunny', st.az != null ? +st.az : 150, 1024).tex;
+  } else if (REAL_BG){ scene.background = REAL_BG.prev; REAL_BG = null; }
 }
 const RN_TIME = {
   morning: { el:16, sun:'#ffd9b0', si:2.6, sky:['#8fb4e0', '#f3d7b8'], hs:'#d7e3f3', hg:'#8a7f6a', hi:0.75 },
@@ -5316,6 +5812,7 @@ function skyTexture(c){
   const t = new THREE.CanvasTexture(can); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 function viewCamera(v, asp){
+  if (v.kind === 'camera' && v.cam) return camFromView(v, asp);
   const mode = KIND_MODE[v.kind], live = v.id === S.viewId && S.view === mode;
   let cm;
   if (mode === 'd3'){ cm = new THREE.PerspectiveCamera(perspCam.fov, asp, 0.05, 2000); }
@@ -5340,19 +5837,103 @@ async function renderAddons(){
   } catch(err){ RN_ADDONS = {}; }
   return RN_ADDONS;
 }
-async function renderPhoto(o){
+/* physically based render (path tracing, three-gpu-pathtracer): light bounces between surfaces, passes through glass,
+   the sky and the sun light the scene; the image clears up sample by sample */
+let RN_BUSY = false, RN_CANCEL = false;
+// world-scale UVs (box projection), the same mapping as the triplanar materials of the fast render
+function worldUV(g0, mw, sc){
+  const g = g0.index ? g0.toNonIndexed() : g0.clone(), pos = g.attributes.position, n = pos.count, uv = new Float32Array(n * 2);
+  const P = [new V3(), new V3(), new V3()], e1 = new V3(), e2 = new V3(), nn = new V3();
+  for (let i = 0; i + 2 < n; i += 3){
+    for (let j = 0; j < 3; j++) P[j].fromBufferAttribute(pos, i + j).applyMatrix4(mw);
+    nn.crossVectors(e1.subVectors(P[1], P[0]), e2.subVectors(P[2], P[0])); const ax = Math.abs(nn.x), ay = Math.abs(nn.y), az = Math.abs(nn.z);
+    for (let j = 0; j < 3; j++){ const p = P[j]; let u, w; if (ay >= ax && ay >= az){ u = p.x; w = p.z; } else if (ax >= az){ u = p.z; w = p.y; } else { u = p.x; w = p.y; } uv[(i + j) * 2] = u * sc.x; uv[(i + j) * 2 + 1] = w * sc.y; }
+  }
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); return g;
+}
+function applyWB(canvas, L){
+  if (!L || Math.abs(L.wb - 6500) < 50) return;
+  const f = wbFactors(L.wb), g = canvas.getContext('2d'), im = g.getImageData(0, 0, canvas.width, canvas.height), d = im.data;
+  for (let i = 0; i < d.length; i += 4){ d[i] = Math.min(255, d[i] * f[0]); d[i + 1] = Math.min(255, d[i + 1] * f[1]); d[i + 2] = Math.min(255, d[i + 2] * f[2]); }
+  g.putImageData(im, 0, 0);
+}
+async function pathTrace(o, v, camR, W, H, extra, L, prog){
+  let PTm; try { PTm = await import('three-gpu-pathtracer'); } catch (err){ throw new Error('не загрузился модуль трассировки лучей (нужен интернет при первом запуске)'); }
+  // three 0.160 scenes have no background/environment rotation yet; the path tracer reads them
+  if (!('backgroundRotation' in THREE.Scene.prototype) && new THREE.Scene().backgroundRotation === undefined){ THREE.Scene.prototype.backgroundRotation = new THREE.Euler(); THREE.Scene.prototype.environmentRotation = new THREE.Euler(); }
+  const ptScene = new THREE.Scene(), own = [];
+  const add = src => {
+    const m = src.material; if (!m || Array.isArray(m) || m === M.pick || m.isShadowMaterial || !src.geometry) return;
+    if (m.transparent && (m.opacity ?? 1) < 0.03 && !m.userData.glass) return;
+    let g = src.geometry, mat;
+    if (m.userData.glass) mat = new THREE.MeshPhysicalMaterial({ color:0xffffff, roughness:0, metalness:0, transmission:1, ior:1.52, thickness:0.008, side:THREE.DoubleSide });
+    else if (o.clay) mat = new THREE.MeshStandardMaterial({ color:'#f2f1ee', roughness:0.88 });
+    else {
+      const tex = m.userData.triTex, col = tex ? new THREE.Color(1, 1, 1) : (m.color ? m.color.clone() : new THREE.Color('#cccccc')), tr = m.transparent ? 1 - (m.opacity ?? 1) : 0;
+      mat = tr > 0.02 ? new THREE.MeshPhysicalMaterial({ color:col, roughness:0.05, metalness:0, transmission:tr, ior:1.5, thickness:0.01, side:THREE.DoubleSide })
+        : new THREE.MeshStandardMaterial({ color:col, roughness:m.roughness ?? 0.85, metalness:m.metalness ?? 0 });
+      if (tex){ mat.map = tex; g = worldUV(g, src.matrixWorld, m.userData.triScale); own.push(g); }
+    }
+    own.push(mat);
+    const c = new THREE.Mesh(g, mat); c.matrixAutoUpdate = false; c.matrix.copy(src.matrixWorld); ptScene.add(c);
+  };
+  model.updateMatrixWorld(true); model.traverseVisible(ob => { if (ob.isMesh) add(ob); });
+  for (const e of extra) if (e.isMesh && e.visible){ e.updateMatrixWorld(true); add(e); }
+  if (o.ground === 'white'){ const gm = new THREE.Mesh(new THREE.CircleGeometry(400, 64), new THREE.MeshStandardMaterial({ color:'#f4f4f2', roughness:0.9 })); gm.rotation.x = -Math.PI / 2; gm.position.y = -0.02; gm.updateMatrix(); gm.matrixAutoUpdate = false; own.push(gm.geometry, gm.material); ptScene.add(gm); }
+  // the sun (moon) and the sky
+  const sl = new THREE.DirectionalLight(sun.color.clone(), sun.intensity); sl.position.copy(sun.position); sl.target.position.copy(sun.target.position); ptScene.add(sl, sl.target);
+  ptScene.environment = scene.background && scene.background.isTexture ? scene.background : makeSky('day', 'overcast', o.az, 1024).tex;
+  ptScene.background = scene.background && scene.background.isColor ? scene.background.clone() : ptScene.environment;
+  ptScene.backgroundRotation = new THREE.Euler(); ptScene.environmentRotation = new THREE.Euler(); ptScene.backgroundBlurriness = 0; // three 0.160 has no such fields yet
+  ptScene.updateMatrixWorld(true);
+  // physical camera: the same view, lens shift and near clipping; depth of field from the f-stop
+  const pc = new PTm.PhysicalCamera(camR.fov, camR.aspect, camR.near, camR.far); pc.position.copy(camR.position); pc.quaternion.copy(camR.quaternion);
+  pc.userData.shiftNdc = camR.userData.shiftNdc; patchShift(pc); pc.updateProjectionMatrix(); pc.updateMatrixWorld(true);
+  if (L && L.dof){ const T = new V3().fromArray(v.cam.t); pc.focusDistance = L.focus > 0 ? L.focus : Math.max(0.2, pc.position.distanceTo(T)); pc.apertureBlades = L.blades; pc.bokehSize = L.f / L.fs; }
+  else pc.fStop = 1e5;
+  // its own WebGL context: if the GPU gives up, the drawing in the main window survives
+  const pr = new THREE.WebGLRenderer({ antialias:false, preserveDrawingBuffer:true, powerPreference:'high-performance' });
+  pr.setPixelRatio(1); pr.setSize(W, H, false); pr.toneMapping = renderer.toneMapping; pr.toneMappingExposure = renderer.toneMappingExposure; pr.outputColorSpace = renderer.outputColorSpace;
+  let lost = false; pr.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; });
+  const pt = new PTm.WebGLPathTracer(pr);
+  pt.bounces = o.bounces || 6; pt.transmissiveBounces = 8; pt.filterGlossyFactor = 0.3; pt.minSamples = 1; pt.renderDelay = 0; pt.fadeDuration = 0;
+  // the frame is traced in tiles so that each GPU job stays short (Windows resets a GPU busy for ~2 s)
+  pt.dynamicLowRes = false; pt.renderScale = 1; pt.multipleImportanceSampling = true; const tl = clamp(Math.ceil(Math.sqrt(W * H / 90000)), 2, 10); pt.tiles.set(tl, tl);
+  RN_BUSY = true; RN_CANCEL = false;
+  const out = document.createElement('canvas'); out.width = W; out.height = H; const og = out.getContext('2d');
+  try {
+    pt.setScene(ptScene, pc);
+    const target = o.samples || 256; let last = 0;
+    while (pt.samples < target && !RN_CANCEL){
+      if (lost) throw new Error('видеокарта не справилась и сбросилась. Уменьшите размер картинки или число отскоков');
+      pt.renderSample();
+      const now = performance.now();
+      if (now - last > 200){ last = now; if (prog) prog(pt.samples, target, pr.domElement); await new Promise(r => setTimeout(r, 0)); }
+    }
+    if (lost) throw new Error('видеокарта не справилась и сбросилась. Уменьшите размер картинки или число отскоков');
+    og.drawImage(pr.domElement, 0, 0, W, H); out.samples = Math.floor(pt.samples);
+  } finally {
+    RN_BUSY = false; try { pt.dispose(); } catch (e){}
+    for (const x of own) if (x.dispose) x.dispose();
+    pr.dispose(); try { pr.forceContextLoss(); } catch (e){}
+  }
+  return out;
+}
+async function renderPhoto(o, prog){
   const v = views.find(x => x.id === o.view); if (!v) throw new Error('Нет такого вида');
   const A = await renderAddons();
   const gl = renderer.getContext(), lim = Math.min(gl.getParameter(gl.MAX_RENDERBUFFER_SIZE), gl.getParameter(gl.MAX_TEXTURE_SIZE), coarsePtr ? 4096 : 8192);
-  let [W, H] = o.size.split('x').map(Number); const k = Math.min(1, lim / Math.max(W, H)); W = Math.round(W * k); H = Math.round(H * k);
-  const mode = KIND_MODE[v.kind];
+  let [W, H] = o.size.split('x').map(Number);
+  if (v.kind === 'camera'){ const ra = ratioOf(camLens(v)); H = Math.round(W / ra); if (ra < 1){ H = Math.max(W, H); W = Math.round(H * ra); } } // the frame format of the camera
+  const k = Math.min(1, lim / Math.max(W, H)); W = Math.round(W * k); H = Math.round(H * k);
+  const mode = KIND_MODE[v.kind], Lx = v.kind === 'camera' && v.cam ? camLens(v) : null;
   const keep = { view:S.view, phase:S.phase, style:S.style, sel:[...sel], selId, tool:S.tool, dims:S.dims, C, bg:scene.background, env:scene.environment,
     vis:[axesG, grids, datum, anno, preview, boxG, cropG, shadowGround].map(g => g.visible), sun:{ p:sun.position.clone(), t:sun.target.position.clone(), c:sun.color.clone(), i:sun.intensity, cs:sun.castShadow, ms:sun.shadow.mapSize.clone(), cam:(({ left, right, top, bottom, near, far }) => ({ left, right, top, bottom, near, far }))(sun.shadow.camera) },
     hemi:{ s:hemi.color.clone(), g:hemi.groundColor.clone(), i:hemi.intensity }, tm:renderer.toneMapping, te:renderer.toneMappingExposure, pr:renderer.getPixelRatio() };
-  const T = RN_TIME[o.time] || RN_TIME.day, extra = [];
+  const sky = makeSky(SKY_TIME[o.time] ? o.time : 'day', SKY_WX[o.sky] ? o.sky : 'sunny', o.az), extra = [];
   try {
     S.view = mode; S.phase = v.phase || 'all'; clearSel(); S.tool = 'select'; S.dims = false; S.style = 'shaded'; RV = v;
-    S.render = { tex:o.tex }; C = { ...C, poche:'#6d655c' }; makeMaterials();
+    S.render = { tex:o.tex, clay:!!o.clay }; C = { ...C, poche:'#6d655c' }; makeMaterials();
     for (const g of [axesG, grids, datum, anno, preview, boxG, cropG, shadowGround]) g.visible = false;
     rebuild(true);
     model.traverse(ob => { if (ob.isLine || ob.isLineSegments) ob.visible = !!o.edges; });
@@ -5360,23 +5941,31 @@ async function renderPhoto(o){
     // ground and sky
     if (o.ground === 'white'){ scene.background = new THREE.Color('#ffffff'); const gm = new THREE.Mesh(new THREE.CircleGeometry(diag * 6, 64), new THREE.ShadowMaterial({ opacity:0.28 })); gm.rotation.x = -Math.PI / 2; gm.position.y = -0.02; gm.receiveShadow = true; scene.add(gm); extra.push(gm); }
     else {
-      const sky = skyTexture(T.sky); scene.background = sky; extra.push({ dispose:() => sky.dispose() });
-      const gm = new THREE.Mesh(new THREE.CircleGeometry(Math.max(80, diag * 8), 96), o.ground === 'paving' ? triMat(texFor('paving', '#b9b4aa'), 0.6, { r:0.9 }) : triMat(texFor('grass', '#6f8f4e'), 0.3, { r:1, env:0.25 }));
+      scene.background = sky.tex;
+      const gm = new THREE.Mesh(new THREE.CircleGeometry(Math.max(80, diag * 8), 96), o.clay ? new THREE.MeshStandardMaterial({ color:'#f2f1ee', roughness:0.9 }) : o.ground === 'paving' ? triMat(texFor('paving', '#b9b4aa'), 0.6, { r:0.9 }) : triMat(texFor('grass', '#6f8f4e'), 0.3, { r:1, env:0.25 }));
       gm.material.clippingPlanes = null; gm.rotation.x = -Math.PI / 2; gm.position.y = -0.02; gm.receiveShadow = true; scene.add(gm); extra.push(gm);
     }
     // sun from the chosen side of the world (0° — north, clockwise), soft shadows fitted to the model
-    const az = o.az * Math.PI / 180, el = T.el * Math.PI / 180, dir = new V3(Math.sin(az) * Math.cos(el), Math.sin(el), -Math.cos(az) * Math.cos(el));
+    const dir = sky.sunDir.clone();
     sun.position.copy(c).addScaledVector(dir, diag * 2 + 20); sun.target.position.copy(c); sun.target.updateMatrixWorld();
-    sun.color.set(T.sun); sun.intensity = T.si; sun.castShadow = o.time !== 'overcast';
+    sun.color.copy(sky.sunColor); sun.intensity = sky.sunI; sun.castShadow = sky.cov < 0.9;
     const sc = sun.shadow.camera, r = diag * 0.75; Object.assign(sc, { left:-r, right:r, top:r, bottom:-r, near:0.5, far:diag * 4 + 60 }); sc.updateProjectionMatrix();
     if (sun.shadow.map){ sun.shadow.map.dispose(); sun.shadow.map = null; }
     sun.shadow.mapSize.set(coarsePtr ? 2048 : 4096, coarsePtr ? 2048 : 4096); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
-    hemi.color.set(T.hs); hemi.groundColor.set(T.hg); hemi.intensity = T.hi;
+    hemi.color.copy(sky.hor); hemi.groundColor.set('#7f7a70'); hemi.intensity = sky.night ? 0.12 : 0.7 + 0.7 * sky.cov;
     let pm = null;
-    if (A.RoomEnvironment){ pm = new THREE.PMREMGenerator(renderer); const envRT = pm.fromScene(new A.RoomEnvironment(), 0.04); scene.environment = envRT.texture; extra.push(envRT); }
-    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = o.time === 'evening' ? 1.05 : 0.95;
+    if (o.ground !== 'white'){ pm = new THREE.PMREMGenerator(renderer); const envRT = pm.fromEquirectangular(sky.tex); scene.environment = envRT.texture; extra.push(envRT); }
+    else if (A.RoomEnvironment){ pm = new THREE.PMREMGenerator(renderer); const envRT = pm.fromScene(new A.RoomEnvironment(), 0.04); scene.environment = envRT.texture; extra.push(envRT); }
+    // exposure of the camera (f-stop, shutter, ISO, EV) and the render's own correction; night is a long exposure
+    const expo = (Lx ? exposureOf(Lx) : 1) * Math.pow(2, +o.ev || 0) * (sky.night ? 8 : 1);
+    renderer.toneMapping = THREE.AgXToneMapping != null && o.engine === 'pt' ? THREE.AgXToneMapping : THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95 * expo;
     renderer.setPixelRatio(1); renderer.setSize(W, H, false);
     const camR = viewCamera(v, W / H);
+    if (o.engine === 'pt'){
+      const out = await pathTrace(o, v, camR, W, H, extra, Lx, prog);
+      if (pm) pm.dispose(); applyWB(out, Lx);
+      return { canvas:out, W, H, scaled:k < 1, samples:out.samples };
+    }
     const useAO = o.ao && A.EffectComposer && A.GTAOPass && !CLIP.length;
     if (useAO){
       const rt = new THREE.WebGLRenderTarget(W, H, { type:THREE.HalfFloatType, samples:4 });
@@ -5388,7 +5977,7 @@ async function renderPhoto(o){
       comp.render(); extra.push(rt, { dispose:() => { ao.dispose && ao.dispose(); comp.dispose && comp.dispose(); } });
     } else renderer.render(scene, camR);
     const out = document.createElement('canvas'); out.width = W; out.height = H; out.getContext('2d').drawImage(cv, 0, 0, W, H);
-    if (pm) pm.dispose();
+    if (pm) pm.dispose(); applyWB(out, Lx);
     return { canvas:out, W, H, scaled:k < 1 };
   } finally {
     for (const e of extra){ if (e.isMesh){ scene.remove(e); e.geometry.dispose(); if (e.material.dispose && !Object.values(RMAT).includes(e.material)) e.material.dispose(); } else if (e.dispose) e.dispose(); }
@@ -5410,30 +5999,45 @@ function openRender(){
   const cur = curView(), pick = list.find(v => v.id === cur.id) || list.find(v => v.kind === 'd3') || list[0];
   $('#rnView').innerHTML = list.map(v => `<option value="${v.id}"${v === pick ? ' selected' : ''}>${esc(KIND_NAME[v.kind] + ': ' + v.name)}${v.box && v.box.on ? ' (с границами)' : ''}</option>`).join('');
   const st = (() => { try { return JSON.parse(lsGet('kot.render') || '{}'); } catch(e){ return {}; } })();
-  for (const [id, k] of [['#rnSize', 'size'], ['#rnTime', 'time'], ['#rnGround', 'ground']]) if (st[k]) $(id).value = st[k];
-  if (st.az != null) $('#rnAz').value = st.az; for (const [id, k] of [['#rnTex', 'tex'], ['#rnAO', 'ao'], ['#rnEdges', 'edges']]) if (st[k] != null) $(id).checked = st[k];
-  azLabel(); renderDlg.hidden = false; $('#rnGo').focus();
+  if (st.time === 'overcast'){ st.time = 'day'; st.sky = 'overcast'; }
+  for (const [id, k] of [['#rnSize', 'size'], ['#rnTime', 'time'], ['#rnGround', 'ground'], ['#rnSky', 'sky'], ['#rnEng', 'engine'], ['#rnSamp', 'samples'], ['#rnBnc', 'bounces']]) if (st[k] != null) $(id).value = String(st[k]);
+  if (st.az != null) $('#rnAz').value = st.az; if (st.ev != null) $('#rnEv').value = st.ev; for (const [id, k] of [['#rnTex', 'tex'], ['#rnAO', 'ao'], ['#rnEdges', 'edges'], ['#rnClay', 'clay']]) if (st[k] != null) $(id).checked = st[k];
+  azLabel(); evLabel(); engLabel(); renderDlg.hidden = false; $('#rnGo').focus();
 }
 const AZ_NAMES = ['север', 'северо-восток', 'восток', 'юго-восток', 'юг', 'юго-запад', 'запад', 'северо-запад'];
 function azLabel(){ const a = +$('#rnAz').value; $('#rnAzV').textContent = `— ${AZ_NAMES[Math.round(a / 45) % 8]}, ${a}°`; }
 $('#rnAz').oninput = azLabel;
+function evLabel(){ const e = +$('#rnEv').value; $('#rnEvV').textContent = (e > 0 ? '+' : '') + e + ' EV'; }
+function engLabel(){ const pt = $('#rnEng').value === 'pt'; for (const id of ['#rnSamp', '#rnBnc']){ $(id).disabled = !pt; } for (const id of ['#rnAO', '#rnEdges']) $(id).closest('label').style.opacity = pt ? 0.45 : 1; }
+$('#rnEv').oninput = evLabel; $('#rnEng').onchange = engLabel;
+$('#rnStop').onclick = () => { RN_CANCEL = true; $('#rnStop').disabled = true; };
 $('#rnClose').onclick = () => renderDlg.hidden = true;
 $('#rbRender').onclick = openRender;
 $('#rnGo').onclick = async () => {
-  const o = { view:$('#rnView').value, size:$('#rnSize').value, time:$('#rnTime').value, az:+$('#rnAz').value, ground:$('#rnGround').value, tex:$('#rnTex').checked, ao:$('#rnAO').checked, edges:$('#rnEdges').checked };
+  const o = { view:$('#rnView').value, size:$('#rnSize').value, time:$('#rnTime').value, sky:$('#rnSky').value, az:+$('#rnAz').value, ground:$('#rnGround').value, tex:$('#rnTex').checked, ao:$('#rnAO').checked, edges:$('#rnEdges').checked,
+    engine:$('#rnEng').value, samples:+$('#rnSamp').value, bounces:+$('#rnBnc').value, ev:+$('#rnEv').value, clay:$('#rnClay').checked };
   lsSet('kot.render', JSON.stringify(o));
   const btn = $('#rnGo'), state = $('#rnState'); btn.disabled = true; $('#rnSave').disabled = true;
-  state.hidden = false; state.textContent = 'Рисую… Большие размеры занимают до полуминуты.'; $('#rnImg').hidden = true;
+  state.hidden = false; state.textContent = o.engine === 'pt' ? 'Готовлю сцену для трассировки лучей…' : 'Рисую… Большие размеры занимают до полуминуты.'; $('#rnImg').hidden = true;
+  const live = $('#rnLive'), stop = $('#rnStop'); stop.hidden = o.engine !== 'pt'; stop.disabled = false;
   await new Promise(r => setTimeout(r, 60));
   try {
-    const t0 = performance.now(), res = await renderPhoto(o);
+    const t0 = performance.now();
+    const prog = (n, total, src) => {
+      if (live.hidden){ const k2 = Math.min(1, 960 / src.width); live.width = Math.round(src.width * k2); live.height = Math.round(src.height * k2); live.hidden = false; }
+      live.getContext('2d').drawImage(src, 0, 0, live.width, live.height);
+      const el = (performance.now() - t0) / 1000, left = n > 1 ? el / n * (total - n) : 0;
+      state.textContent = `Проход ${Math.floor(n)} из ${total}` + (n > 2 ? ` · осталось около ${left < 90 ? Math.ceil(left) + ' с' : Math.ceil(left / 60) + ' мин'}` : '');
+    };
+    const res = await renderPhoto(o, prog);
+    live.hidden = true;
     const blob = await new Promise(r => res.canvas.toBlob(r, 'image/png'));
     if (RN_LAST && RN_LAST.url) URL.revokeObjectURL(RN_LAST.url);
     RN_LAST = { blob, url:URL.createObjectURL(blob), name:(views.find(v => v.id === o.view) || {}).name || 'Вид' };
     $('#rnImg').src = RN_LAST.url; $('#rnImg').hidden = false; state.hidden = true; $('#rnSave').disabled = false;
-    toast(`Готово: ${res.W} × ${res.H}${res.scaled ? ' (уменьшено под возможности устройства)' : ''}, ${((performance.now() - t0) / 1000).toFixed(1)} с`);
-  } catch(err){ state.hidden = false; state.textContent = 'Не получилось нарисовать: ' + (err && err.message || err) + '. Попробуйте размер поменьше.'; }
-  finally { btn.disabled = false; }
+    toast(`Готово: ${res.W} × ${res.H}${res.samples ? ', ' + res.samples + ' проходов' : ''}${res.scaled ? ' (уменьшено под возможности устройства)' : ''}, ${((performance.now() - t0) / 1000).toFixed(1)} с`);
+  } catch(err){ live.hidden = true; state.hidden = false; state.textContent = 'Не получилось нарисовать: ' + (err && err.message || err) + '. Попробуйте размер поменьше или быстрый движок.'; console.error(err); }
+  finally { btn.disabled = false; stop.hidden = true; }
 };
 $('#rnSave').onclick = () => { if (RN_LAST) saveBlob(safeName(`${proj.name || 'Проект'} — визуализация — ${RN_LAST.name}`), 'png', RN_LAST.blob, 'image/png', 'Визуализация PNG'); };
 
@@ -5665,6 +6269,34 @@ function tplRow(v){ return prow('Шаблон вида', `<select id="pTpl"><opt
 function viewRows(v){
   if (v.kind !== 'sheet' && !viewRows.inner){ viewRows.inner = true; try { return tplRow(v) + viewRows(v); } finally { viewRows.inner = false; } }
   const mode = KIND_MODE[v.kind], ck = (id, on, label) => `<label class="pchk"><input type="checkbox" id="${id}"${on ? ' checked' : ''}> ${label}</label>`;
+  if (v.kind === 'camera' && v.cam){
+    const L = camLens(v), opt = (id, list, cur, fmt = x => x) => `<select id="${id}">${list.map(x => `<option value="${x}"${String(x) === String(cur) ? ' selected' : ''}>${fmt(x)}</option>`).join('')}${list.map(String).includes(String(cur)) ? '' : `<option value="${cur}" selected>${fmt(cur)}</option>`}</select>`;
+    const lv = levels.find(l => l.id === actLv()) || levels[0], e0 = lv ? lv.elev : 0, num = (id, val, extra) => `<input id="${id}" type="number" value="${val}" ${extra || ''}>`;
+    return prow('Имя вида', `<input id="pVName" type="text" maxlength="80" value="${esc(v.name)}">`)
+      + `<div class="pgrp">Положение</div>`
+      + prow('Высота глаз от уровня, мм', num('cEye', Math.round((v.cam.p[1] - e0) * 1000), 'step="50"')) + prow('Высота цели от уровня, мм', num('cTgt', Math.round((v.cam.t[1] - e0) * 1000), 'step="50"'))
+      + `<div class="pbtns"><button class="btn sm" id="cAlignV" title="Камера горизонтально, вертикали в кадре строго вертикальны (двухточечная перспектива). Кадр поднимается сдвигом объектива">Выровнять вертикали</button><button class="btn sm" id="cAlignH" title="Камера развёрнута прямо на здание: горизонтали фасада параллельны кадру. Кадр сдвигается объективом">Выровнять горизонтали</button><button class="btn sm" id="cShift0">Сбросить сдвиг</button></div>`
+      + `<div class="pgrp">Объектив</div>`
+      + prow('Фокусное расстояние, мм', opt('cF', [12, 14, 16, 18, 20, 24, 28, 35, 40, 50, 70, 85, 100, 135, 200], L.f))
+      + prow('Матрица', opt('cSen', [36, 23.6, 43.8, 13.2, 6.17], L.sensor, x => ({ 36:'Полный кадр 36 мм', 23.6:'APS-C 23,6 мм', 43.8:'Средний формат 44 мм', 13.2:'1 дюйм 13,2 мм', 6.17:'Телефон 6,2 мм' }[x] || x + ' мм')))
+      + prow('Угол обзора', `<span class="val">${Math.round(hfovOf(L))}° по горизонтали</span>`)
+      + prow('Формат кадра', opt('cRat', Object.keys(RATIOS), L.ratio, x => RATIO_NAME[x] || x))
+      + prow('Сдвиг объектива по вертикали, %', num('cSy', Math.round(L.sy * 100), 'step="1" min="-100" max="100"')) + prow('Сдвиг по горизонтали, %', num('cSx', Math.round(L.sx * 100), 'step="1" min="-100" max="100"'))
+      + `<div class="pgrp">Отсечение камеры</div>`
+      + prow('Ближняя плоскость, мм', num('cNear', Math.round(L.near * 1000), 'step="100" min="10"')) + prow('Дальняя плоскость, мм', num('cFar', Math.round(L.far * 1000), 'step="1000" min="0" title="0 — без дальнего отсечения"'))
+      + `<p class="pnote">Ближняя плоскость отрезает всё, что ближе к камере: так можно встать за стеной и снять комнату. 0 в дальней — без ограничения.</p>`
+      + `<div class="pgrp">Экспозиция</div>`
+      + prow('Диафрагма', opt('cFs', [1.4, 2, 2.8, 4, 5.6, 8, 11, 16, 22], L.fs, x => 'f/' + x))
+      + prow('Выдержка', opt('cSh', [8000, 4000, 2000, 1000, 500, 250, 125, 60, 30, 15, 8, 4, 2, 1, 0.5, 0.25], L.sh, x => x >= 1 ? '1/' + x + ' с' : (1 / x) + ' с'))
+      + prow('ISO', opt('cIso', [50, 100, 200, 400, 800, 1600, 3200, 6400, 12800], L.iso))
+      + prow('Экспокоррекция, EV', num('cEv', L.ev, 'step="0.5" min="-6" max="6"'))
+      + prow('Баланс белого, K', opt('cWb', [2700, 3200, 4000, 5000, 5500, 6500, 7500, 9000], L.wb, x => x + ' K' + ({ 3200:' (лампы)', 5500:' (вспышка)', 6500:' (дневной)', 7500:' (тень)' }[x] || '')))
+      + `<div class="pgrp">Глубина резкости</div>`
+      + prow('Размытие вне фокуса', ck('cDof', L.dof, 'по диафрагме'))
+      + (L.dof ? prow('Фокус, мм', num('cFoc', Math.round(L.focus * 1000), 'step="100" min="0" title="0 — по цели камеры"')) + prow('Лепестков диафрагмы', opt('cBl', [0, 5, 6, 7, 8, 9], L.blades, x => x || 'круглая')) : '')
+      + `<p class="pnote">Экспозиция, баланс белого и глубина резкости работают в «Визуализации». Выдержка, диафрагма и ISO меняют яркость как у настоящей камеры.</p>`
+      + prow('Границы 3D-вида', ck('pBox', v.box && v.box.on, 'включить'));
+  }
   if (mode === 'd3' || mode === 'axo') return prow('Границы 3D-вида', ck('pBox', v.box && v.box.on, 'включить')) + (v.box && v.box.on ? `<div class="pbtns"><button class="btn sm" id="pBoxReset">Границы по модели</button></div>` : '');
   if (v.kind === 'plan') return prow('Обрезать вид', ck('pCrop', v.crop, 'по рамке'));
   if (mode === 'sect') return prow('Имя вида', `<input id="pVName" type="text" maxlength="80" value="${esc(v.name)}">`)
@@ -5685,6 +6317,20 @@ function bindViewRows(v, q){
   num('pVFar', x => { if (x > 0.05) v.far = r4(x); }); num('pVY0', x => { if (x < v.y1 - 0.2) v.y0 = r4(x); }); num('pVY1', x => { if (x > v.y0 + 0.2) v.y1 = r4(x); });
   if (q('pVCrop')) q('pVCrop').onchange = e => { v.crop = e.target.checked; done(); };
   if (q('pVFlip')) q('pVFlip').onclick = () => { v.flip = !v.flip; done(); if (S.viewId === v.id) fitSect(v); };
+  if (v.kind === 'camera' && v.cam){
+    const lens = (k, val) => { v.lens = { ...camLens(v), [k]:val }; camChanged(v); };
+    const pick = (id, k, f = Number) => { const el = q(id); if (el) el.onchange = () => { const x = f(el.value); if (x !== null && x === x) lens(k, x); }; };
+    pick('cF', 'f'); pick('cSen', 'sensor'); pick('cRat', 'ratio', String); pick('cFs', 'fs'); pick('cSh', 'sh'); pick('cIso', 'iso'); pick('cWb', 'wb'); pick('cBl', 'blades');
+    pick('cSy', 'sy', x => clamp(+x / 100, -2, 2)); pick('cSx', 'sx', x => clamp(+x / 100, -2, 2)); pick('cEv', 'ev', x => clamp(+x, -10, 10));
+    pick('cNear', 'near', x => clamp(+x / 1000, 0.01, 500)); pick('cFar', 'far', x => clamp(+x / 1000, 0, 5000)); pick('cFoc', 'focus', x => clamp(+x / 1000, 0, 1000));
+    if (q('cDof')) q('cDof').onchange = e => lens('dof', e.target.checked);
+    const lv = levels.find(l => l.id === actLv()) || levels[0], e0 = lv ? lv.elev : 0;
+    const hgt = (id, key) => { const el = q(id); if (el) el.onchange = () => { const x = +el.value / 1000; if (!Number.isFinite(x)) return; const { P, T } = camPT(v); if (key === 'p') P.y = r4(e0 + x); else T.y = r4(e0 + x); setCamPT(v, P, T); camChanged(v); }; };
+    hgt('cEye', 'p'); hgt('cTgt', 't');
+    if (q('cAlignV')) q('cAlignV').onclick = () => alignCamV(v);
+    if (q('cAlignH')) q('cAlignH').onclick = () => alignCamH(v);
+    if (q('cShift0')) q('cShift0').onclick = () => { v.lens = { ...camLens(v), sx:0, sy:0 }; camChanged(v); toast('Сдвиг объектива сброшен'); };
+  }
 }
 const prow = (label, inner) => `<div class="prow"><span>${label}</span><div>${inner}</div></div>`;
 const pnum = (id, v, extra = '') => `<input id="${id}" type="number" value="${Math.round(v * 1000)}" ${extra}>`;
@@ -5982,6 +6628,7 @@ function renderTree(){
       ${group('Планы этажей', 'plan', of('plan'), 'Новый план')}
       ${group('Узлы', 'detail', of('detail'), 'Новый узел — обвести на плане')}
       ${group('3D-виды', 'd3', of('d3'), 'Новый 3D-вид')}
+      ${group('Камеры', 'camera', of('camera'), 'Новая камера — две точки на плане')}
       ${group('Аксонометрия', 'axo', of('axo'))}
       ${group('Фасады', 'elev', of('elev'))}
       ${group('Разрезы', 'section', of('section'), 'Новый разрез — линия на плане')}
@@ -6037,6 +6684,7 @@ function updateHint(){
     stair: s ? 'Укажите конец марша (верх лестницы).' : 'Укажите начало марша (низ лестницы).',
     room:'Щёлкните внутри контура стен. Двери не разрывают контур помещения, как в Revit.',
     section: s ? 'Укажите конец линии разреза.' : 'Укажите начало линии разреза.',
+    camera: s ? 'Укажите цель — куда смотрит камера. Синие линии — угол обзора объектива 35 мм.' : 'Щёлкните точку съёмки (где стоит фотограф). Высота глаз — 1600 мм от уровня, её можно поменять в свойствах.',
     ielev:'Щёлкните внутри помещения — марка развёртки и 4 вида на его стены.',
     align: E.ref ? 'Укажите грань или линию элемента, которую выровнять по опорной (синей) линии.' : 'Укажите опорную линию: грань или ось стены, ось здания, линию, край объёма.',
     offset:`Смещение ${mm(S.offDist)} мм: щёлкните у стены, линии или оси с той стороны, куда сместить. Можно ввести число и Enter.`,
@@ -6746,7 +7394,7 @@ $('#cPen').onchange = e => setPenOnly(e.target.checked, false);
 $('#lenOk').onclick = applyTyped;
 
 const COMBOS = { WA:() => setTool('wall'), RM:() => setTool('rect'), DR:() => setTool('door'), WN:() => setTool('window'), CM:() => setTool('box'), DI:() => setTool('dim'), MD:() => setTool('select'), OR:() => setTool('orbit'), ZA:() => fit(), ZF:() => fit(),
-  GR:() => setTool('grid'), DL:() => setTool('line'), TX:() => setTool('text'), MV:() => setTool('move'), CO:() => setTool('copy'), RO:() => setTool('rotate'), DE:() => deleteSel(),
+  GR:() => setTool('grid'), CA:() => setTool('camera'), DL:() => setTool('line'), TX:() => setTool('text'), MV:() => setTool('move'), CO:() => setTool('copy'), RO:() => setTool('rotate'), DE:() => deleteSel(),
   CN:() => setTool('column'), SB:() => setTool('floor'), CI:() => setTool('ceiling'), RF:() => setTool('roof'), ST:() => setTool('stair'), RT:() => setTool('room'), SC:() => setTool('section'), EL:() => setTool('ielev'), CL:() => setTool('callout'), DM:() => setTool('demolish'), RR:() => openRender(), LL:() => openLevels(), ME:() => setTool('measure'), FA:() => setTool('fam'), VV:() => openTpl(curView().tpl),
   AL:() => setTool('align'), OF:() => setTool('offset'), MM:() => setTool('mirror'), RE:() => setTool('scale'), TR:() => setTool('trimcorner'), SL:() => setTool('split'), PN:() => pinSel(true), UP:() => pinSel(false),
   HH:() => tempHide('hide'), HI:() => tempHide('iso'), HR:() => tempHide('reset'), EH:() => hideInView(true), RH:() => toggleReveal(), TL:() => toggleThin(), VG:() => toggleGrids(), GP:() => makeGroup('grp'), CS:() => createSimilar() };
@@ -7653,6 +8301,7 @@ setView('axo');
 showName(); greet(); renderVbar();
 (function loop(){
   requestAnimationFrame(loop);
+  if (RN_BUSY) return; // the path tracer owns the canvas while it works
   updateHandles();
   if (S.view === 'sheet') return;
   updateBoxLines();
