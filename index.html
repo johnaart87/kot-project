@@ -2145,7 +2145,7 @@ function sanOv(ov){
   const col = v => /^#[0-9a-f]{6}$/i.test(v), wt = v => Number.isFinite(+v) && +v >= 1 && +v <= 16, lay = q => q && typeof q === 'object' ? { p:typeof q.p === 'string' ? q.p.slice(0, 20) : '', c:col(q.c) ? q.c : '#2b3439', ...(q.co && !q.p ? { co:true } : {}) } : null;
   const pats = q => q && typeof q === 'object' ? { fg:lay(q.fg) || { p:'', c:'#2b3439' }, bg:lay(q.bg) || { p:'', c:'#ffffff' } } : null;
   return Object.fromEntries(Object.entries(ov || {}).filter(([k, v]) => typeof k === 'string' && v && typeof v === 'object').map(([k, v]) => [k.slice(0, 60), {
-    ...(v.vis === false ? { vis:false } : {}), ...(v.vis === true && OPTIN.includes(k) ? { vis:true } : {}), ...(v.half ? { half:true } : {}), ...(col(v.c) ? { c:v.c } : {}), ...(wt(v.w) ? { w:Math.round(+v.w) } : {}),
+    ...(v.vis === false ? { vis:false } : {}), ...(v.vis === true ? { vis:true } : {}), ...(v.half ? { half:true } : {}), ...(col(v.c) ? { c:v.c } : {}), ...(wt(v.w) ? { w:Math.round(+v.w) } : {}),
     ...(col(v.cc) ? { cc:v.cc } : {}), ...(wt(v.cw) ? { cw:Math.round(+v.cw) } : {}), ...(Number.isFinite(+v.tr) && +v.tr > 0 ? { tr:Math.min(+v.tr, 0.95) } : {}),
     ...(pats(v.sp) ? { sp:pats(v.sp) } : {}), ...(pats(v.cp) ? { cp:pats(v.cp) } : {}), ...(['coarse', 'medium', 'fine'].includes(v.dl) ? { dl:v.dl } : {}) }]).filter(([, v]) => Object.keys(v).length));
 }
@@ -2465,7 +2465,7 @@ function rebuild(quiet){
     // Revit «Уровень детализации» of a category (view / template override) for this element only
     const ov0 = ovOf(it), dk = S.detail; if (ov0 && ov0.dl) S.detail = ov0.dl;
     let obj; try { const B = BUILDERS[it.type]; obj = B ? B(it) : null; } finally { S.detail = dk; }
-    if (obj){ obj.position.y += baseY(it); applyOv(obj, ov0); if (S.reveal && viewHidden(it)) obj.traverse(o => { if (o.material) o.material = o.isMesh ? M.revealM : M.revealL; }); model.add(obj); }
+    if (obj){ obj.position.y += baseY(it); applyOv(obj, ov0); if (S.reveal && anyHidden(it) && !isSel(it.id)) obj.traverse(o => { if (o.material) o.material = o.isMesh ? M.revealM : M.revealL; }); model.add(obj); }
   }
   for (const r of items) if (r.type === 'room' && isSel(r.id)){ const o = buildRoomFill(r); if (o){ o.position.y += baseY(r); model.add(o); } }
   // a floor plan looks at its own level: that level is brought to the ground so annotation stays on top;
@@ -3264,7 +3264,9 @@ function sanitizeLevels(arr){
   return out.length ? out.sort((a, b) => a.elev - b.elev) : null;
 }
 const fmtElev = v => (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v).toLocaleString('ru-RU', { minimumFractionDigits:3, maximumFractionDigits:3 });
-const shown = it => levelOk(it) && visState(it) !== 'hide' && (S.reveal || !viewHidden(it)) && tplVisible(it);
+const shown = it => levelOk(it) && visState(it) !== 'hide' && (S.reveal || (!viewHidden(it) && tplVisible(it)));
+// hidden in this view: by the element (EH), temporarily (HH/HI) or by its category in V/G or the template
+const anyHidden = it => viewHidden(it) || !tplVisible(it);
 const dimShown = d => (!d.survey || (S.phase === 'obmer' && !d.dup)) && tplVisible(d) && d.refs.every(r => !r.id || shown(byId(r.id)));
 /* survey dimensions (обмерные размеры): drawn by themselves along every wall built on the «Обмер» stage,
    on the inner faces of the walls, split where partitions join (room by room); shown only on the «Обмер» stage */
@@ -4336,8 +4338,29 @@ function tempHide(mode){
 function hideInView(on){
   const v = curView(); if (!v || v.kind === 'sheet') return;
   const ids = liveIds(sel); if (!ids.length){ toast(on ? 'Сначала выберите элементы' : 'В режиме «Показать скрытые» выберите скрытые элементы'); return; }
+  if (!on) return unhideInView(v, ids);
   const set = new Set(v.hid || []); for (const id of ids) on ? set.add(id) : set.delete(id); v.hid = [...set]; if (!v.hid.length) delete v.hid;
   clearSel(); rebuild(); scheduleSave(); toast(on ? `Скрыто в виде «${v.name}»: ${ids.length}. Вернуть: «Показать скрытые» → выберите → «Показать в виде»` : `Показано в виде: ${ids.length}`);
+}
+// Revit «Показать элемент»: back from every kind of hiding — element in this view, temporary, host wall, category
+function unhideInView(v, ids){
+  pushUndo('Показать в виде'); const cats = new Map(); let n = 0;
+  const set = new Set(v.hid || []);
+  for (const id of ids){
+    const it = byId(id); if (!it) continue; const was = anyHidden(it);
+    set.delete(id); if (isOp(it)) set.delete(it.wall);
+    if (S.tmp && S.tmp.v === S.viewId){ if (S.tmp.mode === 'hide'){ S.tmp.ids.delete(id); if (isOp(it)) S.tmp.ids.delete(it.wall); } else S.tmp.ids.add(id); }
+    v.hid = [...set]; if (!v.hid.length) delete v.hid;
+    if (!tplVisible(it)){
+      // the view's own override first; a category the template hides is shown by the view on top of it
+      for (const k of ovKeys(it)) if (v.ov && v.ov[k] && v.ov[k].vis === false){ delete v.ov[k].vis; if (!Object.keys(v.ov[k]).length) delete v.ov[k]; }
+      if (!tplVisible(it)){ const k = ovKeys(it)[0]; v.ov = v.ov || {}; v.ov[k] = { ...(v.ov[k] || {}), vis:true }; cats.set(k, TYPE_RU[it.type] || k); }
+    }
+    if (was && !anyHidden(it)) n++;
+  }
+  if (S.tmp && S.tmp.mode === 'hide' && !S.tmp.ids.size){ S.tmp = null; $('#viewport').classList.remove('tmpiso'); }
+  OVM.clear(); clearSel(); rebuild(); annoDirty = true; scheduleSave(); $('#propsBody').dataset.id = 'x'; updatePanel();
+  toast(`Показано в виде: ${n || ids.length}` + (cats.size ? `. Категории снова видны в этом виде: ${[...cats.values()].join(', ')}` : ''));
 }
 function toggleReveal(){ S.reveal = !S.reveal; $('#viewport').classList.toggle('reveal', S.reveal); $('#rbReveal').setAttribute('aria-pressed', S.reveal); renderVbar(); rebuild(); toast(S.reveal ? 'Показаны скрытые элементы (малиновым). Выберите их и нажмите «Показать в виде»' : 'Режим «Показать скрытые» выключен'); }
 function openFilter(){
@@ -4669,7 +4692,11 @@ function openCtxMenu(e){
     ['Переместить', 'MV', () => setTool('move'), any], ['Копировать', 'CO', () => setTool('copy'), any], ['Повернуть на 90°', '', rotateSel, any],
     ['Удалить', 'DE', deleteSel, any],
     null,
-    ['Временно скрыть', 'HH', () => tempHide('hide'), any], ['Временно изолировать', 'HI', () => tempHide('iso'), any], ['Скрыть в виде', 'EH', () => hideInView(true), any]
+    ['Временно скрыть', 'HH', () => tempHide('hide'), any], ['Временно изолировать', 'HI', () => tempHide('iso'), any], ['Скрыть в виде', 'EH', () => hideInView(true), any && !S.reveal],
+    null,
+    [S.reveal ? 'Выключить «Показать скрытые»' : 'Показать скрытые', 'RH', toggleReveal, true],
+    ['Показать в виде', '', () => hideInView(false), any && liveIds(sel).some(id => anyHidden(byId(id)))],
+    ['Сбросить временное скрытие', 'HR', () => tempHide('reset'), !!S.tmp]
   ];
   m.innerHTML = rows.map((r, i) => r ? `<button data-i="${i}"${r[3] ? '' : ' disabled'}>${esc(r[0])}${r[1] ? ` <span class="k">${r[1]}</span>` : ''}</button>` : '<hr>').join('');
   m.querySelectorAll('button[data-i]').forEach(b => b.onclick = () => { m.hidden = true; rows[+b.dataset.i][2](); });
