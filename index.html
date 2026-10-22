@@ -252,7 +252,11 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .dim.co{pointer-events:auto;cursor:pointer;color:var(--accent);border:1px solid var(--accent);background:var(--sheet);font-weight:500}
 .tree .add{all:unset;cursor:pointer;color:var(--accent);font-weight:600;padding:0 6px;border-radius:3px;margin-left:4px}
 .tree .add:hover{background:var(--accent-soft)}
-.tree .node{display:flex;align-items:center;justify-content:space-between}
+.tree .node{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;border-radius:4px}
+.tree .node:hover{background:var(--accent-soft)}.tree .node:focus-visible{outline:2px solid var(--accent)}
+.tree .node .tg{width:12px;flex:none;margin-right:2px;display:inline-flex;justify-content:center}.tree .node .tg::before{content:'▾';font-size:10px}
+.tree li.closed>.node .tg::before{content:'▸'}.tree li.closed>ul{display:none}
+.tree .node{justify-content:flex-start}.tree .node .add{margin-left:auto}
 .tree li.it{display:flex;align-items:center}
 .tree li.it>button:first-child{flex:1;min-width:0}
 .tree .x{all:unset;cursor:pointer;color:var(--muted);padding:2px 6px;border-radius:3px;font-size:12px}
@@ -703,7 +707,7 @@ details.more summary::-webkit-details-marker{display:none}
         <div class="scroll" id="propsBody"></div>
       </section>
       <section class="panel" id="browser" aria-label="Диспетчер проекта">
-        <div class="side-h"><span class="ptl">Диспетчер проекта</span> <div class="row"><button id="browserClose" aria-label="Скрыть диспетчер проекта" title="Скрыть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div></div>
+        <div class="side-h"><span class="ptl">Диспетчер проекта</span> <div class="row"><button id="treeFold" aria-label="Свернуть все разделы" title="Свернуть все разделы"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l4 4 4-4M6 16l4-4 4 4"/></svg></button><button id="treeUnfold" aria-label="Развернуть все разделы" title="Развернуть все разделы"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8l4-4 4 4M6 12l4 4 4-4"/></svg></button><button id="browserClose" aria-label="Скрыть диспетчер проекта" title="Скрыть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div></div>
         <div class="scroll"><ul class="tree" id="tree"></ul></div>
       </section>
     </aside>
@@ -7998,6 +8002,22 @@ function renameViewInline(b, id){
   inp.onkeydown = e => { if (e.key === 'Enter') fin(true); else if (e.key === 'Escape') fin(false); e.stopPropagation(); };
   inp.onblur = () => fin(true);
 }
+// sections of the project browser fold like in Revit (+/−); the folded ones are remembered on this device
+let TREE_CLOSED = new Set(); try { TREE_CLOSED = new Set(JSON.parse(lsGet('kot.treeClosed') || '[]')); } catch (e){}
+const treeKey = n => { for (const c of n.childNodes) if (c.nodeType === 3 && c.textContent.trim()) return c.textContent.trim(); return n.textContent.trim(); };
+function treeSave(){ try { lsSet('kot.treeClosed', JSON.stringify([...TREE_CLOSED])); } catch (e){} }
+function treeFolds(ul){
+  ul.querySelectorAll('.node').forEach(n => {
+    const li = n.parentElement, k = treeKey(n); if (!li.querySelector(':scope>ul')) return;
+    const tg = document.createElement('span'); tg.className = 'tg'; tg.setAttribute('aria-hidden', 'true'); n.prepend(tg);
+    n.setAttribute('role', 'button'); n.tabIndex = 0; li.classList.toggle('closed', TREE_CLOSED.has(k)); n.setAttribute('aria-expanded', !TREE_CLOSED.has(k));
+    const flip = () => { if (TREE_CLOSED.has(k)) TREE_CLOSED.delete(k); else TREE_CLOSED.add(k); li.classList.toggle('closed', TREE_CLOSED.has(k)); n.setAttribute('aria-expanded', !TREE_CLOSED.has(k)); treeSave(); };
+    n.onclick = e => { if (e.target.closest('button')) return; flip(); };
+    n.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } };
+  });
+}
+function treeFoldAll(close){ const ul = $('#tree'); ul.querySelectorAll('.node').forEach(n => { const k = treeKey(n); if (close) TREE_CLOSED.add(k); else TREE_CLOSED.delete(k); }); treeSave(); renderTree(); }
+$('#treeFold').onclick = () => treeFoldAll(true); $('#treeUnfold').onclick = () => treeFoldAll(false);
 function renderTree(){
   const ul = $('#tree');
   const btn = (label, act, cur) => `<li><button data-tree="${act}"${cur ? ' aria-current="true"' : ''}>${label}</button></li>`;
@@ -8029,6 +8049,7 @@ function renderTree(){
     <li><div class="node">Семейства · Компоненты<button class="add" data-tree="famnew:" title="Новое семейство" aria-label="Новое семейство">+</button></div><ul>${fams.map(f => `<li class="it"><button data-tree="fam:${f.id}" title="Разместить">${esc(f.name)}<span class="ph">${esc(FAM_CATS[f.cat])}</span></button><button class="x" data-tree="famed:${f.id}" title="Редактировать семейство" aria-label="Редактировать ${esc(f.name)}">✎</button></li>`).join('')}<li class="it"><button data-tree="famload:">Загрузить семейство…</button></li></ul></li>
     <li><div class="node">Семейства · Стены</div><ul>${types.map(t => btn(`<span class="swatch" style="background:${(MATS[t.layers[Math.floor(t.layers.length / 2)]?.m] || MATS.generic).c}"></span>${esc(t.name)}`, 't:' + t.id, false)).join('')}</ul></li>
     <li><div class="node">Проекты</div><ul>${btn('Мои проекты…', 'lib')}</ul></li>`;
+  treeFolds(ul);
   ul.querySelectorAll('[data-tree^="o:"]').forEach(b => b.ondblclick = e => { e.preventDefault(); renameViewInline(b, b.dataset.tree.slice(2)); });
   ul.querySelectorAll('[data-tree]').forEach(b => b.onclick = () => {
     const i = b.dataset.tree.indexOf(':'), k = b.dataset.tree.slice(0, i), v = b.dataset.tree.slice(i + 1);
