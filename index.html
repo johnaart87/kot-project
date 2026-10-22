@@ -1066,7 +1066,7 @@ function wallLayers(w){
   for (const l of ty.layers){ out.push({ m:l.m, s0:z, s1:z + l.t }); z += l.t; }
   return w.flipL ? out.map(l => ({ m:l.m, s0:-l.s1, s1:-l.s0 })).reverse() : out;
 }
-function syncTypeThickness(){ for (const w of items) if (w.type === 'wall' && typeById(w.wt)) w.t = typeT(typeById(w.wt)); }
+function syncTypeThickness(){ for (const w of items) if (w.type === 'wall' && typeById(w.wt)){ const nt = typeT(typeById(w.wt)); if (Math.abs(nt - w.t) > 1e-6) keepLocLine(w, () => { w.t = nt; }); } }
 
 /* ---------- colors from CSS tokens ---------- */
 let C = {};
@@ -2879,7 +2879,8 @@ function addGridSet(nx, sx, ny, sy, x0 = 0, z0 = 0){
 /* ---------- history ---------- */
 function snapshot(){ return JSON.stringify({ items, nextId, types, levels }); }
 // history entries: { s: state before the action, label: optional (voice command text) }; names are worked out by comparing states
-function pushUndo(label){ if (S.phase === 'obmer') SV_PENDING = true; undoStack.push({ s:snapshot(), label:label || null }); if (undoStack.length > 300) undoStack.shift(); redoStack.length = 0; }
+let UNDO_MUTE = false; // one undo step for an edit applied to many selected elements
+function pushUndo(label){ if (S.phase === 'obmer') SV_PENDING = true; if (UNDO_MUTE) return; undoStack.push({ s:snapshot(), label:label || null }); if (undoStack.length > 300) undoStack.shift(); redoStack.length = 0; }
 function restore(s){ const o = JSON.parse(s); items = o.items; nextId = o.nextId; if (o.types) types = o.types; if (o.levels) levels = o.levels; setSel([...sel], selId); rebuild(); renderOptbar(); }
 function undo(n = 1){
   n = Math.min(Math.max(1, n | 0), undoStack.length); if (!n){ toast('Нечего отменять'); return []; }
@@ -6998,8 +6999,48 @@ function locOffsetOf(w, loc = w.loc || 'center'){
 }
 // change thickness or type while keeping the wall's location line in place
 function keepLocLine(w, change){
-  const f = wallFrame(w), before = locOffsetOf(w); change(); const after = locOffsetOf(w), d = before - after;
+  const f = wallFrame(w), t0 = w.t, before = locOffsetOf(w);
+  // walls joined to this one (corner: a shared end point; tee: an end inside this wall's body) stay joined, as in Revit
+  const links = [];
+  for (const o of items){
+    if (o.type !== 'wall' || o === w || lvOf(o) !== lvOf(w)) continue;
+    for (const e of [1, 2]){
+      if (o.dj && o.dj[e - 1]) continue;
+      const E = new V3(o['x' + e], 0, o['z' + e]);
+      const k = Math.hypot(E.x - w.x1, E.z - w.z1) < 2e-3 ? 1 : Math.hypot(E.x - w.x2, E.z - w.z2) < 2e-3 ? 2 : 0;
+      if (k){ if (!(w.dj && w.dj[k - 1])) links.push({ o, e, k }); continue; }
+      const v = E.clone().sub(f.p1), s = v.dot(f.dir), dz = v.dot(f.nrm);
+      if (s > 0.02 && s < f.L - 0.02 && Math.abs(dz) < t0 / 2 + 2e-3){
+        const B = new V3(o['x' + (3 - e)], 0, o['z' + (3 - e)]);
+        links.push({ o, e, side:Math.sign(B.clone().sub(f.p1).dot(f.nrm)) || 1 });
+      }
+    }
+  }
+  change(); const after = locOffsetOf(w), d = before - after;
   if (Math.abs(d) > 1e-6){ w.x1 = r4(w.x1 + f.nrm.x * d); w.z1 = r4(w.z1 + f.nrm.z * d); w.x2 = r4(w.x2 + f.nrm.x * d); w.z2 = r4(w.z2 + f.nrm.z * d); }
+  if (!links.length) return;
+  const g = wallFrame(w);
+  const moveEnd = (o, e, X) => {
+    const E = new V3(o['x' + e], 0, o['z' + e]), B = new V3(o['x' + (3 - e)], 0, o['z' + (3 - e)]);
+    if (e === 1){ const od = E.clone().sub(B).normalize(), u = X.clone().sub(E).dot(od); for (const op of items) if (isOp(op) && op.wall === o.id) op.pos = r4(op.pos + u); }
+    o['x' + e] = r4(X.x); o['z' + e] = r4(X.z);
+  };
+  for (const L of links){
+    const o = L.o, e = L.e, E = new V3(o['x' + e], 0, o['z' + e]), B = new V3(o['x' + (3 - e)], 0, o['z' + (3 - e)]);
+    const od = E.clone().sub(B); if (od.length() < 1e-6) continue; od.normalize();
+    if (L.k){
+      // corner: both ends go to the crossing of the two axes
+      const X = xLines(B, od, g.p1, g.dir);
+      if (!X || X.distanceTo(E) > 4 * Math.max(t0, w.t) + 0.5) continue;
+      moveEnd(o, e, X); w['x' + L.k] = r4(X.x); w['z' + L.k] = r4(X.z);
+    } else {
+      // tee: the end stays on the face it touched, or comes back to it if the wall got thinner or moved
+      const dzN = E.clone().sub(g.p1).dot(g.nrm);
+      if (Math.abs(dzN) <= w.t / 2 + 1e-3) continue;
+      const den = od.dot(g.nrm); if (Math.abs(den) < 0.2) continue;
+      moveEnd(o, e, E.clone().addScaledVector(od, (L.side * w.t / 2 - dzN) / den));
+    }
+  }
 }
 // «Зависимости» group: base level and offset, top level and offset (walls, columns, stairs), location line and room bounding (walls)
 function consRows(it){
@@ -7121,13 +7162,61 @@ function bindViewRows(v, q){
 const prow = (label, inner) => `<div class="prow"><span>${label}</span><div>${inner}</div></div>`;
 const pnum = (id, v, extra = '') => `<input id="${id}" type="number" value="${Math.round(v * 1000)}" ${extra}>`;
 const TYPE_RU = { wall:'Стены', door:'Двери', window:'Окна', box:'Объёмы', dim:'Размеры', grid:'Оси', line:'Линии', circle:'Окружности', text:'Тексты', floor:'Полы', ceiling:'Потолки', roof:'Крыши', column:'Колонны', stair:'Лестницы', room:'Помещения', part:'Части', lock:'Блокировки', grp:'Группы', asm:'Сборки' };
+/* Properties. Several elements of one category (Revit): the panel of one of them; values that differ show «<различные>»,
+   and an edit is replayed on every selected element (panels built off-screen), as one undo step */
+let MULTI_P = null;
+function multiSame(){
+  const L = [...sel].map(byId); if (L.length < 2 || L.some(x => !x || isMeta(x))) return null;
+  const t = L[0].type; if (L.some(x => x.type !== t)) return null;
+  const primary = L.find(x => x.id === selId) || L[0];
+  return { type:t, primary, others:L.filter(x => x !== primary), all:L };
+}
 function updatePanel(){
-  const el = $('#propsBody'), it = sel.size === 1 ? byId(selId) : null;
+  MULTI_P = null; renderPanel();
+  const M = MULTI_P; if (M) multiEnhance($('#propsBody'), M);
+}
+const MULTI_OFF = ['sTag', 'sRN', 'sGName', 'sTx', 'fFam'];
+function multiEnhance(el, M){
+  if (el.dataset.mx === el.dataset.id) return; el.dataset.mx = el.dataset.id;
+  const head = el.querySelector('.typesel');
+  if (head){ const tn = head.querySelector('.tname'), ts = head.querySelector('.tsub'); if (tn){ tn.textContent = (TYPE_RU[M.type] || M.type) + ': ' + M.all.length + ' '; const sb = document.createElement('span'); sb.className = 'tsub'; sb.textContent = '· изменение применяется ко всем выбранным'; tn.append(sb); } head.querySelectorAll('button').forEach(b => b.remove()); }
+  if (M.type === 'wall'){
+    const tot = M.all.reduce((a, w) => { const st = wallStats(w); a.L += st.L; a.A += st.area; a.V += st.vol; return a; }, { L:0, A:0, V:0 });
+    const box = document.createElement('div'); box.innerHTML = `<div class="pgrp">Стены: ${M.all.length} — итого</div>` + prow('Длина', `<span class="val">${mm(tot.L)} мм</span>`) + prow('Площадь', `<span class="val">${m2(tot.A)} м²</span>`) + prow('Объём', `<span class="val">${tot.V.toLocaleString('ru-RU', { maximumFractionDigits:2 })} м³</span>`);
+    (head || el.firstChild) ? (head || el.firstChild).after(...box.childNodes) : el.prepend(...box.childNodes);
+  }
+  // the same field in the panels of the other elements
+  const vals = M.others.map(o => { const d = document.createElement('div'); renderPanel(d, o); const m = new Map(); d.querySelectorAll('input[id],select[id],textarea[id]').forEach(f => m.set(f.id, f.type === 'checkbox' ? f.checked : f.value)); return m; });
+  el.querySelectorAll('input[id],select[id],textarea[id]').forEach(f => {
+    if (MULTI_OFF.includes(f.id)){ f.disabled = true; f.title = 'У каждого элемента своё значение'; return; }
+    const v0 = f.type === 'checkbox' ? f.checked : f.value, diff = vals.some(m => m.has(f.id) && m.get(f.id) !== v0);
+    if (!diff) return;
+    if (f.type === 'checkbox') f.indeterminate = true;
+    else if (f.tagName === 'SELECT'){ const op = document.createElement('option'); op.value = '__diff'; op.textContent = '<различные>'; f.prepend(op); f.value = '__diff'; }
+    else { f.value = ''; f.placeholder = '<различные>'; }
+  });
+  // per-element buttons give way to the buttons for the whole selection
+  el.querySelectorAll('.pbtns').forEach(b => b.remove());
+  const bt = document.createElement('div'); bt.className = 'pbtns'; bt.innerHTML = '<button class="btn sm" id="mMove">Переместить (MV)</button><button class="btn sm" id="mCopy">Копировать (CO)</button><button class="btn sm" id="mRot">Повернуть 90°</button><button class="btn sm danger" id="mDel">Удалить</button>'; el.append(bt);
+  bt.querySelector('#mMove').onclick = () => setTool('move'); bt.querySelector('#mCopy').onclick = () => setTool('copy'); bt.querySelector('#mRot').onclick = rotateSel; bt.querySelector('#mDel').onclick = deleteSel;
+  if (!el._mxBound){
+    el._mxBound = true;
+    el.addEventListener('change', e => {
+      const P = el._mx; if (!P) return; const t = e.target; if (!t.id || MULTI_OFF.includes(t.id) || t.value === '__diff' || t.closest('.pbtns')) return;
+      if (t.type !== 'checkbox' && t.tagName !== 'SELECT' && t.value === '') return;
+      pushUndo(`Изменение: ${P.all.length} эл.`); UNDO_MUTE = true;
+      try { for (const o of P.others){ const d = document.createElement('div'); renderPanel(d, o); const f = d.querySelector('#' + CSS.escape(t.id)); if (!f) continue; if (t.type === 'checkbox') f.checked = t.checked; else f.value = t.value; f.dispatchEvent(new Event('change', { bubbles:true })); } }
+      finally { setTimeout(() => { UNDO_MUTE = false; el.dataset.id = 'x'; el.dataset.mx = ''; updatePanel(); }, 0); }
+    }, true);
+  }
+  el._mx = M;
+}
+function renderPanel(_el, _it){
+  const det = !!_el, el = _el || $('#propsBody'); let it = det ? _it : (sel.size === 1 ? byId(selId) : null);
   const key = sel.size > 1 ? 'm' + [...sel].join(',') : (it ? String(it.id) : 'v:' + (S.selView || S.viewId) + ':' + S.tool);
-  if (el.contains(document.activeElement) && el.dataset.id === key) return;
-  el.dataset.id = key;
+  if (!det){ if (el.contains(document.activeElement) && el.dataset.id === key) return; el.dataset.id = key; el._mx = null; el.dataset.mx = ''; }
   let h = '';
-  const gsel = sel.size ? items.find(g => (g.type === 'grp' || g.type === 'asm') && g.ids.length === sel.size && g.ids.every(id => sel.has(id))) : null;
+  const gsel = !det && sel.size ? items.find(g => (g.type === 'grp' || g.type === 'asm') && g.ids.length === sel.size && g.ids.every(id => sel.has(id))) : null;
   if (gsel){
     const same = items.filter(x => x.type === gsel.type && x.tname === gsel.tname).length;
     el.innerHTML = `<div class="typesel"><span class="tname">${gsel.type === 'asm' ? 'Сборка' : 'Группа модели'}: ${esc(gsel.name)}</span><span class="tsub">Элементов: ${gsel.ids.length}${gsel.type === 'grp' ? ' · экземпляров типа: ' + same : ''}</span></div>`
@@ -7141,7 +7230,9 @@ function updatePanel(){
     q2('mMove').onclick = () => setTool('move'); q2('mCopy').onclick = () => setTool('copy'); q2('mDel').onclick = deleteSel;
     return;
   }
-  if (sel.size > 1){
+  const M0 = !det && sel.size > 1 ? multiSame() : null;
+  if (M0){ MULTI_P = M0; it = M0.primary; }
+  else if (!det && sel.size > 1){
     const byT = {}; for (const id of sel){ const t = byId(id)?.type; if (t) byT[t] = (byT[t] || 0) + 1; }
     const ws = [...sel].map(byId).filter(w => w && w.type === 'wall');
     const tot = ws.reduce((a, w) => { const st = wallStats(w); a.L += st.L; a.A += st.area; a.V += st.vol; return a; }, { L:0, A:0, V:0 });
@@ -8624,7 +8715,7 @@ function execOne(a, ctx){
     case 'walltype': {
       const ty = typeById(a.type); if (!ty) throw new Error('Нет такого типа стены');
       const ws = a.target === 'selected' ? [...sel].map(byId).filter(w => w && w.type === 'wall') : items.filter(w => w.type === 'wall' && (a.target !== 'outer' || outerWalls().includes(w)));
-      ws.forEach(w => { w.wt = ty.id; w.t = typeT(ty); });
+      ws.forEach(w => keepLocLine(w, () => { w.wt = ty.id; w.t = typeT(ty); }));
       return `Тип «${ty.name}» у стен: ${ws.length}`;
     }
     case 'movewall': {
