@@ -370,6 +370,8 @@ details.more summary::-webkit-details-marker{display:none}
 #vgDlg{z-index:70}
 .sheetd.vgwin{width:min(1180px,100%);gap:0;padding:0;overflow:hidden;position:relative}
 .vgtitle{padding:10px 14px;font-size:14px;border-bottom:1px solid var(--line);background:var(--chrome)}
+.vgtpl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line)}
+.vgtpl[hidden]{display:none}.vgtpl select{min-width:220px;max-width:100%}.vgtpl .vghint{margin-left:auto}
 .vgtabs{display:flex;gap:2px;padding:8px 10px 0;background:var(--chrome);border-bottom:1px solid var(--line);flex-wrap:wrap}
 .vgtabs button{border:1px solid var(--line);border-bottom:0;background:var(--chrome);color:var(--ink);font-size:12.5px;padding:4px 10px;border-radius:3px 3px 0 0;cursor:pointer;margin-bottom:-1px}
 .vgtabs button[aria-selected="true"]{background:var(--panel);font-weight:600}
@@ -628,6 +630,9 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" id="rbMats" title="Материалы: тонирование, штриховка поверхности и сечения, фото текстуры"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M4.5 6.5l9 9M3.4 10.6l6 6M6.5 4.5l9 9M10.6 3.4l6 6" stroke-width=".9"/></svg>Материалы</button>
       </div><div class="grp-label">Материалы</div></div>
       <div class="grp"><div class="grp-items">
+        <button class="rbtn" id="rbTplMgr" title="Диспетчер шаблонов видов: список шаблонов, создание, копирование, переименование и удаление"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="3" width="15" height="14" rx="1"/><path d="M2.5 7h15M6 10h8M6 13h8"/></svg>Диспетчер<br>шаблонов</button>
+      </div><div class="grp-label">Шаблоны видов</div></div>
+      <div class="grp"><div class="grp-items">
         <button class="rbtn" data-std="styles" title="Стили линий: вес, цвет и образец для каждой категории линий"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M2 5h16" stroke-width="2.4"/><path d="M2 10h16" stroke-width="1.4" stroke-dasharray="4 2"/><path d="M2 15h16" stroke-width=".8" stroke-dasharray="6 1.5 1 1.5"/></svg>Стили<br>линий</button>
         <button class="rbtn" data-std="weights" title="Вес линий: толщина на бумаге для номеров 1–16"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M2 4h16" stroke-width=".7"/><path d="M2 8h16" stroke-width="1.3"/><path d="M2 12.5h16" stroke-width="2"/><path d="M2 17h16" stroke-width="3"/></svg>Вес<br>линий</button>
         <button class="rbtn" data-std="patterns" title="Образцы линий: штрих, пунктир, штрихпунктир"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 6h16" stroke-dasharray="4 2"/><path d="M2 10h16" stroke-dasharray="1 2"/><path d="M2 14h16" stroke-dasharray="7 2 1 2"/></svg>Образцы<br>линий</button>
@@ -818,6 +823,7 @@ details.more summary::-webkit-details-marker{display:none}
 <div class="modal" id="vgDlg" hidden role="dialog" aria-modal="true" aria-labelledby="vgTitle">
   <div class="sheetd vgwin">
     <div class="vgtitle" id="vgTitle">Переопределения видимости/графики для: </div>
+    <div class="vgtpl" id="vgTplBar" hidden><label for="vgTplSel">Шаблон вида:</label><select id="vgTplSel"></select><button class="btn sm" id="vgTplNew">Новый</button><button class="btn sm" id="vgTplDup">Копия</button><button class="btn sm" id="vgTplRen">Переименовать</button><span class="vghint" id="vgTplUsed"></span></div>
     <div class="vgtabs" role="tablist"><button role="tab" data-vgt="model">Категории модели</button><button role="tab" data-vgt="anno">Категории аннотаций</button></div>
     <div class="vgpane">
       <div class="vgtop"><label class="pchk"><input type="checkbox" id="vgShow"> <span id="vgShowL">Показывать категории модели на этом виде</span></label><span class="vghint">Если категория не отмечена, то она будет невидимой.</span></div>
@@ -6012,7 +6018,7 @@ function renderTpl(){
   const vv = VG_VIEW && views.includes(VG_VIEW) ? VG_VIEW : null, t = vv ? null : TPLS.find(x => x.id === TPL_CUR), body = $('#tplBody'), keepTop = body.scrollTop;
   body.replaceChildren();
   for (const id of ['tplSel', 'tplNew', 'tplDup', 'tplRen', 'tplDel']) $('#' + id).hidden = !!vv;
-  $('#tplTitle').textContent = vv ? `Видимость/графика: «${vv.name}»` : 'Шаблоны видов';
+  $('#tplTitle').textContent = vv ? `Видимость/графика: «${vv.name}»` : 'Диспетчер шаблонов видов';
   if (!vv && !t){ body.innerHTML = '<p class="libnote">Шаблонов нет. Нажмите «Новый».</p>'; return; }
   const OV = vv ? (vv.ov = vv.ov || {}) : t.ov, vt = vv ? tplOfView(vv) : null;
   const note = document.createElement('p'); note.className = 'libnote';
@@ -6077,7 +6083,25 @@ function renderTpl(){
     section('Аннотации', TPL_ANNO, true);
   }
 }
-function openTpl(id){ VG_VIEW = null; TPL_CUR = id && TPLS.some(t => t.id === id) ? id : (TPLS[0] || {}).id || null; renderTpl(); tplDlg.hidden = false; }
+function openTpl(id, tab){
+  VG_VIEW = null; TPL_CUR = id && TPLS.some(t => t.id === id) ? id : (TPLS[0] || {}).id || null;
+  if (!TPL_CUR){ const t = { id:vid('t'), name:'Новый шаблон', ov:{} }; TPLS.push(t); TPL_CUR = t.id; scheduleSave(); }
+  // Revit: «Шаблоны видов» open straight on the V/G tables of the template
+  const t = TPLS.find(x => x.id === TPL_CUR);
+  openVGDlg({ title:`Переопределения видимости/графики для шаблона: ${t.name}`, tab:tab || 'model', tplBar:true, get:() => t.ov, set:o => { t.ov = o; } });
+}
+// the template bar of the V/G window: switching or managing templates keeps what was changed in the table
+function vgTplBar(){
+  const t = TPLS.find(x => x.id === TPL_CUR); if (!t) return;
+  $('#vgTplSel').innerHTML = TPLS.map(x => `<option value="${x.id}"${x.id === t.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('');
+  const used = views.filter(v => v.tpl === t.id).map(v => v.name);
+  $('#vgTplUsed').textContent = used.length ? 'Назначен видам: ' + used.join(', ') : 'Не назначен ни одному виду';
+}
+function vgTplDo(fn){ vgApply(); fn(); openTpl(TPL_CUR, VGD.tab); }
+$('#vgTplSel').onchange = e => vgTplDo(() => { TPL_CUR = e.target.value; });
+$('#vgTplNew').onclick = () => vgTplDo(() => { const n = prompt('Имя нового шаблона', 'Новый шаблон'); if (!n || !n.trim()) return; const t = { id:vid('t'), name:n.trim().slice(0, 80), ov:{} }; TPLS.push(t); TPL_CUR = t.id; scheduleSave(); });
+$('#vgTplDup').onclick = () => vgTplDo(() => { const s0 = TPLS.find(t => t.id === TPL_CUR); if (!s0) return; const t = { id:vid('t'), name:s0.name + ' (копия)', ov:JSON.parse(JSON.stringify(s0.ov)) }; TPLS.push(t); TPL_CUR = t.id; scheduleSave(); });
+$('#vgTplRen').onclick = () => vgTplDo(() => { const t = TPLS.find(x => x.id === TPL_CUR); if (!t) return; const n = prompt('Имя шаблона', t.name); if (n && n.trim()){ t.name = n.trim().slice(0, 80); scheduleSave(); updatePanel(); } });
 // Revit VV: visibility/graphics of the open view (its own overrides on top of the template)
 function openVG(v){
   v = v || curView(); if (!v || v.kind === 'sheet'){ toast('Откройте план, разрез или 3D-вид'); return; }
@@ -6098,7 +6122,7 @@ function vgRows(){
 }
 function openVGDlg(target){
   VGD.target = target; VGD.draft = JSON.parse(JSON.stringify(target.get() || {})); VGD.tab = target.tab || 'model'; VGD.cell = null; VGD.open.clear();
-  $('#vgFind').value = ''; $('#vgDisc').value = ''; $('#vgTitle').textContent = target.title; $('#vgPop').hidden = true; renderVG(); vgDlg.hidden = false;
+  $('#vgFind').value = ''; $('#vgDisc').value = ''; $('#vgTitle').textContent = target.title; $('#vgPop').hidden = true; $('#vgTplBar').hidden = !target.tplBar; if (target.tplBar) vgTplBar(); renderVG(); vgDlg.hidden = false;
 }
 function vgSet(k, field, val){
   const D0 = VGD.draft, cur = { ...(D0[k] || {}) };
@@ -6200,6 +6224,8 @@ $('#vgApply').onclick = vgApply;
 $('#vgOk').onclick = () => { vgApply(); vgDlg.hidden = true; if (!tplDlg.hidden) renderTpl(); };
 $('#vgCancel').onclick = () => { vgDlg.hidden = true; };
 $('#rbTpl').onclick = () => openTpl(curView().tpl);
+// Revit «Управление шаблонами видов»: the only place where a template is deleted
+$('#rbTplMgr').onclick = () => { VG_VIEW = null; TPL_CUR = TPLS.some(t => t.id === curView().tpl) ? curView().tpl : (TPLS[0] || {}).id || null; renderTpl(); tplDlg.hidden = false; };
 if ($('#rbVG')) $('#rbVG').onclick = () => openVG();
 $('#tplSel').onchange = e => { TPL_CUR = e.target.value; renderTpl(); };
 $('#tplNew').onclick = () => { const t = { id:vid('t'), name:'Новый шаблон', ov:{} }; TPLS.push(t); TPL_CUR = t.id; renderTpl(); scheduleSave(); };
