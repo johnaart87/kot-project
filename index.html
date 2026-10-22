@@ -1472,9 +1472,6 @@ function layerMat(m, role){
   const plan = S.view === 'plan';
   if (plan && S.detail === 'coarse' && role !== 'surf') return M.poche;
   if (!plan && S.style === 'lines') return M.lines;
-  // a view template with its own look (survey plan): one cut fill for everything cut on the plan
-  const lk = plan && role !== 'surf' && typeof lookOf === 'function' ? lookOf() : null;
-  if (lk && lk.cut){ const k2 = 'plk:' + JSON.stringify(lk.cut); return LM[k2] || (LM[k2] = patMat({ color:lk.cut.bg.c, pats:lk.cut, proj:'xz', extra:PO })); }
   const real = !plan && S.style === 'real', key = (plan ? (role === 'surf' ? 'pf:' : 'p:') : real ? 'r:' : 's:') + m;
   if (LM[key]) return LM[key];
   const sp = matSpec(m); let mat;
@@ -1683,9 +1680,9 @@ function buildWall(w, prevMat, prevEdge){
     }
   }
   if (plan && !prevEdge && w.id){
-    const sty = st === 'demo' ? 'demo' : st === 'exist' ? 'exist' : 'cut', col = s ? C.sel : null, lk = lookOf(), lw = lk && lk.line && sty === 'cut' ? lk.line : null;
-    const a = fatLines(segs, sty, col || (lw && lw.c), lw && lw.w); if (a){ a.userData.cut = true; g.add(a); }
-    const b = segsI.length && !(lk && lk.noLayers && st === 'normal') && fatLines(segsI, st === 'normal' ? 'layer' : sty, col); if (b){ b.userData.cut = true; g.add(b); }
+    const sty = st === 'demo' ? 'demo' : st === 'exist' ? 'exist' : 'cut', col = s ? C.sel : null;
+    const a = fatLines(segs, sty, col); if (a){ a.userData.cut = true; g.add(a); }
+    const b = segsI.length && fatLines(segsI, st === 'normal' ? 'layer' : sty, col); if (b){ b.userData.cut = true; g.add(b); }
   } else { if (segs.length) g.add(lineOf(segs, em, true)); if (segsI.length) g.add(lineOf(segsI, em, true)); }
   if (plan) for (const o of ops0) planSymbol(g, o, w.t);
   else for (const o of ops0){
@@ -1744,7 +1741,7 @@ function buildFloor(it){
     const g = new THREE.Group();
     if (s){ const geo = prism(it.pts, off - 0.01, off + 0.001); if (geo) g.add(new THREE.Mesh(geo, M.selFlatT)); }
     // surface pattern of the floor material seen from above (tiles, boards); not pickable, the floor is picked by its edge
-    else if (st !== 'demo' && !lookOf() && hasPats(matSpec(it.m || 'concrete').surf)){ const geo = prism(it.pts, off - 0.004, off + 0.002, slabHoles(it)); if (geo){ const fm = new THREE.Mesh(geo, layerMat(it.m || 'concrete', 'surf')); fm.raycast = () => {}; g.add(fm); } }
+    else if (st !== 'demo' && hasPats(matSpec(it.m || 'concrete').surf)){ const geo = prism(it.pts, off - 0.004, off + 0.002, slabHoles(it)); if (geo){ const fm = new THREE.Mesh(geo, layerMat(it.m || 'concrete', 'surf')); fm.raycast = () => {}; fm.userData.proj = true; g.add(fm); } }
     g.add(lineOf([...it.pts, it.pts[0]].map(p => new V3(p.x, off + 0.004, p.z)), s ? M.edgeSel : em === M.edge ? M.slabEdge : em));
     return g;
   }
@@ -1961,7 +1958,7 @@ function famBox(it){
 /* ---------- view templates (Revit «Шаблоны видов» → Видимость/Графика): per category and per family —
    visibility, halftone, line colour and line weight. A view (and the sheet viewport showing it) uses its template. ---------- */
 const TPL_CATS = [['wall', 'Стены'], ['door', 'Двери'], ['window', 'Окна'], ['floor', 'Полы'], ['ceiling', 'Потолки'], ['roof', 'Крыши'], ['column', 'Колонны'], ['stair', 'Лестницы'], ['box', 'Объёмы'], ['room', 'Помещения']];
-const TPL_ANNO = [['grid', 'Оси'], ['dim', 'Размеры'], ['line', 'Линии детализации'], ['text', 'Текст']];
+const TPL_ANNO = [['grid', 'Оси'], ['dim', 'Размеры'], ['line', 'Линии детализации'], ['text', 'Текст'], ['ceilh', 'Высоты потолков (в марках помещений)'], ['winh', 'Высоты окон (от пола и проёма)']];
 /* «Оформление» of a view template (the look of a survey plan): one cut fill for every wall in the view, thin dark cut outline,
    no layer lines, room tags with the ceiling height and window heights written in blue */
 const SURVEY_LOOK = () => ({ cut:{ fg:{ p:'dots', c:'#8f8f8f' }, bg:{ p:'solid', c:'#d9d9d9' } }, line:{ c:'#3c3c3c', w:2 }, noLayers:true, ceil:true, win:true, hc:'#2433c8' });
@@ -1971,9 +1968,18 @@ function sanitizeLook(l){
   return { cut:l.cut ? { fg:lay(l.cut.fg, 'none', '#8f8f8f'), bg:lay(l.cut.bg, 'solid', '#d9d9d9') } : null, line:l.line ? { c:col(l.line.c, '#3c3c3c'), w:clamp(Math.round(+l.line.w) || 2, 1, 16) } : null,
     noLayers:!!l.noLayers, ceil:!!l.ceil, win:!!l.win, hc:col(l.hc, '#2433c8') };
 }
-const lookOf = () => { const t = tplOfView(viewNow()); return t && t.look ? t.look : null; };
+// the former «Оформление плана» of a template, as category overrides (walls: cut pattern, cut lines, coarse detail; floors: no surface pattern; heights on)
+function lookToOv(L){
+  if (!L) return {};
+  const o = {}, w = {};
+  if (L.cut) w.cp = JSON.parse(JSON.stringify(L.cut)); if (L.line){ w.cc = L.line.c; w.cw = L.line.w; } if (L.noLayers) w.dl = 'coarse';
+  if (Object.keys(w).length) o.wall = w;
+  if (L.cut) o.floor = { sp:{ fg:{ p:'none', c:'#2b3439' }, bg:{ p:'none', c:'#ffffff' } } };
+  if (L.ceil) o.ceilh = { vis:true, c:L.hc || '#2433c8' }; if (L.win) o.winh = { vis:true, c:L.hc || '#2433c8' };
+  return o;
+}
 function DEFAULT_TPLS(){ return [
-  { id:'t-survey', name:'Обмерный план (без мебели)', ov:{ 'cat:furniture':{ vis:false }, 'cat:casework':{ vis:false }, box:{ vis:false } }, look:SURVEY_LOOK() },
+  { id:'t-survey', name:'Обмерный план (без мебели)', ov:{ 'cat:furniture':{ vis:false }, 'cat:casework':{ vis:false }, box:{ vis:false }, ...lookToOv(SURVEY_LOOK()) } },
   { id:'t-pres', name:'Презентация: мебель полутоном, без размеров', ov:{ 'cat:furniture':{ half:true }, 'cat:casework':{ half:true }, box:{ half:true }, dim:{ vis:false } } }
 ]; }
 let TPLS = DEFAULT_TPLS();
@@ -1983,19 +1989,30 @@ function sanOv(ov){
   const col = v => /^#[0-9a-f]{6}$/i.test(v), wt = v => Number.isFinite(+v) && +v >= 1 && +v <= 16, lay = q => q && typeof q === 'object' ? { p:typeof q.p === 'string' ? q.p.slice(0, 20) : '', c:col(q.c) ? q.c : '#2b3439' } : null;
   const pats = q => q && typeof q === 'object' ? { fg:lay(q.fg) || { p:'', c:'#2b3439' }, bg:lay(q.bg) || { p:'', c:'#ffffff' } } : null;
   return Object.fromEntries(Object.entries(ov || {}).filter(([k, v]) => typeof k === 'string' && v && typeof v === 'object').map(([k, v]) => [k.slice(0, 60), {
-    ...(v.vis === false ? { vis:false } : {}), ...(v.half ? { half:true } : {}), ...(col(v.c) ? { c:v.c } : {}), ...(wt(v.w) ? { w:Math.round(+v.w) } : {}),
+    ...(v.vis === false ? { vis:false } : {}), ...(v.vis === true && OPTIN.includes(k) ? { vis:true } : {}), ...(v.half ? { half:true } : {}), ...(col(v.c) ? { c:v.c } : {}), ...(wt(v.w) ? { w:Math.round(+v.w) } : {}),
     ...(col(v.cc) ? { cc:v.cc } : {}), ...(wt(v.cw) ? { cw:Math.round(+v.cw) } : {}), ...(Number.isFinite(+v.tr) && +v.tr > 0 ? { tr:Math.min(+v.tr, 0.95) } : {}),
     ...(pats(v.sp) ? { sp:pats(v.sp) } : {}), ...(pats(v.cp) ? { cp:pats(v.cp) } : {}), ...(['coarse', 'medium', 'fine'].includes(v.dl) ? { dl:v.dl } : {}) }]).filter(([, v]) => Object.keys(v).length));
 }
 function sanitizeTpls(arr){
   if (!Array.isArray(arr)) return DEFAULT_TPLS();
   return arr.filter(t => t && typeof t.id === 'string').map(t => ({ id:t.id.slice(0, 40), name:String(t.name || 'Шаблон').slice(0, 80), ov:sanOv(t.ov),
-    // the survey template of older projects gets the survey look
-    ...(t.look ? { look:sanitizeLook(t.look) } : t.id === 't-survey' ? { look:SURVEY_LOOK() } : {}) }));
+  })).map(t2 => t2);
+}
+// older projects: their template «Оформление плана» becomes category overrides
+function migrateLooks(arr, raw){
+  for (const t of arr){ const r = (raw || []).find(x => x && x.id === t.id); const L = r && r.look ? sanitizeLook(r.look) : (t.id === 't-survey' && !t.ov.wall && !t.ov.ceilh ? SURVEY_LOOK() : null); if (!L) continue; const add = sanOv(lookToOv(L)); for (const [k, v] of Object.entries(add)) t.ov[k] = { ...v, ...(t.ov[k] || {}) }; }
+  return arr;
 }
 const tplOfView = v => v && v.tpl && TPLS.find(t => t.id === v.tpl);
 // override keys, the most specific first; '_model' / '_anno' — «Показывать категории модели / аннотаций на этом виде»
 const ANNO_T = ['dim', 'adim', 'rdim', 'grid', 'line', 'circle', 'text'];
+// annotation categories that are off unless a template / the view turns them on (Revit: tags placed by the template)
+const OPTIN = ['ceilh', 'winh'];
+function optCat(k){
+  const v = viewNow(), t = tplOfView(v); let o = null;
+  for (const src of [t && t.ov, v && v.ov]) if (src){ if (src._anno && src._anno.vis === false) o = { off:true }; if (src[k]) o = { ...(o || {}), ...src[k], off:false }; }
+  return o && !o.off && o.vis === true ? o : null;
+}
 const ovKeys = it => { if (!it) return []; const k = it.type === 'circle' ? 'line' : (it.type === 'adim' || it.type === 'rdim') ? 'dim' : it.type, all = ANNO_T.includes(it.type) ? '_anno' : '_model';
   if (it.type === 'fam'){ const f = famById(it.f); return ['f:' + it.f, ...(f ? ['cat:' + f.cat] : []), all]; } return [k, all]; };
 // the template's overrides, then the view's own on top (Revit: view V/G over the template)
@@ -2017,12 +2034,14 @@ function cloneMat(base){
 }
 function applyOv(obj, o){
   if (!o) return;
-  const plan = S.view === 'plan', mp = plan ? o.cp : o.sp, meshOv = o.half || o.tr || patsOn(mp) || (!plan && patsOn(o.cp)), lineOv = o.c || o.w || o.cc || o.cw || o.half;
+  const plan = S.view === 'plan', meshOv = o.half || o.tr || patsOn(o.sp) || patsOn(o.cp), lineOv = o.c || o.w || o.cc || o.cw || o.half;
   if (!meshOv && !lineOv) return;
   obj.traverse(q => {
     const base = q.material; if (!base || Array.isArray(base) || base === M.pick) return;
     if (q.isMesh && !q.isLineSegments2){
       if (!meshOv || base.opacity === 0) return;
+      const mp = plan && !q.userData.proj ? o.cp : o.sp;
+      if (!patsOn(mp) && !o.half && !o.tr && !(!plan && patsOn(o.cp))) return;
       const key = 'm|' + base.uuid + '|' + JSON.stringify([patsOn(mp) ? mp : 0, o.half, o.tr, !plan && patsOn(o.cp) ? o.cp : 0]);
       let m = OVM.get(key);
       if (!m){
@@ -4443,27 +4462,28 @@ function buildLabels(){
     else if (w.type === 'floor'){ const c = polyCenter(w.pts), p = w.pts[0], q = { x:p.x + (c.x - p.x) * 0.12, z:p.z + (c.z - p.z) * 0.12 }; out.push({ x:q.x, y:0, z:q.z, t:w.tag, cls:'wt fl' + sc }); }
     else if (w.type === 'roof'){ const F = roofFrame(w), p = F.map(F.u1 - 0.35, 0, F.v0 + 0.35); out.push({ x:p.x, y:0, z:p.z, t:w.tag, cls:'wt rf' + sc }); }
   }
-  const lk = plan ? lookOf() : null;
+  // annotation categories «Высоты потолков» and «Высоты окон» (shown only where a template / view turns them on)
+  const ceilO = plan ? optCat('ceilh') : null, winO = plan ? optCat('winh') : null;
   if (plan) for (const r of items){
     if (r.type !== 'room' || !shown(r)) continue;
     const d = roomData(r);
-    if (lk && lk.ceil){
+    if (ceilO){
       // survey room tag: number in a circle, area underlined, the measured ceiling height in blue
       const sc2 = isSel(r.id) ? ' sel' : '', hc = roomCeil(r);
       out.push({ x:r.x, y:0, z:r.z, t:String(r.num).padStart(2, '0'), cls:'svn' + sc2, dy:-15 });
       out.push({ x:r.x, y:0, z:r.z, t:d.open ? 'Не окружено' : m2(d.area).replace('.', ',') + ' м²', cls:'sva' + sc2 + (d.open ? ' open' : '') });
-      out.push({ x:r.x, y:0, z:r.z, t:`h потолка=${hc != null ? Math.round(hc * 1000) : '—'}мм`, cls:'hb', dy:17, col:lk.hc });
+      out.push({ x:r.x, y:0, z:r.z, t:`h потолка=${hc != null ? Math.round(hc * 1000) : '—'}мм`, cls:'hb', dy:17, col:ceilO.c || '#2433c8' });
     } else out.push({ x:r.x, y:0, z:r.z, t:`${r.name}\n${r.num}  ·  ${d.open ? 'Не окружено' : m2(d.area) + ' м²'}`, cls:'rm' + (isSel(r.id) ? ' sel' : '') + (d.open ? ' open' : '') });
   }
   // survey: the sill and the opening height of every window, outside the wall
-  if (lk && lk.win) for (const w of items){
+  if (winO) for (const w of items){
     if (w.type !== 'window' || !shown(w)) continue;
     const wl = byId(w.wall); if (!wl) continue;
     const f = wallFrame(wl), op = opsOf(wl, f.L).find(o => o.o.id === w.id); if (!op) continue;
     const c = bounds().getCenter(new V3()), mid = f.p1.clone().addScaledVector(f.dir, op.pos), inSide = Math.sign(c.clone().sub(mid).dot(f.nrm)) || 1;
     const p = mid.addScaledVector(f.nrm, -inSide * (wl.t / 2 + 0.5));
-    out.push({ x:p.x, y:0, z:p.z, t:`h от пола=${Math.round((w.sill || 0) * 1000)}мм`, cls:'hb', dy:-8, col:lk.hc });
-    out.push({ x:p.x, y:0, z:p.z, t:`h проёма=${Math.round(w.h * 1000)}мм`, cls:'hb', dy:8, col:lk.hc });
+    out.push({ x:p.x, y:0, z:p.z, t:`h от пола=${Math.round((w.sill || 0) * 1000)}мм`, cls:'hb', dy:-8, col:winO.c || '#2433c8' });
+    out.push({ x:p.x, y:0, z:p.z, t:`h проёма=${Math.round(w.h * 1000)}мм`, cls:'hb', dy:8, col:winO.c || '#2433c8' });
   }
   if (plan) viewMarkLabels(out);
   if (plan && !RENDER){
@@ -5962,30 +5982,6 @@ function renderTpl(){
     }
   };
   requestAnimationFrame(() => { body.scrollTop = keepTop; });
-  // «Оформление»: the look of the whole view (survey plan style) — templates only
-  if (t){
-    const L = t.look, h3 = document.createElement('h3'); h3.textContent = 'Оформление плана'; h3.style.cssText = 'font-size:14px;margin:12px 0 4px'; body.append(h3);
-    const box = document.createElement('div'); box.className = 'stdgrid'; body.append(box);
-    const fo = cur => [['none', 'Нет'], ...STD.fills.filter(f => f.k !== 'none').map(f => [f.id, f.n])].map(([v, n]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${esc(n)}</option>`).join('');
-    box.innerHTML = `<label>Своё оформление</label><label class="pchk"><input type="checkbox" data-lk="on"${L ? ' checked' : ''}> заливка стен, контур и подписи этого шаблона</label>`
-      + (L ? `<label>Заливка стен: фон</label><div class="row" style="gap:6px"><select data-lk="bgp">${fo(L.cut ? L.cut.bg.p : 'solid')}</select><input type="color" data-lk="bgc" value="${L.cut ? L.cut.bg.c : '#d9d9d9'}"></div>
-        <label>Заливка стен: узор</label><div class="row" style="gap:6px"><select data-lk="fgp">${fo(L.cut ? L.cut.fg.p : 'dots')}</select><input type="color" data-lk="fgc" value="${L.cut ? L.cut.fg.c : '#8f8f8f'}"></div>
-        <label>Контур стен</label><div class="row" style="gap:6px"><input type="color" data-lk="lc" value="${L.line ? L.line.c : '#3c3c3c'}"><select data-lk="lw">${STD.weights.map((w, i) => `<option value="${i + 1}"${(L.line ? L.line.w : 2) === i + 1 ? ' selected' : ''}>${i + 1} — ${w.toLocaleString('ru-RU')} мм</option>`).join('')}</select></div>
-        <label>Линии слоёв стен</label><label class="pchk"><input type="checkbox" data-lk="layers"${L.noLayers ? '' : ' checked'}> показывать</label>
-        <label>Подписи помещений</label><label class="pchk"><input type="checkbox" data-lk="ceil"${L.ceil ? ' checked' : ''}> номер, площадь, высота потолка</label>
-        <label>Подписи окон</label><label class="pchk"><input type="checkbox" data-lk="win"${L.win ? ' checked' : ''}> высота от пола и высота проёма</label>
-        <label>Цвет подписей высот</label><input type="color" data-lk="hc" value="${L.hc}">` : '');
-    const q = k => box.querySelector(`[data-lk="${k}"]`), done = () => { scheduleSave(); rebuild(); annoDirty = true; };
-    q('on').onchange = e => { if (e.target.checked) t.look = SURVEY_LOOK(); else delete t.look; renderTpl(); done(); };
-    if (L){
-      const cut = () => (L.cut = L.cut || { fg:{ p:'dots', c:'#8f8f8f' }, bg:{ p:'solid', c:'#d9d9d9' } });
-      q('bgp').onchange = e => { cut().bg.p = e.target.value; done(); }; q('bgc').onchange = e => { cut().bg.c = e.target.value; done(); };
-      q('fgp').onchange = e => { cut().fg.p = e.target.value; done(); }; q('fgc').onchange = e => { cut().fg.c = e.target.value; done(); };
-      q('lc').onchange = e => { L.line = { ...(L.line || { w:2 }), c:e.target.value }; done(); }; q('lw').onchange = e => { L.line = { ...(L.line || { c:'#3c3c3c' }), w:+e.target.value }; done(); };
-      q('layers').onchange = e => { L.noLayers = !e.target.checked; done(); }; q('ceil').onchange = e => { L.ceil = e.target.checked; done(); };
-      q('win').onchange = e => { L.win = e.target.checked; done(); }; q('hc').onchange = e => { L.hc = e.target.value; done(); };
-    }
-  }
   if (t){
     // Revit «Шаблоны видов»: parameters of the template; V/G of models and of annotations are edited in their own window
     const cnt = pre => Object.keys(t.ov).filter(k => pre(k)).length, isAnno = k => k === '_anno' || TPL_ANNO.some(([a]) => a === k);
@@ -6028,7 +6024,9 @@ function openVGDlg(target){
 }
 function vgSet(k, field, val){
   const D0 = VGD.draft, cur = { ...(D0[k] || {}) };
-  if (val === undefined || val === null || val === '' || (field === 'vis' && val === true) || (field === 'half' && !val) || (field === 'tr' && !val)) delete cur[field]; else cur[field] = val;
+  const opt = field === 'vis' && OPTIN.includes(k);
+  if (opt){ if (val === true) cur.vis = true; else delete cur.vis; }
+  else if (val === undefined || val === null || val === '' || (field === 'vis' && val === true) || (field === 'half' && !val) || (field === 'tr' && !val)) delete cur[field]; else cur[field] = val;
   if (Object.keys(cur).length) D0[k] = cur; else delete D0[k];
 }
 function renderVG(){
@@ -6047,7 +6045,7 @@ function renderVG(){
   };
   const rowHTML = (r, child) => {
     const o = D0[r.k] || {}, has = r.kids && r.kids.length, op = VGD.open.has(r.k);
-    return `<tr data-k="${r.k}" class="${child ? 'child' : ''}${VGD.cell && VGD.cell.k === r.k ? ' rs' : ''}"><td class="nm"><span class="tg${has ? '' : ' leaf'}" data-tg="1">${op ? '−' : '+'}</span><label class="pchk"><input type="checkbox" data-vis="1"${o.vis === false ? '' : ' checked'}> ${esc(r.n)}</label></td>`
+    return `<tr data-k="${r.k}" class="${child ? 'child' : ''}${VGD.cell && VGD.cell.k === r.k ? ' rs' : ''}"><td class="nm"><span class="tg${has ? '' : ' leaf'}" data-tg="1">${op ? '−' : '+'}</span><label class="pchk"><input type="checkbox" data-vis="1"${(OPTIN.includes(r.k) ? o.vis === true : o.vis !== false) ? ' checked' : ''}> ${esc(r.n)}</label></td>`
       + cols.map(col => cellHTML(r, col, o)).join('')
       + `<td style="text-align:center">${(VG_NA[r.k] || []).length > 3 && !anno ? '' : `<input type="checkbox" data-half="1"${o.half ? ' checked' : ''} aria-label="Полутона">`}</td>`
       + (anno ? '' : `<td><select data-dl="1"><option value="">По виду</option><option value="coarse"${o.dl === 'coarse' ? ' selected' : ''}>Низкий</option><option value="medium"${o.dl === 'medium' ? ' selected' : ''}>Средний</option><option value="fine"${o.dl === 'fine' ? ' selected' : ''}>Высокий</option></select></td>`) + `</tr>`
@@ -6107,7 +6105,7 @@ $('#vgFind').oninput = renderVG; $('#vgDisc').onchange = renderVG;
 const vgEach = fn => { const q = ($('#vgFind').value || '').trim().toLowerCase(), disc = $('#vgDisc').value; for (const r of vgRows()){ if (disc && r.disc !== disc) continue; if (!q || r.n.toLowerCase().includes(q)) fn(r.k); for (const c of r.kids || []) if (!q || c.n.toLowerCase().includes(q)) fn(c.k); } renderVG(); };
 $('#vgAll').onclick = () => vgEach(k => vgSet(k, 'vis', true));
 $('#vgNone').onclick = () => vgEach(k => vgSet(k, 'vis', false));
-$('#vgInv').onclick = () => vgEach(k => vgSet(k, 'vis', (VGD.draft[k] || {}).vis === false ? true : false));
+$('#vgInv').onclick = () => vgEach(k => { const v0 = (VGD.draft[k] || {}).vis; vgSet(k, 'vis', OPTIN.includes(k) ? v0 !== true : v0 === false); });
 $('#vgExp').onclick = () => { for (const r of vgRows()) if (r.kids && r.kids.length) VGD.open.add(r.k); renderVG(); };
 $('#vgOvL').onclick = () => { const c2 = VGD.cell; if (!c2) return; const td = $('#vgGrid').querySelector(`tr[data-k="${CSS.escape(c2.k)}"] td.c[data-col="pl"]`); if (td) vgPop(c2.k, 'pl', td); };
 $('#vgOvP').onclick = () => { const c2 = VGD.cell; if (!c2) return; const td = $('#vgGrid').querySelector(`tr[data-k="${CSS.escape(c2.k)}"] td.c[data-col="pp"]`); if (td) vgPop(c2.k, 'pp', td); };
@@ -7664,7 +7662,7 @@ function loadRecord(rec){
   types = sanitizeTypes(rec.types);
   levels = sanitizeLevels(rec.levels) || DEFAULT_LEVELS();
   STD = sanitizeStd(rec.std); makeMaterials();
-  fams = sanitizeFams(rec.fams) || FAM_BUILTIN(); FBOX.clear(); TPLS = sanitizeTpls(rec.tpls);
+  fams = sanitizeFams(rec.fams) || FAM_BUILTIN(); FBOX.clear(); TPLS = migrateLooks(sanitizeTpls(rec.tpls), rec.tpls);
   items = sanitizeItems(rec.items);
   for (const it of items) if (!it.lv && it.type !== 'grid' && !isOp(it) && !isMeta(it)) it.lv = levels[0].id;
   pruneMeta(); S.tmp = null; S.reveal = false; $('#viewport').classList.remove('reveal'); { const rb = $('#rbReveal'); if (rb) rb.setAttribute('aria-pressed', false); } { const vr = $('#vbReveal'); if (vr) vr.setAttribute('aria-pressed', false); }
