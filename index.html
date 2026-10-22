@@ -2289,14 +2289,23 @@ function addDimGeom(d, lineMat, tickMat){
   // sizes follow «Аннотации»: extension gap and overshoot, dimension line extension, tick / arrow / dot
   const k = paperMm(), A = STD.anno, Y = 30, { u, n, o, arr, off } = G;
   const at = (t, s) => new V3(o.x + u.x * t + n.x * s, Y, o.z + u.z * t + n.z * s);
-  const ext = (A.tick === 'arrow' ? 0 : A.ext) * k, pts = [at(arr[0].t - ext, off), at(arr[arr.length - 1].t + ext, off)];
-  for (const a of arr){
+  const ext = (A.tick === 'arrow' ? 0 : A.ext) * k, H = d.survey && d.hid && d.hid.length ? new Set(d.hid) : null;
+  let pts = [at(arr[0].t - ext, off), at(arr[arr.length - 1].t + ext, off)], used = null;
+  if (H){
+    // a survey chain with repeated segments: only the segments that are kept, with their own extension lines and ticks
+    pts = []; used = new Set();
+    for (let i = 0; i < arr.length - 1; i++){ if (H.has(i)) continue; const e0 = i === 0 || H.has(i - 1) ? ext : 0, e1 = i === arr.length - 2 || H.has(i + 1) ? ext : 0; pts.push(at(arr[i].t - e0, off), at(arr[i + 1].t + e1, off)); used.add(i); used.add(i + 1); }
+    if (!pts.length) return;
+  }
+  for (const [ai, a] of arr.entries()){
+    if (used && !used.has(ai)) continue;
     const side = Math.sign(off - a.s) || 1, gap = A.gap * k, over = A.over * k;
     if (Math.abs(off - a.s) > gap) pts.push(at(a.t, a.s + side * gap), at(a.t, off + side * over));
   }
   const col = lineMat === M.dim ? null : '#' + lineMat.color.getHexString(), fl = fatLines(pts, 'dims', col); if (fl) anno.add(fl);
   const rot = -(Math.atan2(u.z, u.x) + Math.PI / 4);
   arr.forEach((a, i) => {
+    if (used && !used.has(i)) return;
     const P = at(a.t, off);
     if (A.tick === 'dot'){ const m = new THREE.Mesh(dotGeo, tickMat); m.position.copy(P); m.scale.set(0.7 * k, 1, 0.7 * k); anno.add(m); }
     else if (A.tick === 'arrow'){
@@ -2473,14 +2482,16 @@ function dimTexts(d, cls, out){
   let ang = Math.atan2(a1.y - a0.y, a1.x - a0.x) * 180 / Math.PI; if (ang > 90) ang -= 180; if (ang <= -90) ang += 180;
   // Revit: with an element selected, the dimensions that reference it become editable — type a value and the selected element moves
   const ED = !d.edit && d.type === 'dim' ? dimEditor(d) : null;
+  const H = d.survey && d.hid ? new Set(d.hid) : null;
   for (let i = 0; i < arr.length - 1; i++){
+    if (H && H.has(i)) continue;
     const tm = (arr[i].t + arr[i + 1].t) / 2, s = off + side * (STD.anno.textMm * 0.7 + 0.9) * paperMm(), L = arr[i + 1].t - arr[i].t;
     let edit = d.edit ? v => d.edit(i, v) : null, c2 = cls, txtEdit = null;
     if (ED){ const ea = ED.owns(d.refs[arr[i].ri]), eb = ED.owns(d.refs[arr[i + 1].ri]); if (ea !== eb){ edit = v => ED.move(u, eb ? v - L : L - v); c2 = cls + ' ed'; } }
     // Revit «Заменить значение размера»: the selected dimension's numbers take your own text
     const ov = d.txt && d.txt[i];
     if (!edit && d.type === 'dim' && d.id && sel.size === 1 && isSel(d.id)){ txtEdit = v => { d.txt = d.txt || {}; if (v && v !== fmtLen(L)) d.txt[i] = v.slice(0, 40); else delete d.txt[i]; if (!Object.keys(d.txt).length) delete d.txt; }; c2 = cls + ' ed'; }
-    out.push({ x:o.x + u.x * tm + n.x * s, y:0, z:o.z + u.z * tm + n.z * s, t:ov || fmtLen(L), cls:c2 + (ov ? ' ovt' : ''), rot:ang, edit, txtEdit, val:L, du:{ x:u.x, z:u.z } });
+    out.push({ x:o.x + u.x * tm + n.x * s, y:0, z:o.z + u.z * tm + n.z * s, t:ov || fmtLen(L), cls:c2 + (ov ? ' ovt' : ''), rot:ang, edit, txtEdit, val:L, du:{ x:u.x, z:u.z }, lineOff:side });
   }
 }
 function dimEditor(d){
@@ -2500,21 +2511,31 @@ function dimEditor(d){
   } };
 }
 // dimension numbers never sit on each other: a number that lands on another one (or on a room tag) slides along its own dimension line
+const MEAS = document.createElement('canvas').getContext('2d'), MEAS_W = new Map();
+function textW(t, fs){ const k = fs.toFixed(1) + '|' + t; if (MEAS_W.has(k)) return MEAS_W.get(k); MEAS.font = `${fs}px "Golos Text", "Segoe UI", Arial, sans-serif`; const w = MEAS.measureText(String(t)).width; if (MEAS_W.size > 4000) MEAS_W.clear(); MEAS_W.set(k, w); return w; }
 function spreadDimTexts(out){
   const fs = STD.anno.textMm * 96 / 25.4 * 1.15 * (RENDER ? RENDER.pxmm / (96 / 25.4) : 1), placed = [];
-  const box = L => { const s = toScreen(L.x, 0, L.z), w = String(L.t).length * fs * 0.58 + 6, h = fs + 3, a = (L.rot || 0) * Math.PI / 180, ca = Math.abs(Math.cos(a)), sa = Math.abs(Math.sin(a));
-    return { x:s.x, y:s.y + (L.dy || 0), hw:(w * ca + h * sa) / 2, hh:(w * sa + h * ca) / 2, w }; };
+  const box = L => { const s = toScreen(L.x, 0, L.z), w = textW(L.t, fs) + 6, h = fs * 1.2 + 2, a = (L.rot || 0) * Math.PI / 180, ca = Math.abs(Math.cos(a)), sa = Math.abs(Math.sin(a));
+    return { x:s.x, y:s.y + (L.dy || 0), hw:(w * ca + h * sa) / 2, hh:(w * sa + h * ca) / 2, w, h }; };
   const hit = b => placed.some(p => Math.abs(p.x - b.x) < p.hw + b.hw - 1 && Math.abs(p.y - b.y) < p.hh + b.hh - 1);
-  for (const L of out) if (!L.du && L.x != null && /^(rm|svn|sva|hb|wt|tx)/.test(L.cls || '')) placed.push(box(L));
+  // fixed: room tags, marks, texts, angular / radial / diameter numbers
+  for (const L of out) if (!L.du && L.x != null && /^(rm|svn|sva|hb|wt|tx|dl)/.test(L.cls || '')) placed.push(box(L));
   for (const L of out){
     if (!L.du) continue;
     let b = box(L);
     if (hit(b)){
-      const x0 = L.x, z0 = L.z, s0 = toScreen(x0, 0, z0), s1 = toScreen(x0 + L.du.x, 0, z0 + L.du.z), pl = Math.hypot(s1.x - s0.x, s1.y - s0.y) || 1, step = (b.w + 6) * 0.6;
+      const x0 = L.x, z0 = L.z, s0 = toScreen(x0, 0, z0), s1 = toScreen(x0 + L.du.x, 0, z0 + L.du.z), pl = Math.hypot(s1.x - s0.x, s1.y - s0.y) || 1, step = (b.w + 6) * 0.5;
+      // the other side of the dimension line, when nothing is free along it
+      const nx = -L.du.z, nz = L.du.x, flip = 2 * (STD.anno.textMm * 0.7 + 0.9) * paperMm();
+      const side = L.lineOff != null ? Math.sign(L.lineOff) || 1 : 1;
       let done = false;
-      for (let n = 1; n <= 8 && !done; n++) for (const sg of [1, -1]){
-        const dpx = sg * n * step; L.x = x0 + L.du.x * dpx / pl; L.z = z0 + L.du.z * dpx / pl; // screen px → model metres along the line
-        b = box(L); if (!hit(b)){ done = true; break; }
+      for (const fl of [0, 1]){
+        for (let n = fl ? 0 : 1; n <= 12 && !done; n++) for (const sg of n ? [1, -1] : [1]){
+          const dpx = sg * n * step; // screen px → model metres along the line
+          L.x = x0 + L.du.x * dpx / pl - (fl ? nx * flip * side : 0); L.z = z0 + L.du.z * dpx / pl - (fl ? nz * flip * side : 0);
+          b = box(L); if (!hit(b)){ done = true; break; }
+        }
+        if (done) break;
       }
       if (!done){ L.x = x0; L.z = z0; b = box(L); }
     }
@@ -2576,12 +2597,12 @@ function addRadGeom(d, sel){
 function specialDimTexts(out){
   const k = paperMm();
   for (const d of items){
-    if (d.type === 'adim' && shown(d)){ const G = angGeom(d); if (!G) continue; const a = G.s + G.w / 2, rr = G.r + (STD.anno.textMm * 0.7 + 0.9) * k; out.push({ x:G.O.x + Math.cos(a) * rr, y:0, z:G.O.z + Math.sin(a) * rr, t:(G.w * 180 / Math.PI).toLocaleString('ru-RU', { maximumFractionDigits:STD.anno.dec || 1 }) + '°', cls:'dl' + (isSel(d.id) ? ' sel' : '') }); }
+    if (d.type === 'adim' && shown(d)){ const G = angGeom(d); if (!G) continue; const a = G.s + G.w / 2, rr = G.r + (STD.anno.textMm * 0.7 + 0.9) * k; out.push({ x:G.O.x + Math.cos(a) * rr, y:0, z:G.O.z + Math.sin(a) * rr, t:(G.w * 180 / Math.PI).toLocaleString('ru-RU', { maximumFractionDigits:STD.anno.dec || 1 }) + '°', cls:'dl' + (isSel(d.id) ? ' sel' : ''), du:{ x:-Math.sin(a), z:Math.cos(a) }, lineOff:1 }); }
     else if (d.type === 'rdim' && shown(d)){
       const G = radGeom(d); if (!G) continue; const P = new V3(d.p.x, 0, d.p.z), far = Math.max(G.R + 3 * k, P.distanceTo(G.c)), along = d.m === 'd' ? 0 : (G.R + far) / 2 - G.R * 0.5;
       const q = G.c.clone().addScaledVector(G.v, d.m === 'd' ? G.R * 0.45 : Math.max(G.R * 0.5, along)).addScaledVector(new V3(-G.v.z, 0, G.v.x), (STD.anno.textMm * 0.7 + 0.9) * k);
       let ang = Math.atan2(G.v.z, G.v.x) * 180 / Math.PI; const s0 = toScreen(G.c.x, 0, G.c.z), s1 = toScreen(G.c.x + G.v.x, 0, G.c.z + G.v.z); ang = Math.atan2(s1.y - s0.y, s1.x - s0.x) * 180 / Math.PI; if (ang > 90) ang -= 180; if (ang <= -90) ang += 180;
-      out.push({ x:q.x, y:0, z:q.z, t:(d.m === 'd' ? '⌀ ' + fmtLen(G.R * 2) : 'R ' + fmtLen(G.R)), cls:'dl' + (isSel(d.id) ? ' sel' : ''), rot:ang });
+      out.push({ x:q.x, y:0, z:q.z, t:(d.m === 'd' ? '⌀ ' + fmtLen(G.R * 2) : 'R ' + fmtLen(G.R)), cls:'dl' + (isSel(d.id) ? ' sel' : ''), rot:ang, du:{ x:G.v.x, z:G.v.z }, lineOff:1 });
     }
   }
   if (S.tool === 'measure' && E.pts.length){ const a = E.pts[0], b = E.pts[1] || D.cur; if (b){ const L = a.distanceTo(b); out.push({ x:(a.x + b.x) / 2, y:0, z:(a.z + b.z) / 2, t:`${mm(L)} мм · ΔX ${mm(Math.abs(b.x - a.x))} · ΔY ${mm(Math.abs(b.z - a.z))}`, cls:'live ruler', dy:-16 }); } }
@@ -2934,22 +2955,37 @@ function refreshSurveyDims(){
   markSurveyDups();
 }
 // a survey dimension that repeats another one (opposite walls of one room, same points along the same direction) is not drawn
+// segment by segment: every segment of a survey chain belongs to the room on its side; a segment that repeats one already
+// kept in the same room (same direction, same two points along it) is not drawn — d.hid lists them, d.dup when all are hidden
 function markSurveyDups(){
   const sv = items.filter(d => d.type === 'dim' && d.survey && byId(d.sw));
-  const info = sv.map(d => {
-    const w = byId(d.sw), f = wallFrame(w), u = new V3(f.dir.x, 0, f.dir.z), mid = f.p1.clone().addScaledVector(f.dir, f.L / 2).addScaledVector(f.nrm, d.side * (w.t / 2 + 0.25));
-    const R = regionAt(mid.x, mid.z, lvOf(w)), pts = d.refs.map(refPoint).filter(Boolean);
-    return { d, u, R, key:R && !R.open ? Math.round(R.area * 1e4) + '|' + R.poly.length : null, pts };
-  });
-  for (const a of info) delete a.d.dup;
-  for (let i = 0; i < info.length; i++){
-    const a = info[i]; if (a.d.dup || !a.key) continue;
-    const ta = a.pts.map(p => p.x * a.u.x + p.z * a.u.z).sort((x, y) => x - y);
-    for (let j = i + 1; j < info.length; j++){
-      const b = info[j]; if (b.d.dup || b.key !== a.key || Math.abs(a.u.x * b.u.z - a.u.z * b.u.x) > 1e-3) continue;
-      const tb = b.pts.map(p => p.x * a.u.x + p.z * a.u.z).sort((x, y) => x - y);
-      if (ta.length === tb.length && ta.every((t, k) => Math.abs(t - tb[k]) < 0.003)) b.d.dup = true;
+  const segs = [];
+  for (const d of sv){
+    delete d.dup; delete d.hid;
+    const G = dimGeom(d), w = byId(d.sw); if (!G) continue;
+    const f = wallFrame(w), { u, n, o, arr } = G, ax = Math.abs(u.x) >= Math.abs(u.z) ? (u.x >= 0 ? 1 : -1) : (u.z >= 0 ? 1 : -1);
+    const list = [];
+    for (let i = 0; i < arr.length - 1; i++){
+      const a = arr[i], b = arr[i + 1], tm = (a.t + b.t) / 2, sm = (a.s + b.s) / 2;
+      const P = new V3(o.x + u.x * tm + n.x * sm, 0, o.z + u.z * tm + n.z * sm).addScaledVector(f.nrm, d.side * 0.25);
+      const R = regionAt(P.x, P.z, lvOf(w)), key = R && !R.open ? Math.round(R.area * 1e4) + '|' + R.poly.length + '|' + Math.round(polyCenter(R.poly).x * 100) + '|' + Math.round(polyCenter(R.poly).z * 100) : null;
+      // the two ends along a common axis of this direction (sign-free), so opposite walls compare
+      const A = new V3(o.x + u.x * a.t, 0, o.z + u.z * a.t), B = new V3(o.x + u.x * b.t, 0, o.z + u.z * b.t), U = u.clone().multiplyScalar(ax);
+      const pa = A.x * U.x + A.z * U.z, pb = B.x * U.x + B.z * U.z;
+      list.push({ i, key, U, lo:Math.min(pa, pb), hi:Math.max(pa, pb) });
     }
+    segs.push({ d, list });
+  }
+  // the longer chains are kept first, so a lone dimension that repeats a part of a chain is the one dropped
+  segs.sort((x, y) => y.list.length - x.list.length);
+  const kept = [];
+  for (const { d, list } of segs){
+    const hid = [];
+    for (const s of list){
+      if (s.key && kept.some(k => k.key === s.key && Math.abs(k.U.x * s.U.z - k.U.z * s.U.x) < 1e-3 && Math.abs(k.lo - s.lo) < 0.003 && Math.abs(k.hi - s.hi) < 0.003)) hid.push(s.i);
+      else kept.push(s);
+    }
+    if (hid.length && hid.length === list.length) d.dup = true; else if (hid.length) d.hid = hid;
   }
 }
 /* Revit «Присоединить / Отсоединить» for wall ends.
