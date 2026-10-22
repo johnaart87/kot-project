@@ -221,6 +221,7 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 #viewport.tmpiso{box-shadow:inset 0 0 0 3px #14a5b8}
 #viewport.tmpiso::after{content:'Временно скрыть/изолировать — сброс: HR';position:absolute;top:6px;right:120px;font-size:11.5px;color:#0e7d8c;background:var(--sheet);padding:2px 6px;border-radius:4px;pointer-events:none}
 #viewport.reveal{box-shadow:inset 0 0 0 3px #d63fa8}
+#hovTip{position:absolute;z-index:7;pointer-events:none;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:2px 7px;font-size:12px;white-space:nowrap;box-shadow:0 4px 14px var(--shade)}
 .dim.co{pointer-events:auto;cursor:pointer;color:var(--accent);border:1px solid var(--accent);background:var(--sheet);font-weight:500}
 .tree .add{all:unset;cursor:pointer;color:var(--accent);font-weight:600;padding:0 6px;border-radius:3px;margin-left:4px}
 .tree .add:hover{background:var(--accent-soft)}
@@ -238,6 +239,10 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .vbar{position:absolute;left:0;bottom:0;display:flex;align-items:center;gap:2px;background:var(--chrome);border-top:1px solid var(--line);border-right:1px solid var(--line);border-top-right-radius:4px;padding:2px 6px;font-size:12px;color:var(--muted)}
 .vbar button{border:0;background:transparent;padding:3px 6px;border-radius:3px;cursor:pointer;color:var(--ink);font-size:12px}
 .vbar button:hover{background:var(--accent-soft)}
+#vbReveal[aria-pressed="true"]{background:#d63fa8;color:#fff}
+#rbGridVis[aria-pressed="true"] .off{display:none}
+#rbGridVis[aria-pressed="true"]{background:transparent}
+#vbWeights[aria-pressed="false"]{color:var(--muted)}
 .vbar .sep{width:1px;height:14px;background:var(--line);margin:0 3px}
 .vbar .scale{font-family:var(--font-num);color:var(--ink);padding:0 4px}
 .viewtag{position:absolute;left:10px;top:8px;font-size:12px;color:var(--muted);pointer-events:none}
@@ -312,6 +317,30 @@ details.more summary::-webkit-details-marker{display:none}
 .stdtab input[type=number]{width:84px}
 .stdtab input[type=color]{width:42px;height:26px;padding:0;border:1px solid var(--line);border-radius:4px;background:none}
 .stdtab canvas{display:block;border:1px solid var(--line-soft);border-radius:3px;background:#fff}
+/* «Материалы» dialog: list on the left, the chosen material's graphics and appearance on the right */
+.matwrap{display:grid;grid-template-columns:minmax(200px,260px) 1fr;gap:14px;min-height:min(560px,70vh)}
+.matside{display:flex;flex-direction:column;gap:8px;min-width:0}
+.matside input[type=search]{width:100%}
+#matList{flex:1;overflow:auto;border:1px solid var(--line);border-radius:6px;max-height:min(520px,62vh)}
+#matList button{display:flex;align-items:center;gap:8px;width:100%;border:0;border-bottom:1px solid var(--line-soft);background:transparent;color:var(--ink);text-align:left;padding:6px 8px;font-size:13px;cursor:pointer}
+#matList button:hover{background:var(--accent-soft)}
+#matList button[aria-selected="true"]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+#matList canvas{flex:none;border:1px solid var(--line);border-radius:3px}
+#matList .mt-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#matList .mt-u{font-size:11px;color:var(--muted)}
+.matbody{min-width:0;display:flex;flex-direction:column;gap:12px;overflow:auto;max-height:min(560px,66vh)}
+.matbody h3{margin:4px 0 0;font-size:14px;font-weight:600}
+.matbody .mrow{display:grid;grid-template-columns:150px 1fr auto;gap:8px;align-items:center;font-size:13px}
+.matbody .mrow > span:first-child{color:var(--muted)}
+.matbody select,.matbody input[type=text],.matbody input[type=number]{width:100%;min-width:0}
+.matbody input[type=color]{width:42px;height:26px;padding:0;border:1px solid var(--line);border-radius:4px;background:none}
+.matbody canvas{border:1px solid var(--line-soft);border-radius:4px;background:#fff;max-width:100%}
+.matprev{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.matprev figure{margin:0;display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted)}
+.matphoto{width:160px;height:120px;border:1px dashed var(--line);border-radius:6px;background:var(--chrome) center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
+.matpick{display:flex;gap:4px;align-items:center;min-width:0}
+.matpick select{flex:1;min-width:0}
+@media (max-width:700px){ .matwrap{grid-template-columns:1fr} #matList{max-height:200px} .matbody{max-height:none} .matbody .mrow{grid-template-columns:110px 1fr auto} }
 .stdgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 16px;align-items:center;max-width:620px}
 .stdgrid label{color:var(--muted);font-size:12.5px}
 #stdBody{max-height:min(62vh,640px);overflow:auto}
@@ -463,6 +492,10 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" id="rbAutoDim" title="Размеры по наружным стенам"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="5" y="7" width="12" height="10"/><path d="M5 3.5h12M5 2v3M17 2v3M11 2v3"/></svg>Размеры<br>по стенам</button>
       </div><div class="grp-label">Размер</div></div>
       <div class="grp"><div class="grp-items">
+        <button class="rbtn" data-tool="grid" title="Ось здания: две точки — линия оси с марками на концах (GR)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="4" r="2.6"/><path d="M10 6.6V18" stroke-dasharray="3 1.5 1 1.5"/></svg>Ось<span class="k">GR</span></button>
+        <button class="rbtn" id="rbGridVis" aria-pressed="true" title="Показать / скрыть оси в текущем виде (VG)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="6" cy="4" r="2.2"/><circle cx="14" cy="4" r="2.2"/><path d="M6 6.2V18M14 6.2V18" stroke-dasharray="3 1.5 1 1.5"/><path class="off" d="M3 17L17 3" stroke-width="1.6"/></svg><span class="lbl">Скрыть<br>оси</span><span class="k">VG</span></button>
+      </div><div class="grp-label">Оси</div></div>
+      <div class="grp"><div class="grp-items">
         <button class="rbtn" data-tool="measure" title="Линейка: щёлкните две точки — длина, ΔX и ΔY (ME)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M2 14L14 2l4 4L6 18z"/><path d="M6 10l2 2M8.5 7.5l1.5 1.5M11 5l2 2"/></svg>Линейка<span class="k">ME</span></button>
       </div><div class="grp-label">Измерить</div></div>
       <div class="grp"><div class="grp-items">
@@ -472,6 +505,9 @@ details.more summary::-webkit-details-marker{display:none}
     </div>
     <div class="rb-panel" id="rbModify" role="tabpanel" hidden></div>
     <div class="rb-panel" id="rbManage" role="tabpanel" hidden>
+      <div class="grp"><div class="grp-items">
+        <button class="rbtn" id="rbMats" title="Материалы: тонирование, штриховка поверхности и сечения, фото текстуры"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M4.5 6.5l9 9M3.4 10.6l6 6M6.5 4.5l9 9M10.6 3.4l6 6" stroke-width=".9"/></svg>Материалы</button>
+      </div><div class="grp-label">Материалы</div></div>
       <div class="grp"><div class="grp-items">
         <button class="rbtn" data-std="styles" title="Стили линий: вес, цвет и образец для каждой категории линий"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M2 5h16" stroke-width="2.4"/><path d="M2 10h16" stroke-width="1.4" stroke-dasharray="4 2"/><path d="M2 15h16" stroke-width=".8" stroke-dasharray="6 1.5 1 1.5"/></svg>Стили<br>линий</button>
         <button class="rbtn" data-std="weights" title="Вес линий: толщина на бумаге для номеров 1–16"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M2 4h16" stroke-width=".7"/><path d="M2 8h16" stroke-width="1.3"/><path d="M2 12.5h16" stroke-width="2"/><path d="M2 17h16" stroke-width="3"/></svg>Вес<br>линий</button>
@@ -540,7 +576,9 @@ details.more summary::-webkit-details-marker{display:none}
         <span class="scale" id="scale">1:100</span><span class="sep"></span>
         <button id="vbDetail" title="Уровень детализации стен">Детализация: средняя</button><span class="sep"></span>
         <button id="vbStyle" title="Визуальный стиль">Стиль: тонированный</button><span class="sep"></span>
-        <label for="vbPhase" style="padding:0 2px">Стадия</label><select id="vbPhase" style="font-size:12px;padding:1px 4px"><option value="obmer">Обмер</option><option value="demontazh">Демонтаж</option><option value="montazh">Монтаж</option><option value="mebel">Мебель</option><option value="all">Показать все</option></select>
+        <label for="vbPhase" style="padding:0 2px">Стадия</label><select id="vbPhase" style="font-size:12px;padding:1px 4px"><option value="obmer">Обмер</option><option value="demontazh">Демонтаж</option><option value="montazh">Монтаж</option><option value="mebel">Мебель</option><option value="all">Показать все</option></select><span class="sep"></span>
+        <button id="vbWeights" aria-pressed="true" title="Вес линий: включён — линии разной толщины по своему весу; выключен — все линии тонкие (TL)">Вес линий: вкл</button><span class="sep"></span>
+        <button id="vbReveal" aria-pressed="false" title="Показать скрытые элементы (RH)"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" style="width:15px;height:15px;vertical-align:-3px"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg> Скрытые</button>
       </div>
       <div id="sheetWrap" hidden><canvas id="sheetCv"></canvas></div>
       <button class="btn primary" id="finishBtn" hidden>Завершить стену</button>
@@ -712,6 +750,17 @@ details.more summary::-webkit-details-marker{display:none}
   </div>
 </div>
 
+<div class="modal" id="matDlg" hidden role="dialog" aria-modal="true" aria-labelledby="matTitle">
+  <div class="sheetd">
+    <header><h2 id="matTitle">Материалы</h2><div class="row"><button class="btn" id="matNew">Новый материал</button><button class="btn" id="matDup">Копия</button><button class="btn primary" id="matClose">Готово</button></div></header>
+    <div class="matwrap">
+      <div class="matside"><input type="search" id="matFind" placeholder="Найти материал"><div id="matList" role="listbox" aria-label="Материалы проекта"></div></div>
+      <div class="matbody" id="matBody"></div>
+    </div>
+    <input type="file" id="matImg" accept="image/*" hidden>
+  </div>
+</div>
+
 <div class="modal" id="levelDlg" hidden role="dialog" aria-modal="true" aria-labelledby="levelTitle">
   <div class="sheetd narrow">
     <header><h2 id="levelTitle">Уровни (отметки)</h2><div class="row"><button class="btn" id="lvAdd">Добавить уровень</button><button class="btn primary" id="lvClose">Готово</button></div></header>
@@ -811,6 +860,44 @@ const MATS = {
   frame:{ n:'Металлокаркас / воздух', c:'#c8d2d7' }, wood:{ n:'Дерево (брус)', c:'#c39a6b' }, block:{ n:'Керамзитобетонный блок', c:'#bfb7a8' },
   tile:{ n:'Металлочерепица', c:'#8e4436' }, screed:{ n:'Стяжка', c:'#c9c6bf' }, steel:{ n:'Сталь', c:'#8f9aa3' }
 };
+/* project materials (Revit «Управление → Материалы»): shading colour + transparency, surface pattern and cut pattern
+   (each a foreground and a background pattern with its colour), appearance photo. MATX holds the project's own
+   materials and its edits of the built-in ones; MATS stays the name/colour list every select uses. */
+const MATS_BASE = JSON.parse(JSON.stringify(MATS));
+let MATX = {};
+const PATS0 = () => ({ fg:{ p:'none', c:'#2b3439' }, bg:{ p:'none', c:'#ffffff' } });
+function matSpec(k){
+  const base = MATS[k] || MATS.generic, x = MATX[k] || {}, sm = (typeof STD !== 'undefined' && STD.mat && STD.mat[k]) || { f:'diag' };
+  return { n:base.n, c:base.c, tr:x.tr || 0, surf:x.surf || PATS0(),
+    cut:x.cut || { fg:{ p:sm.f || 'diag', c:sm.fg || '#2b3439' }, bg:{ p:'solid', c:sm.bg || base.c } },
+    img:x.img || null, iw:x.iw || 1000, ih:x.ih || x.iw || 1000, custom:!!x.custom };
+}
+function syncMats(){
+  for (const k of Object.keys(MATS)) if (!MATS_BASE[k]) delete MATS[k];
+  for (const [k, v] of Object.entries(MATS_BASE)) MATS[k] = { ...v };
+  for (const [k, x] of Object.entries(MATX)){ if (!MATS[k] && !x.custom) continue; const b = MATS[k] || { n:'Материал', c:'#c8c8c8' }; MATS[k] = { n:x.n || b.n, c:x.c || b.c }; }
+}
+function sanitizeMats(o){
+  const out = {}; if (!o || typeof o !== 'object') return out;
+  const col = (v, d) => /^#[0-9a-f]{6}$/i.test(v) ? v : d;
+  const lay = (q, d) => ({ p:q && typeof q.p === 'string' ? q.p.slice(0, 20) : 'none', c:col(q && q.c, d) });
+  const pats = q => q && typeof q === 'object' ? { fg:lay(q.fg, '#2b3439'), bg:lay(q.bg, '#ffffff') } : null;
+  for (const [k, x] of Object.entries(o)){
+    if (!x || typeof x !== 'object' || !/^[\w-]{1,24}$/.test(k) || (!MATS_BASE[k] && !x.custom)) continue;
+    const e = {};
+    if (x.custom) e.custom = true;
+    if (typeof x.n === 'string' && x.n.trim()) e.n = x.n.trim().slice(0, 60);
+    if (/^#[0-9a-f]{6}$/i.test(x.c)) e.c = x.c;
+    if (Number.isFinite(+x.tr) && +x.tr > 0) e.tr = Math.min(Math.max(+x.tr, 0), 0.95);
+    const s = pats(x.surf), c = pats(x.cut); if (s) e.surf = s; if (c) e.cut = c;
+    if (typeof x.img === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(x.img) && x.img.length < 4e6){
+      e.img = x.img; e.iw = Number.isFinite(+x.iw) && +x.iw > 0 ? Math.min(Math.max(+x.iw, 10), 1e5) : 1000;
+      if (Number.isFinite(+x.ih) && +x.ih > 0) e.ih = Math.min(Math.max(+x.ih, 10), 1e5);
+    }
+    out[k] = e;
+  }
+  return out;
+}
 const DEFAULT_TYPES = [
   { id:'ext', name:'Наружная: газобетон 300 + утеплитель 100', layers:[{ m:'plaster', t:0.015 }, { m:'insul', t:0.1 }, { m:'gas', t:0.3 }, { m:'plaster', t:0.015 }] },
   { id:'facade', name:'Наружная: облицовка + газобетон 300', layers:[{ m:'facade', t:0.12 }, { m:'insul', t:0.05 }, { m:'gas', t:0.3 }, { m:'plaster', t:0.015 }] },
@@ -952,7 +1039,14 @@ const STD_DEF = () => ({
     { id:'solid', n:'Сплошная заливка', k:'solid', s:1, a:0, sys:true }, { id:'none', n:'Без штриховки', k:'none', s:1, a:0, sys:true },
     { id:'diag', n:'Диагональ 45° (кирпич, ГОСТ)', k:'lines', s:1.6, a:45, sys:true }, { id:'diag2', n:'Диагональ −45°', k:'lines', s:1.6, a:-45, sys:true },
     { id:'cross', n:'Сетка 45°', k:'cross', s:2, a:45, sys:true }, { id:'concrete', n:'Бетон', k:'concrete', s:2.5, a:0, sys:true },
-    { id:'insul', n:'Утеплитель', k:'insul', s:2.5, a:0, sys:true }, { id:'wood', n:'Дерево', k:'wood', s:1.8, a:0, sys:true }, { id:'dots', n:'Гипс, штукатурка (точки)', k:'dots', s:1.2, a:0, sys:true }
+    { id:'insul', n:'Утеплитель', k:'insul', s:2.5, a:0, sys:true }, { id:'wood', n:'Дерево', k:'wood', s:1.8, a:0, sys:true }, { id:'dots', n:'Гипс, штукатурка (точки)', k:'dots', s:1.2, a:0, sys:true },
+    { id:'brickd', n:'Кирпичная кладка (чертёжная)', k:'brick', s:1.2, a:0, sys:true },
+    // model patterns: real size in mm, they grow and shrink with the model (tiles, brick courses, boards)
+    { id:'brickm', n:'Кирпич 250×65, шов 10 (модельная)', k:'brick', s:75, a:0, u:'model', sys:true },
+    { id:'tile300', n:'Плитка 300×300 (модельная)', k:'cross', s:300, a:0, u:'model', sys:true },
+    { id:'tile600', n:'Плитка 600×600 (модельная)', k:'cross', s:600, a:0, u:'model', sys:true },
+    { id:'board150', n:'Доска 150 (модельная)', k:'lines', s:150, a:0, u:'model', sys:true },
+    { id:'siding200', n:'Сайдинг 200 (модельная)', k:'lines', s:200, a:0, u:'model', sys:true }
   ],
   mat:{ brick:{ f:'diag' }, facade:{ f:'diag' }, gas:{ f:'cross' }, block:{ f:'cross' }, concrete:{ f:'concrete' }, screed:{ f:'dots' }, insul:{ f:'insul' }, eps:{ f:'insul' },
     plaster:{ f:'dots' }, gkl:{ f:'dots' }, wood:{ f:'wood' }, frame:{ f:'none' }, generic:{ f:'diag2' }, tile:{ f:'diag' }, steel:{ f:'cross' } },
@@ -966,7 +1060,7 @@ function sanitizeStd(o){
   const list = (arr, def, fix) => { const m = new Map(def.map(x => [x.id, { ...x }])); if (Array.isArray(arr)) for (const x of arr){ if (!x || typeof x.id !== 'string') continue; const f = fix(x); if (f) m.set(x.id, { ...(m.get(x.id) || {}), ...f, sys:!!(m.get(x.id) || {}).sys }); } return [...m.values()]; };
   out.patterns = list(o.patterns, d.patterns, x => ({ id:x.id.slice(0, 20), n:String(x.n || 'Образец').slice(0, 40), seq:Array.isArray(x.seq) ? x.seq.filter(N).map(v => clamp(+v, 0.1, 100)).slice(0, 12) : [] }));
   out.styles = list(o.styles, d.styles, x => ({ id:x.id.slice(0, 20), n:String(x.n || 'Стиль').slice(0, 40), w:clamp(Math.round(+x.w) || 1, 1, 16), c:/^#[0-9a-f]{6}$/i.test(x.c) ? x.c : '#1b252c', p:typeof x.p === 'string' ? x.p : 'solid' }));
-  out.fills = list(o.fills, d.fills, x => ({ id:x.id.slice(0, 20), n:String(x.n || 'Штриховка').slice(0, 40), k:['solid','none','lines','cross','concrete','insul','wood','dots'].includes(x.k) ? x.k : 'lines', s:N(x.s) ? clamp(+x.s, 0.3, 50) : 2, a:N(x.a) ? +x.a : 0 }));
+  out.fills = list(o.fills, d.fills, x => ({ id:x.id.slice(0, 20), n:String(x.n || 'Штриховка').slice(0, 40), k:['solid','none','lines','cross','concrete','insul','wood','dots','brick'].includes(x.k) ? x.k : 'lines', s:N(x.s) ? clamp(+x.s, 0.3, x.u === 'model' ? 5000 : 50) : 2, a:N(x.a) ? +x.a : 0, u:x.u === 'model' ? 'model' : undefined }));
   out.mat = { ...d.mat }; if (o.mat) for (const [k, v] of Object.entries(o.mat)) if (MATS[k] && v) out.mat[k] = { f:typeof v.f === 'string' ? v.f : (d.mat[k] || {}).f || 'diag', ...(/^#[0-9a-f]{6}$/i.test(v.fg) ? { fg:v.fg } : {}), ...(/^#[0-9a-f]{6}$/i.test(v.bg) ? { bg:v.bg } : {}) };
   const a = o.anno || {};
   out.anno = { tick:['tick','arrow','dot'].includes(a.tick) ? a.tick : d.anno.tick, textMm:N(a.textMm) ? clamp(+a.textMm, 1, 10) : d.anno.textMm, units:['mm','cm','m'].includes(a.units) ? a.units : 'mm', dec:clamp(Math.round(+a.dec) || 0, 0, 3),
@@ -977,9 +1071,11 @@ const styleOpts = cur => STD.styles.map(s => `<option value="${s.id}"${s.id === 
 const lstyle = id => STD.styles.find(s => s.id === id) || STD.styles[0];
 const lpat = id => STD.patterns.find(p => p.id === id) || STD.patterns[0];
 const weightMm = n => STD.weights[clamp(n, 1, 16) - 1];
+const THIN = { on:false }; try { THIN.on = localStorage.getItem('kot-thin') === '1'; } catch (e){}
 // world size of one paper millimetre at the current zoom (on screen 1 mm ≈ 3.78 CSS px; on a sheet image RENDER.pxmm px)
 const paperMm = () => wpp() * (RENDER ? RENDER.pxmm : 96 / 25.4);
-const linePx = mm => RENDER ? Math.max(1, mm * RENDER.pxmm) : Math.max(1, mm / 0.25) * Math.min(devicePixelRatio, 2);
+// "Thin lines" (line weights off): every line on screen is one pixel thick; sheets and prints keep the weights
+const linePx = mm => RENDER ? Math.max(1, mm * RENDER.pxmm) : (THIN.on ? 1 : Math.max(1, mm / 0.25)) * Math.min(devicePixelRatio, 2);
 // fat lines (any width) with the dash pattern laid out on paper: pairs of points in, a LineSegments2 out
 const FATM = new Map();
 function fatMat(color, px){
@@ -1013,32 +1109,67 @@ const polyPairs = pts => { const o = []; for (let i = 0; i < pts.length - 1; i++
 // cut hatch of a material on plans: drawn in the shader on paper scale, so it stays the same size when zooming
 const HATCH = { mm:{ value:0.03 } };
 let SHADER_N = 0; // each custom material gets its own program, so its uniforms are always its own
-const FILL_KIND = { solid:0, none:1, lines:2, cross:3, dots:4, concrete:5, insul:6, wood:7 };
-function hatchMat(m){
-  const ms = STD.mat[m] || { f:'diag' }, f = STD.fills.find(x => x.id === ms.f) || STD.fills[2];
-  const bg = ms.bg || (MATS[m] || MATS.generic).c, fg = ms.fg || '#2b3439';
-  const mat = new THREE.MeshBasicMaterial({ color:f.k === 'solid' ? fg : bg, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
-  if (f.k === 'solid' || f.k === 'none') return mat;
+const FILL_KIND = { solid:0, none:1, lines:2, cross:3, dots:4, concrete:5, insul:6, wood:7, brick:8 };
+// one pattern layer of a material: the fill it uses and its colour (null when there is nothing to draw)
+function patLayer(q){
+  const f = q && STD.fills.find(x => x.id === q.p); if (!f || f.k === 'none') return null;
+  return { k:FILL_KIND[f.k] ?? 2, s:f.s, a:f.a * Math.PI / 180, c:new THREE.Color(q.c || '#2b3439'), model:f.u === 'model' };
+}
+const hasPats = pp => !!(pp && (patLayer(pp.fg) || patLayer(pp.bg)));
+const PAT_GLSL = `
+  uniform float uMm; uniform int uN; uniform int uK[2]; uniform float uS[2]; uniform float uA[2]; uniform vec3 uC[2]; uniform vec2 uMod;
+  uniform int uProj; uniform vec3 uU; uniform vec3 uV; varying vec3 vPW; varying vec3 vPN;
+  float hl(float s, float st, float lw, float fw){ float d = abs(fract(s / st) - 0.5) * st; float hw = max(lw, fw * 0.55); return 1.0 - smoothstep(hw, hw + fw, d); }
+  float hsh(vec2 c){ return fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453); }
+  float patM(vec2 p, int k, float st, float ang, float lw, float fw){
+    float cs = cos(ang), sn = sin(ang); vec2 q = vec2(cs * p.x + sn * p.y, -sn * p.x + cs * p.y);
+    if (k == 2) return hl(q.y, st, lw, fw);
+    if (k == 3) return max(hl(q.y, st, lw, fw), hl(q.x, st, lw, fw));
+    if (k == 4){ vec2 c = fract(q / st) - 0.5; float d = length(c) * st; float r = max(lw > 0.0 ? 0.16 : st * 0.07, fw * 0.7); return 1.0 - smoothstep(r, r + fw, d); }
+    if (k == 5){ vec2 c = floor(q / st); vec2 f = fract(q / st); float r = hsh(c); vec2 o = vec2(hsh(c + 7.0), hsh(c + 3.0)) * 0.6 + 0.2; float d = length(f - o) * st;
+      float rr = lw > 0.0 ? (r > 0.6 ? 0.32 : 0.14) : st * (r > 0.6 ? 0.13 : 0.06); rr = max(rr, fw * 0.7); return (1.0 - smoothstep(rr, rr + fw, d)) * step(0.25, r); }
+    if (k == 6) return hl(q.y - abs(fract(q.x / st) - 0.5) * 2.0 * st, st, lw, fw);
+    if (k == 7) return hl(q.y + 0.3 * st * sin(q.x / st * 1.7), st, lw, fw);
+    if (k == 8){ float r = floor(q.y / st + 0.5); float L = st * 3.4; return max(hl(q.y, st, lw, fw), hl(q.x + 0.5 * L * mod(r, 2.0), L, lw, fw)); }
+    return 0.0;
+  }`;
+/* a material with pattern layers drawn in the shader: proj 'xz' — on the plan; 'plane' — on a section cap (u, v axes);
+   'tri' — on any model face (horizontal faces use X/Y of the plan, vertical faces run along the face and up) */
+function patMat(o){
+  const P = { color:o.color, ...(o.opacity < 1 ? { transparent:true, opacity:o.opacity, depthWrite:false } : {}), ...(o.extra || {}) };
+  const mat = o.lit ? new THREE.MeshStandardMaterial({ roughness:0.9, ...P }) : new THREE.MeshBasicMaterial(P);
+  let L = [patLayer(o.pats && o.pats.bg), patLayer(o.pats && o.pats.fg)].filter(Boolean);
+  const top = L.map(l => l.k).lastIndexOf(0); if (top >= 0){ mat.color.copy(L[top].c); L = L.slice(top + 1); } // a solid layer covers what is under it
+  if (!L.length) return mat;
+  const two = i => L[i] || L[0];
   mat.onBeforeCompile = sh => {
-    Object.assign(sh.uniforms, { uMm:HATCH.mm, uFg:{ value:new THREE.Color(fg) }, uStep:{ value:f.s }, uAng:{ value:f.a * Math.PI / 180 }, uKind:{ value:FILL_KIND[f.k] } });
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vHP;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvHP = (modelMatrix * vec4(transformed, 1.0)).xz;');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
-      uniform float uMm; uniform vec3 uFg; uniform float uStep; uniform float uAng; uniform int uKind; varying vec2 vHP;
-      float hl(vec2 p, float ang, float st){ vec2 n = vec2(-sin(ang), cos(ang)); float t = dot(p, n) / st; float d = abs(fract(t) - 0.5) * st; float fw = fwidth(dot(p, n)) * 0.75 + 1e-4; return 1.0 - smoothstep(0.09, 0.09 + fw, d); }
-      float hsh(vec2 c){ return fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453); }`)
+    Object.assign(sh.uniforms, { uMm:HATCH.mm, uN:{ value:L.length }, uK:{ value:[two(0).k, two(1).k] }, uS:{ value:[two(0).s, two(1).s] }, uA:{ value:[two(0).a, two(1).a] },
+      uC:{ value:[two(0).c, two(1).c] }, uMod:{ value:new THREE.Vector2(two(0).model ? 1 : 0, two(1).model ? 1 : 0) }, uProj:{ value:{ xz:0, plane:1, tri:2 }[o.proj] || 0 },
+      uU:{ value:o.U || new V3(1, 0, 0) }, uV:{ value:o.V || new V3(0, 1, 0) } });
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vPW; varying vec3 vPN;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvPW = (modelMatrix * vec4(transformed, 1.0)).xyz; vPN = normalize(mat3(modelMatrix) * normal);');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\n' + PAT_GLSL)
       .replace('#include <color_fragment>', `#include <color_fragment>
-      { vec2 p = vHP / uMm; float m = 0.0;
-        if (uKind == 2) m = hl(p, uAng, uStep);
-        else if (uKind == 3) m = max(hl(p, uAng, uStep), hl(p, uAng + 1.5707963, uStep));
-        else if (uKind == 4){ vec2 q = fract(p / uStep) - 0.5; float d = length(q) * uStep; float fw = fwidth(p.x) + 1e-4; m = 1.0 - smoothstep(0.16, 0.16 + fw, d); }
-        else if (uKind == 5){ vec2 c = floor(p / uStep); vec2 q = fract(p / uStep); float r = hsh(c); vec2 o = vec2(hsh(c + 7.0), hsh(c + 3.0)) * 0.6 + 0.2; float d = length(q - o) * uStep; float fw = fwidth(p.x) + 1e-4;
-          m = (1.0 - smoothstep(r > 0.6 ? 0.32 : 0.14, (r > 0.6 ? 0.32 : 0.14) + fw, d)) * step(0.25, r); }
-        else if (uKind == 6){ float x = p.x / uStep; vec2 pp = vec2(p.x, p.y - abs(fract(x) - 0.5) * 2.0 * uStep); m = hl(pp, 0.0, uStep); }
-        else if (uKind == 7){ vec2 pp = vec2(p.x, p.y + 0.3 * uStep * sin(p.x / uStep * 1.7)); m = hl(pp, 0.0, uStep); }
-        diffuseColor.rgb = mix(diffuseColor.rgb, uFg, clamp(m, 0.0, 1.0)); }`);
+      { vec2 P;
+        if (uProj == 1) P = vec2(dot(vPW, uU), dot(vPW, uV));
+        else if (uProj == 2){ vec3 n = normalize(vPN); if (abs(n.y) > 0.7) P = vPW.xz; else { vec2 h = normalize(vec2(-n.z, n.x)); P = vec2(dot(vPW.xz, h), vPW.y); } }
+        else P = vPW.xz;
+        // pixel size in world units, taken outside loops and branches (derivatives there are undefined on some GPUs)
+        float pxW = max(length(vec2(dFdx(P.x), dFdy(P.x))), length(vec2(dFdx(P.y), dFdy(P.y)))) + 1e-9;
+        for (int i = 0; i < 2; i++){ if (i >= uN) break; bool md = (i == 0 ? uMod.x : uMod.y) > 0.5; float dv = md ? 0.001 : uMm; float m = patM(P / dv, uK[i], uS[i], uA[i], md ? 0.0 : 0.09, pxW / dv);
+          diffuseColor.rgb = mix(diffuseColor.rgb, uC[i], clamp(m, 0.0, 1.0)); } }`);
   };
-  const ck = 'hatch|' + (++SHADER_N); mat.customProgramCacheKey = () => ck;
+  const ck = 'pat|' + (++SHADER_N); mat.customProgramCacheKey = () => ck;
   return mat;
+}
+const PO = { polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 };
+// cut pattern of a material on the plan
+function hatchMat(m){ const sp = matSpec(m); return patMat({ color:sp.c, pats:sp.cut, proj:'xz', extra:PO }); }
+// paper millimetre in world metres for the patterns: from the orthographic camera; a perspective view uses 1:100
+function hatchScale(){
+  const c = RENDER ? RENDER.cam : cam(); if (!c || !c.isOrthographicCamera) return 0.1;
+  const h = (RENDER ? RENDER.h : cv.clientHeight) || 1;
+  return (c.top - c.bottom) / c.zoom / h * (RENDER ? RENDER.pxmm : 96 / 25.4);
 }
 // dimension values in the project's units
 function fmtLen(v){
@@ -1100,20 +1231,42 @@ function makeMaterials(){
   M.level = new THREE.LineBasicMaterial({ color:C.datum, depthTest:false, transparent:true });
   M.lvlDash = new THREE.LineDashedMaterial({ color:C.datum, dashSize:0.6, gapSize:0.15, depthTest:false, transparent:true });
   M.boxEdge = new THREE.LineBasicMaterial({ color:C.sel, transparent:true, opacity:0.8 });
+  M.hov = new THREE.MeshBasicMaterial({ color:C.sel, transparent:true, opacity:0.32, depthTest:false, depthWrite:false, side:THREE.DoubleSide });
   M.revealM = new THREE.MeshBasicMaterial({ color:'#d63fa8', transparent:true, opacity:0.55, depthWrite:false }); M.revealL = new THREE.LineBasicMaterial({ color:'#b0207f' });
   for (const k of MODEL_MATS) if (M[k]) M[k].clippingPlanes = CLIP;
 }
 // materials of the model itself follow the section box / section planes; annotation does not
 const MODEL_MATS = ['lines','poche','mass','massPlan','glass','glassFlat','door','selShade','selFlat','edge','edgeSel','existFlat','exist3D','existEdge','demoEdge','demo3D','stairDash'];
-function layerMat(m){
+/* the look of a material in the current view (as in Revit):
+   plan — cut pattern (role 'surf': surface pattern of what is seen from above, e.g. a floor);
+   «Тонированный» — shading colour and transparency + surface pattern; «Реалистичный» — the appearance photo */
+function layerMat(m, role){
   if (S.render) return rMat(m);
   const plan = S.view === 'plan';
-  if (plan && S.detail === 'coarse') return M.poche;
+  if (plan && S.detail === 'coarse' && role !== 'surf') return M.poche;
   if (!plan && S.style === 'lines') return M.lines;
-  const key = (plan ? 'p:' : 's:') + m;
-  if (!LM[key] && plan) LM[key] = hatchMat(m);
-  if (!LM[key]){ const c = (MATS[m] || MATS.generic).c; LM[key] = plan ? new THREE.MeshBasicMaterial({ color:c, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 }) : new THREE.MeshStandardMaterial({ color:c, roughness:0.9, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1, clippingPlanes:CLIP }); }
-  return LM[key];
+  const real = !plan && S.style === 'real', key = (plan ? (role === 'surf' ? 'pf:' : 'p:') : real ? 'r:' : 's:') + m;
+  if (LM[key]) return LM[key];
+  const sp = matSpec(m); let mat;
+  if (plan) mat = role === 'surf' ? patMat({ color:C.sheet, pats:sp.surf, proj:'xz', extra:PO }) : hatchMat(m);
+  else if (real && sp.img) mat = photoMat(m, sp);
+  else if (real) mat = new THREE.MeshStandardMaterial({ color:sp.c, roughness:0.75, clippingPlanes:CLIP, ...PO, ...(sp.tr ? { transparent:true, opacity:1 - sp.tr, depthWrite:false } : {}) });
+  else mat = patMat({ lit:true, color:sp.c, opacity:1 - sp.tr, pats:sp.surf, proj:'tri', extra:{ ...PO, clippingPlanes:CLIP } });
+  mat.userData.mk = m; // section caps take the cut pattern of this material
+  return LM[key] = mat;
+}
+// appearance photo of a material, mapped by world position at its real size (width × height in mm)
+const PHOTO = {};
+function photoTex(k, sp){
+  const P = PHOTO[k]; if (P && P.src === sp.img) return P.tex;
+  if (P) P.tex.dispose();
+  const tex = new THREE.TextureLoader().load(sp.img); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  PHOTO[k] = { src:sp.img, tex }; return tex;
+}
+function photoMat(k, sp, opt = {}){
+  const m = triMat(photoTex(k, sp), new THREE.Vector2(1000 / sp.iw, 1000 / sp.ih), { r:0.8, env:0.5, ...opt });
+  if (sp.tr){ m.transparent = true; m.opacity = 1 - sp.tr; m.depthWrite = false; }
+  return m;
 }
 function matFor(kind, s){
   const plan = S.view === 'plan', lines = S.style === 'lines', shade = !plan && !lines;
@@ -1133,7 +1286,7 @@ function part(geo, mat, edgeMat, id, x = 0, y = 0, z = 0){
   m.position.set(x, y, z);
   if (edgeMat){ const ls = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 15), edgeMat); if (edgeMat.isLineDashedMaterial) ls.computeLineDistances(); m.add(ls); }
   if (id) m.userData.id = id;
-  m.castShadow = m.receiveShadow = S.view !== 'plan' && S.style === 'shaded' && !mat.transparent;
+  m.castShadow = m.receiveShadow = S.view !== 'plan' && S.style !== 'lines' && !mat.transparent;
   return m;
 }
 function lineOf(points, mat, segments = false){
@@ -1256,7 +1409,7 @@ function buildWall(w, prevMat, prevEdge){
     const poly = [{ x:cutX(c0, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s1), z:ly.s1 }, { x:cutX(c0, ly.s1), z:ly.s1 }];
     if (poly[1].x - poly[0].x < 1e-4 || poly[2].x - poly[3].x < 1e-4) continue;
     const psel = pt && isSel(pt.id), mat = prevMat || (s || psel ? (plan || S.style === 'lines' ? M.selFlat : M.selShade) : phMat || layerMat(pt ? pt.m || ly.m : ly.m));
-    const add = (pp, y0, y1) => { const geo = prism(pp, y0, y1); if (!geo) return; const m = new THREE.Mesh(geo, mat); if (w.id) m.userData.id = pt ? pt.id : w.id; m.castShadow = m.receiveShadow = !plan && S.style === 'shaded' && !mat.transparent; g.add(m); };
+    const add = (pp, y0, y1) => { const geo = prism(pp, y0, y1); if (!geo) return; const m = new THREE.Mesh(geo, mat); if (w.id) m.userData.id = pt ? pt.id : w.id; m.castShadow = m.receiveShadow = !plan && S.style !== 'lines' && !mat.transparent; g.add(m); };
     const xmin = Math.min(poly[0].x, poly[3].x) - 1, xmax = Math.max(poly[1].x, poly[2].x) + 1;
     // piers between openings (full height), and the parts below and above each opening
     const cuts = plan ? ops : ops.filter(() => false);
@@ -1308,8 +1461,9 @@ function buildWall(w, prevMat, prevEdge){
   else for (const o of ops0){
     const os = isSel(o.o.id), ost = S.render ? 'normal' : visState(o.o), oe = os ? M.edgeSel : ost === 'demo' ? M.demoEdge : ost === 'exist' ? M.existEdge : M.edge;
     const pm = os ? null : ost === 'demo' ? M.demo3D : ost === 'exist' ? M.exist3D : null;
-    if (o.o.type === 'window') g.add(part(new THREE.BoxGeometry(o.b - o.a, o.top - o.bot, 0.02), pm || matFor('glass', os), oe, o.o.id, o.pos, (o.bot + o.top) / 2, 0));
-    else g.add(part(new THREE.BoxGeometry(o.b - o.a - 0.01, o.top - 0.005, 0.045), pm || matFor('door', os), oe, o.o.id, o.pos, (o.top - 0.005) / 2, 0));
+    const om = pm || (!os && o.o.m && MATS[o.o.m] && S.style !== 'lines' ? layerMat(o.o.m) : null);
+    if (o.o.type === 'window') g.add(part(new THREE.BoxGeometry(o.b - o.a, o.top - o.bot, 0.02), om || matFor('glass', os), oe, o.o.id, o.pos, (o.bot + o.top) / 2, 0));
+    else g.add(part(new THREE.BoxGeometry(o.b - o.a - 0.01, o.top - 0.005, 0.045), om || matFor('door', os), oe, o.o.id, o.pos, (o.top - 0.005) / 2, 0));
   }
   return g;
 }
@@ -1332,7 +1486,8 @@ function buildBox(it, prevMat, prevEdge){
   const s = it.id && isSel(it.id), st = it.id && !S.render ? visState(it) : 'normal', plan = S.view === 'plan';
   const pm = s ? null : st === 'demo' ? (plan ? M.pick : M.demo3D) : st === 'exist' ? (plan ? M.existFlat : M.exist3D) : null;
   const em = s ? M.edgeSel : st === 'demo' ? M.demoEdge : st === 'exist' ? M.existEdge : M.edge;
-  return part(new THREE.BoxGeometry(it.w, it.h, it.d), prevMat || pm || matFor('mass', s), prevEdge || em, it.id, it.x + it.w / 2, it.h / 2, it.z + it.d / 2);
+  const om = !s && it.m && MATS[it.m] && !(S.view !== 'plan' && S.style === 'lines') ? layerMat(it.m) : null;
+  return part(new THREE.BoxGeometry(it.w, it.h, it.d), prevMat || pm || om || matFor('mass', s), prevEdge || em, it.id, it.x + it.w / 2, it.h / 2, it.z + it.d / 2);
 }
 /* ---------- more Revit categories: floor, ceiling, roof, column, stair, room ---------- */
 function polyArea(pts){ let a = 0; for (let i = 0; i < pts.length; i++){ const p = pts[i], q = pts[(i + 1) % pts.length]; a += p.x * q.z - q.x * p.z; } return a / 2; }
@@ -1353,11 +1508,13 @@ function stMats(it){
 }
 function buildFloor(it){
   if (!it.pts || it.pts.length < 3) return null;
-  const { pm, em, plan, s } = stMats(it), off = it.off || 0;
+  const { pm, em, plan, s, st } = stMats(it), off = it.off || 0;
   if (plan){
     // like Revit, a floor is picked on the plan by its edge (pickFlat), so clicks inside rooms stay free for window selection
     const g = new THREE.Group();
     if (s){ const geo = prism(it.pts, off - 0.01, off + 0.001); if (geo) g.add(new THREE.Mesh(geo, M.selFlatT)); }
+    // surface pattern of the floor material seen from above (tiles, boards); not pickable, the floor is picked by its edge
+    else if (st !== 'demo' && hasPats(matSpec(it.m || 'concrete').surf)){ const geo = prism(it.pts, off - 0.004, off + 0.002, slabHoles(it)); if (geo){ const fm = new THREE.Mesh(geo, layerMat(it.m || 'concrete', 'surf')); fm.raycast = () => {}; g.add(fm); } }
     g.add(lineOf([...it.pts, it.pts[0]].map(p => new V3(p.x, off + 0.004, p.z)), s ? M.edgeSel : em === M.edge ? M.slabEdge : em));
     return g;
   }
@@ -1548,7 +1705,7 @@ function buildFam(it){
   for (const fm of f.forms){
     const geo = formGeometry(fm); if (!geo) continue;
     const mat = pm || (plan ? (s ? M.selFlat : M.massPlan) : layerMat(it.m || fm.m));
-    const m = new THREE.Mesh(geo, mat); m.userData.id = it.id; m.castShadow = m.receiveShadow = !plan && S.style === 'shaded' && !mat.transparent;
+    const m = new THREE.Mesh(geo, mat); m.userData.id = it.id; m.castShadow = m.receiveShadow = !plan && S.style !== 'lines' && !mat.transparent;
     const ls = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 28), em); if (em.isLineDashedMaterial) ls.computeLineDistances(); m.add(ls);
     g.add(m);
   }
@@ -1593,6 +1750,9 @@ function ovOf(it){
   return o;
 }
 const tplVisible = it => { const o = ovOf(it); return !o || o.vis !== false; };
+// building grids can be switched off per view («Показать/скрыть оси»); «Показать скрытые» still shows them
+const gridsOff = () => { const v = RV || (typeof curView === 'function' ? curView() : null); return !!(v && v.noGrid) && !S.reveal; };
+const gridShown = gr => !gridsOff() && tplVisible(gr);
 const OVM = new Map();
 function applyOv(obj, o){
   if (!o || (!o.half && !o.c && !o.w)) return;
@@ -1777,20 +1937,29 @@ function applyClip(){
   CLIP.push(...clipPlanesFor(viewNow()));
   if (!CLIP.length) return;
   model.updateMatrixWorld(true);
-  const meshes = []; model.traverse(o => { if (o.isMesh && !o.material.transparent && o.material !== M.pick && o.geometry) meshes.push(o); });
-  const so = THREE;
+  // the cut faces of each material get that material's cut pattern (Revit «Штриховка сечения»); the rest gets poche
+  const groups = new Map(); model.traverse(o => { if (o.isMesh && !o.material.transparent && o.material !== M.pick && o.geometry){ const k = (o.material.userData && o.material.userData.mk) || ''; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(o); } });
+  const so = THREE, coarse = S.detail === 'coarse' || S.style === 'lines';
   CLIP.forEach((plane, i) => {
-    const others = CLIP.filter(p => p !== plane);
+    const others = CLIP.filter(p => p !== plane), n = plane.normal;
+    const U = Math.abs(n.y) > 0.9 ? new V3(1, 0, 0) : new V3(-n.z, 0, n.x).normalize(), V = Math.abs(n.y) > 0.9 ? new V3(0, 0, 1) : new V3(0, 1, 0);
     const base = { depthWrite:false, depthTest:false, colorWrite:false, stencilWrite:true, stencilFunc:so.AlwaysStencilFunc, clippingPlanes:[plane] };
     const back = new THREE.MeshBasicMaterial({ ...base, side:so.BackSide, stencilFail:so.IncrementWrapStencilOp, stencilZFail:so.IncrementWrapStencilOp, stencilZPass:so.IncrementWrapStencilOp });
     const front = new THREE.MeshBasicMaterial({ ...base, side:so.FrontSide, stencilFail:so.DecrementWrapStencilOp, stencilZFail:so.DecrementWrapStencilOp, stencilZPass:so.DecrementWrapStencilOp });
-    const capM = new THREE.MeshBasicMaterial({ color:C.poche, side:so.DoubleSide, clippingPlanes:others, stencilWrite:true, stencilRef:0, stencilFunc:so.NotEqualStencilFunc, stencilFail:so.ReplaceStencilOp, stencilZFail:so.ReplaceStencilOp, stencilZPass:so.ReplaceStencilOp });
-    capMats.push(back, front, capM);
-    for (const m of meshes) for (const mat of [back, front]){ const c = new THREE.Mesh(m.geometry, mat); c.matrixAutoUpdate = false; c.matrix.copy(m.matrixWorld); c.renderOrder = 100 + i; capG.add(c); }
-    const cap = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), capM); cap.userData.own = true;
-    plane.coplanarPoint(cap.position); cap.quaternion.setFromUnitVectors(new V3(0, 0, 1), plane.normal); cap.renderOrder = 100.5 + i;
-    cap.onAfterRender = r => r.clearStencil();
-    capG.add(cap);
+    capMats.push(back, front);
+    let j = 0;
+    for (const [mk, meshes] of groups){
+      const capOpt = { side:so.DoubleSide, clippingPlanes:others, stencilWrite:true, stencilRef:0, stencilFunc:so.NotEqualStencilFunc, stencilFail:so.ReplaceStencilOp, stencilZFail:so.ReplaceStencilOp, stencilZPass:so.ReplaceStencilOp };
+      const sp = mk && !coarse ? matSpec(mk) : null;
+      const capM = sp ? patMat({ color:sp.c, pats:sp.cut, proj:'plane', U, V, extra:capOpt }) : new THREE.MeshBasicMaterial({ color:C.poche, ...capOpt });
+      capMats.push(capM);
+      const ro = 100 + i * 400 + j * 2; j++;
+      for (const m of meshes) for (const mat of [back, front]){ const c = new THREE.Mesh(m.geometry, mat); c.matrixAutoUpdate = false; c.matrix.copy(m.matrixWorld); c.renderOrder = ro; capG.add(c); }
+      const cap = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), capM); cap.userData.own = true;
+      plane.coplanarPoint(cap.position); cap.quaternion.setFromUnitVectors(new V3(0, 0, 1), plane.normal); cap.renderOrder = ro + 1;
+      cap.onAfterRender = r => r.clearStencil();
+      capG.add(cap);
+    }
   });
 }
 
@@ -1800,7 +1969,7 @@ function buildDatum(){
   if (S.view === 'sect'){ buildSectDatum(); return; }
   if (S.view === 'plan') return; // plans draw grids as annotation, with the «Оси здания» line style
   for (const gr of items){
-    if (gr.type !== 'grid') continue;
+    if (gr.type !== 'grid' || !gridShown(gr)) continue;
     const l = lineOf([new V3(gr.x1, 0.006, gr.z1), new V3(gr.x2, 0.006, gr.z2)], isSel(gr.id) ? M.datumSel : M.datum);
     datum.add(l);
   }
@@ -1829,7 +1998,7 @@ function rebuild(quiet){
   groundPlane.constant = S.view === 'plan' ? 0 : -lvElev(actLv());
   preview.position.y = S.view === 'plan' ? 0 : lvElev(actLv());
   buildDatum();
-  shadowGround.visible = S.view !== 'plan' && S.view !== 'sect' && S.style === 'shaded';
+  shadowGround.visible = S.view !== 'plan' && S.view !== 'sect' && S.style !== 'lines';
   const za = axesG.getObjectByName('zaxis'); if (za) za.visible = S.view !== 'plan';
   if (!RV) axesG.visible = S.axes && S.view !== 'sect';
   // sections and elevations: light from the viewer, no shadows (the roof would darken every interior wall)
@@ -1840,6 +2009,7 @@ function rebuild(quiet){
   annoDirty = true;
   updateCrop();
   applyClip(); applyAttachClip();
+  if (HOV.list.length) hovDraw();
   if (quiet) return;
   if (S.tool === 'select' && optSel !== [...sel].join(',')){ optSel = [...sel].join(','); renderOptbar(); }
   updateRibbonState(); updatePanel(); renderTree(); scheduleSave();
@@ -1944,7 +2114,7 @@ function rebuildAnno(){
   for (const d of items) if (d.type === 'dim' && dimShown(d)) addDimGeom(d, isSel(d.id) ? M.dimSel : M.dim, isSel(d.id) ? M.dimTickSel : M.dimTick);
   if (viewNow().kind === 'plan') for (const v of views) if (v.kind === 'detail' && v.region){ const r = v.region, Y = 29.5; anno.add(lineOf([new V3(r.x0, Y, r.z0), new V3(r.x1, Y, r.z0), new V3(r.x1, Y, r.z1), new V3(r.x0, Y, r.z1), new V3(r.x0, Y, r.z0)], M.callout)); }
   drawViewMarks();
-  for (const gr of items) if (gr.type === 'grid' && tplVisible(gr)){ const fl = fatLines([new V3(gr.x1, 28.5, gr.z1), new V3(gr.x2, 28.5, gr.z2)], 'grids', isSel(gr.id) ? C.sel : null); if (fl) anno.add(fl); }
+  for (const gr of items) if (gr.type === 'grid' && gridShown(gr)){ const fl = fatLines([new V3(gr.x1, 28.5, gr.z1), new V3(gr.x2, 28.5, gr.z2)], 'grids', isSel(gr.id) ? C.sel : null); if (fl) anno.add(fl); }
   for (const d of tempDims()) addDimGeom(d, M.dimTmp, M.dimTickTmp);
   for (const d of items){ if (d.type === 'adim' && shown(d)) addAngGeom(d, isSel(d.id)); else if (d.type === 'rdim' && shown(d)) addRadGeom(d, isSel(d.id)); }
   if (S.tool === 'adim' && E.picks.length === 2 && D.cur) addAngGeom({ a:E.picks[0], b:E.picks[1], p:{ x:D.cur.x, z:D.cur.z } }, true);
@@ -2031,7 +2201,7 @@ function buildSectDatum(){
   const on = (s, y) => f.p1.clone().addScaledVector(f.dir, s).setY(y).addScaledVector(f.d, -eps);
   const s0 = v.crop === false ? -3 : -0.6, s1 = v.crop === false ? f.L + 3 : f.L + 0.6;
   for (const gr of items){
-    if (gr.type !== 'grid') continue;
+    if (gr.type !== 'grid' || !gridShown(gr)) continue;
     const g = wallFrame(gr), p = xLines(f.p1, f.dir, g.p1, g.dir); if (!p) continue;
     const s = p.clone().sub(f.p1).dot(f.dir); if (s < -0.01 || s > f.L + 0.01) continue;
     datum.add(lineOf([on(s, f.y0), on(s, f.y1 - 0.75)], M.lvlDash));
@@ -2125,17 +2295,18 @@ function specialDimTexts(out){
 }
 const segDist = (px, py, A, B) => { const dx = B.x - A.x, dy = B.y - A.y, L2 = dx * dx + dy * dy || 1, t = clamp(((px - A.x) * dx + (py - A.y) * dy) / L2, 0, 1); return Math.hypot(A.x + dx * t - px, A.y + dy * t - py); };
 // screen-space picking for line-like things: dimensions, grids, detail lines, circles, text
-function pickFlat(px, py){
-  let best = null, bd = coarsePtr ? 12 : 7;
-  const take = (id, d) => { if (d < bd){ bd = d; best = id; } };
-  if (S.view === 'sect') return null;
+// collect = true: every line-like element near the cursor, nearest first (for Tab cycling)
+function pickFlat(px, py, collect){
+  let best = null, bd = coarsePtr ? 12 : 7; const tol0 = bd, all = new Map();
+  const take = (id, d) => { if (collect && d < tol0) all.set(id, Math.min(all.get(id) ?? 1e9, d)); if (d < bd){ bd = d; best = id; } };
+  if (S.view === 'sect') return collect ? [] : null;
   for (const it of items){
     if (S.view === 'plan' && it.type === 'adim' && shown(it)){ const G = angGeom(it); if (G){ let bdd = 1e9; for (let i = 0; i <= 24; i++){ const a = G.s + G.w * i / 24, s2 = toScreen(G.O.x + Math.cos(a) * G.r, 0, G.O.z + Math.sin(a) * G.r); bdd = Math.min(bdd, Math.hypot(s2.x - px, s2.y - py)); } take(it.id, bdd); } continue; }
     if (S.view === 'plan' && it.type === 'rdim' && shown(it)){ const G = radGeom(it); if (G){ const A = toScreen(G.c.x, 0, G.c.z), B = toScreen(it.p.x, 0, it.p.z); take(it.id, segDist(px, py, A, B)); } continue; }
     if (S.view === 'plan' && it.type === 'room'){ const c = toScreen(it.x, 0, it.z); if (Math.abs(c.x - px) < 46 && Math.abs(c.y - py) < 20) take(it.id, 1); continue; }
     if (S.view === 'plan' && it.type === 'floor' && shown(it)){ const P = it.pts.map(p => toScreen(p.x, 0, p.z)); for (let i = 0; i < P.length; i++) take(it.id, segDist(px, py, P[i], P[(i + 1) % P.length]) + 2); continue; }
     if (S.view === 'plan' && it.type === 'roof' && shown(it)){ const F = roofFrame(it), P = [F.map(F.u0, 0, F.v0), F.map(F.u1, 0, F.v0), F.map(F.u1, 0, F.v1), F.map(F.u0, 0, F.v1)].map(p => toScreen(p.x, 0, p.z)); for (let i = 0; i < 4; i++) take(it.id, segDist(px, py, P[i], P[(i + 1) % 4])); continue; }
-    if (it.type === 'grid'){ const A = toScreen(it.x1, 0, it.z1), B = toScreen(it.x2, 0, it.z2); take(it.id, segDist(px, py, A, B)); for (const e of gridBubbles(it)) take(it.id, Math.hypot(e.sx - px, e.sy - py) - 10); continue; }
+    if (it.type === 'grid'){ if (!gridShown(it)) continue; const A = toScreen(it.x1, 0, it.z1), B = toScreen(it.x2, 0, it.z2); take(it.id, segDist(px, py, A, B)); for (const e of gridBubbles(it)) take(it.id, Math.hypot(e.sx - px, e.sy - py) - 10); continue; }
     if (S.view !== 'plan') continue;
     if (it.type === 'dim'){
       if (!dimShown(it)) continue;
@@ -2147,8 +2318,107 @@ function pickFlat(px, py){
     else if (it.type === 'circle'){ const c = toScreen(it.x, 0, it.z), r = it.r / wpp(); take(it.id, Math.abs(Math.hypot(c.x - px, c.y - py) - r)); }
     else if (it.type === 'text'){ const c = toScreen(it.x, 0, it.z), w = Math.max(30, String(it.s).length * it.size * 0.55), h = it.size * 1.3; if (px >= c.x - 3 && px <= c.x + w && py >= c.y - h && py <= c.y + 3) take(it.id, 0); }
   }
-  return best;
+  return collect ? [...all.entries()].sort((a, b) => a[1] - b[1]) : best;
 }
+/* ---------- Revit pre-selection: what is under the cursor is highlighted; Tab cycles through everything there ----------
+   (an element, the floor or room under it, its group or assembly, the chain of joined walls…); a click selects the highlighted one */
+const HOV = { x:-99, y:-99, list:[], i:0 };
+let HOVM = null;
+const hovG = new THREE.Group(); hovG.renderOrder = 50; scene.add(hovG);
+const hovTip = document.createElement('div'); hovTip.id = 'hovTip'; hovTip.hidden = true; vp.append(hovTip);
+const elName = it => { if (!it) return ''; if (it.type === 'room') return `Помещение ${it.num} «${it.name}»`; if (it.type === 'part'){ const w = byId(it.host); return `Часть ${it.li + 1} стены ${w ? w.tag : ''}`; } if (it.type === 'fam'){ const f = famById(it.f); return `${f ? f.name : 'Семейство'} ${it.tag || ''}`.trim(); } if (it.tag) return tagName(it); const w = elWord(it); return w.charAt(0).toUpperCase() + w.slice(1); };
+// walls joined end to end (Revit: Tab over a wall selects the whole chain)
+function wallChain(w){
+  const out = [w], q = [w], key = (x, z) => `${Math.round(x * 500)},${Math.round(z * 500)}`;
+  while (q.length){ const a = q.pop(); const ends = new Set([key(a.x1, a.z1), key(a.x2, a.z2)]);
+    for (const o of items) if (o.type === 'wall' && !out.includes(o) && shown(o) && lvOf(o) === lvOf(w) && (ends.has(key(o.x1, o.z1)) || ends.has(key(o.x2, o.z2)))){ out.push(o); q.push(o); } }
+  return out.map(x => x.id);
+}
+function hoverCands(px, py, alt){
+  const out = [], seen = new Set();
+  const add = (ids, label) => { ids = ids.filter(id => byId(id)); if (!ids.length) return; const k = [...ids].sort((a, b) => a - b).join(','); if (seen.has(k)) return; seen.add(k); out.push({ ids, label }); };
+  const one = id => {
+    const it = byId(id); if (!it) return;
+    const g = !alt && groupOf(it.type === 'part' ? it.host : id); if (g) add(g.ids, `${g.type === 'asm' ? 'Сборка' : 'Группа'} «${g.name}»`);
+    add([id], elName(it));
+    if (it.type === 'part') add([it.host], elName(byId(it.host)));
+    if (it.type === 'wall' || (it.type === 'part' && byId(it.host))){ const w = it.type === 'wall' ? it : byId(it.host), ch = wallChain(w); if (ch.length > 1) add(ch, `Цепочка стен (${ch.length})`); }
+  };
+  // section lines and elevation markers are views, but they take part in Tab cycling too
+  const vm = pickViewMark(px, py); if (vm){ const v = views.find(x => x.id === vm); out.push({ ids:[], view:vm, label:(v ? v.name : 'Вид') + ' (вид)' }); seen.add('view:' + vm); }
+  const flat = pickFlat(px, py, true);
+  setRay(px, py); const hits = [];
+  for (const h of ray.intersectObjects(model.children, true)){ const id = h.object.userData.id; if (!h.object.isMesh || !id || !clipKeep(h.point) || hits.includes(id)) continue; hits.push(id); }
+  // order like Revit: lines right under the cursor, then model elements from the top down, then other lines, rooms, roofs and floors last
+  const lineish = id => { const t = byId(id)?.type; return ['dim', 'line', 'circle', 'grid', 'text', 'adim', 'rdim'].includes(t); };
+  for (const [id, d] of flat) if (d < 3.5 && lineish(id)) one(id);
+  for (const id of hits) one(id);
+  for (const [id] of flat) if (lineish(id)) one(id);
+  for (const [id] of flat) one(id);
+  // on plans: floors and rooms that contain the point (they lie under the walls and furniture)
+  if (S.view === 'plan'){
+    const g = groundAt(px, py);
+    if (g){ for (const it of items){ if (!shown(it)) continue;
+      if (it.type === 'floor' && ptInPoly(g.x, g.z, it.pts)) one(it.id);
+      else if (it.type === 'room'){ const d = roomData(it); if (!d.open && ptInPoly(g.x, g.z, d.poly)) one(it.id); } } }
+  }
+  return out;
+}
+function hovClear(){ for (const ch of [...hovG.children]){ if (ch.userData.own) ch.traverse(o => o.geometry && o.geometry.dispose()); hovG.remove(ch); } }
+function hovDraw(){
+  hovClear();
+  const cand = HOV.list[HOV.i];
+  if (!cand || S.tool !== 'select' || S.view === 'sheet'){ hovTip.hidden = true; return; }
+  const ids = new Set(cand.ids);
+  model.updateMatrixWorld(true);
+  const meshed = new Set(), Y = S.view === 'plan' ? 33 : 0.02, pairs = [];
+  // Revit pre-highlight: the edges of the element under the cursor, drawn bold in blue (no fill)
+  const plan = S.view === 'plan', tmp = new V3();
+  const edges = o => {
+    const eg = new THREE.EdgesGeometry(o.geometry, 20), pa = eg.attributes.position;
+    for (let i = 0; i < pa.count; i++){ tmp.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); const p = tmp.clone(); if (plan) p.y = Y; pairs.push(p); }
+    eg.dispose();
+  };
+  const picks = [];   // invisible pick boxes count only when the element has nothing else (doors in plan)
+  model.traverse(o => {
+    if (!o.isMesh || !ids.has(o.userData.id) || !o.geometry || !o.visible) return;
+    if (o.material === M.pick){ picks.push(o); return; }
+    meshed.add(o.userData.id); edges(o);
+  });
+  for (const o of picks) if (!meshed.has(o.userData.id)){ edges(o); o.userData._h = 1; }
+  for (const o of picks) if (o.userData._h){ meshed.add(o.userData.id); delete o.userData._h; }
+  // line-like elements (dimensions, grids, detail lines, rooms…): a highlighted outline
+  for (const id of ids){
+    if (meshed.has(id)) continue; const it = byId(id); if (!it) continue;
+    const P = (x, z) => new V3(x, Y, z);
+    if (it.type === 'line' || it.type === 'grid') pairs.push(P(it.x1, it.z1), P(it.x2, it.z2));
+    else if (it.type === 'circle'){ for (let k = 0; k < 48; k++){ const a = k / 48 * Math.PI * 2, b = (k + 1) / 48 * Math.PI * 2; pairs.push(P(it.x + Math.cos(a) * it.r, it.z + Math.sin(a) * it.r), P(it.x + Math.cos(b) * it.r, it.z + Math.sin(b) * it.r)); } }
+    else if (it.type === 'dim'){ const G = dimGeom(it); if (G){ const { u, n, o, arr, off } = G, at = t => P(o.x + u.x * t + n.x * off, o.z + u.z * t + n.z * off); pairs.push(at(arr[0].t), at(arr[arr.length - 1].t)); } }
+    else if (it.type === 'room'){ const d = roomData(it); if (!d.open) d.poly.forEach((p, i) => { const q = d.poly[(i + 1) % d.poly.length]; pairs.push(P(p.x, p.z), P(q.x, q.z)); }); }
+    else if (it.pts) it.pts.forEach((p, i) => { const q = it.pts[(i + 1) % it.pts.length]; pairs.push(P(p.x, p.z), P(q.x, q.z)); });
+    else { const pts = itemPts(it); if (pts.length >= 2){ const b = new THREE.Box3().setFromPoints(pts); const c4 = [P(b.min.x, b.min.z), P(b.max.x, b.min.z), P(b.max.x, b.max.z), P(b.min.x, b.max.z)]; c4.forEach((p, i) => pairs.push(p, c4[(i + 1) % 4])); } }
+  }
+  if (pairs.length){
+    const pos = []; for (const p of pairs) pos.push(p.x, p.y, p.z);
+    const g = new LineSegmentsGeometry(); g.setPositions(pos);
+    if (!HOVM) HOVM = new LineMaterial({ color:C.sel, linewidth:2.5, worldUnits:false, depthTest:false, transparent:true });
+    HOVM.color.set(C.sel); HOVM.linewidth = 2.5 * Math.min(devicePixelRatio, 2); HOVM.resolution.set(cv.width || 1, cv.height || 1);
+    const fl = new LineSegments2(g, HOVM); fl.userData.own = true; fl.renderOrder = 51; hovG.add(fl);
+  }
+  const n = HOV.list.length;
+  hovTip.textContent = cand.label + (n > 1 ? `  ·  Tab: ${HOV.i + 1} из ${n}` : '');
+  hovTip.style.left = (HOV.x + 16) + 'px'; hovTip.style.top = (HOV.y + 18) + 'px'; hovTip.hidden = false;
+}
+function hovUpdate(px, py, alt){
+  if (S.tool !== 'select' || drag || box){ if (HOV.list.length){ HOV.list = []; hovDraw(); } return; }
+  if (Math.hypot(px - HOV.x, py - HOV.y) < 3 && HOV.list.length) return;
+  const prev = HOV.list[HOV.i], list = hoverCands(px, py, alt);
+  HOV.x = px; HOV.y = py; HOV.list = list;
+  const k = prev ? prev.ids.join(',') : null; const j = list.findIndex(c => c.ids.join(',') === k); HOV.i = j >= 0 ? j : 0;
+  hovDraw();
+  cv.style.cursor = list.length ? 'move' : 'default';
+}
+function hovHide(){ HOV.list = []; HOV.x = HOV.y = -99; hovDraw(); }
 function pruneDims(){ items = items.filter(d => d.type !== 'dim' || d.refs.filter(r => refPoint(r)).length >= 2); }
 function autoDims(){
   const walls = items.filter(i => i.type === 'wall' && wallFrame(i).L > 0.5); if (!walls.length) return 0;
@@ -2657,7 +2927,7 @@ function snap(px, py, from, ortho){
   // grid lines
   let onGrid = null;
   for (const gr of items){
-    if (gr.type !== 'grid') continue;
+    if (gr.type !== 'grid' || !gridShown(gr)) continue;
     const f = wallFrame(gr), v = p.clone().sub(f.p1), s = v.dot(f.dir), d = v.dot(f.nrm);
     if (s < -tol || s > f.L + tol || Math.abs(d) > tol) continue;
     const q = f.p1.clone().addScaledVector(f.dir, s);
@@ -2846,6 +3116,7 @@ function startTextAt(p){
 function click(px, py, shift, ctrl){
   if (editTool()){ editClick(px, py, shift); return; }
   if (S.tool === 'select'){
+    if (HOV.list.length && Math.hypot(px - HOV.x, py - HOV.y) < 8) return; // selected on pointer down (Tab candidate)
     const id = pick(px, py);
     if (!id){ if (!ctrl && sel.size){ clearSel(); rebuild(); } return; }
     if (ctrl){ const s2 = new Set(sel); s2.has(id) ? s2.delete(id) : s2.add(id); setSel([...s2], id); rebuild(); }
@@ -3352,7 +3623,7 @@ function hideInView(on){
   const set = new Set(v.hid || []); for (const id of ids) on ? set.add(id) : set.delete(id); v.hid = [...set]; if (!v.hid.length) delete v.hid;
   clearSel(); rebuild(); scheduleSave(); toast(on ? `Скрыто в виде «${v.name}»: ${ids.length}. Вернуть: «Показать скрытые» → выберите → «Показать в виде»` : `Показано в виде: ${ids.length}`);
 }
-function toggleReveal(){ S.reveal = !S.reveal; $('#viewport').classList.toggle('reveal', S.reveal); $('#rbReveal').setAttribute('aria-pressed', S.reveal); rebuild(); toast(S.reveal ? 'Показаны скрытые элементы (малиновым). Выберите их и нажмите «Показать в виде»' : 'Режим «Показать скрытые» выключен'); }
+function toggleReveal(){ S.reveal = !S.reveal; $('#viewport').classList.toggle('reveal', S.reveal); $('#rbReveal').setAttribute('aria-pressed', S.reveal); renderVbar(); rebuild(); toast(S.reveal ? 'Показаны скрытые элементы (малиновым). Выберите их и нажмите «Показать в виде»' : 'Режим «Показать скрытые» выключен'); }
 function openFilter(){
   const ids = liveIds(sel); if (!ids.length){ toast('Сначала выберите несколько элементов'); return; }
   const byT = {}; for (const id of ids){ const t = byId(id).type; (byT[t] = byT[t] || []).push(id); }
@@ -3541,14 +3812,22 @@ function doDrag(px, py){
     it.pos = pos; rebuild(); return;
   }
   const g = groundAt(px, py); if (!g) return;
-  const dx = roundS(g.x - drag.g0.x), dz = roundS(g.z - drag.g0.z);
+  let dx = roundS(g.x - drag.g0.x), dz = roundS(g.z - drag.g0.z);
+  // Shift held: move only along X or Y (whichever the cursor moved further along), with a guide line
+  GUIDES = [];
+  if (mouse.shift && S.view !== 'sect'){
+    if (Math.abs(dx) >= Math.abs(dz)) dz = 0; else dx = 0;
+    GUIDES.push({ a:drag.g0.clone(), b:new V3(drag.g0.x + dx, 0, drag.g0.z + dz), axis:dx ? 'x' : 'y' });
+    if (!dx && !dz) GUIDES = [];
+  }
+  annoDirty = true;
   if (!drag.pushed && (dx || dz)){ pushUndo(); drag.pushed = true; markEdited(); }
   if (!drag.pushed) return;
   for (const [id, o] of drag.origs){ const cur = byId(id); if (cur) Object.assign(cur, JSON.parse(JSON.stringify(o))); }
   if (S.phase === 'obmer') SV_PENDING = true;
   if (drag.joined) moveWallJoined(byId(drag.ids[0]), dx, dz);
   else for (const id of drag.ids){ const cur = byId(id); if (cur) translateItem(cur, dx, dz); }
-  rebuild();
+  rebuild(); updatePreview();
 }
 
 /* ---------- pointer input: mouse, stylus, fingers ---------- */
@@ -3571,15 +3850,17 @@ cv.addEventListener('pointerdown', e => {
   down = { x, y, b:e.button, type:e.pointerType, hadStart:!!D.start, moved:false, ctrl };
   if (drawing() || placing() || S.tool === 'dim') hover(x, y, e.shiftKey);
   if (S.tool === 'select' && e.button === 0){
-    const vm = pickViewMark(x, y);
-    if (vm){ S.selView = vm; clearSel(); rebuild(); down = null; return; }
+    // the highlighted candidate (Tab cycles them) is what gets selected
+    if (Math.hypot(x - HOV.x, y - HOV.y) > 4 || !HOV.list.length){ HOV.x = HOV.y = -99; hovUpdate(x, y, e.altKey); }
+    const cand = HOV.list[HOV.i], id = cand ? cand.ids[0] : null;
+    if (cand && cand.view){ S.selView = cand.view; clearSel(); rebuild(); down = null; return; }
     if (S.selView){ S.selView = null; annoDirty = true; $('#propsBody').dataset.id = 'x'; updatePanel(); }
-    const id = pick(x, y);
     if (id){
-      // Revit: a click on a member selects the whole group or assembly (Alt+click — the element alone)
-      const grp = !e.altKey && groupOf(id);
-      if (!ctrl && grp && !isSel(id)){ setSel(grp.ids, id); rebuild(); }
-      else if (!ctrl && !isSel(id)){ setSel([id], id); rebuild(); }
+      const ids = cand.ids, all = ids.every(i => isSel(i));
+      // Shift on an element that is already selected: drag it along an axis (a click without moving deselects it)
+      if (e.shiftKey && !e.ctrlKey && !e.metaKey && all && S.view !== 'sect'){ down.ctrl = false; down.ctrlDone = true; down.shiftSel = ids; selId = id; startDrag(id, x, y); return; }
+      if (ctrl){ const s2 = new Set(sel); for (const i of ids) all ? s2.delete(i) : s2.add(i); setSel([...s2], id); rebuild(); down.ctrlDone = true; }
+      else if (!all || sel.size !== ids.length){ setSel(ids, id); rebuild(); }
       else if (!ctrl){ selId = id; }
       if (!ctrl && S.view !== 'sect') startDrag(id, x, y);
     } else box = { x0:x, y0:y, ctrl };
@@ -3593,7 +3874,7 @@ cv.addEventListener('pointerdown', e => {
 cv.addEventListener('pointermove', e => {
   if (fingerIgnored(e)) return;
   const { x, y } = local(e);
-  Object.assign(mouse, { x, y, inside:true, shift:e.shiftKey });
+  Object.assign(mouse, { x, y, inside:true, shift:e.shiftKey, alt:e.altKey });
   if (down && !down.moved && Math.hypot(x - down.x, y - down.y) > 6){ down.moved = true; clearTimeout(lpT); }
   if (drag && ptrs.size === 1){ doDrag(x, y); return; }
   if (box && down && down.moved){
@@ -3608,7 +3889,15 @@ cv.addEventListener('pointerup', e => {
   if (fingerIgnored(e)) return;
   ptrs.delete(e.pointerId); clearTimeout(lpT);
   const { x, y } = local(e);
-  if (drag){ const moved = drag.pushed; drag = null; const d0 = down; down = null; if (!moved && d0 && !d0.moved) click(x, y, e.shiftKey, false); return; }
+  if (drag){
+    const moved = drag.pushed; drag = null; const d0 = down; down = null; if (GUIDES.length){ GUIDES = []; annoDirty = true; updatePreview(); }
+    if (!moved && d0 && !d0.moved){
+      // Shift+click on an already selected element (drag never started) takes it out of the selection
+      if (d0.shiftSel){ const s2 = new Set(sel); for (const i of d0.shiftSel) s2.delete(i); setSel([...s2], [...s2][0] || null); rebuild(); }
+      else click(x, y, e.shiftKey, false);
+    }
+    return;
+  }
   if (box){
     const b0 = box; box = null; $('#selbox').hidden = true;
     if (down && down.moved){
@@ -3624,11 +3913,12 @@ cv.addEventListener('pointerup', e => {
     if (d.b === 0 && d.type !== 'mouse' && drawing()){ if (!d.hadStart) click(d.x, d.y, e.shiftKey, false); click(x, y, e.shiftKey, false); }
     return;
   }
-  if (d.b === 0) click(x, y, e.shiftKey, d.ctrl);
+  if (d.b === 0 && d.shiftSel){ const s2 = new Set(sel); for (const i of d.shiftSel) s2.delete(i); setSel([...s2], [...s2][0] || null); rebuild(); return; }
+  if (d.b === 0){ if (!(S.tool === 'select' && d.ctrlDone)) click(x, y, e.shiftKey, d.ctrl); }
   else if (d.b === 2) finishAction();
 });
 cv.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); down = null; drag = null; box = null; $('#selbox').hidden = true; clearTimeout(lpT); });
-cv.addEventListener('pointerleave', e => { if (e.pointerType === 'touch') return; mouse.inside = false; cursorEl.hidden = true; if (placing()){ D.op = null; updatePreview(); } });
+cv.addEventListener('pointerleave', e => { if (e.pointerType === 'touch') return; mouse.inside = false; cursorEl.hidden = true; hovHide(); if (placing()){ D.op = null; updatePreview(); } });
 cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('dblclick', e => {
   if (S.tool === 'dim' && DD.refs.length >= 2){ placeDim(); return; }
@@ -3690,7 +3980,7 @@ function hover(px, py, shift){
     updatePreview();
   } else {
     cursorEl.hidden = true;
-    if (S.tool === 'select') cv.style.cursor = pick(px, py) ? 'move' : 'default';
+    if (S.tool === 'select') hovUpdate(px, py, mouse.alt);
   }
 }
 // typed-length clicks reuse snap(): honour the exact point when one is pending
@@ -3713,7 +4003,7 @@ function buildLabels(){
     out.push({ x:1.45, y:0, z:0, t:'X', cls:'ax x' }, { x:0, y:0, z:-1.45, t:'Y', cls:'ax y' });
     if (!plan) out.push({ x:0, y:1.45, z:0, t:'Z', cls:'ax z' });
   }
-  if (S.view !== 'sect') for (const gr of items) if (gr.type === 'grid') for (const b of gridBubbles(gr)) if (b.ok) out.push({ sx:b.sx, sy:b.sy, t:gr.name, cls:'gb' + (isSel(gr.id) ? ' sel' : '') });
+  if (S.view !== 'sect') for (const gr of items) if (gr.type === 'grid' && gridShown(gr)) for (const b of gridBubbles(gr)) if (b.ok) out.push({ sx:b.sx, sy:b.sy, t:gr.name, cls:'gb' + (isSel(gr.id) ? ' sel' : '') });
   if (S.tags && plan) for (const w of items){
     if (!w.tag || !shown(w)) continue;
     const sc = isSel(w.id) ? ' sel' : '';
@@ -3902,6 +4192,7 @@ function setView(v){
   updateHint(); renderVbar();
 }
 function setTool(t){
+  if (t === 'grid' && curView().noGrid){ delete curView().noGrid; annoDirty = true; rebuild(); scheduleSave(); setTimeout(renderVbar); }
   if (['mirror', 'mirror2', 'rotate', 'scale', 'attach'].includes(t) && !liveIds(sel).length){ toast('Сначала выберите элементы, затем инструмент'); t = 'select'; }
   if (t === 'paste' && !clipGet()){ toast('Буфер пуст: скопируйте элементы (Ctrl+C)'); t = 'select'; }
   if (['adim', 'rdim', 'ddim', 'measure', 'align', 'offset', 'trimcorner', 'trim1', 'trimn', 'split', 'splitgap', 'mirror', 'mirror2', 'cutgeo', 'uncutgeo', 'joingeo', 'unjoingeo'].includes(t) && S.view !== 'plan') setView('plan');
@@ -3911,7 +4202,7 @@ function setTool(t){
   if (S.view === 'sect' && !['select', 'orbit', 'demolish'].includes(t)) setView('plan');
   if (t === 'demolish' && (S.phase === 'all' || S.phase === 'obmer')){ setPhase('demontazh'); }
   if ((t === 'move' || t === 'copy') && !sel.size){ toast('Сначала выберите элементы (рамкой или щелчком)'); t = 'select'; }
-  endDraw(); S.tool = t;
+  endDraw(); S.tool = t; if (t !== 'select') hovHide();
   document.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tool === t));
   if (['wall','rect','door','window','box','orbit','grid','move','copy','floor','ceiling','roof','column','stair','room','fam'].includes(t)) showTab('rbArch'); else if (['dim', 'line', 'text'].includes(t)) showTab('rbAnno');
   else if (['section', 'ielev', 'callout'].includes(t)) showTab('rbView');
@@ -3925,8 +4216,23 @@ function setStyle(s){ S.style = s; rebuild(); renderVbar(); }
 function setDetail(d){ S.detail = d; rebuild(); renderVbar(); }
 function renderVbar(){
   $('#vbDetail').textContent = 'Детализация: ' + (S.detail === 'coarse' ? 'низкая' : 'средняя');
-  $('#vbStyle').textContent = 'Стиль: ' + (S.style === 'lines' ? 'скрытые линии' : 'тонированный');
+  $('#vbStyle').textContent = 'Стиль: ' + (S.style === 'lines' ? 'скрытые линии' : S.style === 'real' ? 'реалистичный' : 'тонированный');
   $('#vbDetail').hidden = S.view !== 'plan'; $('#vbStyle').hidden = S.view === 'plan';
+  $('#vbWeights').textContent = 'Вес линий: ' + (THIN.on ? 'выкл' : 'вкл'); $('#vbWeights').setAttribute('aria-pressed', !THIN.on);
+  $('#vbReveal').setAttribute('aria-pressed', !!S.reveal);
+  const gv = $('#rbGridVis'), off = !!curView().noGrid;
+  if (gv){ gv.setAttribute('aria-pressed', !off); gv.querySelector('.lbl').innerHTML = off ? 'Показать<br>оси' : 'Скрыть<br>оси'; }
+}
+function toggleGrids(){
+  const v = curView(); if (!v || v.kind === 'sheet'){ toast('Откройте план, разрез или 3D-вид'); return; }
+  if (v.noGrid) delete v.noGrid; else v.noGrid = true;
+  if (v.noGrid){ const s2 = [...sel].filter(i => byId(i)?.type !== 'grid'); if (s2.length !== sel.size) setSel(s2, s2[0]); }
+  annoDirty = true; rebuild(); renderVbar(); scheduleSave(); updatePanel();
+  toast(v.noGrid ? `Оси скрыты в виде «${v.name}». Вернуть: «Показать оси» (VG)` : `Оси показаны в виде «${v.name}»`);
+}
+function toggleThin(){
+  THIN.on = !THIN.on; try { localStorage.setItem('kot-thin', THIN.on ? '1' : '0'); } catch (e){}
+  rebuild(); renderVbar(); toast(THIN.on ? 'Вес линий выключен: все линии тонкие' : 'Вес линий включён: толщина линий по их весу');
 }
 function updateScale(){
   if (S.view !== 'plan' && S.view !== 'sect'){ $('#scale').textContent = S.view === 'axo' ? 'Аксонометрия' : 'Перспектива'; return; }
@@ -3988,6 +4294,7 @@ function sanitizeViews(arr){
     const o = { id:v.id.slice(0, 40), kind:v.kind, name:String(v.name || KIND_NAME[v.kind]).slice(0, 80), phase:PH_IDX[v.phase] != null || v.phase === 'all' ? v.phase : 'all' };
     if ((v.kind === 'plan' || v.kind === 'detail') && typeof v.lv === 'string') o.lv = v.lv.slice(0, 20);
     if (Array.isArray(v.hid)){ const h = v.hid.map(Number).filter(Number.isFinite); if (h.length) o.hid = h; }
+    if (v.noGrid) o.noGrid = true;
     if (v.cam && Array.isArray(v.cam.p) && Array.isArray(v.cam.t)) o.cam = { p:v.cam.p.map(Number), t:v.cam.t.map(Number), z:Number(v.cam.z) || 1 };
     if (v.kind === 'elev') o.side = ELEV_DIR[v.side] ? v.side : 'S';
     const N = x => Number.isFinite(+x) && x !== null && x !== '';
@@ -4279,7 +4586,7 @@ function renderViewImage(v, vp){
   RENDER = { w, h, cam:camR, pxmm:PX, view:v };
   renderer.setPixelRatio(1); renderer.setSize(w, h, false);
   rebuild(true); // again, now with the sheet's pixel size: line weights and patterns are laid out for the image
-  annoDirty = true; rebuildAnno(); HATCH.mm.value = paperMm(); renderer.render(scene, camR);
+  annoDirty = true; rebuildAnno(); HATCH.mm.value = hatchScale(); renderer.render(scene, camR);
   const can = document.createElement('canvas'); can.width = w; can.height = h; const g = can.getContext('2d');
   g.drawImage(cv, 0, 0, w, h);
   if (mode === 'plan' || mode === 'sect') drawImageLabels(g, PX);
@@ -4408,13 +4715,26 @@ function prevLine(cv2, st){
   g.strokeStyle = st.c || '#1b252c'; g.lineWidth = w; g.setLineDash(seq.length >= 2 ? seq : []); g.beginPath(); g.moveTo(6, cv2.height / 2); g.lineTo(cv2.width - 6, cv2.height / 2); g.stroke();
 }
 function prevFill(cv2, f, fg = '#2b3439', bg = '#ffffff'){
-  const g = cv2.getContext('2d'), W = cv2.width, H = cv2.height, st = f.s * PREV_K; g.fillStyle = f.k === 'solid' ? fg : bg; g.fillRect(0, 0, W, H);
-  g.strokeStyle = fg; g.fillStyle = fg; g.lineWidth = 0.8;
+  const g = cv2.getContext('2d'); g.fillStyle = f.k === 'solid' ? fg : bg; g.fillRect(0, 0, cv2.width, cv2.height); drawPat(g, cv2.width, cv2.height, f, fg);
+}
+// a material's two pattern layers over its colour (model patterns at 1:20)
+function prevPats(cv2, base, pats){
+  const g = cv2.getContext('2d'); g.fillStyle = base; g.fillRect(0, 0, cv2.width, cv2.height);
+  for (const q of [pats.bg, pats.fg]){ const f = q && STD.fills.find(x => x.id === q.p); if (!f || f.k === 'none') continue; if (f.k === 'solid'){ g.fillStyle = q.c; g.fillRect(0, 0, cv2.width, cv2.height); } else drawPat(g, cv2.width, cv2.height, f, q.c); }
+}
+function drawPat(g, W, H, f, fg){
+  if (f.k === 'solid' || f.k === 'none') return;
+  const st = Math.max(2, (f.u === 'model' ? f.s / 20 : f.s) * PREV_K);
+  g.save(); g.strokeStyle = fg; g.fillStyle = fg; g.lineWidth = 0.8;
+  if (f.k === 'brick'){ const a = f.a * Math.PI / 180, L = st * 3.4; g.translate(W / 2, H / 2); g.rotate(-a); const R = Math.hypot(W, H);
+    for (let r = Math.floor(-R / st); r * st < R; r++){ const y = (r + 0.5) * st; g.beginPath(); g.moveTo(-R, y); g.lineTo(R, y); g.stroke(); const off = (r % 2 ? 0.5 : 0) * L; for (let x = -R - off; x < R; x += L){ g.beginPath(); g.moveTo(x + L / 2, y - st); g.lineTo(x + L / 2, y); g.stroke(); } }
+    g.restore(); return; }
   const lines = ang => { const a = ang * Math.PI / 180, n = { x:-Math.sin(a), y:Math.cos(a) }, R = Math.hypot(W, H); for (let t = -R; t < R; t += st){ g.beginPath(); g.moveTo(W / 2 + n.x * t - Math.cos(a) * R, H / 2 + n.y * t - Math.sin(a) * R); g.lineTo(W / 2 + n.x * t + Math.cos(a) * R, H / 2 + n.y * t + Math.sin(a) * R); g.stroke(); } };
   if (f.k === 'lines') lines(f.a); else if (f.k === 'cross'){ lines(f.a); lines(f.a + 90); }
   else if (f.k === 'dots'){ for (let x = st / 2; x < W; x += st) for (let y = st / 2; y < H; y += st){ g.beginPath(); g.arc(x, y, 0.7, 0, 7); g.fill(); } }
   else if (f.k === 'concrete'){ for (let i = 0; i < W * H / (st * st) * 1.2; i++){ g.beginPath(); g.arc(Math.random() * W, Math.random() * H, Math.random() < 0.4 ? 1.3 : 0.6, 0, 7); g.fill(); } }
   else if (f.k === 'insul' || f.k === 'wood'){ for (let y = 0; y < H + st; y += st){ g.beginPath(); for (let x = 0; x <= W; x += 1){ const yy = f.k === 'insul' ? y - Math.abs(((x / st) % 1) - 0.5) * 2 * st : y + 0.3 * st * Math.sin(x / st * 1.7); x ? g.lineTo(x, yy) : g.moveTo(x, yy); } g.stroke(); } }
+  g.restore();
 }
 function applyStd(){ makeMaterials(); rebuild(); annoDirty = true; renderOptbar(); $('#propsBody').dataset.id = 'x'; updatePanel(); scheduleSave(); }
 const canvasEl = (w = 120, h = 22) => { const c = document.createElement('canvas'); c.width = w; c.height = h; c.style.width = w + 'px'; c.style.height = h + 'px'; return c; };
@@ -4465,29 +4785,21 @@ function renderStd(){
     }
     addBtn('Новый образец', () => { STD.patterns.push({ id:newId('p', STD.patterns), n:'Мой образец', seq:[8, 2, 2, 2] }); renderStd(); applyStd(); });
   } else if (STD_TAB === 'fills'){
-    note('Штриховки чертятся на бумаге в миллиметрах и не меняются при увеличении. Ниже — какой штриховкой показывать каждый материал в сечении на плане (уровень детализации «Средний»).');
-    const kinds = [['lines', 'Линии'], ['cross', 'Сетка'], ['dots', 'Точки'], ['concrete', 'Бетон'], ['insul', 'Утеплитель (зигзаг)'], ['wood', 'Дерево (волна)'], ['solid', 'Сплошная заливка'], ['none', 'Без штриховки']];
-    const tb = table(['Штриховка', 'Вид', 'Шаг, мм', 'Угол, °', 'Образец', '']);
+    note('Чертёжная штриховка задаётся в миллиметрах на бумаге и не меняется при увеличении. Модельная — в реальных миллиметрах (плитка 300×300, кирпич 250×65): она растёт и уменьшается вместе с моделью. Какую штриховку показывать у материала на поверхности и в сечении — в окне «Материалы».');
+    const kinds = [['lines', 'Линии'], ['cross', 'Сетка'], ['brick', 'Кирпичная кладка'], ['dots', 'Точки'], ['concrete', 'Бетон'], ['insul', 'Утеплитель (зигзаг)'], ['wood', 'Дерево (волна)'], ['solid', 'Сплошная заливка'], ['none', 'Без штриховки']];
+    const tb = table(['Штриховка', 'Тип', 'Вид', 'Шаг, мм', 'Угол, °', 'Образец', '']);
     for (const f of STD.fills){
       const tr = document.createElement('tr'), pv = canvasEl(64, 28), draw = () => prevFill(pv, f);
       const nm = inp('text', f.n, { maxLength:40 }); nm.onchange = () => { f.n = nm.value.trim() || f.n; applyStd(); renderStd(); };
+      const u = sel([['paper', 'Чертёжная'], ['model', 'Модельная']], f.u === 'model' ? 'model' : 'paper'); u.onchange = () => { if (u.value === 'model'){ f.u = 'model'; if (f.s < 20) f.s = 300; } else { delete f.u; f.s = clamp(f.s, 0.3, 50); } renderStd(); applyStd(); };
       const k = sel(kinds, f.k); k.onchange = () => { f.k = k.value; draw(); applyStd(); };
-      const st = inp('number', f.s, { step:0.1, min:0.3 }); st.onchange = () => { if (+st.value > 0){ f.s = clamp(+st.value, 0.3, 50); draw(); applyStd(); } };
+      const st = inp('number', f.s, { step:f.u === 'model' ? 10 : 0.1, min:0.3 }); st.onchange = () => { if (+st.value > 0){ f.s = clamp(+st.value, 0.3, f.u === 'model' ? 5000 : 50); draw(); applyStd(); } };
       const an = inp('number', f.a, { step:5 }); an.onchange = () => { f.a = +an.value || 0; draw(); applyStd(); };
-      td(tr, nm); td(tr, k); td(tr, st); td(tr, an); td(tr, pv); td(tr, f.sys ? '' : delBtn(() => { STD.fills = STD.fills.filter(x => x !== f); for (const v of Object.values(STD.mat)) if (v.f === f.id) v.f = 'diag'; renderStd(); applyStd(); }));
+      td(tr, nm); td(tr, u); td(tr, k); td(tr, st); td(tr, an); td(tr, pv); td(tr, f.sys ? '' : delBtn(() => { STD.fills = STD.fills.filter(x => x !== f); for (const v of Object.values(STD.mat)) if (v.f === f.id) v.f = 'diag'; for (const x of Object.values(MATX)) for (const pp of [x.surf, x.cut]) if (pp) for (const q of [pp.fg, pp.bg]) if (q.p === f.id) q.p = 'none'; renderStd(); applyMats(); }));
       draw(); tb.append(tr);
     }
     addBtn('Новая штриховка', () => { STD.fills.push({ id:newId('f', STD.fills), n:'Моя штриховка', k:'lines', s:3, a:30 }); renderStd(); applyStd(); });
-    const h3 = document.createElement('h3'); h3.textContent = 'Штриховка материалов в разрезе'; body.append(h3);
-    const tm = table(['Материал', 'Штриховка', 'Цвет линий', 'Цвет фона', 'Вид']);
-    for (const [key, mt] of Object.entries(MATS)){
-      const v = STD.mat[key] = STD.mat[key] || { f:'diag' }, tr = document.createElement('tr'), pv = canvasEl(64, 28);
-      const draw = () => prevFill(pv, STD.fills.find(x => x.id === v.f) || STD.fills[2], v.fg || '#2b3439', v.bg || mt.c);
-      const f = sel(STD.fills.map(x => [x.id, x.n]), v.f); f.onchange = () => { v.f = f.value; draw(); applyStd(); };
-      const fg = inp('color', v.fg || '#2b3439'); fg.oninput = () => { v.fg = fg.value; draw(); }; fg.onchange = applyStd;
-      const bg = inp('color', v.bg || mt.c); bg.oninput = () => { v.bg = bg.value; draw(); }; bg.onchange = applyStd;
-      td(tr, `<span class="swatch" style="background:${mt.c}"></span> ${esc(mt.n)}`); td(tr, f); td(tr, fg); td(tr, bg); td(tr, pv); draw(); tm.append(tr);
-    }
+    addBtn('Открыть «Материалы»…', () => { stdDlg.hidden = true; openMats(); });
   } else {
     note('Настройки размеров и марок для всех планов и листов проекта. Размеры в миллиметрах на бумаге.');
     const A = STD.anno, grid = document.createElement('div'); grid.className = 'stdgrid'; body.append(grid);
@@ -4514,6 +4826,141 @@ $('#stdReset').onclick = () => {
   if (!confirm('Вернуть значения по умолчанию на этой вкладке?')) return;
   if (STD_TAB === 'fills'){ STD.fills = d.fills; STD.mat = d.mat; } else STD[map[STD_TAB]] = d[map[STD_TAB]];
   renderStd(); applyStd();
+};
+
+/* ---------- «Материалы» (Revit «Управление → Материалы»): graphics (shading, surface and cut patterns) and appearance (photo) ---------- */
+const matDlg = $('#matDlg'); let MAT_CUR = 'generic';
+const MAT_EL = ['box', 'door', 'window', 'floor', 'ceiling', 'roof', 'column', 'stair', 'fam', 'part'];
+function applyMats(){
+  syncMats(); for (const k in RMAT){ RMAT[k].dispose(); delete RMAT[k]; }
+  makeMaterials(); rebuild(); annoDirty = true; $('#propsBody').dataset.id = 'x'; updatePanel(); renderTree(); scheduleSave();
+}
+// how many elements use the material: their own material, a wall type layer, or a family form
+function matUse(k){
+  let n = 0;
+  for (const it of items){
+    if (it.m === k && MAT_EL.includes(it.type)) n++;
+    else if (it.type === 'wall'){ const ty = typeById(it.wt); if (ty && ty.layers.some(l => l.m === k)) n++; }
+    else if (it.type === 'fam' && !it.m){ const f = famById(it.f); if (f && f.forms.some(fm => fm.m === k)) n++; }
+  }
+  return n;
+}
+// editable copy of a material in the project (built-in materials keep their key)
+function matEdit(k){
+  const sp = matSpec(k), x = MATX[k] = MATX[k] || {};
+  if (!x.surf) x.surf = JSON.parse(JSON.stringify(sp.surf)); if (!x.cut) x.cut = JSON.parse(JSON.stringify(sp.cut));
+  return x;
+}
+const fillOpts = cur => [['none', 'Нет'], ...STD.fills.filter(f => f.k !== 'none').map(f => [f.id, f.n + (f.u === 'model' ? ' · модельная' : '')])].map(([v, n]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${esc(n)}</option>`).join('');
+// material picker for element properties: every project material + a button that opens it in «Материалы»
+function matPick(id, cur, def){
+  return `<span class="matpick"><select id="${id}">${def ? `<option value="">${esc(def)}</option>` : ''}${Object.entries(MATS).map(([k, m]) => `<option value="${k}"${k === cur ? ' selected' : ''}>${esc(m.n)}</option>`).join('')}</select><button type="button" class="btn sm" data-matedit="${id}" title="Открыть в окне «Материалы»" aria-label="Открыть материал">…</button></span>`;
+}
+function newMatKey(){ let i = 1; while (MATS['u' + i] || MATX['u' + i]) i++; return 'u' + i; }
+function renderMatList(){
+  const q = ($('#matFind').value || '').trim().toLowerCase(), list = $('#matList'); list.replaceChildren();
+  for (const [k, m] of Object.entries(MATS)){
+    if (q && !m.n.toLowerCase().includes(q)) continue;
+    const b = document.createElement('button'), sp = matSpec(k), c = canvasEl(34, 22), u = matUse(k);
+    b.type = 'button'; b.setAttribute('role', 'option'); b.setAttribute('aria-selected', k === MAT_CUR); b.dataset.k = k;
+    prevPats(c, sp.c, hasPats(sp.surf) ? sp.surf : sp.cut);
+    const n = document.createElement('span'); n.className = 'mt-n'; n.textContent = m.n; n.title = m.n;
+    const us = document.createElement('span'); us.className = 'mt-u'; us.textContent = u ? String(u) : ''; us.title = u ? `Используется: ${u}` : '';
+    b.append(c, n, us); b.onclick = () => { MAT_CUR = k; renderMats(); };
+    list.append(b);
+  }
+}
+function renderMatBody(){
+  const k = MATS[MAT_CUR] ? MAT_CUR : 'generic'; MAT_CUR = k;
+  const sp = matSpec(k), u = matUse(k), body = $('#matBody'), selIds = liveIds(sel).filter(i => MAT_EL.includes(byId(i)?.type));
+  const row = (label, html, extra = '') => `<div class="mrow"><span>${label}</span><div>${html}</div><div>${extra}</div></div>`;
+  const patRows = (key, pp) => row('Передний план', `<select data-pk="${key}.fg.p">${fillOpts(pp.fg.p)}</select>`, `<input type="color" data-pk="${key}.fg.c" value="${pp.fg.c}" aria-label="Цвет переднего плана">`)
+    + row('Фон', `<select data-pk="${key}.bg.p">${fillOpts(pp.bg.p)}</select>`, `<input type="color" data-pk="${key}.bg.c" value="${pp.bg.c}" aria-label="Цвет фона">`);
+  body.innerHTML = `
+    ${row('Название', `<input type="text" id="mtName" maxlength="60" value="${esc(sp.n)}">`)}
+    <p class="libnote">${sp.custom ? 'Материал проекта.' : 'Встроенный материал.'} ${u ? `Используется: ${u} эл.` : 'Пока нигде не используется.'}</p>
+    <h3>Тонирование</h3>
+    ${row('Цвет', `<input type="color" id="mtC" value="${sp.c}">`)}
+    ${row('Прозрачность', `<input type="range" id="mtTr" min="0" max="90" step="5" value="${Math.round(sp.tr * 100)}" aria-label="Прозрачность, %">`, `<span id="mtTrV">${Math.round(sp.tr * 100)}%</span>`)}
+    <h3>Штриховка поверхности</h3>
+    <p class="libnote">Видна на фасадах, в 3D-виде (стиль «Тонированный») и на плане — у пола сверху.</p>
+    ${patRows('surf', sp.surf)}
+    <h3>Штриховка сечения</h3>
+    <p class="libnote">Заливка разрезанного элемента: на плане и в разрезах.</p>
+    ${patRows('cut', sp.cut)}
+    <div class="matprev"><figure><canvas id="mtPS" width="150" height="80"></canvas><figcaption>Поверхность</figcaption></figure><figure><canvas id="mtPC" width="150" height="80"></canvas><figcaption>Сечение</figcaption></figure></div>
+    <h3>Внешний вид (фото)</h3>
+    <p class="libnote">Фотография поверхности — кладка, плитка, дерево. Видна в стиле «Реалистичный» и в «Визуализации» с текстурами. Укажите, какой участок в миллиметрах на ней снят.</p>
+    <div class="matprev"><div class="matphoto" id="mtPh"${sp.img ? ` style="background-image:url('${sp.img}')"` : ''}>${sp.img ? '' : 'Нет фото'}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:180px;flex:1">
+        <div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm" id="mtImgUp">${sp.img ? 'Заменить фото' : 'Загрузить фото'}</button>${sp.img ? '<button class="btn sm danger" id="mtImgDel">Убрать фото</button>' : ''}</div>
+        ${sp.img ? row('Ширина образца, мм', `<input type="number" id="mtIW" min="10" step="10" value="${Math.round(sp.iw)}">`) + row('Высота образца, мм', `<input type="number" id="mtIH" min="10" step="10" value="${Math.round(sp.ih)}">`) : ''}
+      </div></div>
+    <div class="pbtns" style="margin-top:4px">
+      ${selIds.length ? `<button class="btn sm primary" id="mtAssign">Назначить выбранным (${selIds.length})</button>` : ''}
+      ${!sp.custom && MATX[k] ? '<button class="btn sm" id="mtReset">Вернуть как было</button>' : ''}
+      ${sp.custom ? '<button class="btn sm danger" id="mtDel">Удалить материал</button>' : ''}
+    </div>`;
+  const q = id => body.querySelector('#' + id);
+  const prev = () => { const s2 = matSpec(k); prevPats(q('mtPS'), s2.c, s2.surf); prevPats(q('mtPC'), '#ffffff', s2.cut); };
+  prev();
+  q('mtName').onchange = e => { const n = e.target.value.trim(); if (!n) return; matEdit(k).n = n.slice(0, 60); applyMats(); renderMatList(); };
+  q('mtC').oninput = e => { matEdit(k).c = e.target.value; syncMats(); prev(); };
+  q('mtC').onchange = () => { applyMats(); renderMatList(); };
+  q('mtTr').oninput = e => { q('mtTrV').textContent = e.target.value + '%'; };
+  q('mtTr').onchange = e => { const v = +e.target.value / 100; const x = matEdit(k); if (v > 0) x.tr = v; else delete x.tr; applyMats(); };
+  body.querySelectorAll('[data-pk]').forEach(el => {
+    const [grp, lay, f] = el.dataset.pk.split('.');
+    const set = v => { matEdit(k)[grp][lay][f] = v; prev(); };
+    if (el.type === 'color'){ el.oninput = e => set(e.target.value); el.onchange = () => { applyMats(); renderMatList(); }; }
+    else el.onchange = e => { set(e.target.value); applyMats(); renderMatList(); };
+  });
+  q('mtImgUp').onclick = () => { const f = $('#matImg'); f.value = ''; f.click(); };
+  if (q('mtImgDel')) q('mtImgDel').onclick = () => { const x = matEdit(k); delete x.img; delete x.iw; delete x.ih; applyMats(); renderMats(); };
+  const dim = (id, key) => { const f = q(id); if (f) f.onchange = e => { const v = +e.target.value; if (v >= 10){ matEdit(k)[key] = Math.min(v, 1e5); applyMats(); } }; };
+  dim('mtIW', 'iw'); dim('mtIH', 'ih');
+  if (q('mtAssign')) q('mtAssign').onclick = () => {
+    pushUndo('Назначить материал'); markEdited();
+    for (const id of selIds){ const it = byId(id); if (it) it.m = k; }
+    applyMats(); renderMats(); toast(`Материал «${MATS[k].n}» назначен: ${selIds.length} эл.`);
+  };
+  if (q('mtReset')) q('mtReset').onclick = () => { delete MATX[k]; applyMats(); renderMats(); };
+  if (q('mtDel')) q('mtDel').onclick = () => {
+    if (u && !confirm(`Материал используется (${u} эл.). Заменить его на «${MATS.generic.n}» и удалить?`)) return;
+    pushUndo('Удалить материал'); markEdited();
+    for (const it of items) if (it.m === k) it.m = 'generic';
+    for (const t of types) for (const l of t.layers) if (l.m === k) l.m = 'generic';
+    for (const f of fams) for (const fm of f.forms) if (fm.m === k) fm.m = 'generic';
+    delete MATX[k]; MAT_CUR = 'generic'; FBOX.clear(); applyMats(); renderMats();
+  };
+}
+function renderMats(){ renderMatList(); renderMatBody(); }
+function openMats(k){ if (k && MATS[k]) MAT_CUR = k; $('#matFind').value = ''; renderMats(); matDlg.hidden = false; }
+$('#rbMats').onclick = () => openMats();
+$('#matClose').onclick = () => { matDlg.hidden = true; };
+$('#matFind').oninput = renderMatList;
+$('#matNew').onclick = () => {
+  const k = newMatKey();
+  MATX[k] = { custom:true, n:'Новый материал', c:'#c8c8c8', surf:PATS0(), cut:{ fg:{ p:'diag', c:'#2b3439' }, bg:{ p:'solid', c:'#ffffff' } } };
+  MAT_CUR = k; applyMats(); renderMats(); const n = $('#mtName'); if (n){ n.focus(); n.select(); }
+};
+$('#matDup').onclick = () => {
+  const sp = matSpec(MAT_CUR), k = newMatKey();
+  MATX[k] = { custom:true, n:(sp.n + ' (копия)').slice(0, 60), c:sp.c, ...(sp.tr ? { tr:sp.tr } : {}), surf:JSON.parse(JSON.stringify(sp.surf)), cut:JSON.parse(JSON.stringify(sp.cut)), ...(sp.img ? { img:sp.img, iw:sp.iw, ih:sp.ih } : {}) };
+  MAT_CUR = k; applyMats(); renderMats();
+};
+// a photo is scaled down to 1024 px and kept inside the project as JPEG
+$('#matImg').onchange = e => {
+  const file = e.target.files && e.target.files[0]; if (!file) return;
+  const url = URL.createObjectURL(file), img = new Image();
+  img.onload = () => {
+    const s2 = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight)), w = Math.max(1, Math.round(img.naturalWidth * s2)), h = Math.max(1, Math.round(img.naturalHeight * s2));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url);
+    const x = matEdit(MAT_CUR); x.img = c.toDataURL('image/jpeg', 0.85); x.iw = x.iw || 1000; x.ih = Math.round(x.iw * h / w);
+    applyMats(); renderMats(); toast('Фото добавлено. Его видно в стиле «Реалистичный» и в визуализации');
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast('Не удалось открыть это изображение'); };
+  img.src = url;
 };
 
 /* ---------- family editor (Revit «Редактор семейств»): a sketch of lines on a coordinate plane → extrusion, revolve or sweep ---------- */
@@ -4823,11 +5270,12 @@ function texFor(kind, base){
 // MeshStandardMaterial with its map sampled by world position along the three axes
 function triMat(tex, scale, opt = {}){
   const m = new THREE.MeshStandardMaterial({ color:0xffffff, roughness:opt.r ?? 0.85, metalness:opt.met ?? 0, envMapIntensity:opt.env ?? 0.55, clippingPlanes:CLIP, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
+  const sc2 = typeof scale === 'number' ? new THREE.Vector2(scale, scale) : scale;
   m.onBeforeCompile = sh => {
-    sh.uniforms.triMap = { value:tex }; sh.uniforms.triScale = { value:scale };
+    sh.uniforms.triMap = { value:tex }; sh.uniforms.triScale = { value:sc2 };
     sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vTriP; varying vec3 vTriN;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTriP = (modelMatrix * vec4(transformed, 1.0)).xyz; vTriN = normalize(mat3(modelMatrix) * normal);');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform sampler2D triMap; uniform float triScale; varying vec3 vTriP; varying vec3 vTriN;')
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform sampler2D triMap; uniform vec2 triScale; varying vec3 vTriP; varying vec3 vTriN;')
       .replace('#include <map_fragment>', `vec3 tb = pow(abs(normalize(vTriN)), vec3(4.0)); tb /= (tb.x + tb.y + tb.z + 1e-5);
         vec4 tcol = texture2D(triMap, vTriP.zy * triScale) * tb.x + texture2D(triMap, vTriP.xz * triScale) * tb.y + texture2D(triMap, vTriP.xy * triScale) * tb.z;
         diffuseColor *= tcol;`);
@@ -4839,8 +5287,13 @@ const R_KIND = { brick:'brick', facade:'brick', wood:'wood', tile:'tile', concre
 function rMat(m){
   const o = S.render || {}, key = m + (o.tex ? ':t' : ':p');
   if (RMAT[key]) return RMAT[key];
-  const base = (MATS[m] || MATS.generic).c;
+  const base = (MATS[m] || MATS.generic).c, sp = MATS[m] ? matSpec(m) : null;
   let mat;
+  // the project's own material: its photo (when textures are on), else its shading colour and transparency
+  if (sp && (sp.custom || sp.img || sp.tr)){
+    mat = sp.img && o.tex ? photoMat(m, sp) : new THREE.MeshStandardMaterial({ color:sp.c, roughness:0.8, envMapIntensity:0.55, clippingPlanes:CLIP, ...PO, ...(sp.tr ? { transparent:true, opacity:1 - sp.tr, depthWrite:false } : {}) });
+    return RMAT[key] = mat;
+  }
   if (m === 'glass') mat = new THREE.MeshStandardMaterial({ color:'#a9c8dc', roughness:0.04, metalness:0.2, transparent:true, opacity:0.32, depthWrite:false, envMapIntensity:1.4, clippingPlanes:CLIP });
   else if (m === 'mass') mat = new THREE.MeshStandardMaterial({ color:'#d9d2c6', roughness:0.8, envMapIntensity:0.5, clippingPlanes:CLIP, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
   else if (m === 'steel') mat = new THREE.MeshStandardMaterial({ color:base, roughness:0.35, metalness:0.75, envMapIntensity:1, clippingPlanes:CLIP });
@@ -5295,7 +5748,7 @@ function updatePanel(){
       + prow('Стадия', `<select id="pVPhase">${[...PHASES, { k:'all', n:'Показать все' }].map(p => `<option value="${p.k}"${p.k === S.phase ? ' selected' : ''}>${p.n}</option>`).join('')}</select>`)
       + prow('Масштаб', `<span class="val">${$('#scale').textContent}</span>`)
       + prow('Детализация', `<select id="pDetail"><option value="medium">Средняя (слои)</option><option value="coarse">Низкая (заливка)</option></select>`)
-      + prow('Стиль 3D', `<select id="pStyle"><option value="shaded">Тонированный</option><option value="lines">Скрытые линии</option></select>`);
+      + prow('Стиль 3D', `<select id="pStyle"><option value="shaded">Тонированный</option><option value="real">Реалистичный</option><option value="lines">Скрытые линии</option></select>`);
   } else if (it.type === 'wall'){
     const ty = typeById(it.wt), dx = it.x2 - it.x1, dz = it.z2 - it.z1;
     const nops = items.filter(o => isOp(o) && o.wall === it.id).length, cuts = wallCuts(it);
@@ -5318,6 +5771,7 @@ function updatePanel(){
       + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
       + `<div class="pgrp">Размеры</div>` + prow('Ширина, мм', pnum('sOW', it.w, 'min="100" step="50"')) + prow('Высота, мм', pnum('sOH', it.h, 'min="100" step="50"'))
       + (door ? '' : prow('Подоконник, мм', pnum('sOS', it.sill, 'min="50" step="50"')))
+      + prow('Материал', matPick('sMatX', it.m, door ? 'По умолчанию (дверное полотно)' : 'По умолчанию (стекло)'))
       + prow('От начала стены, мм', pnum('sOA', it.pos - it.w / 2, 'min="0" step="50"'))
       + (door ? `<div class="pbtns"><button class="btn sm" id="sFlip">Открывание: ${it.flip ? 'сторона Б' : 'сторона А'}</button><button class="btn sm" id="sHand">Петли: ${it.hand ? 'справа' : 'слева'}</button></div>` : '')
       + `<div class="pbtns"><button class="btn sm danger" id="sDel">Удалить</button></div>`;
@@ -5349,17 +5803,17 @@ function updatePanel(){
     h += `<div class="typesel"><span class="tname">${esc(f ? FAM_CATS[f.cat] : 'Семейство')} ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span><select id="fFam">${famOptions(it.f)}</select><span class="tsub">${f ? f.forms.length + ' форм(ы) · ' + mm(sz.x) + ' × ' + mm(sz.z) + ' × ' + mm(sz.y) + ' мм' : 'семейство не найдено'}</span><button class="btn sm" id="fEdit">Изменить семейство…</button></div>`
       + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
       + `<div class="pgrp">Размещение</div>` + prow('Поворот, °', `<input id="fRot" type="number" step="15" value="${r4(it.rot || 0)}">`) + prow('Отражено', `<label class="pchk"><input type="checkbox" id="fMir"${it.mir ? ' checked' : ''}> зеркально</label>`)
-      + prow('Материал', `<select id="fM"><option value="">По семейству</option>${Object.entries(MATS).map(([k, m]) => `<option value="${k}"${k === it.m ? ' selected' : ''}>${esc(m.n)}</option>`).join('')}</select>`)
+      + prow('Материал', matPick('fM', it.m, 'По семейству'))
       + prow('Положение (X, Y), мм', `<span class="val">${mm(it.x)}, ${mm(-it.z)}</span>`)
       + `<div class="pbtns"><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else if (it.type === 'part'){
     const w = byId(it.host), ly = w ? wallLayers(w)[it.li] : null;
     h += `<div class="typesel"><span class="tname">Часть ${it.li + 1} стены ${esc(w ? w.tag : '')}</span><span class="tsub">${ly ? mm(ly.s1 - ly.s0) + ' мм' : ''}</span></div>`
-      + prow('Материал', `<select id="ptM">${Object.entries(MATS).map(([k, m]) => `<option value="${k}"${k === it.m ? ' selected' : ''}>${esc(m.n)}</option>`).join('')}</select>`)
+      + prow('Материал', matPick('ptM', it.m))
       + prow('Исключить часть', `<label class="pchk"><input type="checkbox" id="ptEx"${it.ex ? ' checked' : ''}> не показывать и не считать</label>`)
       + `<div class="pbtns"><button class="btn sm" id="ptWall">Выбрать стену</button><button class="btn sm danger" id="ptDel">Удалить все части стены</button></div>`;
   } else if (NEWCAT.includes(it.type)){
-    const matSel = (id, cur, list) => `<select id="${id}">${list.map(k => `<option value="${k}"${k === cur ? ' selected' : ''}>${esc(MATS[k].n)}</option>`).join('')}</select>`;
+    const matSel = (id, cur) => matPick(id, cur);
     const tagRow = it.type === 'room' ? '' : prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`);
     const head = it.type === 'room' ? `Помещение ${esc(it.num)}` : `${CAT[it.type]} ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span>`;
     h += `<div class="typesel"><span class="tname">${head}</span>${elSummary(it)}</div>` + tagRow;
@@ -5387,6 +5841,7 @@ function updatePanel(){
     h += `<div class="typesel"><span class="tname">Объём ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span></div>`
       + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
       + prow('Ширина (X), мм', pnum('sW', it.w, 'min="10" step="10"')) + prow('Глубина (Y), мм', pnum('sD', it.d, 'min="10" step="10"')) + prow('Высота, мм', pnum('sH', it.h, 'min="10" step="50"'))
+      + prow('Материал', matPick('sMatX', it.m, 'По умолчанию'))
       + `<div class="pbtns"><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   }
   if (it && !isMeta(it)){ const pr = prow('Прикреплён', `<label class="pchk"><input type="checkbox" id="sPin"${it.pin ? ' checked' : ''}> нельзя сдвинуть и удалить</label>`), b = h.lastIndexOf('<div class="pbtns">'); h = b >= 0 ? h.slice(0, b) + pr + h.slice(b) : h + pr; }
@@ -5403,6 +5858,8 @@ function updatePanel(){
   const q = id => el.querySelector('#' + id);
   if (q('pVPhase')) q('pVPhase').onchange = e => setPhase(e.target.value);
   if (it) bindCons(it, q, el);
+  el.querySelectorAll('[data-matedit]').forEach(b => b.onclick = () => { const s2 = q(b.dataset.matedit); openMats((s2 && s2.value) || undefined); });
+  if (it && q('sMatX')) q('sMatX').onchange = e => { pushUndo('Материал'); markEdited(); if (e.target.value) it.m = e.target.value; else delete it.m; el.dataset.id = 'x'; rebuild(); };
   if (q('sPin')) q('sPin').onchange = e => { pushUndo(e.target.checked ? 'Прикрепить' : 'Открепить'); if (e.target.checked) it.pin = true; else delete it.pin; el.dataset.id = 'x'; rebuild(); };
   if (it && it.type === 'fam'){
     const ch = (id, fn) => { const f = q(id); if (f) f.onchange = e => { pushUndo(); markEdited(); fn(e.target); el.dataset.id = 'x'; rebuild(); }; };
@@ -5715,8 +6172,8 @@ function sanitizeItems(arr){
     const id = Math.round(+it.id); if (!(id > 0) || seen.has(id)) continue;
     let o = null;
     if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it), ...(Array.isArray(it.svNo) ? { svNo:it.svNo.filter(s => s === 1 || s === -1) } : {}), ...(Array.isArray(it.dj) && (it.dj[0] || it.dj[1]) ? { dj:[!!it.dj[0], !!it.dj[1]] } : {}), ...(LOC_LINES[it.loc] && it.loc !== 'center' ? { loc:it.loc } : {}), ...(it.nrb ? { nrb:true } : {}) };
-    else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
-    else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+    else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+    else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand, ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
     else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1 } : {}) };
     else if (it.type === 'grid' && seg(it)) o = { id, type:'grid', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, name:String(it.name || '?').slice(0, 6) };
     else if (it.type === 'line' && seg(it)) o = { id, type:'line', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2 };
@@ -5766,7 +6223,7 @@ function record(){
   saveCam();
   return { id:proj.id, name:proj.name, created:proj.created, updated:Date.now(), sample:proj.sample,
     items:JSON.parse(JSON.stringify(items)), nextId, types:JSON.parse(JSON.stringify(types)), settings:getSettings(), thumb:(S.view !== 'sheet' && makeThumb()) || proj.thumb || null, counts:counts(),
-    views:JSON.parse(JSON.stringify(views)), viewId:S.viewId, levels:JSON.parse(JSON.stringify(levels)), std:JSON.parse(JSON.stringify(STD)), fams:JSON.parse(JSON.stringify(fams)), tpls:JSON.parse(JSON.stringify(TPLS)), ver:8 };
+    views:JSON.parse(JSON.stringify(views)), viewId:S.viewId, levels:JSON.parse(JSON.stringify(levels)), std:JSON.parse(JSON.stringify(STD)), fams:JSON.parse(JSON.stringify(fams)), tpls:JSON.parse(JSON.stringify(TPLS)), mats:JSON.parse(JSON.stringify(MATX)), ver:8 };
 }
 let saveT = null;
 function setSaveState(s){ const el = $('#saveState'); el.dataset.s = s; el.textContent = { dirty:'· изменён', saving:'· сохраняю…', saved:'· сохранено', mem:'· не сохраняется на этом устройстве' }[s] || ''; }
@@ -5782,13 +6239,14 @@ function showName(){ $('#projName').textContent = proj.name || 'Без назв�
 function nextName(list, base){ const names = new Set(list.map(p => p.name)); if (!names.has(base)) return base; let i = 2; while (names.has(`${base} ${i}`)) i++; return `${base} ${i}`; }
 function loadRecord(rec){
   endDraw();
+  MATX = sanitizeMats(rec.mats); syncMats(); for (const k in RMAT){ RMAT[k].dispose(); delete RMAT[k]; }
   types = sanitizeTypes(rec.types);
   levels = sanitizeLevels(rec.levels) || DEFAULT_LEVELS();
   STD = sanitizeStd(rec.std); makeMaterials();
   fams = sanitizeFams(rec.fams) || FAM_BUILTIN(); FBOX.clear(); TPLS = sanitizeTpls(rec.tpls);
   items = sanitizeItems(rec.items);
   for (const it of items) if (!it.lv && it.type !== 'grid' && !isOp(it) && !isMeta(it)) it.lv = levels[0].id;
-  pruneMeta(); S.tmp = null; S.reveal = false;
+  pruneMeta(); S.tmp = null; S.reveal = false; $('#viewport').classList.remove('reveal'); { const rb = $('#rbReveal'); if (rb) rb.setAttribute('aria-pressed', false); } { const vr = $('#vbReveal'); if (vr) vr.setAttribute('aria-pressed', false); }
   nextId = Math.max(Number(rec.nextId) || 1, ...items.map(i => i.id + 1), 1);
   ensureTags();
   clearSel(); undoStack.length = 0; redoStack.length = 0; drag = null;
@@ -5830,7 +6288,7 @@ const downloadsP = claudeUse('downloads');
 const safeName = s => String(s || 'Проект').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'Проект';
 function fileJSON(rec){
   return JSON.stringify({ format:'kot-project', version:3, app:'Kot project', id:rec.id, name:rec.name, created:rec.created, updated:rec.updated || Date.now(),
-    units:'m', settings:rec.settings, types:rec.types, nextId:rec.nextId, items:rec.items, views:rec.views, viewId:rec.viewId, levels:rec.levels, std:rec.std, fams:rec.fams, tpls:rec.tpls }, null, 1);
+    units:'m', settings:rec.settings, types:rec.types, nextId:rec.nextId, items:rec.items, views:rec.views, viewId:rec.viewId, levels:rec.levels, std:rec.std, fams:rec.fams, tpls:rec.tpls, mats:rec.mats }, null, 1);
 }
 async function saveBlob(base, ext, blob, mime, desc){
   const dl = await downloadsP;
@@ -5887,7 +6345,7 @@ async function importFile(f, handle){
   const same = data.id && list.find(p => p.id === data.id);
   const name = String(data.name || f.name.replace(/(\.kot)?(\.json)?$/i, '')).slice(0, 80);
   let rec, msg;
-  const body = { items:data.items, nextId:data.nextId, settings:data.settings, types:data.types, views:data.views, viewId:data.viewId, levels:data.levels, std:data.std, fams:data.fams, tpls:data.tpls };
+  const body = { items:data.items, nextId:data.nextId, settings:data.settings, types:data.types, views:data.views, viewId:data.viewId, levels:data.levels, std:data.std, fams:data.fams, tpls:data.tpls, mats:data.mats };
   if (same && (Number(data.updated) || 0) > (same.updated || 0)){ rec = { ...same, ...body, name, updated:Date.now() }; msg = `«${name}» обновлён из файла`; }
   else if (same){ rec = { id:uid(), name:nextName(list, name + ' (из файла)'), created:Date.now(), ...body }; msg = `Открыт как копия: «${rec.name}»`; }
   else { rec = { id:data.id || uid(), name, created:Number(data.created) || Date.now(), ...body }; msg = `Открыт «${name}»`; }
@@ -6275,7 +6733,10 @@ $('#rbDimAl').addEventListener('click', () => { S.dimMode = 'aligned'; renderOpt
 $('#rbAutoDim').onclick = () => { if (S.view !== 'plan') setView('plan'); pushUndo(); markEdited(); const n = autoDims(); rebuild(); toast(n ? `Поставлено размеров: ${n}` : 'Нет стен для размеров'); };
 $('#finishBtn').onclick = () => finishAction();
 $('#vbDetail').onclick = () => setDetail(S.detail === 'coarse' ? 'medium' : 'coarse');
-$('#vbStyle').onclick = () => setStyle(S.style === 'lines' ? 'shaded' : 'lines');
+$('#vbWeights').onclick = toggleThin;
+$('#rbGridVis').onclick = toggleGrids;
+$('#vbReveal').onclick = () => toggleReveal();
+$('#vbStyle').onclick = () => setStyle(S.style === 'shaded' ? 'real' : S.style === 'real' ? 'lines' : 'shaded');
 $('#cGrid').onchange = e => { S.grid = e.target.checked; grids.visible = S.grid; };
 $('#cAxes').onchange = e => { S.axes = e.target.checked; axesG.visible = S.axes; };
 $('#cTags').onchange = e => { S.tags = e.target.checked; lsSet('kot.tags', S.tags ? '1' : '0'); };
@@ -6288,7 +6749,7 @@ const COMBOS = { WA:() => setTool('wall'), RM:() => setTool('rect'), DR:() => se
   GR:() => setTool('grid'), DL:() => setTool('line'), TX:() => setTool('text'), MV:() => setTool('move'), CO:() => setTool('copy'), RO:() => setTool('rotate'), DE:() => deleteSel(),
   CN:() => setTool('column'), SB:() => setTool('floor'), CI:() => setTool('ceiling'), RF:() => setTool('roof'), ST:() => setTool('stair'), RT:() => setTool('room'), SC:() => setTool('section'), EL:() => setTool('ielev'), CL:() => setTool('callout'), DM:() => setTool('demolish'), RR:() => openRender(), LL:() => openLevels(), ME:() => setTool('measure'), FA:() => setTool('fam'), VV:() => openTpl(curView().tpl),
   AL:() => setTool('align'), OF:() => setTool('offset'), MM:() => setTool('mirror'), RE:() => setTool('scale'), TR:() => setTool('trimcorner'), SL:() => setTool('split'), PN:() => pinSel(true), UP:() => pinSel(false),
-  HH:() => tempHide('hide'), HI:() => tempHide('iso'), HR:() => tempHide('reset'), EH:() => hideInView(true), RH:() => toggleReveal(), GP:() => makeGroup('grp'), CS:() => createSimilar() };
+  HH:() => tempHide('hide'), HI:() => tempHide('iso'), HR:() => tempHide('reset'), EH:() => hideInView(true), RH:() => toggleReveal(), TL:() => toggleThin(), VG:() => toggleGrids(), GP:() => makeGroup('grp'), CS:() => createSimilar() };
 let keyBuf = '', keyT = null;
 const LAT = Object.fromEntries('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => ['Key' + c, c]));
 addEventListener('keydown', e => {
@@ -6299,13 +6760,15 @@ addEventListener('keydown', e => {
   for (const dlg of [lib, typeDlg, $('#aiDlg'), $('#installDlg'), $('#renderDlg'), $('#levelDlg'), $('#stdDlg'), $('#tplDlg'), $('#filterDlg')]) if (!dlg.hidden){ if (e.key === 'Escape'){ dlg.hidden = true; if (dlg === typeDlg) closeTypes(); } return; }
   if (e.key === 'Escape' && !fileMenu.hidden){ closeFileMenu(); fileBtn.focus(); return; }
   if (e.key === 'Escape' && !histMenu.hidden){ closeHist(); $('#histBtn').focus(); return; }
-  if (e.key === 'Shift' && mouse.inside) hover(mouse.x, mouse.y, true);
+  if (e.key === 'Shift' && mouse.inside){ mouse.shift = true; if (drag) doDrag(mouse.x, mouse.y); else hover(mouse.x, mouse.y, true); }
   if (e.target === lenInput){
     if (e.key === 'Enter'){ e.preventDefault(); applyTyped(); }
     else if (e.key === 'Escape'){ lenInput.value = ''; endDraw(); lenInput.blur(); }
     return;
   }
   if (e.target.matches('input, select, textarea')) return;
+  // Revit Tab: the next element under the cursor (Shift+Tab — back)
+  if (e.key === 'Tab' && S.tool === 'select' && mouse.inside && HOV.list.length){ e.preventDefault(); const n = HOV.list.length; HOV.i = (HOV.i + (e.shiftKey ? n - 1 : 1)) % n; hovDraw(); return; }
   if (mod && e.code === 'KeyZ'){ e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
   if (mod && e.code === 'KeyC'){ e.preventDefault(); clipCopy(false); return; }
   if (mod && e.code === 'KeyX'){ e.preventDefault(); clipCopy(true); return; }
@@ -6333,7 +6796,7 @@ addEventListener('keydown', e => {
   keyBuf = (keyBuf + L).slice(-2); clearTimeout(keyT); keyT = setTimeout(() => keyBuf = '', 1200);
   if (COMBOS[keyBuf]){ COMBOS[keyBuf](); keyBuf = ''; }
 });
-addEventListener('keyup', e => { if (e.key === 'Shift' && mouse.inside) hover(mouse.x, mouse.y, false); });
+addEventListener('keyup', e => { if (e.key === 'Shift' && mouse.inside){ mouse.shift = false; if (drag) doDrag(mouse.x, mouse.y); else hover(mouse.x, mouse.y, false); } });
 
 function applyTheme(){ readColors(); scene.background = new THREE.Color(C.sheet); buildGrid(); makeMaterials(); buildAxes(); rebuild(); updatePreview(); }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
@@ -6862,7 +7325,7 @@ function execOne(a, ctx){
       if (!['plan', 'd3', 'axo'].includes(a.v)) throw new Error('Не понял вид');
       setView(a.v); return viewNames[a.v];
     }
-    case 'style': setStyle(a.s === 'lines' ? 'lines' : 'shaded'); return a.s === 'lines' ? 'Стиль: скрытые линии' : 'Стиль: тонированный';
+    case 'style': setStyle(a.s === 'lines' ? 'lines' : a.s === 'real' ? 'real' : 'shaded'); return a.s === 'lines' ? 'Стиль: скрытые линии' : a.s === 'real' ? 'Стиль: реалистичный' : 'Стиль: тонированный';
     case 'grid': S.grid = !!a.on; grids.visible = S.grid; $('#cGrid').checked = S.grid; return S.grid ? 'Сетка включена' : 'Сетка скрыта';
     case 'fit': fit(); return 'Показываю всё';
     case 'undo': { const names = undo(a.n || 1); return names.length ? 'Отменено: ' + names.join('; ') : 'Нечего отменять'; }
@@ -7195,7 +7658,8 @@ showName(); greet(); renderVbar();
   updateBoxLines();
   ctl[S.view].update();
   if (annoDirty || (S.view === 'plan' && planCam.zoom !== annoZoom)) rebuildAnno();
-  if (S.view === 'plan'){ HATCH.mm.value = paperMm(); if (Math.abs(Math.log(planCam.zoom / (REB_Z || 1))) > 0.35) rebuild(true); }
+  HATCH.mm.value = hatchScale();
+  if (S.view === 'plan'){ if (Math.abs(Math.log(planCam.zoom / (REB_Z || 1))) > 0.35) rebuild(true); }
   renderer.render(scene, cam());
   updateLabels(); renderCube(); updateScale();
 })();
