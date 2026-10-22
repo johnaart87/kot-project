@@ -241,6 +241,34 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .hnd.flip{clip-path:none;border-radius:4px;width:24px;height:20px;margin:-10px 0 0 -12px;transform:none;color:#fff;font-size:13px;line-height:16px;font-weight:700;cursor:pointer}
 @media (pointer:coarse){.hnd{width:24px;height:24px;margin:-12px 0 0 -12px}.hnd.pt{width:22px;height:22px;margin:-11px 0 0 -11px}}
 .pchk{display:flex;align-items:center;gap:6px;font-size:12px}
+/* «Вес линий» like Revit */
+.lwtabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin:0 0 0;padding:0 2px}
+.lwtabs button{font:12px "Segoe UI",Tahoma,var(--font-ui);padding:4px 10px;border:1px solid transparent;border-bottom:0;background:transparent;color:var(--ink);cursor:pointer;margin-bottom:-1px;border-radius:2px 2px 0 0}
+.lwtabs button[aria-selected="true"]{background:var(--sheet);border-color:var(--line)}
+.lwpane{background:var(--sheet);border:1px solid var(--line);border-top:0;padding:8px 10px 12px;font:12px "Segoe UI",Tahoma,var(--font-ui);color:var(--ink)}
+.lwpane p{margin:4px 0 10px}
+.lwrow{display:flex;gap:10px;align-items:flex-start}
+.lwgrid{flex:1;min-width:0;overflow:auto;border:1px solid color-mix(in srgb,var(--ink) 45%,var(--sheet))}
+.lwt{border-collapse:collapse;width:100%;font:12px "Segoe UI",Tahoma,var(--font-ui)}
+.lwt th,.lwt td{height:19px;padding:0 4px;text-align:left;white-space:nowrap;border-right:1px solid color-mix(in srgb,var(--ink) 35%,var(--sheet))}
+.lwt thead th{background:color-mix(in srgb,var(--ink) 7%,var(--sheet));font-weight:400;text-align:center;border-bottom:1px solid color-mix(in srgb,var(--ink) 35%,var(--sheet));cursor:pointer;min-width:84px}
+.lwt thead th:first-child{min-width:84px;cursor:default}
+.lwt tbody th{background:color-mix(in srgb,var(--ink) 7%,var(--sheet));font-weight:400;border-bottom:1px solid color-mix(in srgb,var(--ink) 18%,var(--sheet))}
+.lwt tbody td{border-bottom:1px dotted color-mix(in srgb,var(--ink) 30%,var(--sheet));cursor:text}
+.lwt tbody td:hover{background:color-mix(in srgb,var(--accent) 10%,var(--sheet))}
+.lwt .on{background:color-mix(in srgb,var(--accent) 16%,var(--sheet))}
+.lwt td input{width:100%;box-sizing:border-box;height:17px;font:inherit;border:1px solid #3b78d8;padding:0 2px;background:var(--sheet);color:var(--ink)}
+.lwt .lwpad td,.lwt .lwpad th{height:80px;border-bottom:0}
+.lwbtns{display:flex;flex-direction:column;gap:6px;min-width:90px}
+.furngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;max-height:62vh;overflow:auto}
+.furncard{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);cursor:pointer;font:12px var(--font-ui)}
+.furncard:hover{border-color:var(--accent);background:var(--accent-soft)}.furncard img{width:140px;height:105px;object-fit:contain;background:#fff;border-radius:4px}.furncard small{color:var(--muted)}
+.lwt td input:not([type=color]):not([type=checkbox]),.lwt td select{width:100%;box-sizing:border-box;height:19px;font:12px "Segoe UI",Tahoma,var(--font-ui);border:1px solid transparent;background:transparent;color:var(--ink);padding:0 2px}
+.lwt td input:focus,.lwt td select:focus{border-color:#3b78d8;outline:0;background:var(--sheet)}
+.lwt tr.on th,.lwt tr.on td{background:color-mix(in srgb,var(--accent) 12%,var(--sheet))}
+.lwt.phg td{white-space:nowrap}.lwt.phg td select{width:auto;max-width:120px}.lwt.phg input[type=color]{width:34px;height:18px;padding:0;border:1px solid var(--line);vertical-align:middle}
+.lwt.phg thead th{cursor:default}
+.phside{font-size:10px;color:var(--muted);letter-spacing:.08em;padding:2px 0}
 /* «Свойства» like Revit's palette: type selector with a preview, grey group bars that fold, a two-column grid of thin lines, 12px Segoe UI */
 #props{--pp-line:color-mix(in srgb,var(--ink) 17%,var(--sheet));--pp-head:color-mix(in srgb,var(--ink) 9%,var(--sheet));--pp-ro:color-mix(in srgb,var(--ink) 52%,var(--sheet))}
 #propsBody{font:12px/1.25 "Segoe UI",Tahoma,var(--font-ui);background:var(--sheet);color:var(--ink)}
@@ -662,7 +690,7 @@ details.more summary::-webkit-details-marker{display:none}
       <div class="grp"><div class="grp-items">
         <button class="rbtn" data-tool="fam" title="Разместить семейство: мебель, оборудование, сантехника, свои элементы (FA)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h14v3H3zM5 12v5M15 12v5M5 9V5h10v4"/></svg>Компонент<span class="k">FA</span></button>
         <button class="rbtn" id="rbFamNew" title="Создать семейство: выдавливание, вращение, сдвиг"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M3 15l5-3 5 3-5 3zM3 15V8l5-3 5 3v7M8 12V5"/><path d="M15 3v5M12.5 5.5h5"/></svg>Новое<br>семейство</button>
-        <button class="rbtn" id="rbFamLoad" title="Загрузить семейство из файла .kotfam"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 6h5l2 2h7v9H3z"/><path d="M10 10v5M8 13l2 2 2-2"/></svg>Загрузить<br>семейство</button>
+        <button class="rbtn" id="rbFurnLib" title="Библиотека мебели: диваны, кресла, столы, кровати, шкафы, стеллажи, кухня, свет, растения">Библиотека мебели</button><button class="rbtn" id="rbModelImp" title="Импорт модели: .glb, .gltf (с .bin и текстурами) или .obj (с .mtl и текстурами) — выберите все файлы модели сразу">Импорт модели</button><input type="file" id="mdlFile" multiple accept=".glb,.gltf,.obj,.mtl,.bin,.png,.jpg,.jpeg,.webp" hidden> title="Загрузить семейство из файла .kotfam"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 6h5l2 2h7v9H3z"/><path d="M10 10v5M8 13l2 2 2-2"/></svg>Загрузить<br>семейство</button>
         <button class="rbtn" id="rbFamEdit" title="Редактировать семейство выбранного элемента или любое из списка"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M3 15l5-3 5 3-5 3zM3 15V8l5-3 5 3"/><path d="M12 13l5-5 1.5 1.5-5 5H12z"/></svg>Редакти-<br>ровать</button>
         <input type="file" id="famFile" accept=".kotfam,.json,application/json" hidden>
       </div><div class="grp-label">Семейства</div></div>
@@ -706,7 +734,7 @@ details.more summary::-webkit-details-marker{display:none}
     <div class="rb-panel" id="rbModify" role="tabpanel" hidden></div>
     <div class="rb-panel" id="rbManage" role="tabpanel" hidden>
       <div class="grp"><div class="grp-items">
-        <button class="rbtn" id="rbMats" title="Материалы: тонирование, штриховка поверхности и сечения, фото текстуры"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M4.5 6.5l9 9M3.4 10.6l6 6M6.5 4.5l9 9M10.6 3.4l6 6" stroke-width=".9"/></svg>Материалы</button>
+        <button class="rbtn" id="rbPhases" title="Стадии: список стадий, фильтры стадий и переопределения графики">Стадии</button><button class="rbtn" id="rbMats" title="Материалы: тонирование, штриховка поверхности и сечения, фото текстуры"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M4.5 6.5l9 9M3.4 10.6l6 6M6.5 4.5l9 9M10.6 3.4l6 6" stroke-width=".9"/></svg>Материалы</button>
       </div><div class="grp-label">Материалы</div></div>
       <div class="grp"><div class="grp-items">
         <button class="rbtn" id="rbTplMgr" title="Диспетчер шаблонов видов: список шаблонов, создание, копирование, переименование и удаление"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="3" width="15" height="14" rx="1"/><path d="M2.5 7h15M6 10h8M6 13h8"/></svg>Диспетчер<br>шаблонов</button>
@@ -725,7 +753,7 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" data-view="plan" title="План этажа (1)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3" y="3" width="14" height="14"/><path d="M3 10h7v7M10 3v4"/></svg>План</button>
         <button class="rbtn" data-view="d3" title="3D-вид (2)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8"/></svg>3D</button>
         <button class="rbtn" data-view="axo" title="Аксонометрия (3)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 3l7 3.5v7L10 17l-7-3.5v-7z M3 6.5L10 10l7-3.5M10 10v7"/></svg>Аксоно-<br>метрия</button>
-        <button class="rbtn" data-tool="camera" title="Камера: на плане щёлкните точку съёмки, затем цель. Ракурс сохраняется как вид (CA)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="11" height="8" rx="1.2"/><path d="M13 9l5-3v8l-5-3z"/><circle cx="6" cy="10" r="1.6"/></svg>Камера<span class="k">CA</span></button>
+        <button class="rbtn" id="rbSaveCam" title="Сохранить ракурс: текущий 3D-вид станет камерой в «Камеры» — откройте её потом или выберите в «Визуализации»">Сохранить ракурс</button><button class="rbtn" data-tool="camera" title="Камера: на плане щёлкните точку съёмки, затем цель. Ракурс сохраняется как вид (CA)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="11" height="8" rx="1.2"/><path d="M13 9l5-3v8l-5-3z"/><circle cx="6" cy="10" r="1.6"/></svg>Камера<span class="k">CA</span></button>
         <button class="rbtn" data-tool="section" title="Разрез: линия на плане (SC)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 10h14" stroke-dasharray="4 1.5 1 1.5"/><path d="M3 6v8M17 6v8" stroke-width="2.2"/><path d="M3 6h3M17 6h-3"/></svg>Разрез<span class="k">SC</span></button>
         <button class="rbtn" data-tool="ielev" title="Развёртка стен помещения (EL)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2.5l2 3h-4zM10 17.5l2-3h-4zM2.5 10l3-2v4zM17.5 10l-3-2v4z" fill="currentColor" stroke="none"/></svg>Развёртка<span class="k">EL</span></button>
         <button class="rbtn" id="rbBox" title="Границы 3D-вида: обрезать модель рамкой с ручками"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M10 2l7 4v8l-7 4-7-4V6z M3 6l7 4 7-4 M10 10v8" stroke-dasharray="2 1.3"/><rect x="8.5" y="1" width="3" height="3" fill="currentColor" stroke="none"/></svg>Границы<br>3D-вида</button>
@@ -1014,7 +1042,7 @@ details.more summary::-webkit-details-marker{display:none}
         <label for="rnView">Вид</label><select id="rnView"></select>
         <label for="rnEng">Движок</label><select id="rnEng"><option value="pt" selected>Физически точный — трассировка лучей</option><option value="fast">Быстрый — растровый</option></select>
         <label for="rnSamp">Качество</label><select id="rnSamp"><option value="64">Черновик — 64 прохода</option><option value="256" selected>Хорошо — 256 проходов</option><option value="1000">Отлично — 1000 проходов</option><option value="3000">Финал — 3000 проходов</option></select>
-        <label for="rnBnc">Отскоков света</label><select id="rnBnc"><option value="3">3 — быстрее</option><option value="6" selected>6 — интерьеры</option><option value="10">10 — светлые комнаты</option><option value="16">16 — максимум</option></select>
+        <label for="rnBnc">Отскоков света</label><select id="rnBnc"><option value="3">3 — быстрее</option><option value="6">6 — фасады</option><option value="10" selected>10 — интерьеры</option><option value="16">16 — светлые комнаты, белая модель</option><option value="24">24 — максимум</option></select>
         <label for="rnSize">Размер картинки</label><select id="rnSize"><option value="1280x720">1280 × 720 (быстро)</option><option value="1920x1080" selected>1920 × 1080 (Full HD)</option><option value="2560x1440">2560 × 1440</option><option value="3840x2160">3840 × 2160 (4K)</option><option value="2480x3508">2480 × 3508 (А4 книжный)</option><option value="3508x2480">3508 × 2480 (А4 альбомный)</option></select>
         <label for="rnTime">Время суток</label><select id="rnTime"><option value="morning">Утро</option><option value="day" selected>День</option><option value="evening">Вечер</option><option value="night">Ночь</option></select>
         <label for="rnSky">Погода</label><select id="rnSky"><option value="clear">Ясно</option><option value="sunny" selected>Солнечно, облака</option><option value="cloudy">Облачно</option><option value="overcast">Пасмурно</option><option value="hdri">HDRI — фото неба</option></select>
@@ -1333,13 +1361,40 @@ function sanitizeStd(o){
   const a = o.anno || {};
   out.anno = { tick:['tick','arrow','dot'].includes(a.tick) ? a.tick : d.anno.tick, textMm:N(a.textMm) ? clamp(+a.textMm, 1, 10) : d.anno.textMm, units:['mm','cm','m'].includes(a.units) ? a.units : 'mm', dec:clamp(Math.round(+a.dec) || 0, 0, 3),
     gap:N(a.gap) ? clamp(+a.gap, 0, 20) : d.anno.gap, over:N(a.over) ? clamp(+a.over, 0, 20) : d.anno.over, ext:N(a.ext) ? clamp(+a.ext, 0, 20) : d.anno.ext, tagMm:N(a.tagMm) ? clamp(+a.tagMm, 1, 10) : d.anno.tagMm };
-  out.stamps = sanitizeStamps(o.stamps);
+  out.stamps = sanitizeStamps(o.stamps); out.lw = sanitizeLW(o.lw); out.ph = sanitizePh(o.ph); if (o.ieAuto) out.ieAuto = true;
+  if (Array.isArray(o.folders)) out.folders = o.folders.filter(f => f && typeof f.id === 'string').slice(0, 200).map(f => ({ id:f.id.slice(0, 30), n:String(f.n || 'Раздел').slice(0, 80) }));
   return out;
 }
 const styleOpts = cur => STD.styles.map(s => `<option value="${s.id}"${s.id === cur ? ' selected' : ''}>${esc(s.n)}</option>`).join('');
 const lstyle = id => STD.styles.find(s => s.id === id) || STD.styles[0];
 const lpat = id => STD.patterns.find(p => p.id === id) || STD.patterns[0];
-const weightMm = n => STD.weights[clamp(n, 1, 16) - 1];
+/* Revit «Вес линий»: model line weights depend on the view scale (a column per scale), perspective views have their own,
+   annotation lines use one set for every scale */
+const LW_DEF = () => ({ scales:[10, 20, 50, 100, 200, 500], model:{
+  10:[0.12, 0.2, 0.3, 0.5, 1, 1.4, 2, 2.8, 4, 5, 6, 7, 8, 9, 9, 9], 20:[0.1, 0.18, 0.25, 0.4, 0.7, 1, 1.4, 2, 2.8, 4, 5, 6, 7, 8, 9, 9],
+  50:[0.08, 0.16, 0.25, 0.35, 0.7, 1, 1.4, 2, 2.8, 4, 5, 6, 7, 8, 9, 9], 100:[0.06, 0.12, 0.2, 0.35, 0.5, 0.7, 1, 1.4, 2, 2.8, 4, 5, 6, 7, 8, 9],
+  200:[0.1, 0.1, 0.18, 0.25, 0.35, 0.5, 0.7, 1, 1.4, 2, 2.8, 4, 5, 6, 7, 8], 500:[0.1, 0.1, 0.1, 0.18, 0.25, 0.35, 0.5, 0.7, 1, 1.4, 2, 2.8, 4, 5, 6, 7] },
+  persp:[0.1, 0.18, 0.25, 0.35, 0.5, 0.7, 1, 1.4, 2, 2.8, 4, 5, 6, 7, 8, 9] });
+function sanitizeLW(o){
+  const d = LW_DEF(); if (!o || typeof o !== 'object') return d;
+  const col = (a, def) => Array.isArray(a) && a.length === 16 && a.every(v => Number.isFinite(+v)) ? a.map(v => clamp(+v, 0.01, 20)) : def;
+  const scales = [...new Set((Array.isArray(o.scales) ? o.scales : d.scales).map(v => Math.round(+v)).filter(v => v >= 1 && v <= 5000))].sort((a, b) => a - b).slice(0, 14);
+  if (!scales.length) return d;
+  const model = {}; for (const sc of scales) model[sc] = col(o.model && o.model[sc], d.model[sc] || d.model[100]);
+  return { scales, model, persp:col(o.persp, d.persp) };
+}
+const LW_MODEL = ['cut', 'layer', 'exist', 'demo'];
+// the scale the view is drawn at: a sheet viewport's scale, otherwise the zoom of the plan or section
+const curViewScale = () => RENDER && RENDER.scale ? RENDER.scale : (S.view === 'plan' || S.view === 'sect') ? wpp() * 1000 / 0.2646 : 100;
+function weightMm(n, kind){
+  const i = clamp(Math.round(n) || 1, 1, 16) - 1, lw = STD.lw || (STD.lw = LW_DEF());
+  if (kind === 'model' && lw && lw.scales.length){
+    if (S.view === 'd3' && !RENDER) return lw.persp[i];
+    const sc = curViewScale(); let best = lw.scales[0]; for (const s2 of lw.scales) if (Math.abs(Math.log(s2 / sc)) < Math.abs(Math.log(best / sc))) best = s2;
+    return lw.model[best][i];
+  }
+  return STD.weights[i];
+}
 const THIN = { on:false }; try { THIN.on = localStorage.getItem('kot-thin') === '1'; } catch (e){}
 // world size of one paper millimetre at the current zoom (on screen 1 mm ≈ 3.78 CSS px; on a sheet image RENDER.pxmm px)
 const paperMm = () => wpp() * (RENDER ? RENDER.pxmm : 96 / 25.4);
@@ -1371,7 +1426,7 @@ function fatLines(pairs, styleId, colorOverride, weightOverride){
   if (!pts.length) return null;
   const pos = []; for (const p of pts) pos.push(p.x, p.y, p.z);
   const g = new LineSegmentsGeometry(); g.setPositions(pos);
-  const l = new LineSegments2(g, fatMat(colorOverride || st.c, linePx(weightMm(weightOverride || st.w)))); l.computeLineDistances(); l.renderOrder = 6;
+  const l = new LineSegments2(g, fatMat(colorOverride || st.c, linePx(weightMm(weightOverride || st.w, weightOverride || LW_MODEL.includes(styleId) ? 'model' : 'anno')))); l.computeLineDistances(); l.renderOrder = 6;
   return l;
 }
 const polyPairs = pts => { const o = []; for (let i = 0; i < pts.length - 1; i++) o.push(pts[i], pts[i + 1]); return o; };
@@ -1553,11 +1608,12 @@ function makeMaterials(){
   M.datum = new THREE.LineDashedMaterial({ color:C.datum, dashSize:0.9, gapSize:0.25 });
   M.datumSel = new THREE.LineDashedMaterial({ color:C.sel, dashSize:0.9, gapSize:0.25 });
   M.detail = new THREE.LineBasicMaterial({ color:C.ink });
-  M.existFlat = new THREE.MeshBasicMaterial({ color:C.exist || '#cfd3d6', ...po });
-  M.exist3D = new THREE.MeshStandardMaterial({ color:C.exist || '#c4c8cb', roughness:0.9, ...po });
-  M.existEdge = new THREE.LineBasicMaterial({ color:C['exist-edge'] || '#8a939a' });
-  M.demoEdge = new THREE.LineDashedMaterial({ color:C.demo || '#d43a2a', dashSize:0.12, gapSize:0.07 });
-  M.demo3D = new THREE.MeshStandardMaterial({ color:C.demo || '#d43a2a', transparent:true, opacity:0.22, depthWrite:false });
+  const PGX = typeof STD !== 'undefined' && STD && STD.ph ? STD.ph.gfx : null; // «Стадии → Переопределения графики»
+  M.existFlat = new THREE.MeshBasicMaterial({ color:PGX && PGX.exist.cp ? PGX.exist.cpc : C.exist || '#cfd3d6', ...po });
+  M.exist3D = new THREE.MeshStandardMaterial({ color:PGX ? PGX.exist.cpc : C.exist || '#c4c8cb', roughness:0.9, ...po });
+  M.existEdge = new THREE.LineBasicMaterial({ color:PGX ? PGX.exist.c : C['exist-edge'] || '#8a939a' });
+  M.demoEdge = new THREE.LineDashedMaterial({ color:PGX ? PGX.demo.c : C.demo || '#d43a2a', dashSize:0.12, gapSize:0.07 });
+  M.demo3D = new THREE.MeshStandardMaterial({ color:PGX ? PGX.demo.c : C.demo || '#d43a2a', transparent:true, opacity:0.22, depthWrite:false });
   M.callout = new THREE.LineDashedMaterial({ color:C.accent, dashSize:0.18, gapSize:0.1 });
   // transparent so it sorts after the plan's transparent symbols (glass, grids) and covers them too
   M.crop = new THREE.MeshBasicMaterial({ color:C.sheet, depthTest:false, depthWrite:false, transparent:true, opacity:1 });
@@ -1626,7 +1682,7 @@ function matFor(kind, s){
 }
 
 /* ---------- geometry helpers ---------- */
-function disposeGroup(g){ for (const ch of [...g.children]){ ch.traverse(o => { if (o.geometry) o.geometry.dispose(); }); g.remove(ch); } }
+function disposeGroup(g){ for (const ch of [...g.children]){ ch.traverse(o => { if (o.geometry && !o.userData.shared) o.geometry.dispose(); }); g.remove(ch); } }
 function part(geo, mat, edgeMat, id, x = 0, y = 0, z = 0){
   const m = new THREE.Mesh(geo, mat);
   m.position.set(x, y, z);
@@ -1836,7 +1892,7 @@ function buildWall(w, prevMat, prevEdge){
   if (plan && !prevEdge && w.id){
     const sty = st === 'demo' ? 'demo' : st === 'exist' ? 'exist' : 'cut', col = s ? C.sel : null;
     const a = fatLines(segs, sty, col); if (a){ a.userData.cut = true; g.add(a); }
-    const b = segsI.length && fatLines(segsI, st === 'normal' ? 'layer' : sty, col); if (b){ b.userData.cut = true; g.add(b); }
+    const b = segsI.length && fatLines(segsI, st === 'demo' || st === 'exist' ? sty : 'layer', col); if (b){ b.userData.cut = true; g.add(b); }
   } else { if (segs.length) g.add(lineOf(segs, em, true)); if (segsI.length) g.add(lineOf(segsI, em, true)); }
   if (plan) for (const o of ops0) planSymbol(g, o, w.t);
   else for (const o of ops0){
@@ -2039,6 +2095,16 @@ function FAM_BUILTIN(){
 }
 let fams = FAM_BUILTIN();
 const famById = id => fams.find(f => f.id === id);
+// the model of a family (imported file or library generator)
+function sanMesh(m){
+  if (!m || typeof m !== 'object') return null; const N = v => Number.isFinite(+v), box = Array.isArray(m.box) && m.box.length === 3 && m.box.every(N) ? m.box.map(v => clamp(+v, 0.01, 100)) : undefined;
+  if (m.kind === 'gen' && FURN_LIB[m.g]) return { kind:'gen', g:m.g, p:Object.fromEntries(Object.entries(m.p || {}).filter(([k, v]) => ['w', 'd', 'h'].includes(k) && N(v)).map(([k, v]) => [k, clamp(+v, 5, 20000)])), ...(box ? { box } : {}) };
+  if (m.kind === 'file' && ['glb', 'gltf', 'obj'].includes(m.fmt) && typeof m.data === 'string' && m.data.length < 90e6){
+    const files = {}; if (m.files && typeof m.files === 'object') for (const [n, v] of Object.entries(m.files)) if (typeof v === 'string' && n.length < 200) files[n] = v;
+    return { kind:'file', fmt:m.fmt, name:String(m.name || 'model').slice(0, 120), data:m.data, files, u:N(m.u) && +m.u > 0 ? +m.u : 1, zUp:!!m.zUp, s:N(m.s) && +m.s > 0 ? clamp(+m.s, 0.001, 1000) : 1, ...(box ? { box } : {}) };
+  }
+  return null;
+}
 function sanitizeFams(arr){
   if (!Array.isArray(arr)) return null;
   const N = v => Number.isFinite(+v), P = a => Array.isArray(a) ? a.filter(p => Array.isArray(p) && N(p[0]) && N(p[1])).map(p => [+p[0], +p[1]]).slice(0, 400) : [];
@@ -2047,7 +2113,7 @@ function sanitizeFams(arr){
     if (!f || typeof f.id !== 'string' || !Array.isArray(f.forms)) continue;
     const forms = f.forms.filter(fm => fm && FORM_KINDS[fm.kind]).map(fm => ({ kind:fm.kind, plane:FAM_PLANES[fm.plane] ? fm.plane : 'XY', off:N(fm.off) ? +fm.off : 0, m:MATS[fm.m] ? fm.m : 'generic',
       ...(fm.kind === 'extrude' ? { pts:P(fm.pts), a:N(fm.a) ? +fm.a : 0, b:N(fm.b) ? +fm.b : 300 } : fm.kind === 'revolve' ? { pts:P(fm.pts), axis:P(fm.axis).slice(0, 2), ang:N(fm.ang) ? clamp(+fm.ang, 1, 360) : 360 } : { path:P(fm.path), prof:P(fm.prof) }) }));
-    out.push({ id:f.id.slice(0, 40), name:String(f.name || 'Семейство').slice(0, 80), cat:FAM_CATS[f.cat] ? f.cat : 'generic', forms });
+    out.push({ id:f.id.slice(0, 40), name:String(f.name || 'Семейство').slice(0, 80), cat:FAM_CATS[f.cat] ? f.cat : 'generic', forms, ...(sanMesh(f.mesh) ? { mesh:sanMesh(f.mesh) } : {}) });
   }
   return out;
 }
@@ -2084,6 +2150,7 @@ function formGeometry(fm){
 }
 function buildFam(it){
   const f = famById(it.f); if (!f) return null;
+  if (f.mesh) return buildMeshFam(it, f);
   const { pm, em, plan, s } = stMats(it), g = new THREE.Group();
   for (const fm of f.forms){
     const geo = formGeometry(fm); if (!geo) continue;
@@ -2098,6 +2165,7 @@ function buildFam(it){
 // plan footprint of an instance (for selection boxes, snapping and bounds)
 const FBOX = new Map();
 function famLocalBox(f){
+  if (f.mesh){ const T = MESH_T.get(meshKey(f)); if (T) return T.box.clone(); const s2 = f.mesh.box || [0.6, 0.6, 0.6]; return new THREE.Box3(new V3(-s2[0] / 2, 0, -s2[2] / 2), new V3(s2[0] / 2, s2[1], s2[2] / 2)); }
   const sig = JSON.stringify(f.forms), c = FBOX.get(f.id); if (c && c.sig === sig) return c.b.clone();
   const b = new THREE.Box3();
   for (const fm of f.forms){ const geo = formGeometry(fm); if (!geo) continue; geo.computeBoundingBox(); b.union(geo.boundingBox); geo.dispose(); }
@@ -2109,6 +2177,280 @@ function famBox(it){
   const b = famLocalBox(f);
   const m = new THREE.Matrix4().compose(new V3(it.x, 0, it.z), new THREE.Quaternion().setFromAxisAngle(new V3(0, 1, 0), (it.rot || 0) * Math.PI / 180), new V3(it.mir ? -1 : 1, 1, 1));
   return b.applyMatrix4(m);
+}
+
+/* ---------- 3D models as families: imported files (glTF / GLB / OBJ + MTL + textures) and the furniture library ----------
+   A family with «mesh» has no sketch forms: { kind:'file', fmt, name, data (base64), files:{name:base64}, u (metres per file unit), zUp, s (scale) }
+   or { kind:'gen', g (library generator), p:{ w, d, h } in mm }. The model is normalised once (metres, Y up, standing on the floor,
+   centred in plan) and kept as a template of meshes; instances share its geometry */
+const MESH_T = new Map(), MESH_LOAD = new Map();
+const meshKey = f => f.id + '|' + (f.mesh.kind === 'gen' ? JSON.stringify(f.mesh) : (f.mesh.data || '').length + '|' + f.mesh.u + '|' + !!f.mesh.zUp + '|' + (f.mesh.s || 1) + '|' + Object.keys(f.mesh.files || {}).join(','));
+const b64ToBuf = s => { const bin = atob(s), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; };
+function bufToB64(buf){ const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+const MIME = n => /\.png$/i.test(n) ? 'image/png' : /\.jpe?g$/i.test(n) ? 'image/jpeg' : /\.webp$/i.test(n) ? 'image/webp' : /\.bin$/i.test(n) ? 'application/octet-stream' : 'text/plain';
+// a three.js group from the stored file (with its side files: .bin, .mtl, textures given to the loader by name)
+async function parseModelFile(m){
+  const urls = {}; for (const [n, b] of Object.entries(m.files || {})) urls[n.toLowerCase()] = URL.createObjectURL(new Blob([b64ToBuf(b)], { type:MIME(n) }));
+  const mgr = new THREE.LoadingManager(); mgr.setURLModifier(u => { const n = decodeURIComponent(u.split(/[\\/]/).pop().split('?')[0]).toLowerCase(); return urls[n] || u; });
+  try {
+    if (m.fmt === 'obj'){
+      const { OBJLoader } = await import('three/addons/loaders/OBJLoader.js'), ld = new OBJLoader(mgr);
+      const mtlName = Object.keys(m.files || {}).find(n => /\.mtl$/i.test(n));
+      if (mtlName){ const { MTLLoader } = await import('three/addons/loaders/MTLLoader.js'); const mtl = new MTLLoader(mgr).parse(new TextDecoder().decode(b64ToBuf(m.files[mtlName])), ''); mtl.preload(); ld.setMaterials(mtl); }
+      return ld.parse(new TextDecoder().decode(b64ToBuf(m.data)));
+    }
+    const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js'), ld = new GLTFLoader(mgr);
+    try { const { DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js'); const dr = new DRACOLoader(); dr.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/'); ld.setDRACOLoader(dr); } catch (e){}
+    try { const { MeshoptDecoder } = await import('three/addons/libs/meshopt_decoder.module.js'); ld.setMeshoptDecoder(MeshoptDecoder); } catch (e){}
+    const src = m.fmt === 'gltf' ? new TextDecoder().decode(b64ToBuf(m.data)) : b64ToBuf(m.data);
+    const g = await new Promise((res, rej) => ld.parse(src, '', res, rej));
+    return g.scene || (g.scenes && g.scenes[0]);
+  } finally { setTimeout(() => Object.values(urls).forEach(u => URL.revokeObjectURL(u)), 30000); }
+}
+// every material becomes a standard (PBR) one: the drawing, the fast render and the path tracer read the same fields
+function stdMat(m0){
+  const m = Array.isArray(m0) ? m0[0] : m0;
+  if (!m) return new THREE.MeshStandardMaterial({ color:'#c8c8c8', roughness:0.7 });
+  if (m.isMeshStandardMaterial){ const c = m.clone(); if (c.map) c.map.colorSpace = THREE.SRGBColorSpace; return c; }
+  const c = new THREE.MeshStandardMaterial({ color:m.color ? m.color.clone() : '#c8c8c8', map:m.map || null, roughness:m.shininess != null ? clamp(1 - Math.sqrt(m.shininess / 200), 0.08, 1) : 0.7, metalness:0,
+    transparent:!!m.transparent || (m.opacity ?? 1) < 1, opacity:m.opacity ?? 1, normalMap:m.normalMap || null, side:m.side ?? THREE.FrontSide });
+  if (c.map) c.map.colorSpace = THREE.SRGBColorSpace; return c;
+}
+// the template: baked geometries (metres, Y up, base at 0, centred), their materials and edge lines for drawings
+function bakeTemplate(root, m){
+  const k = (m.u || 1) * (m.s || 1), pre = new THREE.Matrix4().makeScale(k, k, k);
+  if (m.zUp) pre.premultiply(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+  root.updateMatrixWorld(true);
+  const parts = []; let tris = 0;
+  root.traverse(o => {
+    if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    const geo = o.geometry.clone(); geo.applyMatrix4(new THREE.Matrix4().multiplyMatrices(pre, o.matrixWorld));
+    if (!geo.attributes.normal) geo.computeVertexNormals();
+    if (o.isInstancedMesh){ for (let i = 0; i < o.count; i++){ const im = new THREE.Matrix4(); o.getMatrixAt(i, im); const g2 = o.geometry.clone(); g2.applyMatrix4(new THREE.Matrix4().multiplyMatrices(pre, new THREE.Matrix4().multiplyMatrices(o.matrixWorld, im))); parts.push({ geo:g2, mat:stdMat(mats[0]) }); } geo.dispose(); return; }
+    if (mats.length > 1 && geo.groups.length){ for (const gr of geo.groups){ const g2 = geo.clone(); g2.setIndex(null); const idx = geo.index; if (idx){ const a = idx.array.slice(gr.start, gr.start + gr.count); g2.setIndex(new THREE.BufferAttribute(a, 1)); } else g2.setDrawRange(gr.start, gr.count); g2.clearGroups(); parts.push({ geo:g2, mat:stdMat(mats[gr.materialIndex] || mats[0]) }); } geo.dispose(); }
+    else parts.push({ geo, mat:stdMat(mats[0]) });
+  });
+  const b = new THREE.Box3(); for (const p of parts){ p.geo.computeBoundingBox(); b.union(p.geo.boundingBox); tris += (p.geo.index ? p.geo.index.count : p.geo.attributes.position.count) / 3; }
+  if (b.isEmpty()) throw new Error('в файле нет видимой геометрии');
+  const c = b.getCenter(new V3()), sh = new THREE.Matrix4().makeTranslation(-c.x, -b.min.y, -c.z);
+  for (const p of parts){ p.geo.applyMatrix4(sh); p.geo.computeBoundingBox(); p.geo.computeBoundingSphere(); p.mat.userData.imp = true; }
+  // edge lines only where faces fold sharply (and not for huge meshes)
+  const big = tris > 250000;
+  for (const p of parts) p.edges = big ? null : new THREE.EdgesGeometry(p.geo, 32);
+  const box = new THREE.Box3(); for (const p of parts) box.union(p.geo.boundingBox);
+  return { parts, box, tris:Math.round(tris) };
+}
+function meshTemplate(f){
+  const key = meshKey(f); const t = MESH_T.get(key); if (t) return t;
+  if (!MESH_LOAD.has(key)){
+    const job = (async () => {
+      const root = f.mesh.kind === 'gen' ? await furnGen(f.mesh.g, f.mesh.p || {}) : await parseModelFile(f.mesh);
+      const T = bakeTemplate(root, f.mesh.kind === 'gen' ? { u:1, s:1 } : f.mesh);
+      for (const [k2, v] of MESH_T) if (k2.startsWith(f.id + '|')) MESH_T.delete(k2);
+      MESH_T.set(key, T); FBOX.delete(f.id); rebuild(); updatePreview(); annoDirty = true;
+    })().catch(e => { console.warn('model', e); toast(`Модель «${f.name}» не открылась: ${(e && e.message) || e}`); }).finally(() => MESH_LOAD.delete(key));
+    MESH_LOAD.set(key, job);
+  }
+  return null;
+}
+// an instance of a model family: shared geometry, the family's own materials (or the instance material, the phase / selection look)
+function buildMeshFam(it, f){
+  const { pm, em, plan, s } = stMats(it), g = new THREE.Group(), T = meshTemplate(f);
+  if (!T){ // still loading: a box of the stored size
+    const sz = f.mesh.box || [0.6, 0.6, 0.6], geo = new THREE.BoxGeometry(sz[0], sz[1], sz[2]); geo.translate(0, sz[1] / 2, 0);
+    const m = new THREE.Mesh(geo, plan ? M.massPlan : M.lines); m.userData.id = it.id; m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), em)); g.add(m);
+  } else for (const p of T.parts){
+    let mat;
+    if (pm) mat = pm; else if (plan) mat = s ? M.selFlat : M.massPlan; else if (S.style === 'lines' && !S.render) mat = M.lines;
+    else if (it.m && MATS[it.m]) mat = layerMat(it.m);
+    else if (S.render && S.render.clay) mat = rMat('mass');
+    else { mat = p.matC || (p.matC = (() => { const c = p.mat.clone(); c.clippingPlanes = CLIP; c.userData.imp = true; c.userData.src = p.mat; return c; })()); }
+    const m = new THREE.Mesh(p.geo, mat); m.userData.id = it.id; m.userData.shared = true; m.castShadow = m.receiveShadow = !plan && S.style !== 'lines';
+    if (p.edges && (plan || S.style !== 'real' || s)){ const ls = new THREE.LineSegments(p.edges, em); ls.userData.shared = true; if (em.isLineDashedMaterial) ls.computeLineDistances(); m.add(ls); }
+    g.add(m);
+  }
+  g.position.set(it.x, 0, it.z); g.rotation.y = (it.rot || 0) * Math.PI / 180; if (it.mir) g.scale.x = -1;
+  return g;
+}
+/* ---------- the furniture library: models built from rounded shapes (sizes in mm, the model stands on the floor, front towards −Z… +Z) ---------- */
+let RBOX = null;
+async function rbox(){ if (!RBOX) RBOX = (await import('three/addons/geometries/RoundedBoxGeometry.js')).RoundedBoxGeometry; return RBOX; }
+const FMAT = {
+  fabric:() => new THREE.MeshStandardMaterial({ color:'#b9b2a6', roughness:0.95 }), fabric2:() => new THREE.MeshStandardMaterial({ color:'#d9d4ca', roughness:0.95 }),
+  wood:() => new THREE.MeshStandardMaterial({ color:'#a77b52', roughness:0.6 }), oak:() => new THREE.MeshStandardMaterial({ color:'#c9a878', roughness:0.55 }),
+  white:() => new THREE.MeshStandardMaterial({ color:'#f0efeb', roughness:0.5 }), metal:() => new THREE.MeshStandardMaterial({ color:'#2f3236', roughness:0.35, metalness:0.8 }),
+  chrome:() => new THREE.MeshStandardMaterial({ color:'#d8dadc', roughness:0.15, metalness:1 }), linen:() => new THREE.MeshStandardMaterial({ color:'#ece8df', roughness:0.9 }),
+  ceramic:() => new THREE.MeshStandardMaterial({ color:'#e9e3d8', roughness:0.35 }), green:() => new THREE.MeshStandardMaterial({ color:'#4e7a3e', roughness:0.8, side:THREE.DoubleSide }),
+  rug:() => new THREE.MeshStandardMaterial({ color:'#8c8274', roughness:1 }), shade:() => new THREE.MeshStandardMaterial({ color:'#f3ede0', roughness:0.9, side:THREE.DoubleSide })
+};
+const FURN_LIB = {
+  sofa3:{ n:'Диван трёхместный', cat:'furniture', p:{ w:2200, d:950, h:820 } }, armchair:{ n:'Кресло', cat:'furniture', p:{ w:900, d:880, h:800 } },
+  chair:{ n:'Стул с мягким сиденьем', cat:'furniture', p:{ w:460, d:520, h:860 } }, dtable:{ n:'Стол обеденный', cat:'furniture', p:{ w:1600, d:900, h:750 } },
+  ctable:{ n:'Журнальный столик', cat:'furniture', p:{ w:1100, d:600, h:420 } }, bed2:{ n:'Кровать двуспальная', cat:'furniture', p:{ w:1700, d:2150, h:1050 } },
+  night:{ n:'Тумба прикроватная', cat:'casework', p:{ w:500, d:400, h:520 } }, wardrobe:{ n:'Шкаф распашной', cat:'casework', p:{ w:1800, d:600, h:2200 } },
+  shelf:{ n:'Стеллаж с книгами', cat:'casework', p:{ w:900, d:350, h:2000 } }, desk:{ n:'Рабочий стол', cat:'furniture', p:{ w:1400, d:700, h:750 } },
+  kitchen:{ n:'Кухонный гарнитур', cat:'casework', p:{ w:2400, d:600, h:900 } }, lamp:{ n:'Торшер', cat:'lighting', p:{ w:450, d:450, h:1650 } },
+  rug:{ n:'Ковёр', cat:'furniture', p:{ w:2000, d:1400, h:12 } }, plant:{ n:'Растение в кашпо', cat:'generic', p:{ w:550, d:550, h:1300 } },
+  radiator:{ n:'Радиатор', cat:'equipment', p:{ w:800, d:100, h:550 } }
+};
+async function furnGen(kind, p0){
+  const RB = await rbox(), L = FURN_LIB[kind], p = { ...(L ? L.p : {}), ...p0 }, W = p.w / 1000, D = p.d / 1000, H = p.h / 1000, g = new THREE.Group();
+  const mats = {}; const M_ = k => mats[k] || (mats[k] = FMAT[k]());
+  // a rounded box by its min corner and size (metres)
+  const box = (x, y, z, w, h, d, r, mk) => { const rr = Math.max(0.0005, Math.min(r, w / 2 - 1e-4, h / 2 - 1e-4, d / 2 - 1e-4)); const geo = new RB(w, h, d, 3, rr); geo.translate(x + w / 2, y + h / 2, z + d / 2); g.add(new THREE.Mesh(geo, M_(mk))); };
+  const cyl = (x, y, z, r1, r2, h, mk, seg = 20) => { const geo = new THREE.CylinderGeometry(r2, r1, h, seg); geo.translate(x, y + h / 2, z); g.add(new THREE.Mesh(geo, M_(mk))); };
+  const lathe = (pts, x, y, z, mk) => { const geo = new THREE.LatheGeometry(pts.map(([a, b]) => new THREE.Vector2(a, b)), 40); geo.translate(x, y, z); g.add(new THREE.Mesh(geo, M_(mk))); };
+  const x0 = -W / 2, z0 = -D / 2;
+  if (kind === 'sofa3' || kind === 'armchair'){
+    const n = kind === 'sofa3' ? 3 : 1, arm = Math.min(0.2, W * 0.12), legH = 0.08, baseH = 0.22, back = 0.22, seatH = 0.2;
+    for (const [lx, lz] of [[0.06, 0.06], [W - 0.06, 0.06], [W - 0.06, D - 0.06], [0.06, D - 0.06]]) cyl(x0 + lx, 0, z0 + lz, 0.018, 0.022, legH, 'wood');
+    box(x0, legH, z0, W, baseH, D, 0.03, 'fabric');                                   // frame
+    box(x0, legH, z0 + D - back, W, H - legH, back, 0.06, 'fabric');                 // back frame
+    box(x0, legH, z0, arm, 0.62 - legH, D, 0.07, 'fabric'); box(x0 + W - arm, legH, z0, arm, 0.62 - legH, D, 0.07, 'fabric'); // arms
+    const cw = (W - 2 * arm) / n;
+    for (let i = 0; i < n; i++){
+      box(x0 + arm + i * cw + 0.005, legH + baseH, z0 + 0.03, cw - 0.01, seatH, D - back - 0.02, 0.07, 'fabric2');      // seat cushions
+      box(x0 + arm + i * cw + 0.01, legH + baseH + seatH - 0.02, z0 + D - back - 0.15, cw - 0.02, H - legH - baseH - seatH - 0.02, 0.18, 0.08, 'fabric2'); // back cushions
+    }
+  } else if (kind === 'chair'){
+    const sh = 0.46, t = 0.03;
+    for (const [lx, lz] of [[0.04, 0.04], [W - 0.04, 0.04], [W - 0.04, D - 0.04], [0.04, D - 0.04]]) cyl(x0 + lx, 0, z0 + lz, 0.014, 0.018, sh - 0.02, 'oak', 14);
+    box(x0, sh - 0.03, z0, W, 0.06, D, 0.02, 'fabric2');
+    for (const lx of [0.04, W - 0.04]) cyl(x0 + lx, sh, z0 + D - 0.04, 0.014, 0.016, H - sh - 0.05, 'oak', 14);
+    box(x0 + 0.02, H - 0.24, z0 + D - 0.06, W - 0.04, 0.2, 0.03, 0.012, 'oak');
+    void t;
+  } else if (kind === 'dtable' || kind === 'desk' || kind === 'ctable'){
+    const tt = kind === 'ctable' ? 0.04 : 0.035, inset = kind === 'ctable' ? 0.08 : 0.06;
+    box(x0, H - tt, z0, W, tt, D, 0.008, kind === 'desk' ? 'white' : 'oak');
+    if (kind === 'ctable'){ box(x0 + inset, 0.06, z0 + inset, W - 2 * inset, 0.02, D - 2 * inset, 0.006, 'oak'); for (const [lx, lz] of [[inset, inset], [W - inset, inset], [W - inset, D - inset], [inset, D - inset]]) box(x0 + lx - 0.02, 0, z0 + lz - 0.02, 0.04, H - tt, 0.04, 0.004, 'metal'); }
+    else for (const [lx, lz] of [[inset, inset], [W - inset, inset], [W - inset, D - inset], [inset, D - inset]]) box(x0 + lx - 0.025, 0, z0 + lz - 0.025, 0.05, H - tt, 0.05, 0.006, kind === 'desk' ? 'metal' : 'oak');
+    if (kind === 'desk') box(x0 + W - 0.45, H - tt - 0.15, z0 + 0.05, 0.4, 0.13, D - 0.1, 0.006, 'white');
+  } else if (kind === 'bed2'){
+    const fh = 0.32, head = 0.08;
+    box(x0, 0.04, z0 + head, W, fh - 0.04, D - head, 0.02, 'oak');                     // base
+    box(x0, 0, z0, W, H, head, 0.025, 'fabric');                                       // headboard
+    box(x0 + 0.04, fh, z0 + head + 0.02, W - 0.08, 0.22, D - head - 0.06, 0.06, 'linen'); // mattress
+    box(x0 + 0.02, fh + 0.16, z0 + head + 0.55, W - 0.04, 0.1, D - head - 0.6, 0.05, 'fabric2'); // blanket
+    for (const px of [0.12, W / 2 + 0.04]) box(x0 + px, fh + 0.2, z0 + head + 0.06, W / 2 - 0.16, 0.14, 0.42, 0.06, 'white'); // pillows
+  } else if (kind === 'night'){
+    box(x0, 0.03, z0, W, H - 0.03, D, 0.006, 'oak');
+    for (const y of [0.1, 0.3]) { box(x0 + 0.02, y, z0 - 0.002, W - 0.04, 0.17, 0.01, 0.004, 'oak'); cyl(0, y + 0.08, z0 - 0.02, 0.008, 0.008, 0.02, 'metal', 10); }
+  } else if (kind === 'wardrobe'){
+    box(x0, 0, z0, W, H, D, 0.006, 'white');
+    const nd = Math.max(2, Math.round(W / 0.45)), dw = W / nd;
+    for (let i = 0; i < nd; i++){ box(x0 + i * dw + 0.002, 0.08, z0 - 0.018, dw - 0.004, H - 0.1, 0.018, 0.003, 'white'); box(x0 + i * dw + (i % 2 ? 0.04 : dw - 0.055), H * 0.45, z0 - 0.035, 0.015, 0.25, 0.015, 0.006, 'chrome'); }
+  } else if (kind === 'shelf'){
+    const t = 0.02, n = Math.max(3, Math.round(H / 0.36));
+    box(x0, 0, z0, t, H, D, 0.003, 'white'); box(x0 + W - t, 0, z0, t, H, D, 0.003, 'white'); box(x0, 0, z0 + D - 0.008, W, H, 0.008, 0.002, 'white');
+    let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    const bookC = ['#8b5e3c', '#3c5a7a', '#c9b38a', '#7a3c3c', '#d9d4ca', '#4a6a4a', '#2f3236'];
+    for (let i = 0; i <= n; i++){
+      const y = i * (H - t) / n; box(x0, y, z0, W, t, D, 0.003, 'white');
+      if (i === n) break;
+      let x = x0 + t + 0.01; const top = (H - t) / n - t - 0.04;
+      while (x < x0 + W - t - 0.05 && rnd() < 0.93){
+        const bw = 0.018 + rnd() * 0.035, bh = top * (0.65 + rnd() * 0.35), bd = D * (0.6 + rnd() * 0.3), key = 'book' + (Math.floor(rnd() * bookC.length));
+        if (!FMAT[key]) { const c2 = bookC[+key.slice(4)]; FMAT[key] = () => new THREE.MeshStandardMaterial({ color:c2, roughness:0.75 }); }
+        box(x, y + t, z0 + D - 0.01 - bd, bw, bh, bd, 0.002, key); x += bw + 0.002;
+        if (rnd() < 0.08) x += 0.12;
+      }
+    }
+  } else if (kind === 'kitchen'){
+    const ch = H - 0.04, n = Math.max(2, Math.round(W / 0.6)), mw = W / n;
+    box(x0, 0, z0 + 0.06, W, 0.1, D - 0.1, 0.003, 'metal');                            // plinth
+    box(x0, 0.1, z0 + 0.02, W, ch - 0.1, D - 0.04, 0.004, 'white');                     // carcasses
+    for (let i = 0; i < n; i++){ box(x0 + i * mw + 0.002, 0.1, z0, mw - 0.004, ch - 0.12, 0.02, 0.003, 'white'); box(x0 + i * mw + 0.05, ch - 0.1, z0 - 0.025, mw - 0.1, 0.012, 0.012, 0.005, 'chrome'); }
+    box(x0 - 0.01, ch, z0 - 0.02, W + 0.02, 0.04, D + 0.02, 0.004, 'oak');              // worktop
+    box(x0 + mw * 0.2, ch + 0.035, z0 + 0.08, mw * 0.6, 0.008, D * 0.5, 0.004, 'chrome'); // sink
+  } else if (kind === 'lamp'){
+    lathe([[0, 0], [0.16, 0], [0.17, 0.015], [0.04, 0.03], [0, 0.03]], 0, 0, 0, 'metal');
+    cyl(0, 0.03, 0, 0.012, 0.012, H - 0.33, 'metal', 12);
+    lathe([[0.13, 0], [0.21, 0.34], [0.205, 0.345], [0.125, 0.005]], 0, H - 0.36, 0, 'shade');
+  } else if (kind === 'rug'){
+    box(x0, 0, z0, W, Math.max(0.006, H), D, 0.004, 'rug');
+  } else if (kind === 'plant'){
+    lathe([[0, 0], [0.16, 0], [0.24, 0.4], [0.25, 0.42], [0.22, 0.42], [0.2, 0.4], [0, 0.4]], 0, 0, 0, 'ceramic');
+    let seed = 3; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    for (let i = 0; i < 26; i++){
+      const a = rnd() * Math.PI * 2, el = 0.2 + rnd() * 0.9, len = 0.25 + rnd() * 0.35, y = 0.42 + rnd() * (H - 0.75);
+      const geo = new THREE.SphereGeometry(1, 10, 6); geo.scale(len * 0.5, 0.012, len * 0.18);
+      const m = new THREE.Mesh(geo, M_('green')); m.position.set(Math.cos(a) * len * 0.45, y + Math.sin(el) * len * 0.3, Math.sin(a) * len * 0.45); m.rotation.set(0, -a, el * 0.6); m.updateMatrix(); geo.applyMatrix4(m.matrix); m.position.set(0, 0, 0); m.rotation.set(0, 0, 0); g.add(m);
+      cyl(Math.cos(a) * 0.03, 0.4, Math.sin(a) * 0.03, 0.004, 0.003, y - 0.38, 'green', 6);
+    }
+  } else if (kind === 'radiator'){
+    const n = Math.max(4, Math.round(W / 0.08)), fw = W / n;
+    for (let i = 0; i < n; i++) box(x0 + i * fw + 0.004, 0.12, z0, fw - 0.008, H - 0.12, D, 0.02, 'white');
+    for (const y of [0.16, H - 0.04]) box(x0, y, z0 + D * 0.3, W, 0.03, D * 0.4, 0.012, 'white');
+  } else box(x0, 0, z0, W, H, D, 0.01, 'white');
+  return g;
+}
+/* «Импорт модели»: .glb / .gltf (+ .bin, textures) / .obj (+ .mtl, textures) — units and the up axis are checked in a dialog */
+const UNITS = [[1, 'Метры'], [0.01, 'Сантиметры'], [0.001, 'Миллиметры'], [0.0254, 'Дюймы']];
+async function importModelFiles(list){
+  const files = [...list], main = files.find(f => /\.(glb|gltf|obj)$/i.test(f.name));
+  if (!main){ toast('Выберите файл модели .glb, .gltf или .obj (можно вместе с .mtl, .bin и текстурами)'); return; }
+  toast('Читаю модель…');
+  const fmt = main.name.split('.').pop().toLowerCase(), side = {};
+  for (const f of files) if (f !== main) side[f.name] = bufToB64(await f.arrayBuffer());
+  const mesh = { kind:'file', fmt, name:main.name, data:bufToB64(await main.arrayBuffer()), files:side, u:1, zUp:false, s:1 };
+  let root;
+  try { root = await parseModelFile(mesh); } catch (e){ toast('Файл не открылся: ' + ((e && e.message) || e)); return; }
+  const raw = bakeTemplate(root, { u:1, s:1 }), rs = raw.box.getSize(new V3()), mx = Math.max(rs.x, rs.y, rs.z);
+  mesh.u = fmt === 'obj' ? (mx > 200 ? 0.001 : mx > 20 ? 0.01 : 1) : (mx > 60 ? 0.01 : 1);
+  // Z-up files (3ds Max, SketchUp exports) lie on their back: tall and thin in depth
+  mesh.zUp = fmt === 'obj' && rs.z > rs.y * 1.6 && rs.z > rs.x * 0.6;
+  const d = mkModal('mdlDlg', 'Импорт модели', '<div id="mdlBody" style="display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center"></div><div class="row" style="justify-content:flex-end;gap:6px;margin-top:12px"><button class="btn primary" id="mdlOk">Загрузить в проект</button><button class="btn" id="mdlNo">Отмена</button></div>', 520);
+  const B = d.querySelector('#mdlBody');
+  B.innerHTML = `<label for="mdlName">Имя</label><input id="mdlName" maxlength="80" value="${esc(main.name.replace(/\.[^.]+$/, ''))}">
+    <label for="mdlCat">Категория</label><select id="mdlCat">${Object.entries(FAM_CATS).map(([k, n]) => `<option value="${k}"${k === 'furniture' ? ' selected' : ''}>${n}</option>`).join('')}</select>
+    <label for="mdlU">Единицы файла</label><select id="mdlU">${UNITS.map(([v, n]) => `<option value="${v}"${v === mesh.u ? ' selected' : ''}>${n}</option>`).join('')}</select>
+    <span></span><label class="pchk"><input type="checkbox" id="mdlZ"${mesh.zUp ? ' checked' : ''}> Ось Z направлена вверх (модель лежит на боку)</label>
+    <span>Размер</span><b id="mdlSz"></b>
+    <span>Файлы</span><span class="libnote" style="margin:0">${esc(main.name)}${Object.keys(side).length ? ' + ' + esc(Object.keys(side).join(', ')) : ''} · ${raw.tris.toLocaleString('ru-RU')} треугольников</span>`;
+  const size = () => { const k = +B.querySelector('#mdlU').value, z = B.querySelector('#mdlZ').checked, sx = rs.x * k, sy = (z ? rs.z : rs.y) * k, sz = (z ? rs.y : rs.z) * k;
+    B.querySelector('#mdlSz').textContent = `${mm(sx)} × ${mm(sz)} × ${mm(sy)} мм (Ш × Г × В)`; return [sx, sy, sz]; };
+  B.querySelector('#mdlU').onchange = size; B.querySelector('#mdlZ').onchange = size; size();
+  d.querySelector('#mdlNo').onclick = () => { d.hidden = true; };
+  d.querySelector('#mdlOk').onclick = () => {
+    mesh.u = +B.querySelector('#mdlU').value; mesh.zUp = B.querySelector('#mdlZ').checked; mesh.box = size();
+    const f = { id:vid('f'), name:(B.querySelector('#mdlName').value.trim() || main.name).slice(0, 80), cat:B.querySelector('#mdlCat').value, forms:[], mesh };
+    fams.push(f); S.famId = f.id; d.hidden = true; renderTree(); scheduleSave(); setTool('fam');
+    toast(`Модель «${f.name}» загружена. Щёлкните, где поставить; Пробел — повернуть на 90°`);
+  };
+  for (const g of raw.parts){ g.geo.dispose(); if (g.edges) g.edges.dispose(); }
+  d.hidden = false;
+}
+/* «Библиотека мебели»: cards with small previews (rendered once with the main renderer) */
+const LIB_PREV = new Map();
+async function libPreview(kind){
+  if (LIB_PREV.has(kind)) return LIB_PREV.get(kind);
+  const T = bakeTemplate(await furnGen(kind, {}), { u:1, s:1 }), sc = new THREE.Scene(), W = 160, H = 120;
+  for (const p of T.parts) sc.add(new THREE.Mesh(p.geo, p.mat));
+  sc.add(new THREE.HemisphereLight('#ffffff', '#8a8580', 1.6)); const dl = new THREE.DirectionalLight('#ffffff', 2.2); dl.position.set(2, 4, -3); sc.add(dl);
+  const b = T.box, c = b.getCenter(new V3()), R = b.getSize(new V3()).length() * 0.62, cm = new THREE.PerspectiveCamera(30, W / H, 0.01, 100);
+  cm.position.copy(c).add(new V3(0.9, 0.65, -1.1).normalize().multiplyScalar(R / Math.tan(15 * Math.PI / 180))); cm.lookAt(c);
+  const rt = new THREE.WebGLRenderTarget(W, H, { samples:4 }), keepRT = renderer.getRenderTarget(), keepCol = renderer.getClearColor(new THREE.Color()), keepA = renderer.getClearAlpha();
+  renderer.setRenderTarget(rt); renderer.setClearColor('#ffffff', 1); renderer.clear(); renderer.render(sc, cm);
+  const px = new Uint8Array(W * H * 4); renderer.readRenderTargetPixels(rt, 0, 0, W, H, px); renderer.setRenderTarget(keepRT); renderer.setClearColor(keepCol, keepA); rt.dispose();
+  const can = document.createElement('canvas'); can.width = W; can.height = H; const g = can.getContext('2d'), im = g.createImageData(W, H);
+  for (let y = 0; y < H; y++) im.data.set(px.subarray((H - 1 - y) * W * 4, (H - y) * W * 4), y * W * 4); g.putImageData(im, 0, 0);
+  for (const p of T.parts){ p.geo.dispose(); if (p.edges) p.edges.dispose(); }
+  const url = can.toDataURL(); LIB_PREV.set(kind, url); return url;
+}
+function openFurnLib(){
+  const d = mkModal('libDlgF', 'Библиотека мебели', '<p class="libnote" style="margin:0 0 8px">Щёлкните модель, затем место на плане. Размеры модели меняются в «Свойствах» (для всех её экземпляров). Свои модели — «Импорт модели» (.glb, .gltf, .obj).</p><div id="libGrid" class="furngrid"></div>', 760);
+  const G = d.querySelector('#libGrid');
+  G.innerHTML = Object.entries(FURN_LIB).map(([k, L]) => `<button class="furncard" data-k="${k}" title="${esc(L.n)}"><img alt="" data-pk="${k}"><span>${esc(L.n)}</span><small>${L.p.w} × ${L.p.d} × ${L.p.h} мм</small></button>`).join('');
+  G.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const f = famModelFamily(b.dataset.k); if (!f) return; S.famId = f.id; d.hidden = true; renderTree(); scheduleSave(); setTool('fam'); toast(`«${f.name}»: щёлкните, где поставить; Пробел — повернуть на 90°`); });
+  d.hidden = false;
+  (async () => { for (const k of Object.keys(FURN_LIB)){ try { const url = await libPreview(k); const im = G.querySelector(`[data-pk="${k}"]`); if (im) im.src = url; } catch (e){ console.warn('preview', k, e); } } })();
+}
+function famModelFamily(kind){
+  const L = FURN_LIB[kind]; if (!L) return null;
+  let f = fams.find(x => x.mesh && x.mesh.kind === 'gen' && x.mesh.g === kind && JSON.stringify(x.mesh.p) === JSON.stringify(L.p));
+  if (!f){ f = { id:'lib-' + kind + '-' + Date.now().toString(36).slice(-4), name:L.n, cat:L.cat, forms:[], mesh:{ kind:'gen', g:kind, p:{ ...L.p }, box:[L.p.w / 1000, L.p.h / 1000, L.p.d / 1000] } }; fams.push(f); }
+  return f;
 }
 
 /* ---------- view templates (Revit «Шаблоны видов» → Видимость/Графика): per category and per family —
@@ -2235,7 +2577,7 @@ function applyOv(obj, o){
     if (!m){
       m = base.clone();
       if (c2) m.color = new THREE.Color(c2); if (o.half){ m.transparent = true; m.opacity = 0.4; }
-      if (q.isLineSegments2 && w2) m.linewidth = linePx(weightMm(w2));
+      if (q.isLineSegments2 && w2) m.linewidth = linePx(weightMm(w2, 'model'));
       if (base.clippingPlanes) m.clippingPlanes = base.clippingPlanes;
       OVM.set(key, m);
     }
@@ -2351,7 +2693,7 @@ function roomData(r){ return regionAt(r.x, r.z, lvOf(r)); }
 // ceiling height of a room for the survey: measured value, else the ceiling drawn over the room
 function roomCeil(r){ if (Number.isFinite(r.hc)) return r.hc; const c = items.find(i => i.type === 'ceiling' && lvOf(i) === lvOf(r) && i.pts && ptInPoly(r.x, r.z, i.pts)); return c ? c.h : null; }
 function nextRoomNum(){ const used = new Set(items.filter(r => r.type === 'room').map(r => String(r.num))); let i = 1; while (used.has(String(i))) i++; return String(i); }
-function addRoom(x, z, name){ const it = { id:nextId++, type:'room', x:r4(x), z:r4(z), name:name || 'Помещение', num:nextRoomNum(), lv:actLv() }; items.push(it); return it; }
+function addRoom(x, z, name){ const it = { id:nextId++, type:'room', x:r4(x), z:r4(z), name:name || 'Помещение', num:nextRoomNum(), lv:actLv() }; items.push(it); if (STD.ieAuto) setTimeout(() => autoIelevs(true), 0); return it; }
 // Revit «Расставить помещения автоматически»: one room in every closed area that has none
 function autoRooms(){
   const G = roomGrid(); if (!G) return 0;
@@ -2465,7 +2807,7 @@ function rebuild(quiet){
     // Revit «Уровень детализации» of a category (view / template override) for this element only
     const ov0 = ovOf(it), dk = S.detail; if (ov0 && ov0.dl) S.detail = ov0.dl;
     let obj; try { const B = BUILDERS[it.type]; obj = B ? B(it) : null; } finally { S.detail = dk; }
-    if (obj){ obj.position.y += baseY(it); applyOv(obj, ov0); if (S.reveal && anyHidden(it) && !isSel(it.id)) obj.traverse(o => { if (o.material) o.material = o.isMesh ? M.revealM : M.revealL; }); model.add(obj); }
+    if (obj){ obj.position.y += baseY(it); applyOv(obj, ov0); { const pst = !S.render && it.id ? visState(it) : 'normal'; if (pst === 'new' || pst === 'temp' || ((pst === 'exist' || pst === 'demo') && phData().gfx[pst === 'exist' ? 'exist' : 'demo'].half)) applyOv(obj, phOv(pst)); const pm = pst !== 'normal' && phData().gfx[{ exist:'exist', demo:'demo', new:'nw', temp:'temp' }[pst]]?.m; if (pm && MATS[pm] && S.view !== 'plan' && S.style !== 'lines') obj.traverse(o => { if (o.isMesh && !o.isLineSegments2 && o.material && o.material !== M.pick) o.material = layerMat(pm); }); } if (S.reveal && anyHidden(it) && !isSel(it.id)) obj.traverse(o => { if (o.material) o.material = o.isMesh ? M.revealM : M.revealL; }); model.add(obj); }
   }
   for (const r of items) if (r.type === 'room' && isSel(r.id)){ const o = buildRoomFill(r); if (o){ o.position.y += baseY(r); model.add(o); } }
   // a floor plan looks at its own level: that level is brought to the ground so annotation stays on top;
@@ -2777,11 +3119,12 @@ function spreadDimTexts(out){
     else if (w.type === 'dim' && dimShown(w)){ const G = dimGeom(w); if (!G) continue; const e = t => toScreen(G.o.x + G.u.x * t + G.n.x * G.off, 0, G.o.z + G.u.z * t + G.n.z * G.off); dlines.push({ id:w.id, a:e(G.arr[0].t), b:e(G.arr[G.arr.length - 1].t) }); }
   }
   const inPoly = (x, y, P) => { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) if ((P[i].y > y) !== (P[j].y > y) && x < (P[j].x - P[i].x) * (y - P[i].y) / (P[j].y - P[i].y) + P[i].x) c = !c; return c; };
+  let wallsOn = true;
   const blocked = (b, L) => {
     const a = -(L.rot || 0) * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a), hw = b.w / 2 - 2, hh = b.h / 2 - 1;
     const loc = p => { const dx = p.x - b.x, dy = p.y - b.y; return { x:dx * ca - dy * sa, y:dx * sa + dy * ca }; }, inR = q => Math.abs(q.x) < hw && Math.abs(q.y) < hh;
     const pts = [[0, 0], [-1, -1], [1, -1], [1, 1], [-1, 1], [-1, 0], [1, 0]].map(([i, j]) => { const x = i * hw, y = j * hh; return { x:b.x + x * ca + y * sa, y:b.y - x * sa + y * ca }; });
-    for (const P of walls) if (pts.some(p => inPoly(p.x, p.y, P)) || P.some(p => inR(loc(p)))) return true;
+    if (wallsOn) for (const P of walls) if (pts.some(p => inPoly(p.x, p.y, P)) || P.some(p => inR(loc(p)))) return true;
     for (const s of dlines){ if (s.id === L.dimId) continue; for (let k = 0; k <= 16; k++){ const t = k / 16; if (inR(loc({ x:s.a.x + (s.b.x - s.a.x) * t, y:s.a.y + (s.b.y - s.a.y) * t }))) return true; } }
     return false;
   };
@@ -2789,6 +3132,9 @@ function spreadDimTexts(out){
   // fixed: room tags, marks, texts, angular / radial / diameter numbers, and numbers moved by hand
   for (const L of out) if (!L.du && L.x != null && /^(rm|svn|sva|hb|wt|tx|dl)/.test(L.cls || '')) placed.push(box(L));
   for (const L of out) if (L.du && L.man) placed.push(box(L));
+  // a segment's half length on screen: a number may slide along its line only while it stays inside its own segment
+  const segHalf = L => { if (!L.anc) return 1e9; const A = toScreen(L.anc.x, 0, L.anc.z), e1 = toScreen(L.anc.x + L.du.x * L.segL / 2, 0, L.anc.z + L.du.z * L.segL / 2); return Math.hypot(e1.x - A.x, e1.y - A.y); };
+  const needLead = [];
   for (const L of out){
     if (!L.du || L.man) continue;
     let b = box(L);
@@ -2796,32 +3142,66 @@ function spreadDimTexts(out){
       const x0 = L.x, z0 = L.z, s0 = toScreen(x0, 0, z0), s1 = toScreen(x0 + L.du.x, 0, z0 + L.du.z), pl = Math.hypot(s1.x - s0.x, s1.y - s0.y) || 1, step = (b.w + 6) * 0.5;
       // the other side of the dimension line, when nothing is free along it
       const nx = -L.du.z, nz = L.du.x, flip = 2 * (STD.anno.textMm * 0.7 + 0.9) * paperMm();
-      const side = L.lineOff != null ? Math.sign(L.lineOff) || 1 : 1;
+      const side = L.lineOff != null ? Math.sign(L.lineOff) || 1 : 1, room = segHalf(L) - b.w / 2;
       let done = false;
       for (const fl of [0, 1]){
-        for (let n = fl ? 0 : 1; n <= 12 && !done; n++) for (const sg of n ? [1, -1] : [1]){
+        for (let n = fl ? 0 : 1; n <= 12 && !done && n * step <= room; n++) for (const sg of n ? [1, -1] : [1]){
           const dpx = sg * n * step; // screen px → model metres along the line
           L.x = x0 + L.du.x * dpx / pl - (fl ? nx * flip * side : 0); L.z = z0 + L.du.z * dpx / pl - (fl ? nz * flip * side : 0);
           b = box(L); if (!hit(b, L)){ done = true; break; }
         }
         if (done) break;
       }
-      if (!done){ L.x = x0; L.z = z0; b = box(L); }
+      if (!done){ L.x = x0; L.z = z0; if (L.anc){ needLead.push(L); continue; } b = box(L); }
     }
     placed.push(b);
   }
-  // Revit: a number that left its segment (slid off, moved to the other side or dragged away) gets a leader to the middle of its segment
+  // no room in its segment: the number goes onto a leader with a shelf (45°), placed where neither the number
+  // nor the leader touches other numbers, dimension lines, other leaders or walls (first free spot, nearest first)
+  const leads = [];
+  const segX = (p, q, r, s2) => { const d = (q.x - p.x) * (s2.y - r.y) - (q.y - p.y) * (s2.x - r.x); if (Math.abs(d) < 1e-9) return false; const t = ((r.x - p.x) * (s2.y - r.y) - (r.y - p.y) * (s2.x - r.x)) / d, v = ((r.x - p.x) * (q.y - p.y) - (r.y - p.y) * (q.x - p.x)) / d; return t > 0.02 && t < 0.98 && v > 0 && v < 1; };
+  // how many numbers, dimension lines and leaders a leader line touches (0 — free)
+  const segCost = (p, q, L, skip0) => {
+    let n = 0;
+    for (const b of placed){ for (let k = 0; k <= 12; k++){ const t = k / 12; if (skip0 && t < 0.2) continue; const x = p.x + (q.x - p.x) * t, y = p.y + (q.y - p.y) * t; if (Math.abs(b.x - x) < b.hw && Math.abs(b.y - y) < b.hh){ n++; break; } } }
+    for (const d of dlines) if (d.id !== L.dimId && segX(p, q, d.a, d.b)) n++;
+    for (const [r, s2] of leads) if (segX(p, q, r, s2)) n++;
+    return n;
+  };
+  const boxCost = (b, L) => placed.filter(p => Math.abs(p.x - b.x) < p.hw + b.hw - 1 && Math.abs(p.y - b.y) < p.hh + b.hh - 1).length * 3 + (L.du && blocked(b, L) ? 2 : 0);
+  for (const L of needLead){
+    const A = toScreen(L.anc.x, 0, L.anc.z), B = toScreen(L.base.x, 0, L.base.z), a = (L.rot || 0) * Math.PI / 180, u = { x:Math.cos(a), y:Math.sin(a) }, n = { x:-Math.sin(a), y:Math.cos(a) };
+    const w = textW(L.t, fs) + 4, h = fs * 1.2, pref = Math.sign((B.x - A.x) * n.x + (B.y - A.y) * n.y) || -1;
+    let best = null, free = null;
+    // first pass keeps numbers off walls too; the second allows a wall but still no other number, dimension line or leader
+    outer: for (const pass of [0, 1]) for (const k of [1.4, 2.2, 3.2, 4.5, 6.5, 9, 12.5, 17]){
+      wallsOn = pass === 0;
+      const dn = k * fs;
+      for (const sn of [pref, -pref]) for (const su of [1, -1]){
+        const K = { x:A.x + u.x * su * dn + n.x * sn * dn, y:A.y + u.y * su * dn + n.y * sn * dn }, F = { x:K.x + u.x * su * w, y:K.y + u.y * su * w };
+        const T = { x:K.x + u.x * su * w / 2 - n.x * h / 2, y:K.y + u.y * su * w / 2 - n.y * h / 2 };
+        const ca = Math.abs(u.x), sa = Math.abs(u.y), bw = w + 6, bh = h + 2, b = { x:T.x, y:T.y, hw:(bw * ca + bh * sa) / 2, hh:(bw * sa + bh * ca) / 2, w:bw, h:bh };
+        const cand = { T, pts:[A, K, F], b };
+        const cost = boxCost(b, L) + segCost(A, K, L, true) + segCost(K, F, L, false) + (pass ? 0.5 : 0);
+        if (!best || cost < best.cost){ cand.cost = cost; best = cand; }
+        if (cost < 1){ free = cand; break outer; }
+      }
+    }
+    // the first free spot, or the nearest one when nothing is free
+    wallsOn = true; const c = free || best;
+    L.sx = c.T.x; L.sy = c.T.y; L.lead = c.pts; placed.push(c.b); leads.push([c.pts[0], c.pts[1]], [c.pts[1], c.pts[2]]);
+  }
+  // a number dragged by hand gets a leader when it left its segment
   for (const L of out){
-    if (!L.du || !L.anc) continue;
+    if (!L.du || !L.anc || !L.man) continue;
     const T = toScreen(L.x, 0, L.z), B = toScreen(L.base.x, 0, L.base.z), A = toScreen(L.anc.x, 0, L.anc.z);
     const moved = Math.hypot(T.x - B.x, T.y - B.y); if (moved < 3) continue;
-    const e1 = toScreen(L.anc.x + L.du.x * L.segL / 2, 0, L.anc.z + L.du.z * L.segL / 2), half = Math.hypot(e1.x - A.x, e1.y - A.y);
+    const half = segHalf(L), e1 = toScreen(L.anc.x + L.du.x * L.segL / 2, 0, L.anc.z + L.du.z * L.segL / 2);
     const ux = (e1.x - A.x) / (half || 1), uy = (e1.y - A.y) / (half || 1), along = (T.x - B.x) * ux + (T.y - B.y) * uy;
     const side0 = (B.x - A.x) * -uy + (B.y - A.y) * ux, side1 = (T.x - A.x) * -uy + (T.y - A.y) * ux;
-    if (Math.abs(along) > half - 2 || (L.man && (moved > fs * 1.6 || Math.sign(side0) !== Math.sign(side1)))) L.leader = { x:L.anc.x, z:L.anc.z };
+    if (Math.abs(along) > half - 2 || moved > fs * 1.6 || Math.sign(side0) !== Math.sign(side1)) L.leader = { x:L.anc.x, z:L.anc.z };
   }
-}
-// leader of a dimension number in screen pixels: from the middle of its segment to the edge of the text
+}// leader of a dimension number in screen pixels: from the middle of its segment to the edge of the text
 // leader on a shelf (ГОСТ 2.307): from the middle of the segment a line at 45° to a shelf under the number;
 // the number slides along its shelf so that the leader keeps 45° — returns the polyline and the new centre of the text
 function leaderPx(L, s, fs){
@@ -3219,21 +3599,64 @@ const PHASED = ['wall', 'door', 'window', 'box', 'floor', 'ceiling', 'roof', 'co
 const phName = k => k === 'all' ? 'Показать все' : (PHASES.find(p => p.k === k) || { n:'—' }).n;
 const newPhase = () => S.phase === 'all' ? 'montazh' : S.phase;
 // 'normal' — drawn as usual; 'exist' — built in an earlier phase (grey); 'demo' — demolished in this phase (red dashed); 'hide'
+/* ---------- Revit «Стадии»: the list of phases, phase filters and graphic overrides ----------
+   Phase status of an element in the phase of the view: new (built in it), existing (built earlier, still there),
+   demolished (taken down in it), temporary (built and taken down in it). The view's phase filter says for each status:
+   by category (as usual), overridden (the graphics of «Переопределения графики») or not shown. */
+const PH_GFX_DEF = () => ({
+  exist:{ c:'#808080', cc:'#808080', sp:'', spc:'#c0c0c0', cp:'solid', cpc:'#cfd3d6', half:false, m:'' },
+  demo:{ c:'#d43a2a', cc:'#d43a2a', sp:'', spc:'#d43a2a', cp:'', cpc:'#ffffff', half:false, m:'' },
+  nw:{ c:'#2e9a3c', cc:'#2e9a3c', sp:'solid', spc:'#bcd8b8', cp:'solid', cpc:'#bcd8b8', half:false, m:'' },
+  temp:{ c:'#1a2a8a', cc:'#1a2a8a', sp:'', spc:'#ffffff', cp:'', cpc:'#ffffff', half:false, m:'' } });
+const PH_FILT_DEF = () => [
+  { id:'all', n:'Показать все', nw:'cat', ex:'ov', dm:'ov', tm:'ov' }, { id:'done', n:'Показать завершённое', nw:'cat', ex:'cat', dm:'hide', tm:'hide' },
+  { id:'demo', n:'Показать снесённое', nw:'hide', ex:'hide', dm:'cat', tm:'cat' }, { id:'new', n:'Показать новое', nw:'cat', ex:'hide', dm:'hide', tm:'hide' },
+  { id:'prevdemo', n:'Показать предыдущую стадию и снос', nw:'hide', ex:'ov', dm:'ov', tm:'hide' }, { id:'prevnew', n:'Показать предыдущую стадию и новое', nw:'cat', ex:'ov', dm:'hide', tm:'hide' },
+  { id:'prev', n:'Показать предыдущую стадию', nw:'hide', ex:'ov', dm:'hide', tm:'hide' }, { id:'none', n:'Нет', nw:'cat', ex:'cat', dm:'cat', tm:'cat' }];
+const PH_LIST_DEF = () => [{ k:'obmer', n:'Обмер', d:'Обмерные чертежи существующего состояния' }, { k:'demontazh', n:'Демонтаж', d:'Снос и демонтаж' }, { k:'montazh', n:'Монтаж', d:'Новое строительство' }, { k:'mebel', n:'Мебель', d:'Расстановка мебели и оборудования' }];
+function sanitizePh(o){
+  const col = v => /^#[0-9a-f]{6}$/i.test(v), V = ['cat', 'ov', 'hide'];
+  const list = (o && Array.isArray(o.list) ? o.list : PH_LIST_DEF()).filter(p => p && typeof p.k === 'string').slice(0, 30).map(p => ({ k:p.k.slice(0, 24), n:String(p.n || p.k).slice(0, 60), d:String(p.d || '').slice(0, 120) }));
+  const filters = (o && Array.isArray(o.filters) ? o.filters : PH_FILT_DEF()).filter(f => f && typeof f.id === 'string').slice(0, 40).map(f => ({ id:f.id.slice(0, 24), n:String(f.n || 'Фильтр').slice(0, 60), nw:V.includes(f.nw) ? f.nw : 'cat', ex:V.includes(f.ex) ? f.ex : 'cat', dm:V.includes(f.dm) ? f.dm : 'cat', tm:V.includes(f.tm) ? f.tm : 'cat' }));
+  const D = PH_GFX_DEF(), gfx = {};
+  for (const k of Object.keys(D)){ const g = (o && o.gfx && o.gfx[k]) || {}, d = D[k]; gfx[k] = { c:col(g.c) ? g.c : d.c, cc:col(g.cc) ? g.cc : d.cc, sp:typeof g.sp === 'string' ? g.sp : d.sp, spc:col(g.spc) ? g.spc : d.spc, cp:typeof g.cp === 'string' ? g.cp : d.cp, cpc:col(g.cpc) ? g.cpc : d.cpc, half:!!g.half, m:typeof g.m === 'string' ? g.m : '' }; }
+  return { list:list.length ? list : PH_LIST_DEF(), filters:filters.length ? filters : PH_FILT_DEF(), gfx };
+}
+const phData = () => (typeof STD !== 'undefined' && STD && STD.ph) || (STD.ph = sanitizePh(null));
+// the list of phases is shared by every list in the program (PHASES / PH_IDX are filled in place)
+function syncPhases(){
+  const L = phData().list; PHASES.length = 0; for (const p of L) PHASES.push({ k:p.k, n:p.n });
+  for (const k of Object.keys(PH_IDX)) delete PH_IDX[k]; PHASES.forEach((p, i) => { PH_IDX[p.k] = i; });
+  const opts = [...PHASES, { k:'all', n:'Показать все' }].map(p => `<option value="${p.k}">${esc(p.n)}</option>`).join('');
+  for (const id of ['#phaseSel', '#vbPhase']){ const el = document.querySelector(id); if (el){ el.innerHTML = opts; el.value = S.phase; } }
+  const G = phData().gfx; for (const [sid, k] of [['exist', 'exist'], ['demo', 'demo']]){ const st = STD.styles && STD.styles.find(x => x.id === sid); if (st) st.c = G[k].c; }
+}
+const viewPhF = () => { const v = RV || (typeof curView === 'function' ? curView() : null), F = phData().filters; return F.find(f => f.id === (v && v.phf)) || F.find(f => f.id === 'all') || F[0]; };
+function phStatus(it){
+  const c = PH_IDX[it.ph] ?? Math.min(2, PHASES.length - 1), d = it.dem ? (PH_IDX[it.dem] ?? 99) : 99, P = PH_IDX[S.phase] ?? Math.min(2, PHASES.length - 1);
+  if (c > P || d < P) return null; // not built yet, or gone before this phase
+  if (d === P) return c === P ? 'tm' : 'dm';
+  return c === P ? 'nw' : 'ex';
+}
+// 'normal' — drawn as usual; 'exist' / 'demo' — the overridden existing / demolished look; 'new' / 'temp' — overridden new / temporary; 'hide'
 function visState(it){
   if (!it || !PHASED.includes(it.type)) return 'normal';
   let host = 'normal';
   if (isOp(it)){ host = visState(byId(it.wall)); if (host === 'hide') return 'hide'; }
-  const c = PH_IDX[it.ph] ?? 2, d = it.dem ? (PH_IDX[it.dem] ?? 99) : 99;
   let st;
-  if (S.phase === 'all') st = d < 99 ? 'demo' : 'normal';
+  if (S.phase === 'all') st = it.dem ? 'demo' : 'normal';
   else {
-    const P = PH_IDX[S.phase] ?? 2;
-    if (c > P) return 'hide';
-    if (d <= P) st = d === P ? 'demo' : 'hide';
-    else st = c < P ? 'exist' : 'normal';
+    const ps = phStatus(it); if (!ps) return 'hide';
+    const f = viewPhF(), how = f[ps];
+    if (how === 'hide') return 'hide';
+    st = how === 'cat' ? 'normal' : { ex:'exist', dm:'demo', nw:'new', tm:'temp' }[ps];
   }
-  if (st === 'hide') return 'hide';
-  return host === 'demo' ? 'demo' : st;
+  return host === 'demo' && st !== 'hide' ? 'demo' : st;
+}
+// overrides of a phase status as a V/G override (colour of projection / cut lines, patterns, halftone)
+function phOv(st){
+  const k = { exist:'exist', demo:'demo', new:'nw', temp:'temp' }[st]; if (!k) return null; const g = phData().gfx[k];
+  return { c:g.c, cc:g.cc, ...(g.sp ? { sp:{ fg:{ p:g.sp, c:g.spc }, bg:{ p:'', c:'#ffffff' } } } : {}), ...(g.cp ? { cp:{ fg:{ p:g.cp, c:g.cpc }, bg:{ p:'', c:'#ffffff' } } } : {}), ...(g.half ? { half:true } : {}) };
 }
 /* ---------- levels (Revit «Уровни» / отметки): every element has a base level («Зависимость снизу») and an offset;
    walls, columns and stairs may also be tied to a top level («Зависимость сверху»). A floor plan shows its own level. ---------- */
@@ -3278,7 +3701,7 @@ function surveySides(w){
   if (out.length) return out.filter(s => !no.includes(s));
   return [w.flipL ? -1 : 1].filter(s => !no.includes(s)); // contour not closed yet: the inner side is opposite the outer layer
 }
-function surveyRefs(w, side){
+function surveyRefs(w, side, noOps){
   const f = wallFrame(w), refs = [{ k:'w', id:w.id, end:0, side }];
   const mids = [];
   for (const o of items){
@@ -3293,7 +3716,7 @@ function surveyRefs(w, side){
     });
   }
   // doors, windows and openings: the chain also gets their edges (piers and the width of each opening)
-  for (const op of opsOf(w, f.L)) mids.push({ s:op.a, r:[{ k:'o', id:op.o.id, edge:0, side }] }, { s:op.b, r:[{ k:'o', id:op.o.id, edge:1, side }] });
+  if (!noOps) for (const op of opsOf(w, f.L)) mids.push({ s:op.a, r:[{ k:'o', id:op.o.id, edge:0, side }] }, { s:op.b, r:[{ k:'o', id:op.o.id, edge:1, side }] });
   mids.sort((a, b) => a.s - b.s).forEach(m => refs.push(...m.r));
   refs.push({ k:'w', id:w.id, end:1, side });
   return refs;
@@ -3306,9 +3729,16 @@ function refreshSurveyDims(){
     const want = surveySides(w), f = wallFrame(w);
     items = items.filter(d => !(d.type === 'dim' && d.survey && d.sw === w.id && !want.includes(d.side)));
     for (const side of want){
-      const refs = surveyRefs(w, side), d = items.find(x => x.type === 'dim' && x.survey && x.sw === w.id && x.side === side);
+      const refs = surveyRefs(w, side), d = items.find(x => x.type === 'dim' && x.survey && !x.tot && x.sw === w.id && x.side === side);
       if (d){ d.refs = refs; d.dir = { x:f.dir.x, z:f.dir.z }; }
       else items.push({ id:nextId++, type:'dim', survey:true, sw:w.id, side, refs, off:r4(side * 0.45), dir:{ x:f.dir.x, z:f.dir.z } });
+      // with doors or windows in the chain, the overall size between the walls goes on a second line (repeats are dropped by markSurveyDups)
+      const T = items.find(x => x.type === 'dim' && x.survey && x.tot && x.sw === w.id && x.side === side);
+      if (refs.some(r => r.k === 'o')){
+        const tr = surveyRefs(w, side, true);
+        if (T){ T.refs = tr; T.dir = { x:f.dir.x, z:f.dir.z }; }
+        else items.push({ id:nextId++, type:'dim', survey:true, tot:true, sw:w.id, side, refs:tr, off:r4(side * 1.05), dir:{ x:f.dir.x, z:f.dir.z } });
+      } else if (T) items = items.filter(x => x !== T);
     }
   }
   markSurveyDups();
@@ -4013,6 +4443,53 @@ function makeInteriorElevations(p, quiet){
   if (!quiet) toast(`${made[0].name.replace(/ — 1 \(север\)$/, '')}: 4 вида (север, восток, юг, запад) — в диспетчере проекта`);
   return made;
 }
+/* automatic interior elevations: one elevation for every wall run (простенок) of every room, from inside the room,
+   phase «Мебель», view template «После монтажа». With the option on, new rooms get theirs too */
+function ielevTpl(){
+  let t = TPLS.find(x => /после\s*монтаж/i.test(x.name));
+  if (!t){ t = { id:vid('t'), name:'После монтажа', ov:{} }; TPLS.push(t); }
+  return t;
+}
+function ielevWallDefs(room, tpl){
+  const d = regionAt(room.x, room.z, lvOf(room)); if (!d || d.open || !d.poly || d.poly.length < 3) return [];
+  // the contour with collinear points merged and steps shorter than 5 cm dropped
+  let P = d.poly.map(q => ({ x:q.x, z:q.z }));
+  for (let pass = 0; pass < 3; pass++){
+    const out = [];
+    for (let i = 0; i < P.length; i++){
+      const a = P[(i - 1 + P.length) % P.length], b = P[i], c2 = P[(i + 1) % P.length];
+      const ux = b.x - a.x, uz = b.z - a.z, vx = c2.x - b.x, vz = c2.z - b.z, la = Math.hypot(ux, uz), lb = Math.hypot(vx, vz);
+      if (la < 0.05 || lb < 0.05 || Math.abs(ux * vz - uz * vx) / (la * lb) < 0.02) continue;
+      out.push(b);
+    }
+    if (out.length < 3) break; P = out;
+  }
+  const H = Math.max(S.wallH, ...items.filter(w => w.type === 'wall' && lvOf(w) === lvOf(room)).map(w => w.h)), c0 = polyCenter(P), defs = [];
+  let k = 0;
+  for (let i = 0; i < P.length; i++){
+    const A = P[i], B = P[(i + 1) % P.length], L = Math.hypot(B.x - A.x, B.z - A.z); if (L < 0.3) continue;
+    const ux = (B.x - A.x) / L, uz = (B.z - A.z) / L, nx = -uz, nz = ux, mx = (A.x + B.x) / 2, mz = (A.z + B.z) / 2;
+    const inw = ptInPoly(mx + nx * 0.05, mz + nz * 0.05, P) ? 1 : -1, ix = nx * inw, iz = nz * inw;
+    // the cut line inside the room (as far as its middle), looking at the wall
+    const off = clamp(Math.abs((c0.x - mx) * ix + (c0.z - mz) * iz), 0.6, 4), e = 0.05;
+    k++;
+    defs.push({ id:vid('v'), kind:'ielev', code:String(k), name:`Развёртка: ${room.name || 'Помещение'} ${room.num ? '(' + room.num + ') ' : ''}— ${k}`, room:room.id,
+      p1:{ x:r4(A.x + ix * off - ux * e), z:r4(A.z + iz * off - uz * e) }, p2:{ x:r4(B.x + ix * off + ux * e), z:r4(B.z + iz * off + uz * e) },
+      flip:inw === 1, crop:true, far:r4(off + 0.3), y0:-0.15, y1:r4(LVL(lvOf(room)).elev + H + 0.15), phase:PH_IDX.mebel != null ? 'mebel' : (PHASES[PHASES.length - 1] || { k:'all' }).k, tpl:tpl.id, lv:lvOf(room) });
+  }
+  return defs;
+}
+function autoIelevs(quiet){
+  const tpl = ielevTpl(); let n = 0, r0 = 0;
+  for (const room of items.filter(r => r.type === 'room')){
+    if (views.some(v => v.kind === 'ielev' && v.room === room.id)) continue;
+    const defs = ielevWallDefs(room, tpl); if (!defs.length) continue;
+    views.push(...defs); n += defs.length; r0++;
+  }
+  if (n){ renderTree(); annoDirty = true; scheduleSave(); }
+  if (!quiet) toast(n ? `Развёртки: ${n} видов в ${r0} помещениях (стадия «${phName('mebel')}», шаблон «${tpl.name}»)` : 'У всех помещений развёртки уже есть');
+  return n;
+}
 function ielevDefs(p){
   const d = regionAt(p.x, p.z); if (d.open) return null;
   const R = rectOf(d.poly), G = roomGrid(), room = items.find(r => r.type === 'room' && d.fill[cellAt(G, r.x, r.z)]);
@@ -4696,7 +5173,8 @@ function openCtxMenu(e){
     null,
     [S.reveal ? 'Выключить «Показать скрытые»' : 'Показать скрытые', 'RH', toggleReveal, true],
     ['Показать в виде', '', () => hideInView(false), any && liveIds(sel).some(id => anyHidden(byId(id)))],
-    ['Сбросить временное скрытие', 'HR', () => tempHide('reset'), !!S.tmp]
+    ['Сбросить временное скрытие', 'HR', () => tempHide('reset'), !!S.tmp],
+    ...(S.view === 'd3' || S.view === 'axo' ? [null, ['Сохранить ракурс как камеру', '', saveCamFromView, true]] : [])
   ];
   m.innerHTML = rows.map((r, i) => r ? `<button data-i="${i}"${r[3] ? '' : ' disabled'}>${esc(r[0])}${r[1] ? ` <span class="k">${r[1]}</span>` : ''}</button>` : '<hr>').join('');
   m.querySelectorAll('button[data-i]').forEach(b => b.onclick = () => { m.hidden = true; rows[+b.dataset.i][2](); });
@@ -4916,7 +5394,8 @@ function updateLabels(){
     n++;
     el.hidden = false; el.className = L.cls ? 'dim ' + L.cls : 'dim';
     if (el.textContent !== L.t) el.textContent = L.t;
-    if (L.leader){ const q = leaderPx(L, s, fsL); if (q){ lead.push(q); s.x = q.tx; s.y = q.ty; } }
+    if (L.lead) lead.push({ pts:L.lead });
+    else if (L.leader){ const q = leaderPx(L, s, fsL); if (q){ lead.push(q); s.x = q.tx; s.y = q.ty; } }
     el.style.left = s.x + 'px'; el.style.top = (s.y + (L.dy || 0)) + 'px';
     el._dd = L.own || null;
     el.style.transform = L.rot ? `translate(-50%,-50%) rotate(${L.rot}deg)` : '';
@@ -5130,6 +5609,22 @@ function camFromView(v, asp){
   cm.userData.shiftNdc = [2 * L.sx, 2 * L.sy]; patchShift(cm); cm.updateProjectionMatrix(); cm.updateMatrixWorld(true);
   return cm;
 }
+// «Сохранить ракурс»: the current 3D view becomes a camera (eye, target, lens) — to be opened again or rendered later
+function saveCamFromView(){
+  const v0 = curView();
+  if (!['d3', 'axo'].includes(S.view)){ const t = views.find(x => x.kind === 'd3'); if (!t){ toast('Откройте 3D-вид, настройте ракурс и нажмите «Сохранить ракурс»'); return; } openView(t.id); toast('Открыт 3D-вид: настройте ракурс и нажмите «Сохранить ракурс» ещё раз'); return; }
+  const cm = cam(), tg = ctl[S.view].target, n0 = views.filter(v => v.kind === 'camera').length + 1; let n = n0; while (views.some(v => v.kind === 'camera' && v.name === 'Камера ' + n)) n++;
+  const name = prompt('Имя ракурса', 'Камера ' + n); if (name === null) return;
+  // the perspective lens matching what is on screen (axonometry is saved with a long lens from the same direction)
+  const fov = S.view === 'd3' ? perspCam.fov : 20, f = Math.round(Math.max(8, Math.min(600, (LENS0.sensor * 0.5 * (24 / 36)) / Math.tan(fov * Math.PI / 360))));
+  let P = cm.position.clone(); if (S.view === 'axo'){ const dir = P.clone().sub(tg).normalize(), b = bounds(), R = b.getSize(new V3()).length(); P = tg.clone().addScaledVector(dir, R * 1.6); }
+  const v = { id:vid('v'), kind:'camera', code:'К' + n, name:(name.trim() || 'Камера ' + n).slice(0, 80), phase:v0.phase || S.phase, ...(v0.phf ? { phf:v0.phf } : {}), ...(v0.tpl ? { tpl:v0.tpl } : {}),
+    cam:{ p:[r4(P.x), r4(P.y), r4(P.z)], t:[r4(tg.x), r4(tg.y), r4(tg.z)], z:1 }, lens:{ ...LENS0, f } };
+  if (v0.box && v0.box.on) v.box = JSON.parse(JSON.stringify(v0.box));
+  views.push(v); renderTree(); scheduleSave(); openView(v.id);
+  toast(`Ракурс «${v.name}» сохранён в «Камеры». Его можно выбрать в «Визуализации»`);
+  return v;
+}
 function makeCamera(a, b){
   const n0 = views.filter(v => v.kind === 'camera').length + 1; let n = n0; while (views.some(v => v.kind === 'camera' && v.name === 'Камера ' + n)) n++;
   const L = levels.find(l => l.id === actLv()) || levels[0], y = r4((L ? L.elev : 0) + 1.6);
@@ -5229,6 +5724,8 @@ function sanitizeViews(arr){
     if (typeof v.tpl === 'string') o.tpl = v.tpl.slice(0, 40);
     if (v.tplAuto && o.tpl) o.tplAuto = true;
     if (v.ov && typeof v.ov === 'object'){ const ov = sanOv(v.ov); if (Object.keys(ov).length) o.ov = ov; }
+    if (typeof v.phf === 'string' && v.phf !== 'all') o.phf = v.phf.slice(0, 24);
+    if (typeof v.folder === 'string') o.folder = v.folder.slice(0, 30);
     if (v.kind === 'camera'){
       if (!o.cam) continue;
       o.code = String(v.code || 'К').slice(0, 6); const l = v.lens || {}, L = {};
@@ -5241,6 +5738,7 @@ function sanitizeViews(arr){
     if (v.kind === 'section' || v.kind === 'ielev'){
       if (!v.p1 || !v.p2 || ![v.p1.x, v.p1.z, v.p2.x, v.p2.z].every(N)) continue;
       Object.assign(o, { code:String(v.code || '1').slice(0, 6), p1:{ x:+v.p1.x, z:+v.p1.z }, p2:{ x:+v.p2.x, z:+v.p2.z }, flip:v.flip !== false, crop:v.crop !== false, far:N(v.far) ? clamp(+v.far, 0.1, 200) : 5, y0:N(v.y0) ? +v.y0 : -0.5, y1:N(v.y1) ? +v.y1 : 4 });
+      if (v.kind === 'ielev' && N(v.room)) o.room = +v.room;
       if (v.mk && N(v.mk.x) && N(v.mk.z)) o.mk = { id:String(v.mk.id || 'mk'), x:+v.mk.x, z:+v.mk.z, i:clamp(Math.round(+v.mk.i) || 0, 0, 3) };
     }
     if (v.kind === 'sheet'){
@@ -5535,7 +6033,7 @@ function renderViewImage(v, vp){
   }
   camR.updateProjectionMatrix(); camR.updateMatrixWorld(true);
   const w = clamp(Math.round(wmm * PX), 16, 3200), h = clamp(Math.round(hmm * PX), 16, 3200);
-  RENDER = { w, h, cam:camR, pxmm:PX, view:v };
+  RENDER = { w, h, cam:camR, pxmm:PX, view:v, scale:SCALED(v) ? vp.scale : 0 };
   renderer.setPixelRatio(1); renderer.setSize(w, h, false);
   rebuild(true); // again, now with the sheet's pixel size: line weights and patterns are laid out for the image
   annoDirty = true; rebuildAnno(); HATCH.mm.value = hatchScale(); renderer.render(scene, camR);
@@ -5553,7 +6051,8 @@ function drawImageLabels(g, PX){
   for (const L of buildLabels()){
     const s = L.sx != null ? { x:L.sx, y:L.sy } : toScreen(L.x, L.y, L.z), cls = L.cls || '';
     g.save(); g.translate(s.x, s.y);
-    if (/^dl/.test(cls) && L.leader){ const q = leaderPx(L, s, STD.anno.textMm * PX * 1.15); if (q){ g.restore(); g.save(); g.strokeStyle = '#1b252c'; g.lineWidth = 0.18 * PX; g.beginPath(); q.pts.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)); g.stroke(); g.translate(q.tx, q.ty); } }
+    if (/^dl/.test(cls) && L.lead){ g.restore(); g.save(); g.strokeStyle = '#1b252c'; g.lineWidth = 0.18 * PX; g.beginPath(); L.lead.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)); g.stroke(); g.translate(s.x, s.y); }
+    else if (/^dl/.test(cls) && L.leader){ const q = leaderPx(L, s, STD.anno.textMm * PX * 1.15); if (q){ g.restore(); g.save(); g.strokeStyle = '#1b252c'; g.lineWidth = 0.18 * PX; g.beginPath(); q.pts.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)); g.stroke(); g.translate(q.tx, q.ty); } }
     if (/^dl/.test(cls)){ g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(STD.anno.textMm * PX); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
     else if (/^gb/.test(cls)){ g.beginPath(); g.arc(0, 0, 3.6 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.25 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(3 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.2 * PX); }
     else if (/^wt/.test(cls)){ g.font = font(STD.anno.tagMm * 0.8 * PX, true); const tw = g.measureText(L.t).width + 1.2 * PX, th = 3.2 * PX; g.fillStyle = '#fff'; g.strokeStyle = '#1b252c'; g.lineWidth = 0.2 * PX; if (/dr/.test(cls)){ g.beginPath(); g.ellipse(0, 0, Math.max(tw, th) / 2, th / 2, 0, 0, Math.PI * 2); g.fill(); g.stroke(); } else { g.fillRect(-tw / 2, -th / 2, tw, th); g.strokeRect(-tw / 2, -th / 2, tw, th); } g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.1 * PX); }
@@ -5749,6 +6248,61 @@ async function exportSheetPNG(){
   const g = can.getContext('2d'); g.setTransform(PX, 0, 0, PX, 0, 0); const keepSel = SHEET.sel; SHEET.sel = null; paintSheet(g, v); SHEET.sel = keepSel;
   can.toBlob(b => { if (b) saveBlob(safeName(`${v.num} ${v.name}`), 'png', b, 'image/png', 'Лист PNG'); }, 'image/png');
 }
+/* «Стадии» (Revit: Управление → Стадии): three tabs — the list of phases, phase filters, graphic overrides */
+const PHD = { tab:'list', draft:null, sel:0 };
+function openPhases(){
+  PHD.draft = JSON.parse(JSON.stringify(phData())); PHD.tab = 'list'; PHD.sel = 0;
+  const d = mkModal('phDlg', 'Стадии', '<div class="lwtabs" id="phTabs" role="tablist"></div><div class="lwpane" id="phPane"></div><div class="row" style="justify-content:flex-end;gap:6px;margin-top:10px"><button class="btn primary" id="phOk">OK</button><button class="btn" id="phNo">Отмена</button><button class="btn" id="phApply">Применить</button></div>', 760);
+  d.querySelector('#phOk').onclick = () => { phApply(); d.hidden = true; };
+  d.querySelector('#phNo').onclick = () => { d.hidden = true; };
+  d.querySelector('#phApply').onclick = phApply;
+  renderPhases(); d.hidden = false;
+}
+function phApply(){
+  const D = PHD.draft, old = phData();
+  // phases merged away: their elements move to the phase they were merged into
+  const keep = new Set(D.list.map(p => p.k));
+  for (const it of items){ if (it.ph && !keep.has(it.ph)) it.ph = D.mergeTo && D.mergeTo[it.ph] || D.list[0].k; if (it.dem && !keep.has(it.dem)) it.dem = D.mergeTo && D.mergeTo[it.dem] || D.list[0].k; }
+  for (const v of views){ if (v.phase && v.phase !== 'all' && !keep.has(v.phase)) v.phase = (D.mergeTo && D.mergeTo[v.phase]) || D.list[0].k; if (v.phf && !D.filters.some(f => f.id === v.phf)) delete v.phf; }
+  delete D.mergeTo;
+  STD.ph = sanitizePh(D); PHD.draft = JSON.parse(JSON.stringify(STD.ph));
+  if (S.phase !== 'all' && !keep.has(S.phase)) S.phase = curView().phase || 'all';
+  syncPhases(); makeMaterials(); OVM.clear(); rebuild(); annoDirty = true; renderTree(); scheduleSave(); $('#propsBody').dataset.id = 'x'; updatePanel(); renderOptbar();
+  void old;
+}
+function renderPhases(){
+  const D = PHD.draft, d = $('#phDlg'), tabs = d.querySelector('#phTabs'), P = d.querySelector('#phPane');
+  tabs.innerHTML = [['list', 'Стадии'], ['filt', 'Фильтры стадий'], ['gfx', 'Переопределения графики']].map(([k, n]) => `<button role="tab" data-ph="${k}" aria-selected="${k === PHD.tab}">${n}</button>`).join('');
+  tabs.querySelectorAll('[data-ph]').forEach(b => b.onclick = () => { PHD.tab = b.dataset.ph; renderPhases(); });
+  const fills = STD.fills.filter(f => f.k !== 'none');
+  if (PHD.tab === 'list'){
+    P.innerHTML = `<div class="lwrow"><div style="flex:1;min-width:0"><div class="phside"><span>ПРОШЛОЕ</span></div><div class="lwgrid"><table class="lwt"><thead><tr><th style="width:36px"></th><th>Имя</th><th>Описание</th></tr></thead><tbody>${D.list.map((p, i) => `<tr data-i="${i}"${i === PHD.sel ? ' class="on"' : ''}><th>${i + 1}</th><td><input data-k="n" value="${esc(p.n)}"></td><td><input data-k="d" value="${esc(p.d || '')}"></td></tr>`).join('')}</tbody></table></div><div class="phside"><span>БУДУЩЕЕ</span></div></div>
+      <div class="lwbtns"><b style="font-weight:600">Вставить</b><button class="btn sm" id="phBefore">До</button><button class="btn sm" id="phAfter">После</button><b style="font-weight:600;margin-top:8px">Объединить с</b><button class="btn sm" id="phPrev">Предыдущей</button><button class="btn sm" id="phNext">Следующей</button></div></div>
+      <p style="margin-top:8px">Элементы объединённой стадии переходят в соседнюю. Порядок стадий — от прошлого к будущему.</p>`;
+    P.querySelectorAll('tr[data-i]').forEach(tr => { const i = +tr.dataset.i; tr.onclick = () => { if (PHD.sel !== i){ PHD.sel = i; P.querySelectorAll('tr[data-i]').forEach(r => r.classList.toggle('on', +r.dataset.i === i)); } };
+      tr.querySelectorAll('input').forEach(inp => inp.onchange = () => { D.list[i][inp.dataset.k] = inp.value.slice(0, inp.dataset.k === 'n' ? 60 : 120) || (inp.dataset.k === 'n' ? D.list[i].n : ''); }); });
+    const ins = off => { let n = D.list.length + 1, k; do { k = 'ph' + Date.now().toString(36).slice(-4) + n++; } while (D.list.some(p => p.k === k)); D.list.splice(PHD.sel + off, 0, { k, n:'Стадия ' + (D.list.length + 1), d:'' }); PHD.sel += off; renderPhases(); };
+    const merge = dir => { const j = PHD.sel + dir; if (j < 0 || j >= D.list.length || D.list.length < 2) return; const gone = D.list[PHD.sel]; D.mergeTo = { ...(D.mergeTo || {}), [gone.k]:D.list[j].k }; D.list.splice(PHD.sel, 1); PHD.sel = Math.max(0, Math.min(PHD.sel + (dir < 0 ? -1 : 0), D.list.length - 1)); renderPhases(); };
+    P.querySelector('#phBefore').onclick = () => ins(0); P.querySelector('#phAfter').onclick = () => ins(1);
+    P.querySelector('#phPrev').onclick = () => merge(-1); P.querySelector('#phNext').onclick = () => merge(1);
+  } else if (PHD.tab === 'filt'){
+    const V = [['cat', 'По категориям'], ['ov', 'Переопределено'], ['hide', 'Не отображается']], cell = (f, k) => `<td><select data-k="${k}">${V.map(([v, n]) => `<option value="${v}"${f[k] === v ? ' selected' : ''}>${n}</option>`).join('')}</select></td>`;
+    P.innerHTML = `<div class="lwrow"><div class="lwgrid"><table class="lwt phf"><thead><tr><th style="width:36px"></th><th>Имя фильтра</th><th>Новые</th><th>Существующие</th><th>Снесенные</th><th>Временные</th></tr></thead><tbody>${D.filters.map((f, i) => `<tr data-i="${i}"${i === PHD.sel ? ' class="on"' : ''}><th>${i + 1}</th><td><input data-k="n" value="${esc(f.n)}"></td>${cell(f, 'nw')}${cell(f, 'ex')}${cell(f, 'dm')}${cell(f, 'tm')}</tr>`).join('')}</tbody></table></div>
+      <div class="lwbtns"><button class="btn sm" id="phFNew">Новый</button><button class="btn sm" id="phFDel">Удалить</button></div></div>
+      <p style="margin-top:8px">Фильтр стадий назначается виду в «Свойствах» (параметр «Фильтр стадий»). «Переопределено» — элементы рисуются графикой вкладки «Переопределения графики».</p>`;
+    P.querySelectorAll('tr[data-i]').forEach(tr => { const i = +tr.dataset.i; tr.onclick = () => { PHD.sel = i; P.querySelectorAll('tr[data-i]').forEach(r => r.classList.toggle('on', +r.dataset.i === i)); };
+      tr.querySelectorAll('input,select').forEach(x => x.onchange = () => { D.filters[i][x.dataset.k] = x.tagName === 'INPUT' ? (x.value.slice(0, 60) || D.filters[i].n) : x.value; }); });
+    P.querySelector('#phFNew').onclick = () => { D.filters.push({ id:'f' + Date.now().toString(36), n:'Новый фильтр', nw:'cat', ex:'cat', dm:'cat', tm:'cat' }); PHD.sel = D.filters.length - 1; renderPhases(); };
+    P.querySelector('#phFDel').onclick = () => { const f = D.filters[PHD.sel]; if (!f || D.filters.length < 2) return; if (!confirm(`Удалить фильтр «${f.n}»? Виды с ним получат «Показать все».`)) return; D.filters.splice(PHD.sel, 1); PHD.sel = 0; renderPhases(); };
+  } else {
+    const rows = [['exist', 'Существующие'], ['demo', 'Снесенные'], ['nw', 'Создать'], ['temp', 'Временные']];
+    const fOpt = cur => `<option value="">—</option>` + fills.map(f => `<option value="${f.id}"${f.id === cur ? ' selected' : ''}>${esc(f.n)}</option>`).join('');
+    const mOpt = cur => `<option value="">&lt;По категориям&gt;</option>` + Object.entries(MATS).map(([k, m]) => `<option value="${k}"${k === cur ? ' selected' : ''}>${esc(m.n)}</option>`).join('');
+    P.innerHTML = `<div class="lwgrid"><table class="lwt phg"><thead><tr><th rowspan="2">Статус стадии</th><th colspan="2">Проекция/Поверхность</th><th colspan="2">Сечение</th><th rowspan="2">Полутона</th><th rowspan="2">Материал</th></tr><tr><th>Линии</th><th>Штриховки</th><th>Линии</th><th>Штриховки</th></tr></thead><tbody>${rows.map(([k, n]) => { const g = D.gfx[k]; return `<tr data-k="${k}"><th>${n}</th><td><input type="color" data-f="c" value="${g.c}"></td><td><select data-f="sp">${fOpt(g.sp)}</select><input type="color" data-f="spc" value="${g.spc}"></td><td><input type="color" data-f="cc" value="${g.cc}"></td><td><select data-f="cp">${fOpt(g.cp)}</select><input type="color" data-f="cpc" value="${g.cpc}"></td><td style="text-align:center"><input type="checkbox" data-f="half"${g.half ? ' checked' : ''}></td><td><select data-f="m">${mOpt(g.m)}</select></td></tr>`; }).join('')}<tr class="lwpad"><th></th><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table></div>
+      <p style="margin-top:8px">Графика статусов, которые фильтр стадий вида показывает как «Переопределено». Материал заменяет материал элементов на 3D-видах.</p>`;
+    P.querySelectorAll('tr[data-k]').forEach(tr => { const g = D.gfx[tr.dataset.k]; tr.querySelectorAll('[data-f]').forEach(x => { const on = () => { g[x.dataset.f] = x.type === 'checkbox' ? x.checked : x.value; }; x.onchange = on; if (x.type === 'color') x.oninput = on; }); });
+  }
+}
 function mkModal(id, title, body, wide){
   let d = document.getElementById(id); if (d) return d;
   d = document.createElement('div'); d.className = 'modal'; d.id = id; d.hidden = true; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true');
@@ -5868,9 +6422,30 @@ function openPrint(){
   d.querySelector('#prGo').onclick = async () => {
     const what = d.querySelector('input[name="prWhat"]:checked').value;
     if (what === 'cur'){
-      const [Wm, Hm] = SHEET_SIZES[d.querySelector('#prSize').value] || SHEET_SIZES.A4;
-      renderer.render(scene, cam()); const url = cv.toDataURL('image/png'); d.hidden = true;
-      printPages([{ url, Wm:Math.max(Wm, Hm), Hm:Math.min(Wm, Hm) }]); return;
+      // the view is drawn again for paper (as on a sheet): with dimensions, tags and texts, without the coordinate axes,
+      // at the largest standard scale that fits the chosen format
+      const [W0, H0] = SHEET_SIZES[d.querySelector('#prSize').value] || SHEET_SIZES.A4, v = curView(), MG = 10, TITLE = 10;
+      const fit = (wm, hm) => { const land = wm >= hm, Wm = land ? Math.max(W0, H0) : Math.min(W0, H0), Hm = land ? Math.min(W0, H0) : Math.max(W0, H0); return { Wm, Hm, ok:wm <= Wm - 2 * MG && hm <= Hm - 2 * MG - TITLE }; };
+      let vp, page;
+      if (SCALED(v)){
+        let mW, mH; // model size of what the image will show, metres
+        if (KIND_MODE[v.kind] === 'sect'){ const f = sectFrame(v); mW = f.L; mH = f.y1 - f.y0; }
+        else { let r = (v.kind === 'detail' || v.crop) && v.region ? v.region : null; if (!r){ const b = bounds(); r = { x0:b.min.x - 2, x1:b.max.x + 2, z0:b.min.z - 2, z1:b.max.z + 2 }; } mW = r.x1 - r.x0; mH = r.z1 - r.z0; }
+        const list = [10, 20, 25, 50, 75, 100, 150, 200, 250, 500, 1000, 2000].filter(sc => v.kind !== 'detail' || sc >= (v.scale || 20));
+        let sc = list[list.length - 1]; for (const x of list){ if (fit(mW * 1000 / x, mH * 1000 / x).ok){ sc = x; break; } }
+        vp = { scale:sc, w:150, h:110 }; page = fit(mW * 1000 / sc, mH * 1000 / sc);
+      } else { page = fit(1, 0); vp = { scale:100, w:page.Wm - 2 * MG, h:page.Hm - 2 * MG - TITLE }; }
+      d.hidden = true; toast('Готовлю вид к печати…');
+      const res = renderViewImage(v, vp), img = new Image();
+      await new Promise(r => { img.onload = r; img.onerror = r; img.src = res.url; });
+      const PX = 6, can = document.createElement('canvas'); can.width = Math.round(page.Wm * PX); can.height = Math.round(page.Hm * PX);
+      const g = can.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, can.width, can.height); g.setTransform(PX, 0, 0, PX, 0, 0);
+      const iw = Math.min(res.wmm, page.Wm - 2 * MG), ih = res.hmm * iw / res.wmm, x0 = (page.Wm - iw) / 2, y0 = Math.max(MG, (page.Hm - TITLE - ih) / 2);
+      g.drawImage(img, x0, y0, iw, ih);
+      g.fillStyle = '#111'; g.font = '600 4px "Golos Text", Arial'; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+      g.fillText(v.name + (SCALED(v) ? '   М 1:' + vp.scale : ''), x0, Math.min(page.Hm - MG, y0 + ih + 7));
+      g.font = '3px "Golos Text", Arial'; g.textAlign = 'right'; g.fillText(proj.name || '', page.Wm - MG, page.Hm - MG / 2);
+      printPages([{ url:can.toDataURL('image/png'), Wm:page.Wm, Hm:page.Hm }]); return;
     }
     const ids = boxes().filter(b => b.checked).map(b => b.value); if (!ids.length){ toast('Выберите листы'); return; }
     d.hidden = true; toast('Готовлю листы к печати…');
@@ -5964,6 +6539,7 @@ function drawPat(g, W, H, f, fg){
 }
 function applyStd(){ makeMaterials(); rebuild(); annoDirty = true; renderOptbar(); $('#propsBody').dataset.id = 'x'; updatePanel(); scheduleSave(); }
 const canvasEl = (w = 120, h = 22) => { const c = document.createElement('canvas'); c.width = w; c.height = h; c.style.width = w + 'px'; c.style.height = h + 'px'; return c; };
+const LW_TAB = { t:'model', col:null };
 function renderStd(){
   document.querySelectorAll('#stdTabs [data-st]').forEach(b => b.setAttribute('aria-selected', b.dataset.st === STD_TAB));
   const body = $('#stdBody'); body.replaceChildren();
@@ -5989,15 +6565,39 @@ function renderStd(){
     }
     addBtn('Новый стиль линии', () => { STD.styles.push({ id:newId('u', STD.styles), n:'Мой стиль', w:2, c:'#1b252c', p:'solid' }); renderStd(); applyStd(); });
   } else if (STD_TAB === 'weights'){
-    note('Вес линии — толщина пера на бумаге. Номер 1 — самая тонкая линия. Толщины соответствуют ГОСТ 2.303: основная 0,5–1,4 мм, тонкая — в 2–3 раза тоньше. На экране 0,25 мм ≈ 1 пиксель.');
-    const tb = table(['Номер', 'Толщина, мм', 'Вид']);
-    STD.weights.forEach((v, i) => {
-      const tr = document.createElement('tr'), pv = canvasEl(160, 24), n = inp('number', v, { step:0.01, min:0.02, max:10 });
-      const draw = () => prevLine(pv, { w:i + 1, c:'#1b252c', p:'solid' });
-      n.onchange = () => { const x = +n.value; if (x > 0){ STD.weights[i] = clamp(x, 0.02, 10); draw(); applyStd(); } };
-      td(tr, String(i + 1)); td(tr, n); td(tr, pv); draw(); tb.append(tr);
+    // Revit «Вес линий»: three tabs; the model tab is a table of 16 pens × view scales, a cell is edited by a click
+    const lw = STD.lw || (STD.lw = LW_DEF()), tab = LW_TAB.t;
+    const tabs = document.createElement('div'); tabs.className = 'lwtabs'; tabs.setAttribute('role', 'tablist');
+    tabs.innerHTML = [['model', 'Вес линий модели'], ['persp', 'Перспектива'], ['anno', 'Вес линий аннотаций']].map(([k, n]) => `<button role="tab" data-lw="${k}" aria-selected="${k === tab}">${n}</button>`).join('');
+    tabs.querySelectorAll('[data-lw]').forEach(b => b.onclick = () => { LW_TAB.t = b.dataset.lw; LW_TAB.col = null; renderStd(); });
+    body.append(tabs);
+    const pane = document.createElement('div'); pane.className = 'lwpane'; body.append(pane);
+    const txt = { model:'Веса линий модели влияют на толщину линий стен, окон и других объектов на ортогональных видах. Они зависят от масштаба вида.',
+      persp:'Веса линий в перспективе влияют на толщину линий объектов на перспективных видах.',
+      anno:'Веса линий аннотаций определяют толщину линий в размерах, осях, линиях детализации и других аннотациях. Они не зависят ни от масштаба, ни от проекции.' }[tab];
+    pane.innerHTML = `<p>${txt}</p><p>Имеется 16 вариантов значений веса линий. Для изменения значения следует щелкнуть мышью в соответствующей ячейке.</p><div class="lwrow"><div class="lwgrid"><table class="lwt"><thead></thead><tbody></tbody></table></div>${tab === 'model' ? '<div class="lwbtns"><button class="btn sm" id="lwAdd">Добавить…</button><button class="btn sm" id="lwDel">Удалить</button></div>' : ''}</div>`;
+    const cols = tab === 'model' ? lw.scales.map(sc => ({ head:'1 : ' + sc, arr:lw.model[sc], sc })) : [{ head:'Толщина', arr:tab === 'persp' ? lw.persp : STD.weights }];
+    const T = pane.querySelector('.lwt');
+    T.tHead.innerHTML = `<tr><th></th>${cols.map((c2, j) => `<th data-c="${j}"${LW_TAB.col === c2.sc ? ' class="on"' : ''}>${c2.head}</th>`).join('')}</tr>`;
+    const f4 = v => v.toFixed(4) + ' мм';
+    T.tBodies[0].innerHTML = [...Array(16)].map((_, i) => `<tr><th>${i + 1}</th>${cols.map((c2, j) => `<td data-r="${i}" data-c="${j}"${LW_TAB.col === c2.sc ? ' class="on"' : ''}>${f4(c2.arr[i])}</td>`).join('')}</tr>`).join('') + `<tr class="lwpad"><th></th>${cols.map(() => '<td></td>').join('')}</tr>`;
+    T.querySelectorAll('thead th[data-c]').forEach(th => th.onclick = () => { LW_TAB.col = cols[+th.dataset.c].sc || null; renderStd(); });
+    T.querySelectorAll('td[data-r]').forEach(cell => cell.onclick = () => {
+      if (cell.querySelector('input')) return;
+      const c2 = cols[+cell.dataset.c], i = +cell.dataset.r, inp2 = document.createElement('input'); inp2.type = 'text'; inp2.value = c2.arr[i].toFixed(4); cell.textContent = ''; cell.append(inp2); inp2.focus(); inp2.select();
+      const done = ok => { if (!inp2.isConnected) return; const v = parseFloat(inp2.value.replace(',', '.')); if (ok && v > 0){ c2.arr[i] = clamp(v, 0.01, 20); applyStd(); } cell.textContent = f4(c2.arr[i]); };
+      inp2.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') done(true); if (e.key === 'Escape') done(false); if (e.key === 'Tab'){ e.preventDefault(); done(true); const nx = T.querySelector(`td[data-r="${i + (e.shiftKey ? -1 : 1)}"][data-c="${cell.dataset.c}"]`); if (nx) nx.click(); } };
+      inp2.onblur = () => done(true);
     });
-  } else if (STD_TAB === 'patterns'){
+    if (tab === 'model'){
+      pane.querySelector('#lwAdd').onclick = () => {
+        const v = Math.round(+String(prompt('Новый масштаб вида: 1 :', '25') || '').replace(/^1\s*:\s*/, '')); if (!(v >= 1 && v <= 5000) || lw.scales.includes(v)) return;
+        // the new column starts as a copy of the nearest scale
+        const near = lw.scales.reduce((p2, s2) => Math.abs(Math.log(s2 / v)) < Math.abs(Math.log(p2 / v)) ? s2 : p2, lw.scales[0]);
+        lw.model[v] = [...lw.model[near]]; lw.scales.push(v); lw.scales.sort((a, b) => a - b); LW_TAB.col = v; renderStd(); applyStd();
+      };
+      pane.querySelector('#lwDel').onclick = () => { const v = LW_TAB.col; if (!v){ toast('Щёлкните заголовок столбца (масштаб), который удалить'); return; } if (lw.scales.length < 2) return; lw.scales = lw.scales.filter(x => x !== v); delete lw.model[v]; LW_TAB.col = null; renderStd(); applyStd(); };
+    }  } else if (STD_TAB === 'patterns'){
     note('Образец — повторяющаяся последовательность «штрих, пробел, штрих, пробел…» в миллиметрах на бумаге. Например, осевая: 15 3 1 3. Пустое поле — сплошная линия.');
     const tb = table(['Образец', 'Штрих и пробел, мм', 'Вид', '']);
     for (const pt of STD.patterns){
@@ -6521,7 +7121,9 @@ $('#famFile').onchange = async e => {
 };
 $('#rbFamNew').onclick = () => openFamEditor(null);
 $('#rbFamLoad').onclick = () => $('#famFile').click();
-$('#rbFamEdit').onclick = () => { const it = sel.size === 1 ? byId(selId) : null; openFamEditor(it && it.type === 'fam' ? it.f : S.famId); };
+$('#rbFurnLib').onclick = openFurnLib; $('#rbModelImp').onclick = () => { const i = $('#mdlFile'); i.value = ''; i.click(); };
+$('#mdlFile').onchange = e => { if (e.target.files && e.target.files.length) importModelFiles(e.target.files); };
+$('#rbFamEdit').onclick = () => { const it = sel.size === 1 ? byId(selId) : null, id = it && it.type === 'fam' ? it.f : S.famId, f = famById(id); if (f && f.mesh){ toast('Это 3D-модель: её размеры или масштаб меняются в «Свойствах»'); return; } openFamEditor(id); };
 
 /* ---------- view templates dialog ---------- */
 /* «Видимость/графика» (Revit V/G, VV): for a template, or for one view on top of its template */
@@ -6738,6 +7340,7 @@ $('#vgOk').onclick = () => { vgApply(); vgDlg.hidden = true; if (!tplDlg.hidden)
 $('#vgCancel').onclick = () => { vgDlg.hidden = true; };
 $('#rbTpl').onclick = () => openTpl(curView().tpl);
 // Revit «Управление шаблонами видов»: the only place where a template is deleted
+$('#rbPhases').onclick = openPhases; $('#rbSaveCam').onclick = saveCamFromView;
 $('#rbStamps').onclick = () => openStampEd(curView().kind === 'sheet' ? stampOf(curView()).id : null);
 $('#rbTplMgr').onclick = () => { VG_VIEW = null; TPL_CUR = TPLS.some(t => t.id === curView().tpl) ? curView().tpl : (TPLS[0] || {}).id || null; renderTpl(); tplDlg.hidden = false; };
 if ($('#rbVG')) $('#rbVG').onclick = () => openVG();
@@ -6872,12 +7475,16 @@ const SKY_TIME = {
 const SKY_WX = { clear:{ cov:0, n:'Ясно' }, sunny:{ cov:0.3, n:'Солнечно, облака' }, cloudy:{ cov:0.6, n:'Облачно' }, overcast:{ cov:0.96, n:'Пасмурно' } };
 const SKY_CACHE = new Map();
 function fbm5J(x, y){ let s = 0, a = 0.5, f = 1; for (let i = 0; i < 5; i++){ s += a * vnJ(x * f + i * 17.3, y * f - i * 9.1); f *= 2.03; a *= 0.5; } return s / 0.97; }
-function makeSky(time, wx, az, w = 2048){
-  const key = [time, wx, az, w].join('|'); if (SKY_CACHE.has(key)) return SKY_CACHE.get(key);
+function makeSky(time, wx, az, w = 2048, disc = 0){
+  // disc > 0: the sun is a real disc of that angular size (degrees) with its full power — the path tracer samples it
+  // like a big soft light (Corona «размер солнца»), instead of a separate hard directional light
+  const key = [time, wx, az, w, disc].join('|'); if (SKY_CACHE.has(key)) return SKY_CACHE.get(key);
   const T = SKY_TIME[time] || SKY_TIME.day, X = SKY_WX[wx] || SKY_WX.sunny, cov = X.cov, h = w / 2;
   const el = T.el * Math.PI / 180, a = az * Math.PI / 180, sd = new V3(Math.sin(a) * Math.cos(el), Math.sin(el), -Math.cos(a) * Math.cos(el));
   const data = new Float32Array(w * h * 4), k = T.k * (1 + 0.5 * cov), grey = T.night ? [0.03, 0.035, 0.05] : [0.78, 0.80, 0.84];
   const th = 0.78 - 0.62 * cov; // cloud density threshold: fewer, then more and joined clouds
+  // the disc: radiance = irradiance of the sun / its solid angle (the same power as the directional sun of the fast render)
+  const dR = disc * Math.PI / 360, dCos = Math.cos(dR), dOm = 2 * Math.PI * (1 - dCos), dI = T.si * (1 - 0.97 * Math.pow(cov, 1.5)), dL = disc ? dI / dOm : 0;
   for (let y = 0; y < h; y++){
     const lat = ((y + 0.5) / h - 0.5) * Math.PI, sy = Math.sin(lat), cy = Math.cos(lat);
     for (let x = 0; x < w; x++){
@@ -6892,7 +7499,8 @@ function makeSky(time, wx, az, w = 2048){
         // glow around the sun (or the moon)
         const glow = (Math.pow(Math.max(ca, 0), 48) * 1.2 + Math.pow(Math.max(ca, 0), 6) * 0.18) * (1 - 0.8 * cov);
         r += T.sun[0] * glow; g += T.sun[1] * glow; b += T.sun[2] * glow;
-        if (ca > 0.99996) { const d0 = (T.night ? 8 : 40) * (1 - cov); r += T.sun[0] * d0; g += T.sun[1] * d0; b += T.sun[2] * d0; }
+        if (!disc && ca > 0.99996) { const d0 = (T.night ? 8 : 40) * (1 - cov); r += T.sun[0] * d0; g += T.sun[1] * d0; b += T.sun[2] * d0; }
+        if (disc && ca > dCos){ const e = Math.min(1, (ca - dCos) / ((1 - dCos) * 0.35)), Ls = dL * (0.75 + 0.25 * e) / k; r += T.sun[0] * Ls; g += T.sun[1] * Ls; b += T.sun[2] * Ls; }
         // stars
         if (T.night && hshJ(x * 1.7, y * 3.1) > 0.9988){ const s2 = 0.4 + hshJ(x, y) * 1.4; r += s2; g += s2; b += s2 * 1.1; }
         // clouds on a sky plane: domain-warped noise, shaded towards the sun, thinning at the horizon
@@ -7084,11 +7692,13 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
   const add = src => {
     const m = src.material; if (!m || Array.isArray(m) || m === M.pick || m.isShadowMaterial || !src.geometry) return;
     if (m.transparent && (m.opacity ?? 1) < 0.03 && !m.userData.glass) return;
+    if (m.userData.glass && o.glass === 'open') return; // «окна пропускают свет»: no glass panes — daylight enters freely, far less noise
     let g = src.geometry, mat;
     // rounded edges (Corona «round edges»): boxes — furniture, columns, door leaves, stair steps — get a real chamfer
     if (RB && g.type === 'BoxGeometry' && !m.userData.glass){ const q = g.parameters, r = Math.min(o.bevel / 1000, 0.45 * Math.min(q.width, q.height, q.depth)); if (r > 0.0005){ g = new RB(q.width, q.height, q.depth, 2, r); own.push(g); } }
     if (m.userData.glass) mat = new THREE.MeshPhysicalMaterial({ color:0xffffff, roughness:0, metalness:0, transmission:1, ior:1.52, thickness:0.008, specularIntensity:1, side:THREE.DoubleSide });
     else if (o.clay) mat = new THREE.MeshPhysicalMaterial({ color:'#f2f1ee', roughness:0.88, specularIntensity:0.4 });
+    else if (m.userData.imp){ const sm = m.userData.src || m; mat = new THREE.MeshPhysicalMaterial({ color:sm.color ? sm.color.clone() : 0xcccccc, map:sm.map || null, roughness:sm.roughness ?? 0.6, metalness:sm.metalness ?? 0, normalMap:sm.normalMap || null, roughnessMap:sm.roughnessMap || null, metalnessMap:sm.metalnessMap || null, emissive:sm.emissive ? sm.emissive.clone() : 0x000000, emissiveMap:sm.emissiveMap || null, emissiveIntensity:sm.emissiveIntensity ?? 1, side:sm.side ?? THREE.FrontSide, ...(sm.transparent && (sm.opacity ?? 1) < 0.9 ? { transmission:1 - (sm.opacity ?? 1), thickness:0.005 } : {}) }); }
     else {
       const mk = m.userData.mk, sp = mk && MATS[mk] ? matSpec(mk) : null, P = sp ? sp.pbr : PBR_DEF;
       const tex = m.userData.triTex, col = tex ? new THREE.Color(1, 1, 1) : (m.color ? m.color.clone() : new THREE.Color('#cccccc')), tr = sp ? sp.tr : (m.transparent ? 1 - (m.opacity ?? 1) : 0);
@@ -7108,7 +7718,7 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
   if (o.ground === 'white'){ const gm = new THREE.Mesh(new THREE.CircleGeometry(400, 64), new THREE.MeshStandardMaterial({ color:'#f4f4f2', roughness:0.9 })); gm.rotation.x = -Math.PI / 2; gm.position.y = -0.02; gm.updateMatrix(); gm.matrixAutoUpdate = false; own.push(gm.geometry, gm.material); ptScene.add(gm); }
   // the sun (moon) and the sky
   // with an HDRI the sun is in the panorama itself (importance-sampled), no extra light
-  if (!o.hdri && sun.intensity > 0){ const sl = new THREE.DirectionalLight(sun.color.clone(), sun.intensity); sl.position.copy(sun.position); sl.target.position.copy(sun.target.position); ptScene.add(sl, sl.target); }
+  if (!o.hdri && !o.discSun && sun.intensity > 0){ const sl = new THREE.DirectionalLight(sun.color.clone(), sun.intensity); sl.position.copy(sun.position); sl.target.position.copy(sun.target.position); ptScene.add(sl, sl.target); }
   ptScene.environment = o.envTex || (scene.background && scene.background.isTexture ? scene.background : makeSky('day', 'overcast', o.az, 1024).tex);
   ptScene.background = scene.background && scene.background.isColor ? scene.background.clone() : ptScene.environment;
   ptScene.backgroundRotation = new THREE.Euler(); ptScene.environmentRotation = new THREE.Euler(); ptScene.backgroundBlurriness = 0; // three 0.160 has no such fields yet
@@ -7125,7 +7735,9 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
   const pt = new PTm.WebGLPathTracer(pr);
   pt.bounces = o.bounces || 6; pt.transmissiveBounces = 8; pt.filterGlossyFactor = 0.3; pt.minSamples = 1; pt.renderDelay = 0; pt.fadeDuration = 0;
   // the frame is traced in tiles so that each GPU job stays short (Windows resets a GPU busy for ~2 s)
-  pt.dynamicLowRes = false; pt.renderScale = 1; pt.multipleImportanceSampling = true; const tl = clamp(Math.ceil(Math.sqrt(W * H / (TABLET ? 40000 : 90000))), 2, 14); pt.tiles.set(tl, tl);
+  pt.dynamicLowRes = false; pt.renderScale = 1; pt.multipleImportanceSampling = true;
+  // more bounces — smaller tiles: every GPU job stays short, or Windows resets the GPU (and the frame comes back black)
+  const perTile = (TABLET ? 40000 : 90000) * 6 / Math.max(6, o.bounces || 6), tl = clamp(Math.ceil(Math.sqrt(W * H / perTile)), 2, 24); pt.tiles.set(tl, tl);
   RN_BUSY = true; RN_CANCEL = false;
   const out = document.createElement('canvas'); out.width = W; out.height = H; const og = out.getContext('2d');
   try {
@@ -7141,6 +7753,8 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
     out.samples = Math.floor(pt.samples);
     // raw linear HDR image (the average of all samples), read before the tracer is disposed
     out.hdr = readFloatRT(pr, pt.target, W, H);
+    // a GPU reset may leave an empty (all black) target without a «context lost» event
+    { const gl2 = pr.getContext(); if (gl2.isContextLost && gl2.isContextLost()) lost = true; let nz = 0; for (let i = 0; i < out.hdr.length; i += 16) if (out.hdr[i] > 0 || out.hdr[i + 1] > 0) { nz++; if (nz > 20) break; } if (lost || nz <= 20) throw new Error('видеокарта сбросилась во время расчёта — кадр пустой. Уменьшите число отскоков света или размер картинки и запустите снова (браузер может потребовать перезапуска)'); }
     // auxiliary passes for the denoiser: albedo (surface colour) and normals, rendered with the same camera
     if (o.denoise){ out.alb = aovPass(pr, ptScene, pc, W, H, 'albedo'); out.nrm = aovPass(pr, ptScene, pc, W, H, 'normal'); }
     if (prog) prog(pt.samples, target, pr.domElement);
@@ -7163,7 +7777,9 @@ async function renderPhoto(o, prog){
     vis:[axesG, grids, datum, anno, preview, boxG, cropG, shadowGround].map(g => g.visible), sun:{ p:sun.position.clone(), t:sun.target.position.clone(), c:sun.color.clone(), i:sun.intensity, cs:sun.castShadow, ms:sun.shadow.mapSize.clone(), cam:(({ left, right, top, bottom, near, far }) => ({ left, right, top, bottom, near, far }))(sun.shadow.camera) },
     hemi:{ s:hemi.color.clone(), g:hemi.groundColor.clone(), i:hemi.intensity }, tm:renderer.toneMapping, te:renderer.toneMappingExposure, pr:renderer.getPixelRatio() };
   const sky = makeSky(SKY_TIME[o.time] ? o.time : 'day', SKY_WX[o.sky] ? o.sky : 'sunny', o.az), extra = [];
-  const hd = o.sky === 'hdri' && HDRI ? hdriTex(o.hrot || 0, o.hev || 0) : null; o.hdri = !!hd; o.envTex = hd || (o.ground !== 'white' ? sky.tex : null);
+  // path tracing: the sky with the sun disc (soft shadows); the fast render keeps the directional sun
+  const skyPT = o.engine === 'pt' && o.sky !== 'hdri' && o.ground !== 'white' ? makeSky(SKY_TIME[o.time] ? o.time : 'day', SKY_WX[o.sky] ? o.sky : 'sunny', o.az, 2048, Math.max(0.53, (+o.sunSize || 4) * 0.53)) : null; o.discSun = !!skyPT;
+  const hd = o.sky === 'hdri' && HDRI ? hdriTex(o.hrot || 0, o.hev || 0) : null; o.hdri = !!hd; o.envTex = hd || (o.ground !== 'white' ? (skyPT || sky).tex : null);
   try {
     S.view = mode; S.phase = v.phase || 'all'; clearSel(); S.tool = 'select'; S.dims = false; S.style = 'shaded'; RV = v;
     S.render = { tex:o.tex, clay:!!o.clay }; C = { ...C, poche:'#6d655c' }; makeMaterials();
@@ -7174,7 +7790,7 @@ async function renderPhoto(o, prog){
     // ground and sky
     if (o.ground === 'white'){ scene.background = new THREE.Color('#ffffff'); const gm = new THREE.Mesh(new THREE.CircleGeometry(diag * 6, 64), new THREE.ShadowMaterial({ opacity:0.28 })); gm.rotation.x = -Math.PI / 2; gm.position.y = -0.02; gm.receiveShadow = true; scene.add(gm); extra.push(gm); }
     else {
-      scene.background = hd || sky.tex;
+      scene.background = hd || (skyPT || sky).tex;
       const gm = new THREE.Mesh(new THREE.CircleGeometry(Math.max(80, diag * 8), 96), o.clay ? new THREE.MeshStandardMaterial({ color:'#f2f1ee', roughness:0.9 }) : o.ground === 'paving' ? triMat(texFor('paving', '#b9b4aa'), 0.6, { r:0.9 }) : triMat(texFor('grass', '#6f8f4e'), 0.3, { r:1, env:0.25 }));
       gm.material.clippingPlanes = null; gm.rotation.x = -Math.PI / 2; gm.position.y = -0.02; gm.receiveShadow = true; scene.add(gm); extra.push(gm);
     }
@@ -7200,7 +7816,7 @@ async function renderPhoto(o, prog){
       if (pm) pm.dispose();
       let den = null, dnErr = null;
       if (o.denoise && r.hdr && r.alb){ if (prog) prog(-1, 0, null); try { den = await denoiseHDR(r.hdr, r.alb, r.nrm, W, H); } catch (e){ dnErr = (e && e.message) || String(e); console.warn('denoise', e); } }
-      return { R:{ hdr:r.hdr, den, W, H, base, ldr:false, wb:Lx ? Lx.wb : 6500 }, W, H, scaled:k < 1, samples:r.samples, dnErr };
+      return { R:{ hdr:r.hdr, den, W, H, base, ldr:false, wb:Lx ? Lx.wb : 6500, clay:!!o.clay }, W, H, scaled:k < 1, samples:r.samples, dnErr };
     }
     const useAO = o.ao && A.EffectComposer && A.GTAOPass && !CLIP.length;
     if (useAO){
@@ -7235,14 +7851,16 @@ async function renderPhoto(o, prog){
 /* ---------- frame buffer (as Corona VFB): the render is kept as linear HDR; tone mapping and corrections are applied live ----------
    ev — exposure, curve — tone curve, hc — highlight compression, wb/tint — white balance, con/sat — contrast, saturation,
    fh/fs — filmic highlights and shadows, vig — vignette, bloom/bth — glow around bright areas and its threshold, sharp — sharpening */
-const POST_DEF = { ev:0, curve:'corona', hc:4, wb:6500, tint:0, con:0.12, sat:1.05, fh:0.2, fs:0.1, vig:0.15, bloom:0.12, bth:1.5, sharp:0.25, dn:true };
+const POST_DEF = { ev:0, auto:true, curve:'corona', hc:6, wb:6500, tint:0, con:0.1, sat:1.05, fh:0.3, fs:0.1, vig:0.15, bloom:0.15, bth:1.4, sharp:0.25, dn:true };
 const POST_PRESETS = {
   'Нейтральный':{ ev:0, curve:'corona', hc:4, wb:6500, tint:0, con:0.12, sat:1.05, fh:0.2, fs:0.1, vig:0.15, bloom:0.12, bth:1.5, sharp:0.25 },
   'Мягкий архвиз':{ ev:0.2, curve:'corona', hc:8, wb:6200, tint:0, con:0.04, sat:0.95, fh:0.45, fs:0.2, vig:0.2, bloom:0.22, bth:1.2, sharp:0.2 },
   'Тёплый интерьер':{ ev:0.15, curve:'corona', hc:6, wb:5600, tint:0.02, con:0.1, sat:1.08, fh:0.3, fs:0.12, vig:0.25, bloom:0.25, bth:1.1, sharp:0.25 },
   'Холодный день':{ ev:0, curve:'corona', hc:5, wb:7400, tint:-0.01, con:0.15, sat:1.0, fh:0.25, fs:0.05, vig:0.12, bloom:0.1, bth:1.6, sharp:0.3 },
   'Контрастный':{ ev:-0.1, curve:'aces', hc:3, wb:6500, tint:0, con:0.28, sat:1.15, fh:0.1, fs:0, vig:0.3, bloom:0.15, bth:1.4, sharp:0.4 },
-  'Кино (ACES)':{ ev:0, curve:'aces', hc:4, wb:6500, tint:0, con:0.05, sat:1.0, fh:0.15, fs:0.05, vig:0.2, bloom:0.18, bth:1.3, sharp:0.2 }
+  'Кино (ACES)':{ ev:0, curve:'aces', hc:4, wb:6500, tint:0, con:0.05, sat:1.0, fh:0.15, fs:0.05, vig:0.2, bloom:0.18, bth:1.3, sharp:0.2 },
+  // a white studio model: bright, soft highlights, no colour cast (window glow stays white, shadows stay soft grey)
+  'Белая модель':{ ev:0.35, curve:'corona', hc:12, wb:6500, tint:0, con:0.06, sat:0, fh:0.5, fs:0.18, vig:0.1, bloom:0.28, bth:1.0, sharp:0.15 }
 };
 let RN_RES = null, RN_POST = { ...POST_DEF };
 const RN_OUT = document.createElement('canvas');
@@ -7264,7 +7882,10 @@ function boxBlur(src, w, h, r, ch = 3){
 const acesC = x => Math.min(1, Math.max(0, (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14)));
 function postProcess(R, P){
   const { W, H } = R, N = W * H, src = P.dn && R.den ? R.den : R.hdr, ldr = R.ldr;
-  const k = (ldr ? 1 : R.base) * Math.pow(2, P.ev), f = wbFactors(P.wb), tg = 1 + P.tint, lin = new Float32Array(N * 3);
+  // Corona-like auto exposure: the median brightness of the frame (the brightest 3% — windows, sky — left out) is brought to a middle grey;
+  // it is computed once per image, the exposure slider then works on top of it
+  if (!ldr && P.auto){ const key = src === R.den ? 'd' : 'h'; R._auto = R._auto || {}; if (R._auto[key] == null){ const step = Math.max(1, Math.floor(N / 60000)), Ls = []; for (let i = 0; i < N; i += step){ const L = (0.2126 * src[i * 4] + 0.7152 * src[i * 4 + 1] + 0.0722 * src[i * 4 + 2]) * R.base; if (L > 1e-6) Ls.push(L); } Ls.sort((a, b) => a - b); const cut = Ls.slice(0, Math.max(1, Math.floor(Ls.length * 0.97))), med = cut[Math.floor(cut.length * 0.5)] || 0.18; R._auto[key] = clamp((R.clay ? 0.34 : 0.2) / med, 1 / 64, 64); } }
+  const k = (ldr ? 1 : R.base * (P.auto && R._auto ? R._auto[src === R.den ? 'd' : 'h'] : 1)) * Math.pow(2, P.ev), f = wbFactors(P.wb), tg = 1 + P.tint, lin = new Float32Array(N * 3);
   for (let i = 0; i < N; i++){ lin[i * 3] = Math.max(0, src[i * 4]) * k * f[0]; lin[i * 3 + 1] = Math.max(0, src[i * 4 + 1]) * k * f[1] * tg; lin[i * 3 + 2] = Math.max(0, src[i * 4 + 2]) * k * f[2]; }
   // bloom: what is brighter than the threshold glows, blurred at a quarter of the size
   if (P.bloom > 0.001){
@@ -7318,6 +7939,7 @@ function renderPostUI(){
   box.innerHTML = `<h3>Кадр: цветокоррекция</h3>
     <div class="row" style="gap:4px;flex-wrap:wrap">${Object.keys(POST_PRESETS).map(n => `<button class="btn sm" data-ppre="${esc(n)}">${esc(n)}</button>`).join('')}</div>
     ${RN_RES.den ? `<label class="pchk"><input type="checkbox" data-pp="dn"${P.dn ? ' checked' : ''}> Шумоподавление (Intel OIDN)</label>` : ''}
+    ${RN_RES.ldr ? '' : `<label class="pchk"><input type="checkbox" data-pp="auto"${P.auto ? ' checked' : ''}> Автоэкспозиция (как в Corona)</label>`}
     ${row('Экспозиция', rng('ev', -4, 4, 0.05), (P.ev > 0 ? '+' : '') + (+P.ev).toFixed(2) + ' EV')}
     ${RN_RES.ldr ? '' : row('Тональная кривая', `<select data-pp="curve"><option value="corona"${P.curve === 'corona' ? ' selected' : ''}>Corona — сжатие светов</option><option value="aces"${P.curve === 'aces' ? ' selected' : ''}>ACES — кино</option><option value="linear"${P.curve === 'linear' ? ' selected' : ''}>Линейная</option></select>`)}
     ${RN_RES.ldr ? '' : row('Сжатие светов', rng('hc', 1, 20, 0.1), (+P.hc).toFixed(1))}
@@ -7346,7 +7968,7 @@ function openRender(){
   $('#rnView').innerHTML = list.map(v => `<option value="${v.id}"${v === pick ? ' selected' : ''}>${esc(KIND_NAME[v.kind] + ': ' + v.name)}${v.box && v.box.on ? ' (с границами)' : ''}</option>`).join('');
   const st = (() => { try { return JSON.parse(lsGet('kot.render') || '{}'); } catch(e){ return {}; } })();
   if (st.time === 'overcast'){ st.time = 'day'; st.sky = 'overcast'; }
-  for (const [id, k] of [['#rnSize', 'size'], ['#rnTime', 'time'], ['#rnGround', 'ground'], ['#rnSky', 'sky'], ['#rnEng', 'engine'], ['#rnSamp', 'samples'], ['#rnBnc', 'bounces']]) if (st[k] != null) $(id).value = String(st[k]);
+  for (const [id, k] of [['#rnSize', 'size'], ['#rnTime', 'time'], ['#rnGround', 'ground'], ['#rnSky', 'sky'], ['#rnEng', 'engine'], ['#rnSamp', 'samples'], ['#rnBnc', 'bounces'], ['#rnSun', 'sunSize'], ['#rnGlass', 'glass']]) if (st[k] != null) $(id).value = String(st[k]);
   if (st.az != null) $('#rnAz').value = st.az; if (st.ev != null) $('#rnEv').value = st.ev; for (const [id, k] of [['#rnTex', 'tex'], ['#rnAO', 'ao'], ['#rnEdges', 'edges'], ['#rnClay', 'clay'], ['#rnDn', 'denoise'], ['#rnBump', 'bump']]) if (st[k] != null) $(id).checked = st[k];
   $('#rnHPre').innerHTML = HDRI_LIB.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('') + '<option value="file">Свой файл</option>';
   if (st.hpre) $('#rnHPre').value = st.hpre; if (st.hrot != null) $('#rnHRot').value = st.hrot; if (st.hev != null) $('#rnHEv').value = st.hev; if (st.bevel != null) $('#rnBev').value = String(st.bevel);
@@ -7376,7 +7998,7 @@ $('#rnClose').onclick = () => renderDlg.hidden = true;
 $('#rbRender').onclick = openRender;
 $('#rnGo').onclick = async () => {
   const o = { view:$('#rnView').value, size:$('#rnSize').value, time:$('#rnTime').value, sky:$('#rnSky').value, az:+$('#rnAz').value, ground:$('#rnGround').value, tex:$('#rnTex').checked, ao:$('#rnAO').checked, edges:$('#rnEdges').checked,
-    engine:$('#rnEng').value, samples:+$('#rnSamp').value, bounces:+$('#rnBnc').value, ev:+$('#rnEv').value, clay:$('#rnClay').checked,
+    engine:$('#rnEng').value, samples:+$('#rnSamp').value, bounces:+$('#rnBnc').value, ev:+$('#rnEv').value, clay:$('#rnClay').checked, sunSize:+$('#rnSun').value, glass:$('#rnGlass').value,
     denoise:$('#rnDn').checked, bump:$('#rnBump').checked, bevel:+$('#rnBev').value, hpre:$('#rnHPre').value, hrot:+$('#rnHRot').value, hev:+$('#rnHEv').value };
   lsSet('kot.render', JSON.stringify(o));
   // the HDRI: a Poly Haven preset is downloaded once and kept on the device; «Свой файл» — the last loaded file
@@ -7406,6 +8028,7 @@ $('#rnGo').onclick = async () => {
     RN_RES = res.R;
     const saved = (() => { try { return JSON.parse(lsGet('kot.post') || 'null'); } catch(e){ return null; } })();
     RN_POST = { ...POST_DEF, ...(saved || {}) }; if (res.R.wb && res.R.wb !== 6500) RN_POST.wb = res.R.wb;
+    if (res.R.clay) RN_POST = { ...RN_POST, ...POST_PRESETS['Белая модель'], auto:true, dn:RN_POST.dn };
     if (res.R.ldr){ RN_POST.curve = 'linear'; }
     renderPostUI(); refreshPost(true);
     RN_LAST = { name:(views.find(v => v.id === o.view) || {}).name || 'Вид' };
@@ -7531,7 +8154,7 @@ function renderOptbar(){
   else if (t === 'stair') h += num('oSW', 'Ширина марша', S.stairW, 50) + num('oSH', 'Высота подъёма', S.stairH, 50) + `<span class="tip">Укажите начало (низ) и конец марша</span>`;
   else if (t === 'room') h += `<span class="tip">Щёлкните внутри контура стен — появится помещение с маркой (имя, номер, площадь)</span><button class="btn sm" id="oAutoRm">Расставить автоматически</button>`;
   else if (t === 'section') h += `<span class="tip">Укажите начало и конец линии разреза. Разрез смотрит в сторону стрелок; направление и глубину меняйте синими ручками</span>`;
-  else if (t === 'ielev') h += `<span class="tip">Щёлкните внутри помещения: появятся 4 развёртки стен (север, восток, юг, запад)</span>`;
+  else if (t === 'ielev') h += `<label class="pchk" title="Во всех помещениях — развёртка каждого простенка (стадия «Мебель», шаблон «После монтажа»); новые помещения получают развёртки сами"><input type="checkbox" id="oIeAll"${STD.ieAuto ? ' checked' : ''}> Развёртки по всем помещениям</label><button class="btn sm" id="oIeGo">Построить сейчас</button><span class="tip">Или щёлкните внутри помещения: 4 развёртки (север, восток, юг, запад)</span>`;
   else if (t === 'align') h += `<label><input type="checkbox" id="oAlM"${S.alignMulti ? ' checked' : ''}> Многократное выравнивание</label><span class="tip">После выравнивания нажмите замок 🔓 — выравнивание сохранится при любых изменениях</span>`;
   else if (t === 'offset') h += num('oOff', 'Смещение', S.offDist, 10) + `<label><input type="checkbox" id="oOffC"${S.offCopy ? ' checked' : ''}> Копировать</label><span class="tip">Щёлкните у стены или линии с той стороны, куда сместить</span>`;
   else if (t === 'mirror' || t === 'mirror2') h += `<label><input type="checkbox" id="oMirC"${S.mirCopy ? ' checked' : ''}> Копировать</label>`;
@@ -7551,6 +8174,8 @@ function renderOptbar(){
   const loc = ob.querySelector('#oLoc'); if (loc){ loc.value = S.loc; loc.onchange = e => { S.loc = e.target.value; updatePreview(); }; }
   on('oChain', 'change', e => { S.chain = e.target.checked; });
   if (ob.querySelector('#oDOp')) ob.querySelector('#oDOp').onchange = e => { S.doorOp = !!e.target.value; };
+  if (ob.querySelector('#oIeAll')) ob.querySelector('#oIeAll').onchange = e => { STD.ieAuto = e.target.checked; scheduleSave(); if (STD.ieAuto) autoIelevs(); };
+  if (ob.querySelector('#oIeGo')) ob.querySelector('#oIeGo').onclick = () => autoIelevs();
   mmv('oH', 'wallH'); mmv('oDW', 'doorW'); mmv('oDH', 'doorH'); mmv('oWW', 'winW'); mmv('oWH', 'winH'); mmv('oWS', 'winSill'); mmv('oBH', 'boxH');
   const dr = ob.querySelector('#oDimRef'); if (dr){ dr.value = S.dimRef; dr.onchange = e => { S.dimRef = e.target.value; }; }
   const dm = ob.querySelector('#oDimMode'); if (dm){ dm.value = S.dimMode; dm.onchange = e => { S.dimMode = e.target.value; annoDirty = true; }; }
@@ -7898,6 +8523,8 @@ function renderPanel(_el, _it){
       + prow('План', `<select id="pVPick">${planOpts}</select>`)
       + (cv0.kind === 'plan' || cv0.kind === 'detail' ? prow('Уровень', `<span class="val">${esc(LVL(cv0.lv).name)} · ${fmtElev(LVL(cv0.lv).elev)}</span>`) : '')
       + viewRows(cv0)
+      + ((STD.folders || []).length ? prow('Раздел в диспетчере', `<select id="pVFld"><option value="">—</option>${STD.folders.map(f => `<option value="${f.id}"${f.id === cv0.folder ? ' selected' : ''}>${esc(f.n)}</option>`).join('')}</select>`) : '')
+      + (cv0.kind !== 'sheet' ? prow('Фильтр стадий', `<select id="pVPhF">${phData().filters.map(f => `<option value="${f.id}"${f.id === (cv0.phf || 'all') ? ' selected' : ''}>${esc(f.n)}</option>`).join('')}</select>`) : '')
       + prow('Стадия', `<select id="pVPhase">${[...PHASES, { k:'all', n:'Показать все' }].map(p => `<option value="${p.k}"${p.k === S.phase ? ' selected' : ''}>${p.n}</option>`).join('')}</select>`)
       + prow('Масштаб', `<span class="val">${$('#scale').textContent}</span>`)
       + prow('Детализация', `<select id="pDetail"><option value="medium">Средняя (слои)</option><option value="coarse">Низкая (заливка)</option></select>`)
@@ -7955,10 +8582,11 @@ function renderPanel(_el, _it){
       + `<div class="pbtns"><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else if (it.type === 'fam'){
     const f = famById(it.f), b = famBox(it), sz = b.getSize(new V3());
-    h += `<div class="typesel"><span class="tname">${esc(f ? FAM_CATS[f.cat] : 'Семейство')} ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span><select id="fFam">${famOptions(it.f)}</select><span class="tsub">${f ? f.forms.length + ' форм(ы) · ' + mm(sz.x) + ' × ' + mm(sz.z) + ' × ' + mm(sz.y) + ' мм' : 'семейство не найдено'}</span><button class="btn sm" id="fEdit">Изменить семейство…</button></div>`
+    h += `<div class="typesel"><span class="tname">${esc(f ? FAM_CATS[f.cat] : 'Семейство')} ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span><select id="fFam">${famOptions(it.f)}</select><span class="tsub">${f ? (f.mesh ? (f.mesh.kind === 'gen' ? 'модель из библиотеки' : 'модель · ' + esc(f.mesh.name)) : f.forms.length + ' форм(ы)') + ' · ' + mm(sz.x) + ' × ' + mm(sz.z) + ' × ' + mm(sz.y) + ' мм' : 'семейство не найдено'}</span>${f && f.mesh ? '' : '<button class="btn sm" id="fEdit">Изменить семейство…</button>'}</div>`
       + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
       + `<div class="pgrp">Размещение</div>` + prow('Поворот, °', `<input id="fRot" type="number" step="15" value="${r4(it.rot || 0)}">`) + prow('Отражено', `<label class="pchk"><input type="checkbox" id="fMir"${it.mir ? ' checked' : ''}> зеркально</label>`)
-      + prow('Материал', matPick('fM', it.m, 'По семейству'))
+      + prow('Материал', matPick('fM', it.m, f && f.mesh ? 'Как в модели' : 'По семейству'))
+      + (f && f.mesh ? `<div class="pgrp">Модель (для всех экземпляров)</div>` + (f.mesh.kind === 'gen' ? prow('Ширина, мм', pnum('fMW', f.mesh.p.w / 1000, 'min="50" step="10"')) + prow('Глубина, мм', pnum('fMD', f.mesh.p.d / 1000, 'min="50" step="10"')) + prow('Высота, мм', pnum('fMH', f.mesh.p.h / 1000, 'min="5" step="10"')) : prow('Масштаб модели', `<input id="fMS" type="number" step="0.05" min="0.01" value="${f.mesh.s || 1}">`) + prow('Ось Z вверх', `<label class="pchk"><input type="checkbox" id="fMZ"${f.mesh.zUp ? ' checked' : ''}> модель лежала на боку</label>`)) : '')
       + prow('Положение (X, Y), мм', `<span class="val">${mm(it.x)}, ${mm(-it.z)}</span>`)
       + `<div class="pbtns"><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else if (it.type === 'part'){
@@ -8013,6 +8641,8 @@ function renderPanel(_el, _it){
   el.innerHTML = h;
   const q = id => el.querySelector('#' + id);
   if (q('pVPhase')) q('pVPhase').onchange = e => setPhase(e.target.value);
+  if (q('pVFld')) q('pVFld').onchange = e => { const vv = curView(); if (e.target.value) vv.folder = e.target.value; else delete vv.folder; scheduleSave(); renderTree(); };
+  if (q('pVPhF')) q('pVPhF').onchange = e => { const vv = curView(); vv.phf = e.target.value; if (vv.phf === 'all') delete vv.phf; rebuild(); annoDirty = true; scheduleSave(); $('#propsBody').dataset.id = 'x'; updatePanel(); };
   if (it) bindCons(it, q, el);
   el.querySelectorAll('[data-matedit]').forEach(b => b.onclick = () => { const s2 = q(b.dataset.matedit); openMats((s2 && s2.value) || undefined); });
   if (it && q('sMatX')) q('sMatX').onchange = e => { pushUndo('Материал'); markEdited(); if (e.target.value) it.m = e.target.value; else delete it.m; el.dataset.id = 'x'; rebuild(); };
@@ -8020,7 +8650,11 @@ function renderPanel(_el, _it){
   if (it && it.type === 'fam'){
     const ch = (id, fn) => { const f = q(id); if (f) f.onchange = e => { pushUndo(); markEdited(); fn(e.target); el.dataset.id = 'x'; rebuild(); }; };
     ch('fFam', t => it.f = t.value); ch('fRot', t => it.rot = ((+t.value || 0) % 360 + 360) % 360); ch('fMir', t => { if (t.checked) it.mir = true; else delete it.mir; }); ch('fM', t => { if (t.value) it.m = t.value; else delete it.m; });
-    q('fEdit').onclick = () => openFamEditor(it.f);
+    if (q('fEdit')) q('fEdit').onclick = () => openFamEditor(it.f);
+    const fm2 = famById(it.f);
+    if (fm2 && fm2.mesh){ const mch = (id, fn) => { const x = q(id); if (x) x.onchange = e => { pushUndo('Размеры модели'); markEdited(); fn(e.target); FBOX.delete(fm2.id); el.dataset.id = 'x'; rebuild(); scheduleSave(); }; };
+      mch('fMW', t => { fm2.mesh.p = { ...fm2.mesh.p, w:clamp(Math.round(+t.value) || fm2.mesh.p.w, 50, 20000) }; }); mch('fMD', t => { fm2.mesh.p = { ...fm2.mesh.p, d:clamp(Math.round(+t.value) || fm2.mesh.p.d, 50, 20000) }; }); mch('fMH', t => { fm2.mesh.p = { ...fm2.mesh.p, h:clamp(Math.round(+t.value) || fm2.mesh.p.h, 5, 20000) }; });
+      mch('fMS', t => { fm2.mesh.s = clamp(+t.value || 1, 0.001, 1000); }); mch('fMZ', t => { fm2.mesh.zUp = t.checked; }); }
   }
   if (it && it.type === 'part'){
     q('ptM').onchange = e => { pushUndo('Материал части'); markEdited(); it.m = e.target.value; el.dataset.id = 'x'; rebuild(); };
@@ -8148,6 +8782,24 @@ $('#treeFind').addEventListener('input', treeFilter);
 $('#treeFind').addEventListener('keydown', e => { if (e.key === 'Escape'){ e.target.value = ''; treeFilter(); } e.stopPropagation(); });
 function treeFoldAll(close){ const ul = $('#tree'); ul.querySelectorAll('.node').forEach(n => { const k = treeKey(n); if (close) TREE_CLOSED.add(k); else TREE_CLOSED.delete(k); }); treeSave(); renderTree(); }
 $('#treeFold').onclick = () => treeFoldAll(true); $('#treeUnfold').onclick = () => treeFoldAll(false);
+// «+» of a section: tick the views that belong to it, or make a new floor plan right in it
+function openFolderAdd(fid){
+  const F = (STD.folders || []).find(x => x.id === fid); if (!F) return;
+  const d = mkModal('fldDlg', 'Раздел видов', '<div id="fldBody"></div><div class="row" style="justify-content:flex-end;gap:6px;margin-top:10px"><button class="btn primary" id="fldOk">Готово</button><button class="btn" id="fldNo">Отмена</button></div>', 560);
+  const B = d.querySelector('#fldBody'), kinds = ['plan', 'detail', 'd3', 'camera', 'axo', 'elev', 'section', 'ielev', 'sheet'];
+  B.innerHTML = `<p style="margin:0 0 6px"><b>${esc(F.n)}</b></p>
+    <div class="row" style="gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px"><span>Новый план этажа:</span><select id="fldLv">${[...levels].sort((a, b) => a.elev - b.elev).map(L => `<option value="${L.id}">${esc(L.name)} (${fmtElev(L.elev)})</option>`).join('')}</select><input id="fldNm" placeholder="Имя вида" style="min-width:180px"><select id="fldPh">${[...PHASES, { k:'all', n:'Показать все' }].map(p => `<option value="${p.k}"${p.k === S.phase ? ' selected' : ''}>${esc(p.n)}</option>`).join('')}</select><button class="btn sm" id="fldNew">Создать в разделе</button></div>
+    <div style="max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:4px;padding:6px 8px">${kinds.map(k => { const L = views.filter(v => v.kind === k); if (!L.length) return ''; return `<div style="margin:4px 0 2px;color:var(--muted);font-size:11px">${esc(k === 'sheet' ? 'Листы' : KIND_NAME[k])}</div>` + L.map(v => `<label class="pchk"><input type="checkbox" data-v="${v.id}"${v.folder === fid ? ' checked' : ''}> ${esc(k === 'sheet' ? v.num + ' — ' + v.name : v.name)}${v.folder && v.folder !== fid ? ` <small style="color:var(--muted)">(в «${esc(((STD.folders || []).find(x => x.id === v.folder) || { n:'?' }).n)}»)</small>` : ''}</label>`).join(''); }).join('')}</div>`;
+  d.querySelector('#fldNew').onclick = () => {
+    const L = levels.find(l => l.id === B.querySelector('#fldLv').value); if (!L) return;
+    const nm = (B.querySelector('#fldNm').value.trim() || `${L.name} — ${F.n}`).slice(0, 80), ph = B.querySelector('#fldPh').value;
+    const v = { id:vid('v'), kind:'plan', name:nm, phase:ph, lv:L.id, folder:fid }; views.push(v); scheduleSave(); renderTree(); d.hidden = true; openView(v.id);
+    toast(`План «${v.name}» создан в разделе «${F.n}»`);
+  };
+  d.querySelector('#fldOk').onclick = () => { B.querySelectorAll('[data-v]').forEach(cb => { const v = views.find(x => x.id === cb.dataset.v); if (!v) return; if (cb.checked) v.folder = fid; else if (v.folder === fid) delete v.folder; }); scheduleSave(); renderTree(); d.hidden = true; };
+  d.querySelector('#fldNo').onclick = () => { d.hidden = true; };
+  d.hidden = false;
+}
 function renderTree(){
   const ul = $('#tree');
   const btn = (label, act, cur) => `<li><button data-tree="${act}"${cur ? ' aria-current="true"' : ''}>${label}</button></li>`;
@@ -8164,7 +8816,10 @@ function renderTree(){
   const group = (title, kind, list, add) => `<li><div class="node">${title}${add ? `<button class="add" data-tree="n:${kind}" title="${add}" aria-label="${add}">+</button>` : ''}</div><ul>${list.map(vItem).join('') || '<li class="it"><span class="ph">пусто</span></li>'}</ul></li>`;
   const of = k => views.filter(v => v.kind === k);
   const lvHtml = `<li><div class="node">Уровни<button class="add" data-tree="lvadd:" title="Новый уровень" aria-label="Новый уровень">+</button></div><ul>` + [...levels].sort((a, b) => b.elev - a.elev).map(L => `<li class="it"><button data-tree="lv:${L.id}" title="Открыть план уровня">${esc(L.name)}<span class="ph">${fmtElev(L.elev)}</span></button><button class="x" data-tree="lved:" title="Изменить уровни" aria-label="Изменить уровни">✎</button></li>`).join('') + `</ul></li>`;
-  ul.innerHTML = lvHtml + `<li><div class="node">Виды (все)</div><ul>
+  // own sections of the browser (Revit: «Организация диспетчера проекта» — folders such as «02_Обмерный план»)
+  const FD = STD.folders || [];
+  const fdHtml = `<li><div class="node">Мои разделы видов<button class="add" data-tree="fnew:" title="Новый раздел видов" aria-label="Новый раздел видов">+</button></div><ul>` + (FD.map(f => `<li><div class="node">${esc(f.n)}<button class="add" data-tree="fadd:${f.id}" title="Добавить виды или создать план этажа в разделе" aria-label="Добавить виды">+</button><button class="add" data-tree="fren:${f.id}" title="Переименовать раздел" aria-label="Переименовать раздел">✎</button><button class="add" data-tree="fdel:${f.id}" title="Удалить раздел (виды остаются)" aria-label="Удалить раздел">×</button></div><ul>` + (views.filter(v => v.folder === f.id).map(vItem).join('') || '<li class="it"><span class="ph">пусто — нажмите +</span></li>') + '</ul></li>').join('') || '<li class="it"><span class="ph">нажмите +, чтобы создать раздел</span></li>') + '</ul></li>';
+  ul.innerHTML = lvHtml + fdHtml + `<li><div class="node">Виды (все)</div><ul>
       ${group('Планы этажей', 'plan', of('plan'), 'Новый план')}
       ${group('Узлы', 'detail', of('detail'), 'Новый узел — обвести на плане')}
       ${group('3D-виды', 'd3', of('d3'), 'Новый 3D-вид')}
@@ -8176,7 +8831,7 @@ function renderTree(){
     </ul></li>
     ${group('Листы (все)', 'sheet', of('sheet').sort((a, b) => a.num.localeCompare(b.num, 'ru', { numeric:true })), 'Новый лист')}
     ${grs.length ? `<li><div class="node">Оси</div><ul>${grs.map(g => btn('Ось ' + esc(g.name), 'g:' + g.id, isSel(g.id))).join('')}</ul></li>` : ''}
-    <li><div class="node">Семейства · Компоненты<button class="add" data-tree="famnew:" title="Новое семейство" aria-label="Новое семейство">+</button></div><ul>${fams.map(f => `<li class="it"><button data-tree="fam:${f.id}" title="Разместить">${esc(f.name)}<span class="ph">${esc(FAM_CATS[f.cat])}</span></button><button class="x" data-tree="famed:${f.id}" title="Редактировать семейство" aria-label="Редактировать ${esc(f.name)}">✎</button></li>`).join('')}<li class="it"><button data-tree="famload:">Загрузить семейство…</button></li></ul></li>
+    <li><div class="node">Семейства · Компоненты<button class="add" data-tree="famnew:" title="Новое семейство" aria-label="Новое семейство">+</button></div><ul>${fams.map(f => `<li class="it"><button data-tree="fam:${f.id}" title="Разместить">${esc(f.name)}<span class="ph">${esc(FAM_CATS[f.cat])}</span></button><button class="x" data-tree="famed:${f.id}" title="Редактировать семейство" aria-label="Редактировать ${esc(f.name)}">✎</button></li>`).join('')}<li class="it"><button data-tree="furnlib:">Библиотека мебели…</button></li><li class="it"><button data-tree="mdlimp:">Импорт модели (glTF, OBJ)…</button></li><li class="it"><button data-tree="famload:">Загрузить семейство…</button></li></ul></li>
     <li><div class="node">Семейства · Стены</div><ul>${types.map(t => btn(`<span class="swatch" style="background:${(MATS[t.layers[Math.floor(t.layers.length / 2)]?.m] || MATS.generic).c}"></span>${esc(t.name)}`, 't:' + t.id, false)).join('')}</ul></li>
     <li><div class="node">Проекты</div><ul>${btn('Мои проекты…', 'lib')}</ul></li>`;
   treeFolds(ul); treeFilter(); $('#treeTitle').textContent = 'Диспетчер проекта — ' + (proj.name || 'Без названия');
@@ -8191,6 +8846,12 @@ function renderTree(){
     else if (k === 'famed'){ openFamEditor(v); return; }
     else if (k === 'famnew'){ openFamEditor(null); return; }
     else if (k === 'famload'){ $('#famFile').click(); return; }
+    else if (k === 'furnlib'){ openFurnLib(); return; }
+    else if (k === 'fnew'){ const n = prompt('Имя раздела видов', '01_Новый раздел'); if (!n || !n.trim()) return; STD.folders = [...(STD.folders || []), { id:vid('fd'), n:n.trim().slice(0, 80) }]; scheduleSave(); renderTree(); openFolderAdd(STD.folders[STD.folders.length - 1].id); return; }
+    else if (k === 'fadd'){ openFolderAdd(v); return; }
+    else if (k === 'fren'){ const f = (STD.folders || []).find(x => x.id === v); if (!f) return; const n = prompt('Имя раздела', f.n); if (n && n.trim()){ f.n = n.trim().slice(0, 80); scheduleSave(); renderTree(); } return; }
+    else if (k === 'fdel'){ const f = (STD.folders || []).find(x => x.id === v); if (!f || !confirm(`Удалить раздел «${f.n}»? Виды останутся в «Виды (все)».`)) return; STD.folders = STD.folders.filter(x => x !== f); for (const w of views) if (w.folder === f.id) delete w.folder; scheduleSave(); renderTree(); return; }
+    else if (k === 'mdlimp'){ const i = $('#mdlFile'); i.value = ''; i.click(); return; }
     else if (k === 'n'){ newView(v); return; }
     else if (k === 'd'){ const x = views.find(y => y.id === v); if (x && confirm(`Удалить ${x.kind === 'sheet' ? 'лист ' + x.num : '«' + x.name + '»'}?`)) deleteView(v); return; }
     else if (k === 'p'){ placeOnSheet(v); renderTree(); return; }
@@ -8363,7 +9024,7 @@ function sanitizeItems(arr){
     if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it), ...(Array.isArray(it.svNo) ? { svNo:it.svNo.filter(s => s === 1 || s === -1) } : {}), ...(Array.isArray(it.dj) && (it.dj[0] || it.dj[1]) ? { dj:[!!it.dj[0], !!it.dj[1]] } : {}), ...(LOC_LINES[it.loc] && it.loc !== 'center' ? { loc:it.loc } : {}), ...(it.nrb ? { nrb:true } : {}) };
     else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
     else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand, ...(it.type === 'door' && it.op ? { op:true } : {}), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
-    else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1, ...(it.dup ? { dup:true } : {}) } : {}),
+    else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1, ...(it.dup ? { dup:true } : {}), ...(it.tot ? { tot:true } : {}) } : {}),
       ...(it.tp && typeof it.tp === 'object' ? { tp:Object.fromEntries(Object.entries(it.tp).filter(([k, v]) => /^\d{1,3}$/.test(k) && v && N(v.u) && N(v.v)).map(([k, v]) => [k, { u:clamp(+v.u, -100, 100), v:clamp(+v.v, -100, 100) }])) } : {}),
       ...(it.txt && typeof it.txt === 'object' ? { txt:Object.fromEntries(Object.entries(it.txt).filter(([k, v]) => /^\d{1,3}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.slice(0, 40)])) } : {}) };
     else if (it.type === 'grid' && seg(it)) o = { id, type:'grid', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, name:String(it.name || '?').slice(0, 6) };
@@ -8433,7 +9094,7 @@ function loadRecord(rec){
   MATX = sanitizeMats(rec.mats); syncMats(); for (const k in RMAT){ RMAT[k].dispose(); delete RMAT[k]; }
   types = sanitizeTypes(rec.types);
   levels = sanitizeLevels(rec.levels) || DEFAULT_LEVELS();
-  STD = sanitizeStd(rec.std); makeMaterials();
+  STD = sanitizeStd(rec.std); syncPhases(); makeMaterials();
   fams = sanitizeFams(rec.fams) || FAM_BUILTIN(); FBOX.clear(); TPLS = migrateLooks(sanitizeTpls(rec.tpls), rec.tpls);
   items = sanitizeItems(rec.items);
   for (const it of items) if (!it.lv && it.type !== 'grid' && !isOp(it) && !isMeta(it)) it.lv = levels[0].id;
@@ -8952,6 +9613,8 @@ const RB_ICONS = {
   box:`<path d="M8 1.5l6 3.3v6.4L8 14.5 2 11.2V4.8z" fill="#e2e5e8" stroke="${cK}"/><path d="M2 4.8L8 8l6-3.2M8 8v6.5" stroke="${cK}"/>`,
   room:`<rect x="1.5" y="2.5" width="13" height="11" fill="#fff" stroke="${cK}"/><path d="M1.5 2.5l13 11M14.5 2.5l-13 11" stroke="${cB}" stroke-width=".7" stroke-dasharray="1.2 1"/><rect x="4.5" y="6" width="7" height="4" fill="#fff" stroke="${cR}"/>`,
   rbAutoRooms:`<rect x="1" y="1.5" width="6.5" height="6" fill="#fff" stroke="${cK}"/><rect x="8.5" y="1.5" width="6.5" height="6" fill="#fff" stroke="${cK}"/><rect x="1" y="8.5" width="14" height="6" fill="#fff" stroke="${cK}"/><path d="M2.5 4.5h3.5M10 4.5h3.5M5 11.5h6" stroke="${cR}" stroke-width="1.4"/>`,
+  rbFurnLib:`<path d="M2 9.5h12v3H2z" fill="${cF}" stroke="${cB}"/><path d="M2.5 12.5v2M13.5 12.5v2" stroke="${cK}" stroke-width="1.3"/><path d="M2 9.5V7a1.5 1.5 0 0 1 3 0v2.5M11 9.5V7a1.5 1.5 0 0 1 3 0v2.5" fill="#fff" stroke="${cB}"/><path d="M5 6h6v3.5H5z" fill="#fff" stroke="${cB}"/><path d="M6 1.5h4v2.5H6z" fill="#fff" stroke="${cK}"/>`,
+  rbModelImp:`<path d="M8 1.5l5.5 3v6.5L8 14.5 2.5 11V4.5z" fill="#fff" stroke="${cB}"/><path d="M2.5 4.5L8 7.5l5.5-3M8 7.5v7" stroke="${cB}"/><path d="M11.5 9v6M9.5 13l2 2 2-2" stroke="${cG}" stroke-width="1.4"/>`,
   rbFamNew:`<path d="M3 1.5h7l3 3v10H3z" fill="#fff" stroke="${cK}"/><path d="M10 1.5v3h3" stroke="${cK}"/><path d="M8 7v6M5 10h6" stroke="${cG}" stroke-width="1.7"/>`,
   rbFamLoad:`<path d="M1.5 4.5h5l1.5 1.5h6.5v8.5h-13z" fill="#f2cf73" stroke="#8a6a2b"/><path d="M8 3v6M5.5 6.5L8 9l2.5-2.5" stroke="${cB}" stroke-width="1.5"/>`,
   rbFamEdit:`<path d="M3 8h10v2.5H3z" fill="#c99a62" stroke="#7a5326"/><path d="M4 10.5v4M12 10.5v4" stroke="#7a5326" stroke-width="1.3"/><path d="M9.5 6.5l4.5-4.5 1.5 1.5L11 8l-2 .5z" fill="${cY}" stroke="#8a6a2b"/>`,
@@ -8976,6 +9639,7 @@ const RB_ICONS = {
   camera:`<rect x="1.5" y="5" width="9" height="7" rx="1" fill="${cF}" stroke="#1c4f8f"/><path d="M10.5 7.2l4-2v6.6l-4-2z" fill="#3d8fe0" stroke="#1c4f8f"/><circle cx="6" cy="8.5" r="1.8" fill="#fff" stroke="#1c4f8f"/>`,
   section:`<path d="M3 13.5V5" stroke="${cK}" stroke-width="1.3" stroke-dasharray="2.5 1"/><path d="M3 5h8" stroke="${cK}" stroke-width="1.3"/><path d="M8.5 1.5L13 5l-4.5 3.5z" fill="#1c4f8f" stroke="none"/><circle cx="3" cy="13" r="2.2" fill="#fff" stroke="${cK}"/>`,
   ielev:`<rect x="3" y="3" width="10" height="10" fill="#fff" stroke="${cK}"/><circle cx="8" cy="8" r="2.4" fill="#fff" stroke="#1c4f8f"/><path d="M8 3.8v1.8M8 10.4v1.8M3.8 8h1.8M10.4 8h1.8" stroke="#1c4f8f" stroke-width="1.6"/>`,
+  rbSaveCam:`<rect x="1.5" y="5" width="9" height="7" rx="1" fill="${cF}" stroke="#1c4f8f"/><path d="M10.5 7.2l4-2v6.6l-4-2z" fill="#3d8fe0" stroke="#1c4f8f"/><path d="M3 1.5h5v3H3z" fill="#fff" stroke="${cK}"/><path d="M4.5 1.5v1.8h2V1.5" stroke="${cK}"/>`,
   rbBox:`<path d="M8 2l6 3.3v6.4L8 15 2 11.7V5.3z" fill="${cF}" stroke="#1c4f8f"/><path d="M1 1h4M1 1v4M15 15h-4M15 15v-4" stroke="${cR}" stroke-width="1.4"/>`,
   callout:`<rect x="1.5" y="1.5" width="9" height="8" rx="1.5" fill="#fff" stroke="#1c4f8f" stroke-dasharray="2 1"/><path d="M10.5 8l2.5 3" stroke="#1c4f8f"/><circle cx="13" cy="12.5" r="2.2" fill="#fff" stroke="#1c4f8f"/>`,
   rbTpl:`<rect x="1.5" y="2" width="13" height="12" fill="#fff" stroke="${cK}"/><path d="M1.5 5h13M5.5 5v9" stroke="${cK}"/><path d="M7.5 7.5h5M7.5 10h5M7.5 12.5h3" stroke="${cB}"/>`,
@@ -8991,6 +9655,7 @@ const RB_ICONS = {
   weights:`<path d="M1.5 3h13" stroke="#222" stroke-width=".6"/><path d="M1.5 6.5h13" stroke="#222" stroke-width="1.2"/><path d="M1.5 10h13" stroke="#222" stroke-width="1.9"/><path d="M1.5 13.8h13" stroke="#222" stroke-width="2.7"/>`,
   patterns:`<path d="M1.5 4h13" stroke="#222" stroke-dasharray="3 1.5"/><path d="M1.5 8h13" stroke="#222" stroke-dasharray="1 1.5"/><path d="M1.5 12h13" stroke="#222" stroke-dasharray="5 1.5 1 1.5"/>`,
   fills:`<rect x="1.5" y="1.5" width="13" height="13" fill="#fff" stroke="${cK}"/><path d="M1.5 7.5l6-6M1.5 13.5l12-12M4.5 14.5l10-10M10.5 14.5l4-4" stroke="${cB}" stroke-width=".9"/>`,
+  rbPhases:`<rect x="1.5" y="2.5" width="4" height="11" fill="#fff" stroke="${cK}"/><rect x="6" y="2.5" width="4" height="11" fill="${cF}" stroke="${cB}"/><rect x="10.5" y="2.5" width="4" height="11" fill="#fff" stroke="${cR}" stroke-dasharray="1.5 1"/>`,
   anno:`<path d="M2 4v8M14 4v8" stroke="${cK}"/><path d="M2 8h12" stroke="${cB}" stroke-width="1.2"/><path d="M.8 9.2l2.4-2.4M12.8 9.2l2.4-2.4" stroke="${cB}" stroke-width="1.2"/><path d="M5.5 5.5h5" stroke="#222"/>`
 };
 // [panel id, [[group label, { b:[keys], t:[keys…], t2:[…], i:[…] }]]]; key → button selector and label
@@ -9002,7 +9667,7 @@ const RB_LAYOUT = [
       t2:[['[data-tool="floor"]', 'floor', 'Перекрытие'], ['[data-tool="stair"]', 'stair', 'Лестница'], ['[data-tool="box"]', 'box', 'Объём']],
       t3:[['[data-tool="rect"]', 'rect', 'Комната из стен']] }],
     ['Помещения и зоны', { b:[['[data-tool="room"]', 'room', 'Помещение']], t:[['#rbAutoRooms', 'rbAutoRooms', 'Расставить везде']] }],
-    ['Семейства', { t:[['#rbFamNew', 'rbFamNew', 'Новое семейство'], ['#rbFamLoad', 'rbFamLoad', 'Загрузить'], ['#rbFamEdit', 'rbFamEdit', 'Редактировать']] }],
+    ['Семейства', { b:[['#rbFurnLib', 'rbFurnLib', 'Библиотека мебели']], t:[['#rbModelImp', 'rbModelImp', 'Импорт модели'], ['#rbFamNew', 'rbFamNew', 'Новое семейство'], ['#rbFamLoad', 'rbFamLoad', 'Загрузить']], t2:[['#rbFamEdit', 'rbFamEdit', 'Редактировать']] }],
     ['Базовые элементы', { b:[['#rbLevels', 'rbLevels', 'Уровень'], ['[data-tool="grid"]', 'grid', 'Ось']] }],
     ['Свойства и вид', { t:[['#rbTypes', 'rbTypes', 'Типы стен'], ['[data-tool="orbit"]', 'orbit', 'Обзор'], ['[data-tool="demolish"]', 'demolish', 'Снести']] }]
   ], ['[data-tool="move"]', '[data-tool="copy"]', '#rbRotate', '#rbDelete']],
@@ -9017,14 +9682,15 @@ const RB_LAYOUT = [
   ['rbView', [
     ['Графика', { b:[['#rbTpl', 'rbTpl', 'Шаблоны видов']], t:[['#rbRender', 'rbRender', 'Визуализация'], ['#rbBox', 'rbBox', 'Границы 3D-вида']] }],
     ['Создание', { b:[['[data-view="d3"]', 'd3', '3D-вид'], ['[data-tool="section"]', 'section', 'Разрез'], ['[data-tool="callout"]', 'callout', 'Узел']],
-      t:[['[data-view="plan"]', 'plan', 'План'], ['[data-view="axo"]', 'axo', 'Аксонометрия'], ['[data-tool="camera"]', 'camera', 'Камера']], t2:[['[data-tool="ielev"]', 'ielev', 'Развёртка']] }],
+      t:[['[data-view="plan"]', 'plan', 'План'], ['[data-view="axo"]', 'axo', 'Аксонометрия'], ['[data-tool="camera"]', 'camera', 'Камера']], t2:[['#rbSaveCam', 'rbSaveCam', 'Сохранить ракурс'], ['[data-tool="ielev"]', 'ielev', 'Развёртка']] }],
     ['Компоновка листа', { b:[['#rbSheet', 'rbSheet', 'Лист']] }],
     ['Окна', { t:[['#rbFit', 'rbFit', 'Показать всё'], ['#rbLeft', 'rbLeft', 'Свойства'], ['#rbRight', 'rbRight', 'Чат команд']] }]
   ]],
   ['rbManage', [
     ['Параметры', { b:[['#rbMats', 'rbMats', 'Материалы']], t:[['[data-std="styles"]', 'styles', 'Стили линий'], ['[data-std="weights"]', 'weights', 'Вес линий'], ['[data-std="patterns"]', 'patterns', 'Образцы линий']],
       t2:[['[data-std="fills"]', 'fills', 'Штриховки'], ['[data-std="anno"]', 'anno', 'Аннотации']] }],
-    ['Шаблоны видов', { t:[['#rbTplMgr', 'rbTplMgr', 'Диспетчер шаблонов'], ['#rbStamps', 'rbStamps', 'Штампы']] }]
+    ['Шаблоны видов', { t:[['#rbTplMgr', 'rbTplMgr', 'Диспетчер шаблонов'], ['#rbStamps', 'rbStamps', 'Штампы']] }],
+    ['Стадии', { b:[['#rbPhases', 'rbPhases', 'Стадии']] }]
   ]]
 ];
 (function ribbonize(){
