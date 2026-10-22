@@ -376,6 +376,13 @@ details.more summary::-webkit-details-marker{display:none}
 .rn-set label{color:var(--muted)}
 .rn-set .pchk{color:var(--ink)}
 .rn-set select,.rn-set input[type=range]{width:100%}
+.rn-post{grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 14px;font-size:12.5px;border-top:1px solid var(--line);padding-top:10px}
+.rn-post h3,.rn-post > .row,.rn-post > .pchk{grid-column:1 / -1;margin:0}
+.rn-post h3{font-size:14px;font-weight:600}
+.rn-post label{color:var(--muted);display:flex;justify-content:space-between;gap:6px}
+.rn-post .pv{color:var(--ink);font-family:var(--font-num)}
+.rn-post input[type=range],.rn-post select{width:100%}
+.rn-prev canvas{background:#fff}
 @media (max-width:760px){.rn-body{grid-template-columns:minmax(0,1fr)}}
 .sheetd header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
 .sheetd h2{margin:0;font-size:18px;font-weight:600}
@@ -816,16 +823,27 @@ details.more summary::-webkit-details-marker{display:none}
         <label for="rnBnc">Отскоков света</label><select id="rnBnc"><option value="3">3 — быстрее</option><option value="6" selected>6 — интерьеры</option><option value="10">10 — светлые комнаты</option><option value="16">16 — максимум</option></select>
         <label for="rnSize">Размер картинки</label><select id="rnSize"><option value="1280x720">1280 × 720 (быстро)</option><option value="1920x1080" selected>1920 × 1080 (Full HD)</option><option value="2560x1440">2560 × 1440</option><option value="3840x2160">3840 × 2160 (4K)</option><option value="2480x3508">2480 × 3508 (А4 книжный)</option><option value="3508x2480">3508 × 2480 (А4 альбомный)</option></select>
         <label for="rnTime">Время суток</label><select id="rnTime"><option value="morning">Утро</option><option value="day" selected>День</option><option value="evening">Вечер</option><option value="night">Ночь</option></select>
-        <label for="rnSky">Погода</label><select id="rnSky"><option value="clear">Ясно</option><option value="sunny" selected>Солнечно, облака</option><option value="cloudy">Облачно</option><option value="overcast">Пасмурно</option></select>
+        <label for="rnSky">Погода</label><select id="rnSky"><option value="clear">Ясно</option><option value="sunny" selected>Солнечно, облака</option><option value="cloudy">Облачно</option><option value="overcast">Пасмурно</option><option value="hdri">HDRI — фото неба</option></select>
+        <div id="rnHdri" hidden style="display:flex;flex-direction:column;gap:6px">
+          <label for="rnHPre">Панорама неба (Poly Haven, CC0)</label><select id="rnHPre"></select>
+          <button class="btn sm" id="rnHFile" type="button">Свой файл .hdr / .exr…</button><input type="file" id="rnHIn" accept=".hdr,.exr" hidden>
+          <span id="rnHName" class="libnote"></span>
+          <label for="rnHRot">Поворот неба <span id="rnHRotV">0°</span></label><input id="rnHRot" type="range" min="0" max="359" step="1" value="0">
+          <label for="rnHEv">Яркость неба <span id="rnHEvV">0 EV</span></label><input id="rnHEv" type="range" min="-4" max="4" step="0.25" value="0">
+        </div>
         <label for="rnAz">Солнце: сторона света <span id="rnAzV"></span></label><input id="rnAz" type="range" min="0" max="359" step="1" value="150">
         <label for="rnEv">Экспокоррекция <span id="rnEvV">0 EV</span></label><input id="rnEv" type="range" min="-4" max="4" step="0.5" value="0">
         <label for="rnGround">Окружение</label><select id="rnGround"><option value="grass">Газон</option><option value="paving">Мощение</option><option value="white">Белый фон</option></select>
         <label class="pchk"><input type="checkbox" id="rnClay"> Белая модель (clay)</label>
+        <label class="pchk"><input type="checkbox" id="rnDn" checked> Шумоподавление (Intel OIDN)</label>
+        <label class="pchk"><input type="checkbox" id="rnBump" checked> Рельеф материалов</label>
+        <label for="rnBev">Фаски на рёбрах</label><select id="rnBev"><option value="0">Нет</option><option value="3">3 мм</option><option value="6" selected>6 мм</option><option value="10">10 мм</option><option value="20">20 мм</option></select>
         <label class="pchk"><input type="checkbox" id="rnTex" checked> Материалы с фактурой</label>
         <label class="pchk"><input type="checkbox" id="rnAO" checked> Мягкие тени в углах</label>
         <label class="pchk"><input type="checkbox" id="rnEdges"> Контурные линии</label>
         <p class="libnote">Трассировка честно считает свет: отскоки от стен и пола, свет неба через окна, преломление в стекле. Картинка проявляется постепенно — её можно остановить в любой момент. Для интерьера поставьте камеру внутри комнаты (Вид → Камера) или отрежьте стену ближней плоскостью камеры. «Границы 3D-вида» работают только в быстром движке.</p>
       </div>
+      <div class="rn-post" id="rnPost" hidden></div>
     </div>
   </div>
 </div>
@@ -910,11 +928,17 @@ const MATS = {
 const MATS_BASE = JSON.parse(JSON.stringify(MATS));
 let MATX = {};
 const PATS0 = () => ({ fg:{ p:'none', c:'#2b3439' }, bg:{ p:'none', c:'#ffffff' } });
+/* physical (PBR) properties for the photoreal render: r — roughness, m — metalness, sp — specular (reflection) strength,
+   cc/ccr — clear coat (varnish, lacquer) and its roughness, sh/shc — sheen of fabrics and its colour, bump — relief from the photo/texture, ior — refraction */
+const PBR_DEF = { r:0.85, m:0, sp:0.5, cc:0, ccr:0.08, sh:0, shc:'#ffffff', bump:0.35, ior:1.5 };
+const PBR_MAT = { wood:{ r:0.5, cc:0.35, bump:0.25 }, tile:{ r:0.38, m:0.7, bump:0.2 }, steel:{ r:0.28, m:1, bump:0 }, concrete:{ r:0.92, bump:0.6 }, brick:{ r:0.9, bump:0.9 },
+  facade:{ r:0.85, bump:0.9 }, plaster:{ r:0.9, bump:0.35 }, gkl:{ r:0.85, bump:0.15 }, screed:{ r:0.75, bump:0.3 }, gas:{ r:0.95, bump:0.5 }, block:{ r:0.95, bump:0.6 },
+  insul:{ r:1, bump:0.8 }, eps:{ r:0.8, bump:0.3 }, generic:{ r:0.9, bump:0.4 }, frame:{ r:0.4, m:0.8, bump:0 } };
 function matSpec(k){
   const base = MATS[k] || MATS.generic, x = MATX[k] || {}, sm = (typeof STD !== 'undefined' && STD.mat && STD.mat[k]) || { f:'diag' };
   return { n:base.n, c:base.c, tr:x.tr || 0, surf:x.surf || PATS0(),
     cut:x.cut || { fg:{ p:sm.f || 'diag', c:sm.fg || '#2b3439' }, bg:{ p:'solid', c:sm.bg || base.c } },
-    img:x.img || null, iw:x.iw || 1000, ih:x.ih || x.iw || 1000, custom:!!x.custom };
+    img:x.img || null, iw:x.iw || 1000, ih:x.ih || x.iw || 1000, custom:!!x.custom, pbr:{ ...PBR_DEF, ...(PBR_MAT[k] || {}), ...(x.pbr || {}) } };
 }
 function syncMats(){
   for (const k of Object.keys(MATS)) if (!MATS_BASE[k]) delete MATS[k];
@@ -938,6 +962,10 @@ function sanitizeMats(o){
       e.img = x.img; e.iw = Number.isFinite(+x.iw) && +x.iw > 0 ? Math.min(Math.max(+x.iw, 10), 1e5) : 1000;
       if (Number.isFinite(+x.ih) && +x.ih > 0) e.ih = Math.min(Math.max(+x.ih, 10), 1e5);
     }
+    if (x.pbr && typeof x.pbr === 'object'){ const P = {}, n01 = v => Math.min(Math.max(+v, 0), 1);
+      for (const q of ['r', 'm', 'sp', 'cc', 'ccr', 'sh', 'bump']) if (Number.isFinite(+x.pbr[q])) P[q] = n01(x.pbr[q]);
+      if (Number.isFinite(+x.pbr.ior)) P.ior = Math.min(Math.max(+x.pbr.ior, 1), 3); if (/^#[0-9a-f]{6}$/i.test(x.pbr.shc)) P.shc = x.pbr.shc;
+      if (Object.keys(P).length) e.pbr = P; }
     out[k] = e;
   }
   return out;
@@ -5325,6 +5353,12 @@ function renderMatBody(){
         <div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm" id="mtImgUp">${sp.img ? 'Заменить фото' : 'Загрузить фото'}</button>${sp.img ? '<button class="btn sm danger" id="mtImgDel">Убрать фото</button>' : ''}</div>
         ${sp.img ? row('Ширина образца, мм', `<input type="number" id="mtIW" min="10" step="10" value="${Math.round(sp.iw)}">`) + row('Высота образца, мм', `<input type="number" id="mtIH" min="10" step="10" value="${Math.round(sp.ih)}">`) : ''}
       </div></div>
+    <h3>Физика света (визуализация)</h3>
+    <p class="libnote">Как материал отражает и рассеивает свет в «Физически точной» визуализации. Шероховатость 0 — зеркало, 1 — матовая поверхность.</p>
+    ${[['r', 'Шероховатость', 0, 1, 0.01], ['m', 'Металличность', 0, 1, 0.01], ['sp', 'Блеск (отражение)', 0, 1, 0.01], ['bump', 'Рельеф из фото / фактуры', 0, 1, 0.01], ['cc', 'Лак (прозрачное покрытие)', 0, 1, 0.01], ['ccr', 'Шероховатость лака', 0, 1, 0.01], ['sh', 'Бархат ткани', 0, 1, 0.01], ['ior', 'Преломление (IOR)', 1, 2.5, 0.01]]
+      .map(([k2, n, a, b, st]) => row(n, `<input type="range" data-pb="${k2}" min="${a}" max="${b}" step="${st}" value="${sp.pbr[k2]}" aria-label="${n}">`, `<span data-pbv="${k2}">${(+sp.pbr[k2]).toFixed(2)}</span>`)).join('')}
+    ${row('Цвет бархата', `<input type="color" data-pb="shc" value="${sp.pbr.shc}">`)}
+    <div class="pbtns">${[['Матовый', { r:0.92, m:0, sp:0.3, cc:0, sh:0 }], ['Сатин', { r:0.55, m:0, sp:0.5, cc:0, sh:0 }], ['Глянец', { r:0.12, m:0, sp:0.6, cc:0.6, ccr:0.05, sh:0 }], ['Лакированное дерево', { r:0.5, m:0, cc:0.7, ccr:0.06, sh:0 }], ['Металл', { r:0.25, m:1, cc:0, sh:0 }], ['Хром', { r:0.04, m:1, cc:0, sh:0 }], ['Ткань', { r:0.95, m:0, sp:0.2, cc:0, sh:0.8 }], ['Керамика', { r:0.08, m:0, sp:0.6, cc:0.5, ccr:0.03, sh:0 }]].map(([n, v]) => `<button class="btn sm" data-pbp='${JSON.stringify(v)}'>${n}</button>`).join('')}</div>
     <div class="pbtns" style="margin-top:4px">
       ${selIds.length ? `<button class="btn sm primary" id="mtAssign">Назначить выбранным (${selIds.length})</button>` : ''}
       ${!sp.custom && MATX[k] ? '<button class="btn sm" id="mtReset">Вернуть как было</button>' : ''}
@@ -5344,6 +5378,12 @@ function renderMatBody(){
     if (el.type === 'color'){ el.oninput = e => set(e.target.value); el.onchange = () => { applyMats(); renderMatList(); }; }
     else el.onchange = e => { set(e.target.value); applyMats(); renderMatList(); };
   });
+  body.querySelectorAll('[data-pb]').forEach(el => {
+    const k2 = el.dataset.pb, lab = body.querySelector('[data-pbv="' + k2 + '"]');
+    el.oninput = () => { if (lab) lab.textContent = (+el.value).toFixed(2); };
+    el.onchange = () => { const x = matEdit(k); x.pbr = { ...(x.pbr || {}), [k2]:k2 === 'shc' ? el.value : +el.value }; scheduleSave(); for (const kk in RMAT){ RMAT[kk].dispose(); delete RMAT[kk]; } };
+  });
+  body.querySelectorAll('[data-pbp]').forEach(b => b.onclick = () => { const x = matEdit(k); x.pbr = { ...(x.pbr || {}), ...JSON.parse(b.dataset.pbp) }; scheduleSave(); for (const kk in RMAT){ RMAT[kk].dispose(); delete RMAT[kk]; } renderMatBody(); toast('Физика материала: ' + b.textContent); });
   q('mtImgUp').onclick = () => { const f = $('#matImg'); f.value = ''; f.click(); };
   if (q('mtImgDel')) q('mtImgDel').onclick = () => { const x = matEdit(k); delete x.img; delete x.iw; delete x.ih; applyMats(); renderMats(); };
   const dim = (id, key) => { const f = q(id); if (f) f.onchange = e => { const v = +e.target.value; if (v >= 10){ matEdit(k)[key] = Math.min(v, 1e5); applyMats(); } }; };
@@ -5722,8 +5762,8 @@ function rMat(m){
   let mat;
   // the project's own material: its photo (when textures are on), else its shading colour and transparency
   if (sp && (sp.custom || sp.img || sp.tr)){
-    mat = sp.img && o.tex ? photoMat(m, sp) : new THREE.MeshStandardMaterial({ color:sp.c, roughness:0.8, envMapIntensity:0.55, clippingPlanes:CLIP, ...PO, ...(sp.tr ? { transparent:true, opacity:1 - sp.tr, depthWrite:false } : {}) });
-    return RMAT[key] = mat;
+    mat = sp.img && o.tex ? photoMat(m, sp, { r:sp.pbr.r, met:sp.pbr.m }) : new THREE.MeshStandardMaterial({ color:sp.c, roughness:sp.pbr.r, metalness:sp.pbr.m, envMapIntensity:0.55, clippingPlanes:CLIP, ...PO, ...(sp.tr ? { transparent:true, opacity:1 - sp.tr, depthWrite:false } : {}) });
+    mat.userData.mk = m; return RMAT[key] = mat;
   }
   if (m === 'glass'){ mat = new THREE.MeshStandardMaterial({ color:'#a9c8dc', roughness:0.04, metalness:0.2, transparent:true, opacity:0.32, depthWrite:false, envMapIntensity:1.4, clippingPlanes:CLIP }); mat.userData.glass = true; }
   else if (m === 'mass') mat = new THREE.MeshStandardMaterial({ color:'#d9d2c6', roughness:0.8, envMapIntensity:0.5, clippingPlanes:CLIP, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
@@ -5733,6 +5773,7 @@ function rMat(m){
     mat = o.tex ? triMat(texFor(kind, base), kind === 'grass' ? 0.3 : kind === 'paving' ? 0.5 : 1, opt)
       : new THREE.MeshStandardMaterial({ color:base, roughness:opt.r ?? 0.85, metalness:opt.met ?? 0, envMapIntensity:0.55, clippingPlanes:CLIP, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
   }
+  if (MATS[m]){ const P = matSpec(m).pbr; if (mat.roughness != null && m !== 'steel'){ mat.roughness = P.r; mat.metalness = P.m; } mat.userData.mk = m; }
   return RMAT[key] = mat;
 }
 /* ---------- sky with clouds (as in D5 Render): time of day × weather → a linear HDR panorama that lights the scene ----------
@@ -5789,6 +5830,44 @@ function makeSky(time, wx, az, w = 2048){
   const out = { tex, sunDir:sd, sunColor:new THREE.Color(...T.sun), sunI:T.si * (1 - 0.97 * Math.pow(cov, 1.5)), night:!!T.night, cov, zen:new THREE.Color(...T.zen), hor:new THREE.Color(...T.hor) };
   if (SKY_CACHE.size > 6){ const [k0, v0] = SKY_CACHE.entries().next().value; v0.tex.dispose(); SKY_CACHE.delete(k0); }
   SKY_CACHE.set(key, out); return out;
+}
+/* HDRI: a real photographic sky panorama (.hdr / .exr) — Poly Haven presets (CC0) or your own file; rotation and brightness.
+   Files are kept on the device (IndexedDB «kot-hdri»), rows are stored bottom-up like the procedural sky */
+const HDRI_LIB = [['kloofendal_48d_partly_cloudy_puresky', 'Облака, день'], ['citrus_orchard_road_puresky', 'Ясный день'], ['industrial_sunset_puresky', 'Закат'], ['qwantani_dusk_2_puresky', 'Сумерки'], ['venice_sunset', 'Закат над городом'], ['studio_small_08', 'Фотостудия (интерьер)']];
+let HDRI = null; const HDRI_TEX = new Map();
+function idbHdri(){ return new Promise((res, rej) => { const r = indexedDB.open('kot-hdri', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function hdriSave(name, buf){ try { const db = await idbHdri(); await new Promise((res, rej) => { const t = db.transaction('f', 'readwrite'); t.objectStore('f').put({ name, buf }, name); t.objectStore('f').put(name, '__last'); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (e){} }
+async function hdriGet(name){ try { const db = await idbHdri(); return await new Promise(res => { const q = db.transaction('f').objectStore('f').get(name); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch (e){ return null; } }
+async function hdriParse(buf, name){
+  const isExr = /\.exr$/i.test(name) || new DataView(buf).getUint32(0, true) === 20000630;
+  const mod = await import(isExr ? 'three/addons/loaders/EXRLoader.js' : 'three/addons/loaders/RGBELoader.js');
+  const Ld = isExr ? new mod.EXRLoader() : new mod.RGBELoader(); Ld.setDataType(THREE.FloatType);
+  const r = Ld.parse(buf); if (!r || !r.data || !r.width) throw new Error('файл не похож на HDRI (.hdr или .exr)');
+  const w = r.width, h = r.height, src = r.data, ch = src.length / (w * h), data = new Float32Array(w * h * 4);
+  for (let y = 0; y < h; y++){ const sy = isExr ? y : h - 1 - y; for (let x = 0; x < w; x++){ const s2 = (sy * w + x) * ch, d = (y * w + x) * 4; data[d] = src[s2]; data[d + 1] = src[s2 + 1]; data[d + 2] = src[s2 + 2]; data[d + 3] = 1; } }
+  return { name, w, h, data };
+}
+function hdriSet(H){ HDRI = H; HDRI_TEX.forEach(t => t.dispose()); HDRI_TEX.clear(); }
+async function hdriFile(file){ const buf = await file.arrayBuffer(); const H = await hdriParse(buf, file.name); hdriSet(H); hdriSave('file:' + file.name, buf); return H; }
+async function hdriPreset(id){
+  const key = 'ph:' + id; if (HDRI && HDRI.name === key) return HDRI;
+  const hit = await hdriGet(key); if (hit){ const H = await hdriParse(hit.buf, key); hdriSet(H); return H; }
+  const res = await fetch(`https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/${TABLET ? '1k' : '2k'}/${id}_${TABLET ? '1k' : '2k'}.hdr`); if (!res.ok) throw new Error('HDRI не скачалось (' + res.status + ')');
+  const buf = await res.arrayBuffer(); const H = await hdriParse(buf, key); hdriSet(H); hdriSave(key, buf); return H;
+}
+async function hdriLast(){ const name = await hdriGet('__last'); if (!name) return null; const hit = await hdriGet(name); if (!hit) return null; const H = await hdriParse(hit.buf, name); hdriSet(H); return H; }
+// the panorama turned around the vertical axis (its columns shifted) and scaled by 2^ev; the brightest point gives the sun
+function hdriTex(rot, ev){
+  const key = rot + '|' + ev; if (HDRI_TEX.has(key)) return HDRI_TEX.get(key);
+  const { w, h, data } = HDRI, out = new Float32Array(data.length), sh = Math.round(((rot % 360) + 360) % 360 / 360 * w), k = Math.pow(2, ev);
+  let best = -1, bx = 0, by = 0;
+  for (let y = 0; y < h; y++){ const row = y * w; for (let x = 0; x < w; x++){ const s2 = (row + (x + sh) % w) * 4, d = (row + x) * 4; out[d] = data[s2] * k; out[d + 1] = data[s2 + 1] * k; out[d + 2] = data[s2 + 2] * k; out[d + 3] = 1;
+    if (y > h / 2){ const L = out[d] + out[d + 1] + out[d + 2]; if (L > best){ best = L; bx = x; by = y; } } } }
+  const t = new THREE.DataTexture(out, w, h, THREE.RGBAFormat, THREE.FloatType); t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.LinearSRGBColorSpace; t.magFilter = t.minFilter = THREE.LinearFilter; t.generateMipmaps = false; t.needsUpdate = true;
+  const lat = ((by + 0.5) / h - 0.5) * Math.PI, phi = ((bx + 0.5) / w - 0.5) * 2 * Math.PI, o = (by * w + bx) * 4;
+  t.userData.sun = { dir:new V3(Math.cos(phi) * Math.cos(lat), Math.sin(lat), Math.sin(phi) * Math.cos(lat)).normalize(), peak:best / 3, color:new THREE.Color(out[o], out[o + 1], out[o + 2]).multiplyScalar(1 / Math.max(out[o], out[o + 1], out[o + 2], 1e-6)) };
+  if (HDRI_TEX.size > 3){ const [k0, v0] = HDRI_TEX.entries().next().value; v0.dispose(); HDRI_TEX.delete(k0); }
+  HDRI_TEX.set(key, t); return t;
 }
 // «Реалистичный» 3D view: the same sky as in the last render settings, behind the model
 let REAL_BG = null;
@@ -5849,16 +5928,71 @@ function worldUV(g0, mw, sc){
     nn.crossVectors(e1.subVectors(P[1], P[0]), e2.subVectors(P[2], P[0])); const ax = Math.abs(nn.x), ay = Math.abs(nn.y), az = Math.abs(nn.z);
     for (let j = 0; j < 3; j++){ const p = P[j]; let u, w; if (ay >= ax && ay >= az){ u = p.x; w = p.z; } else if (ax >= az){ u = p.z; w = p.y; } else { u = p.x; w = p.y; } uv[(i + j) * 2] = u * sc.x; uv[(i + j) * 2 + 1] = w * sc.y; }
   }
-  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); return g;
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  const ix = new Uint32Array(n); for (let i = 0; i < n; i++) ix[i] = i; g.setIndex(new THREE.BufferAttribute(ix, 1)); // tangents (relief) need an index
+  return g;
 }
+// relief: a tangent-space normal map from the brightness of a texture (photo or procedural), cached per texture
+const NRM_CACHE = new Map();
+function normalTex(tex){
+  if (NRM_CACHE.has(tex.uuid)) return NRM_CACHE.get(tex.uuid);
+  const im = tex.image; if (!im || !(im.width || im.naturalWidth)) return null;
+  const w0 = im.naturalWidth || im.width, h0 = im.naturalHeight || im.height, k = Math.min(1, 1024 / Math.max(w0, h0)), W = Math.max(8, Math.round(w0 * k)), H = Math.max(8, Math.round(h0 * k));
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d', { willReadFrequently:true }); g.drawImage(im, 0, 0, W, H);
+  const src = g.getImageData(0, 0, W, H).data, hgt = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) hgt[i] = (src[i * 4] * 0.299 + src[i * 4 + 1] * 0.587 + src[i * 4 + 2] * 0.114) / 255;
+  const out = g.createImageData(W, H), d = out.data, at = (x, y) => hgt[((y + H) % H) * W + ((x + W) % W)];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
+    const dx = (at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1)) - (at(x - 1, y - 1) + 2 * at(x - 1, y) + at(x - 1, y + 1));
+    const dy = (at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1)) - (at(x - 1, y - 1) + 2 * at(x, y - 1) + at(x + 1, y - 1));
+    let nx = -dx * 2, ny = dy * 2, nz = 1; const l = Math.hypot(nx, ny, nz); nx /= l; ny /= l; nz /= l;
+    const i = (y * W + x) * 4; d[i] = (nx * 0.5 + 0.5) * 255; d[i + 1] = (ny * 0.5 + 0.5) * 255; d[i + 2] = (nz * 0.5 + 0.5) * 255; d[i + 3] = 255;
+  }
+  g.putImageData(out, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.NoColorSpace;
+  NRM_CACHE.set(tex.uuid, t); return t;
+}
+const TABLET = coarsePtr || /Android|iPad|iPhone|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
 function applyWB(canvas, L){
   if (!L || Math.abs(L.wb - 6500) < 50) return;
   const f = wbFactors(L.wb), g = canvas.getContext('2d'), im = g.getImageData(0, 0, canvas.width, canvas.height), d = im.data;
   for (let i = 0; i < d.length; i += 4){ d[i] = Math.min(255, d[i] * f[0]); d[i + 1] = Math.min(255, d[i + 1] * f[1]); d[i + 2] = Math.min(255, d[i + 2] * f[2]); }
   g.putImageData(im, 0, 0);
 }
+// GL reads images bottom-up; the canvas and the denoiser want them top-down
+function flipRows(a, W, H){ const row = W * 4, out = new a.constructor(a.length); for (let y = 0; y < H; y++) out.set(a.subarray((H - 1 - y) * row, (H - y) * row), y * row); return out; }
+function readFloatRT(pr, rt, W, H){
+  const n = W * H * 4; let buf = new Float32Array(n);
+  if (rt.texture.type === THREE.HalfFloatType){ const h = new Uint16Array(n); pr.readRenderTargetPixels(rt, 0, 0, W, H, h); for (let i = 0; i < n; i++) buf[i] = THREE.DataUtils.fromHalfFloat(h[i]); }
+  else pr.readRenderTargetPixels(rt, 0, 0, W, H, buf);
+  return flipRows(buf, W, H);
+}
+// albedo / normal pass of the traced scene (for the denoiser), 8 bit, linear
+function aovPass(pr, sc, cam, W, H, kind){
+  const rt = new THREE.WebGLRenderTarget(W, H), swap = [], nm = kind === 'normal' ? new THREE.MeshNormalMaterial() : null;
+  sc.traverse(o => { if (!o.isMesh) return; const m = o.material, a = nm || new THREE.MeshBasicMaterial({ color:m.transmission > 0.5 ? 0xffffff : m.color, map:m.map || null }); swap.push([o, m, a]); o.material = a; });
+  const bg = sc.background, tm = pr.toneMapping; sc.background = null; pr.toneMapping = THREE.NoToneMapping;
+  pr.setRenderTarget(rt); pr.setClearColor(0x000000, 1); pr.clear(); pr.render(sc, cam); pr.setRenderTarget(null);
+  pr.toneMapping = tm; sc.background = bg;
+  for (const [o, m, a] of swap){ o.material = m; if (a !== nm) a.dispose(); } if (nm) nm.dispose();
+  const px = new Uint8Array(W * H * 4); pr.readRenderTargetPixels(rt, 0, 0, W, H, px); rt.dispose();
+  return new Uint8ClampedArray(flipRows(px, W, H).buffer);
+}
+// Intel Open Image Denoise (the denoiser of Corona and V-Ray) on WebGPU: HDR colour + albedo + normals
+let UNET_P = null;
+async function denoiseHDR(hdr, alb, nrm, W, H){
+  if (!navigator.gpu) throw new Error('браузер без WebGPU');
+  const OI = await import('https://cdn.jsdelivr.net/npm/oidn-web@0.5.0/dist/oidn.js');
+  if (!UNET_P) UNET_P = OI.initUNetFromURL(`https://cdn.jsdelivr.net/gh/pissang/oidn-web@0.5.0/weights/${TABLET ? 'rt_hdr_alb_nrm_small' : 'rt_hdr_alb_nrm'}.tza`, undefined, { aux:true, hdr:true }).catch(e => { UNET_P = null; throw e; });
+  const unet = await UNET_P;
+  return await new Promise((res, rej) => {
+    try { unet.tileExecute({ color:{ data:hdr, width:W, height:H }, albedo:{ data:alb, width:W, height:H }, normal:{ data:nrm, width:W, height:H }, done(d){ res(d && d.data ? d.data : d); }, progress(){} }); }
+    catch (e){ rej(e); }
+  });
+}
 async function pathTrace(o, v, camR, W, H, extra, L, prog){
-  let PTm; try { PTm = await import('three-gpu-pathtracer'); } catch (err){ throw new Error('не загрузился модуль трассировки лучей (нужен интернет при первом запуске)'); }
+  let PTm, RB = null; try { PTm = await import('three-gpu-pathtracer'); } catch (err){ throw new Error('не загрузился модуль трассировки лучей (нужен интернет при первом запуске)'); }
+  if (o.bevel > 0){ try { RB = (await import('three/addons/geometries/RoundedBoxGeometry.js')).RoundedBoxGeometry; } catch (e){ RB = null; } }
   // three 0.160 scenes have no background/environment rotation yet; the path tracer reads them
   if (!('backgroundRotation' in THREE.Scene.prototype) && new THREE.Scene().backgroundRotation === undefined){ THREE.Scene.prototype.backgroundRotation = new THREE.Euler(); THREE.Scene.prototype.environmentRotation = new THREE.Euler(); }
   const ptScene = new THREE.Scene(), own = [];
@@ -5866,13 +6000,20 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
     const m = src.material; if (!m || Array.isArray(m) || m === M.pick || m.isShadowMaterial || !src.geometry) return;
     if (m.transparent && (m.opacity ?? 1) < 0.03 && !m.userData.glass) return;
     let g = src.geometry, mat;
-    if (m.userData.glass) mat = new THREE.MeshPhysicalMaterial({ color:0xffffff, roughness:0, metalness:0, transmission:1, ior:1.52, thickness:0.008, side:THREE.DoubleSide });
-    else if (o.clay) mat = new THREE.MeshStandardMaterial({ color:'#f2f1ee', roughness:0.88 });
+    // rounded edges (Corona «round edges»): boxes — furniture, columns, door leaves, stair steps — get a real chamfer
+    if (RB && g.type === 'BoxGeometry' && !m.userData.glass){ const q = g.parameters, r = Math.min(o.bevel / 1000, 0.45 * Math.min(q.width, q.height, q.depth)); if (r > 0.0005){ g = new RB(q.width, q.height, q.depth, 2, r); own.push(g); } }
+    if (m.userData.glass) mat = new THREE.MeshPhysicalMaterial({ color:0xffffff, roughness:0, metalness:0, transmission:1, ior:1.52, thickness:0.008, specularIntensity:1, side:THREE.DoubleSide });
+    else if (o.clay) mat = new THREE.MeshPhysicalMaterial({ color:'#f2f1ee', roughness:0.88, specularIntensity:0.4 });
     else {
-      const tex = m.userData.triTex, col = tex ? new THREE.Color(1, 1, 1) : (m.color ? m.color.clone() : new THREE.Color('#cccccc')), tr = m.transparent ? 1 - (m.opacity ?? 1) : 0;
-      mat = tr > 0.02 ? new THREE.MeshPhysicalMaterial({ color:col, roughness:0.05, metalness:0, transmission:tr, ior:1.5, thickness:0.01, side:THREE.DoubleSide })
-        : new THREE.MeshStandardMaterial({ color:col, roughness:m.roughness ?? 0.85, metalness:m.metalness ?? 0 });
-      if (tex){ mat.map = tex; g = worldUV(g, src.matrixWorld, m.userData.triScale); own.push(g); }
+      const mk = m.userData.mk, sp = mk && MATS[mk] ? matSpec(mk) : null, P = sp ? sp.pbr : PBR_DEF;
+      const tex = m.userData.triTex, col = tex ? new THREE.Color(1, 1, 1) : (m.color ? m.color.clone() : new THREE.Color('#cccccc')), tr = sp ? sp.tr : (m.transparent ? 1 - (m.opacity ?? 1) : 0);
+      mat = new THREE.MeshPhysicalMaterial({ color:col, roughness:P.r, metalness:P.m, specularIntensity:P.sp * 2, clearcoat:P.cc, clearcoatRoughness:P.ccr, sheen:P.sh, sheenColor:new THREE.Color(P.shc), sheenRoughness:0.55, ior:P.ior,
+        ...(tr > 0.02 ? { transmission:tr, thickness:0.01, side:THREE.DoubleSide } : {}) });
+      if (tex){
+        if (g === src.geometry) g = worldUV(g, src.matrixWorld, m.userData.triScale); else { const g2 = worldUV(g, src.matrixWorld, m.userData.triScale); g.dispose(); g = g2; }
+        own.push(g); mat.map = tex;
+        if (P.bump > 0.01 && o.bump !== false){ const nt = normalTex(tex); if (nt){ mat.normalMap = nt; mat.normalScale.set(P.bump * 1.6, P.bump * 1.6); } }
+      }
     }
     own.push(mat);
     const c = new THREE.Mesh(g, mat); c.matrixAutoUpdate = false; c.matrix.copy(src.matrixWorld); ptScene.add(c);
@@ -5881,8 +6022,9 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
   for (const e of extra) if (e.isMesh && e.visible){ e.updateMatrixWorld(true); add(e); }
   if (o.ground === 'white'){ const gm = new THREE.Mesh(new THREE.CircleGeometry(400, 64), new THREE.MeshStandardMaterial({ color:'#f4f4f2', roughness:0.9 })); gm.rotation.x = -Math.PI / 2; gm.position.y = -0.02; gm.updateMatrix(); gm.matrixAutoUpdate = false; own.push(gm.geometry, gm.material); ptScene.add(gm); }
   // the sun (moon) and the sky
-  const sl = new THREE.DirectionalLight(sun.color.clone(), sun.intensity); sl.position.copy(sun.position); sl.target.position.copy(sun.target.position); ptScene.add(sl, sl.target);
-  ptScene.environment = scene.background && scene.background.isTexture ? scene.background : makeSky('day', 'overcast', o.az, 1024).tex;
+  // with an HDRI the sun is in the panorama itself (importance-sampled), no extra light
+  if (!o.hdri && sun.intensity > 0){ const sl = new THREE.DirectionalLight(sun.color.clone(), sun.intensity); sl.position.copy(sun.position); sl.target.position.copy(sun.target.position); ptScene.add(sl, sl.target); }
+  ptScene.environment = o.envTex || (scene.background && scene.background.isTexture ? scene.background : makeSky('day', 'overcast', o.az, 1024).tex);
   ptScene.background = scene.background && scene.background.isColor ? scene.background.clone() : ptScene.environment;
   ptScene.backgroundRotation = new THREE.Euler(); ptScene.environmentRotation = new THREE.Euler(); ptScene.backgroundBlurriness = 0; // three 0.160 has no such fields yet
   ptScene.updateMatrixWorld(true);
@@ -5898,7 +6040,7 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
   const pt = new PTm.WebGLPathTracer(pr);
   pt.bounces = o.bounces || 6; pt.transmissiveBounces = 8; pt.filterGlossyFactor = 0.3; pt.minSamples = 1; pt.renderDelay = 0; pt.fadeDuration = 0;
   // the frame is traced in tiles so that each GPU job stays short (Windows resets a GPU busy for ~2 s)
-  pt.dynamicLowRes = false; pt.renderScale = 1; pt.multipleImportanceSampling = true; const tl = clamp(Math.ceil(Math.sqrt(W * H / 90000)), 2, 10); pt.tiles.set(tl, tl);
+  pt.dynamicLowRes = false; pt.renderScale = 1; pt.multipleImportanceSampling = true; const tl = clamp(Math.ceil(Math.sqrt(W * H / (TABLET ? 40000 : 90000))), 2, 14); pt.tiles.set(tl, tl);
   RN_BUSY = true; RN_CANCEL = false;
   const out = document.createElement('canvas'); out.width = W; out.height = H; const og = out.getContext('2d');
   try {
@@ -5911,7 +6053,12 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
       if (now - last > 200){ last = now; if (prog) prog(pt.samples, target, pr.domElement); await new Promise(r => setTimeout(r, 0)); }
     }
     if (lost) throw new Error('видеокарта не справилась и сбросилась. Уменьшите размер картинки или число отскоков');
-    og.drawImage(pr.domElement, 0, 0, W, H); out.samples = Math.floor(pt.samples);
+    out.samples = Math.floor(pt.samples);
+    // raw linear HDR image (the average of all samples), read before the tracer is disposed
+    out.hdr = readFloatRT(pr, pt.target, W, H);
+    // auxiliary passes for the denoiser: albedo (surface colour) and normals, rendered with the same camera
+    if (o.denoise){ out.alb = aovPass(pr, ptScene, pc, W, H, 'albedo'); out.nrm = aovPass(pr, ptScene, pc, W, H, 'normal'); }
+    if (prog) prog(pt.samples, target, pr.domElement);
   } finally {
     RN_BUSY = false; try { pt.dispose(); } catch (e){}
     for (const x of own) if (x.dispose) x.dispose();
@@ -5931,6 +6078,7 @@ async function renderPhoto(o, prog){
     vis:[axesG, grids, datum, anno, preview, boxG, cropG, shadowGround].map(g => g.visible), sun:{ p:sun.position.clone(), t:sun.target.position.clone(), c:sun.color.clone(), i:sun.intensity, cs:sun.castShadow, ms:sun.shadow.mapSize.clone(), cam:(({ left, right, top, bottom, near, far }) => ({ left, right, top, bottom, near, far }))(sun.shadow.camera) },
     hemi:{ s:hemi.color.clone(), g:hemi.groundColor.clone(), i:hemi.intensity }, tm:renderer.toneMapping, te:renderer.toneMappingExposure, pr:renderer.getPixelRatio() };
   const sky = makeSky(SKY_TIME[o.time] ? o.time : 'day', SKY_WX[o.sky] ? o.sky : 'sunny', o.az), extra = [];
+  const hd = o.sky === 'hdri' && HDRI ? hdriTex(o.hrot || 0, o.hev || 0) : null; o.hdri = !!hd; o.envTex = hd || (o.ground !== 'white' ? sky.tex : null);
   try {
     S.view = mode; S.phase = v.phase || 'all'; clearSel(); S.tool = 'select'; S.dims = false; S.style = 'shaded'; RV = v;
     S.render = { tex:o.tex, clay:!!o.clay }; C = { ...C, poche:'#6d655c' }; makeMaterials();
@@ -5941,7 +6089,7 @@ async function renderPhoto(o, prog){
     // ground and sky
     if (o.ground === 'white'){ scene.background = new THREE.Color('#ffffff'); const gm = new THREE.Mesh(new THREE.CircleGeometry(diag * 6, 64), new THREE.ShadowMaterial({ opacity:0.28 })); gm.rotation.x = -Math.PI / 2; gm.position.y = -0.02; gm.receiveShadow = true; scene.add(gm); extra.push(gm); }
     else {
-      scene.background = sky.tex;
+      scene.background = hd || sky.tex;
       const gm = new THREE.Mesh(new THREE.CircleGeometry(Math.max(80, diag * 8), 96), o.clay ? new THREE.MeshStandardMaterial({ color:'#f2f1ee', roughness:0.9 }) : o.ground === 'paving' ? triMat(texFor('paving', '#b9b4aa'), 0.6, { r:0.9 }) : triMat(texFor('grass', '#6f8f4e'), 0.3, { r:1, env:0.25 }));
       gm.material.clippingPlanes = null; gm.rotation.x = -Math.PI / 2; gm.position.y = -0.02; gm.receiveShadow = true; scene.add(gm); extra.push(gm);
     }
@@ -5949,22 +6097,25 @@ async function renderPhoto(o, prog){
     const dir = sky.sunDir.clone();
     sun.position.copy(c).addScaledVector(dir, diag * 2 + 20); sun.target.position.copy(c); sun.target.updateMatrixWorld();
     sun.color.copy(sky.sunColor); sun.intensity = sky.sunI; sun.castShadow = sky.cov < 0.9;
+    if (hd){ const su = hd.userData.sun; sun.position.copy(c).addScaledVector(su.dir, diag * 2 + 20); sun.target.updateMatrixWorld(); sun.color.copy(su.color); sun.intensity = su.peak > 30 ? 2.6 : 0; sun.castShadow = su.peak > 30; }
     const sc = sun.shadow.camera, r = diag * 0.75; Object.assign(sc, { left:-r, right:r, top:r, bottom:-r, near:0.5, far:diag * 4 + 60 }); sc.updateProjectionMatrix();
     if (sun.shadow.map){ sun.shadow.map.dispose(); sun.shadow.map = null; }
     sun.shadow.mapSize.set(coarsePtr ? 2048 : 4096, coarsePtr ? 2048 : 4096); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
-    hemi.color.copy(sky.hor); hemi.groundColor.set('#7f7a70'); hemi.intensity = sky.night ? 0.12 : 0.7 + 0.7 * sky.cov;
+    hemi.color.copy(sky.hor); hemi.groundColor.set('#7f7a70'); hemi.intensity = hd ? 0.15 : sky.night ? 0.12 : 0.7 + 0.7 * sky.cov;
     let pm = null;
-    if (o.ground !== 'white'){ pm = new THREE.PMREMGenerator(renderer); const envRT = pm.fromEquirectangular(sky.tex); scene.environment = envRT.texture; extra.push(envRT); }
+    if (o.ground !== 'white' || hd){ pm = new THREE.PMREMGenerator(renderer); const envRT = pm.fromEquirectangular(hd || sky.tex); scene.environment = envRT.texture; extra.push(envRT); }
     else if (A.RoomEnvironment){ pm = new THREE.PMREMGenerator(renderer); const envRT = pm.fromScene(new A.RoomEnvironment(), 0.04); scene.environment = envRT.texture; extra.push(envRT); }
     // exposure of the camera (f-stop, shutter, ISO, EV) and the render's own correction; night is a long exposure
-    const expo = (Lx ? exposureOf(Lx) : 1) * Math.pow(2, +o.ev || 0) * (sky.night ? 8 : 1);
+    const expo = (Lx ? exposureOf(Lx) : 1) * Math.pow(2, +o.ev || 0) * (sky.night && !hd ? 8 : 1);
     renderer.toneMapping = THREE.AgXToneMapping != null && o.engine === 'pt' ? THREE.AgXToneMapping : THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95 * expo;
     renderer.setPixelRatio(1); renderer.setSize(W, H, false);
     const camR = viewCamera(v, W / H);
     if (o.engine === 'pt'){
-      const out = await pathTrace(o, v, camR, W, H, extra, Lx, prog);
-      if (pm) pm.dispose(); applyWB(out, Lx);
-      return { canvas:out, W, H, scaled:k < 1, samples:out.samples };
+      const r = await pathTrace(o, v, camR, W, H, extra, Lx, prog), base = renderer.toneMappingExposure;
+      if (pm) pm.dispose();
+      let den = null, dnErr = null;
+      if (o.denoise && r.hdr && r.alb){ if (prog) prog(-1, 0, null); try { den = await denoiseHDR(r.hdr, r.alb, r.nrm, W, H); } catch (e){ dnErr = (e && e.message) || String(e); console.warn('denoise', e); } }
+      return { R:{ hdr:r.hdr, den, W, H, base, ldr:false, wb:Lx ? Lx.wb : 6500 }, W, H, scaled:k < 1, samples:r.samples, dnErr };
     }
     const useAO = o.ao && A.EffectComposer && A.GTAOPass && !CLIP.length;
     if (useAO){
@@ -5976,9 +6127,13 @@ async function renderPhoto(o, prog){
       comp.addPass(ao); comp.addPass(new A.OutputPass());
       comp.render(); extra.push(rt, { dispose:() => { ao.dispose && ao.dispose(); comp.dispose && comp.dispose(); } });
     } else renderer.render(scene, camR);
-    const out = document.createElement('canvas'); out.width = W; out.height = H; out.getContext('2d').drawImage(cv, 0, 0, W, H);
-    if (pm) pm.dispose(); applyWB(out, Lx);
-    return { canvas:out, W, H, scaled:k < 1 };
+    const out = document.createElement('canvas'); out.width = W; out.height = H; const og2 = out.getContext('2d', { willReadFrequently:true }); og2.drawImage(cv, 0, 0, W, H);
+    if (pm) pm.dispose();
+    // the fast render goes through the same frame buffer: its picture becomes linear again for the corrections
+    const px = og2.getImageData(0, 0, W, H).data, hdr = new Float32Array(W * H * 4), lut = new Float32Array(256);
+    for (let i = 0; i < 256; i++){ const x = i / 255; lut[i] = x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }
+    for (let i = 0; i < px.length; i += 4){ hdr[i] = lut[px[i]]; hdr[i + 1] = lut[px[i + 1]]; hdr[i + 2] = lut[px[i + 2]]; hdr[i + 3] = 1; }
+    return { R:{ hdr, den:null, W, H, base:1, ldr:true, wb:Lx ? Lx.wb : 6500 }, W, H, scaled:k < 1 };
   } finally {
     for (const e of extra){ if (e.isMesh){ scene.remove(e); e.geometry.dispose(); if (e.material.dispose && !Object.values(RMAT).includes(e.material)) e.material.dispose(); } else if (e.dispose) e.dispose(); }
     S.render = null; RV = null; C = keep.C; makeMaterials();
@@ -5992,6 +6147,112 @@ async function renderPhoto(o, prog){
     renderer.setPixelRatio(keep.pr); resize(); if (S.view !== 'sheet') rebuild(true); annoDirty = true;
   }
 }
+/* ---------- frame buffer (as Corona VFB): the render is kept as linear HDR; tone mapping and corrections are applied live ----------
+   ev — exposure, curve — tone curve, hc — highlight compression, wb/tint — white balance, con/sat — contrast, saturation,
+   fh/fs — filmic highlights and shadows, vig — vignette, bloom/bth — glow around bright areas and its threshold, sharp — sharpening */
+const POST_DEF = { ev:0, curve:'corona', hc:4, wb:6500, tint:0, con:0.12, sat:1.05, fh:0.2, fs:0.1, vig:0.15, bloom:0.12, bth:1.5, sharp:0.25, dn:true };
+const POST_PRESETS = {
+  'Нейтральный':{ ev:0, curve:'corona', hc:4, wb:6500, tint:0, con:0.12, sat:1.05, fh:0.2, fs:0.1, vig:0.15, bloom:0.12, bth:1.5, sharp:0.25 },
+  'Мягкий архвиз':{ ev:0.2, curve:'corona', hc:8, wb:6200, tint:0, con:0.04, sat:0.95, fh:0.45, fs:0.2, vig:0.2, bloom:0.22, bth:1.2, sharp:0.2 },
+  'Тёплый интерьер':{ ev:0.15, curve:'corona', hc:6, wb:5600, tint:0.02, con:0.1, sat:1.08, fh:0.3, fs:0.12, vig:0.25, bloom:0.25, bth:1.1, sharp:0.25 },
+  'Холодный день':{ ev:0, curve:'corona', hc:5, wb:7400, tint:-0.01, con:0.15, sat:1.0, fh:0.25, fs:0.05, vig:0.12, bloom:0.1, bth:1.6, sharp:0.3 },
+  'Контрастный':{ ev:-0.1, curve:'aces', hc:3, wb:6500, tint:0, con:0.28, sat:1.15, fh:0.1, fs:0, vig:0.3, bloom:0.15, bth:1.4, sharp:0.4 },
+  'Кино (ACES)':{ ev:0, curve:'aces', hc:4, wb:6500, tint:0, con:0.05, sat:1.0, fh:0.15, fs:0.05, vig:0.2, bloom:0.18, bth:1.3, sharp:0.2 }
+};
+let RN_RES = null, RN_POST = { ...POST_DEF };
+const RN_OUT = document.createElement('canvas');
+function boxBlur(src, w, h, r, ch = 3){
+  // three passes of a separable box blur ≈ gaussian (horizontal a → b, vertical b → a)
+  const a = Float32Array.from(src), b = new Float32Array(src.length), n = 2 * r + 1;
+  for (let pass = 0; pass < 3; pass++){
+    for (let y = 0; y < h; y++) for (let c = 0; c < ch; c++){
+      const row = y * w; let acc = 0; for (let x = -r; x <= r; x++) acc += a[(row + clamp(x, 0, w - 1)) * ch + c];
+      for (let x = 0; x < w; x++){ b[(row + x) * ch + c] = acc / n; acc += a[(row + Math.min(x + r + 1, w - 1)) * ch + c] - a[(row + Math.max(x - r, 0)) * ch + c]; }
+    }
+    for (let x = 0; x < w; x++) for (let c = 0; c < ch; c++){
+      let acc = 0; for (let y = -r; y <= r; y++) acc += b[(clamp(y, 0, h - 1) * w + x) * ch + c];
+      for (let y = 0; y < h; y++){ a[(y * w + x) * ch + c] = acc / n; acc += b[(Math.min(y + r + 1, h - 1) * w + x) * ch + c] - b[(Math.max(y - r, 0) * w + x) * ch + c]; }
+    }
+  }
+  return a;
+}
+const acesC = x => Math.min(1, Math.max(0, (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14)));
+function postProcess(R, P){
+  const { W, H } = R, N = W * H, src = P.dn && R.den ? R.den : R.hdr, ldr = R.ldr;
+  const k = (ldr ? 1 : R.base) * Math.pow(2, P.ev), f = wbFactors(P.wb), tg = 1 + P.tint, lin = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++){ lin[i * 3] = Math.max(0, src[i * 4]) * k * f[0]; lin[i * 3 + 1] = Math.max(0, src[i * 4 + 1]) * k * f[1] * tg; lin[i * 3 + 2] = Math.max(0, src[i * 4 + 2]) * k * f[2]; }
+  // bloom: what is brighter than the threshold glows, blurred at a quarter of the size
+  if (P.bloom > 0.001){
+    const s = 4, w = Math.max(1, Math.floor(W / s)), h = Math.max(1, Math.floor(H / s)), sm = new Float32Array(w * h * 3), th = ldr ? Math.min(P.bth, 0.9) : P.bth;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){ const j = ((y * s) * W + x * s) * 3, o2 = (y * w + x) * 3; for (let c = 0; c < 3; c++) sm[o2 + c] = Math.max(0, lin[j + c] - th); }
+    const bl = boxBlur(sm, w, h, Math.max(2, Math.round(Math.min(w, h) * 0.035)));
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){ const o2 = (Math.min(h - 1, Math.floor(y / s)) * w + Math.min(w - 1, Math.floor(x / s))) * 3, j = (y * W + x) * 3; for (let c = 0; c < 3; c++) lin[j + c] += bl[o2 + c] * P.bloom * 2; }
+  }
+  const img = new ImageData(W, H), d = img.data, cx = W / 2, cy = H / 2, rr = 1 / (cx * cx + cy * cy), hc2 = P.hc * P.hc;
+  const enc = x => x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055;
+  for (let y = 0; y < H; y++){
+    const dy = y - cy;
+    for (let x = 0; x < W; x++){
+      const i = y * W + x, j = i * 3; let r = lin[j], g = lin[j + 1], b = lin[j + 2];
+      if (!ldr){
+        if (P.curve === 'aces'){ r = acesC(r * 0.8); g = acesC(g * 0.8); b = acesC(b * 0.8); }
+        else if (P.curve === 'corona'){ const L = 0.2126 * r + 0.7152 * g + 0.0722 * b, Lc = L * (1 + L / hc2) / (1 + L), q = L > 1e-6 ? Lc / L : 1; r *= q; g *= q; b *= q; }
+      }
+      // filmic: soften the brightest tones, lift the deepest shadows
+      if (P.fh > 0){ const m = Math.max(r, g, b); if (m > 0.7){ const t = Math.min(1, (m - 0.7) / 0.6), q = 1 - P.fh * 0.35 * t * t; r *= q; g *= q; b *= q; } }
+      if (P.fs > 0){ r += P.fs * 0.04 * Math.pow(1 - Math.min(1, r * 6), 2); g += P.fs * 0.04 * Math.pow(1 - Math.min(1, g * 6), 2); b += P.fs * 0.04 * Math.pow(1 - Math.min(1, b * 6), 2); }
+      if (P.vig > 0){ const dx = x - cx, v = 1 - P.vig * Math.pow((dx * dx + dy * dy) * rr, 1.3); r *= v; g *= v; b *= v; }
+      r = enc(Math.min(1, Math.max(0, r))); g = enc(Math.min(1, Math.max(0, g))); b = enc(Math.min(1, Math.max(0, b)));
+      if (P.con){ const s2 = t => { const u = t - 0.5; return 0.5 + u * (1 + P.con) - P.con * 2 * u * u * u * 1.2; }; r = s2(r); g = s2(g); b = s2(b); }
+      if (P.sat !== 1){ const L = 0.2126 * r + 0.7152 * g + 0.0722 * b; r = L + (r - L) * P.sat; g = L + (g - L) * P.sat; b = L + (b - L) * P.sat; }
+      const o2 = i * 4; d[o2] = r * 255; d[o2 + 1] = g * 255; d[o2 + 2] = b * 255; d[o2 + 3] = 255;
+    }
+  }
+  // sharpening (unsharp mask on the final picture)
+  if (P.sharp > 0.01){
+    const lum = new Float32Array(N); for (let i = 0; i < N; i++) lum[i] = (d[i * 4] + d[i * 4 + 1] + d[i * 4 + 2]) / 3;
+    const bl = boxBlur(lum, W, H, 1, 1), a = P.sharp * 1.2;
+    for (let i = 0; i < N; i++){ const dd = (lum[i] - bl[i]) * a; d[i * 4] += dd; d[i * 4 + 1] += dd; d[i * 4 + 2] += dd; }
+  }
+  return img;
+}
+let POST_T = 0;
+function refreshPost(now){
+  if (!RN_RES) return;
+  const go = () => {
+    const img = postProcess(RN_RES, RN_POST); RN_OUT.width = RN_RES.W; RN_OUT.height = RN_RES.H; RN_OUT.getContext('2d').putImageData(img, 0, 0);
+    const live = $('#rnLive'), k = Math.min(1, 1200 / RN_RES.W); live.width = Math.round(RN_RES.W * k); live.height = Math.round(RN_RES.H * k);
+    live.getContext('2d').drawImage(RN_OUT, 0, 0, live.width, live.height); live.hidden = false; $('#rnImg').hidden = true;
+  };
+  clearTimeout(POST_T); if (now) go(); else POST_T = setTimeout(go, 120);
+}
+function renderPostUI(){
+  const box = $('#rnPost'); if (!RN_RES){ box.hidden = true; return; }
+  const P = RN_POST, row = (label, html, val = '') => `<div><label>${label} <span class="pv">${val}</span></label>${html}</div>`;
+  const rng = (k2, a, b, st) => `<input type="range" data-pp="${k2}" min="${a}" max="${b}" step="${st}" value="${P[k2]}">`;
+  box.innerHTML = `<h3>Кадр: цветокоррекция</h3>
+    <div class="row" style="gap:4px;flex-wrap:wrap">${Object.keys(POST_PRESETS).map(n => `<button class="btn sm" data-ppre="${esc(n)}">${esc(n)}</button>`).join('')}</div>
+    ${RN_RES.den ? `<label class="pchk"><input type="checkbox" data-pp="dn"${P.dn ? ' checked' : ''}> Шумоподавление (Intel OIDN)</label>` : ''}
+    ${row('Экспозиция', rng('ev', -4, 4, 0.05), (P.ev > 0 ? '+' : '') + (+P.ev).toFixed(2) + ' EV')}
+    ${RN_RES.ldr ? '' : row('Тональная кривая', `<select data-pp="curve"><option value="corona"${P.curve === 'corona' ? ' selected' : ''}>Corona — сжатие светов</option><option value="aces"${P.curve === 'aces' ? ' selected' : ''}>ACES — кино</option><option value="linear"${P.curve === 'linear' ? ' selected' : ''}>Линейная</option></select>`)}
+    ${RN_RES.ldr ? '' : row('Сжатие светов', rng('hc', 1, 20, 0.1), (+P.hc).toFixed(1))}
+    ${row('Баланс белого', rng('wb', 2500, 10000, 50), P.wb + ' K')}
+    ${row('Оттенок (зелёный ↔ пурпур)', rng('tint', -0.15, 0.15, 0.005), (+P.tint).toFixed(3))}
+    ${row('Контраст', rng('con', -0.3, 0.5, 0.01), (+P.con).toFixed(2))}
+    ${row('Насыщенность', rng('sat', 0, 2, 0.01), (+P.sat).toFixed(2))}
+    ${row('Плёночные света', rng('fh', 0, 1, 0.01), (+P.fh).toFixed(2))}
+    ${row('Плёночные тени', rng('fs', 0, 1, 0.01), (+P.fs).toFixed(2))}
+    ${row('Виньетка', rng('vig', 0, 0.8, 0.01), (+P.vig).toFixed(2))}
+    ${row('Ореол (bloom)', rng('bloom', 0, 1, 0.01), (+P.bloom).toFixed(2))}
+    ${row('Порог ореола', rng('bth', 0.3, 6, 0.05), (+P.bth).toFixed(2))}
+    ${row('Резкость', rng('sharp', 0, 1, 0.01), (+P.sharp).toFixed(2))}`;
+  box.hidden = false;
+  box.querySelectorAll('[data-pp]').forEach(el => {
+    const k2 = el.dataset.pp, upd = () => { P[k2] = el.type === 'checkbox' ? el.checked : el.tagName === 'SELECT' ? el.value : +el.value; const pv = el.previousElementSibling && el.previousElementSibling.querySelector('.pv'); if (pv && el.type === 'range') pv.textContent = k2 === 'ev' ? (P.ev > 0 ? '+' : '') + P.ev.toFixed(2) + ' EV' : k2 === 'wb' ? P.wb + ' K' : (+P[k2]).toFixed(k2 === 'tint' ? 3 : 2); refreshPost(); };
+    el.oninput = upd; el.onchange = () => { upd(); lsSet('kot.post', JSON.stringify(P)); };
+  });
+  box.querySelectorAll('[data-ppre]').forEach(b => b.onclick = () => { Object.assign(RN_POST, POST_PRESETS[b.dataset.ppre]); if (RN_RES) RN_POST.wb = RN_POST.wb === 6500 && RN_RES.wb ? RN_RES.wb : RN_POST.wb; renderPostUI(); refreshPost(true); lsSet('kot.post', JSON.stringify(RN_POST)); });
+}
 // the dialog
 const renderDlg = $('#renderDlg'); let RN_LAST = null;
 function openRender(){
@@ -6001,9 +6262,24 @@ function openRender(){
   const st = (() => { try { return JSON.parse(lsGet('kot.render') || '{}'); } catch(e){ return {}; } })();
   if (st.time === 'overcast'){ st.time = 'day'; st.sky = 'overcast'; }
   for (const [id, k] of [['#rnSize', 'size'], ['#rnTime', 'time'], ['#rnGround', 'ground'], ['#rnSky', 'sky'], ['#rnEng', 'engine'], ['#rnSamp', 'samples'], ['#rnBnc', 'bounces']]) if (st[k] != null) $(id).value = String(st[k]);
-  if (st.az != null) $('#rnAz').value = st.az; if (st.ev != null) $('#rnEv').value = st.ev; for (const [id, k] of [['#rnTex', 'tex'], ['#rnAO', 'ao'], ['#rnEdges', 'edges'], ['#rnClay', 'clay']]) if (st[k] != null) $(id).checked = st[k];
-  azLabel(); evLabel(); engLabel(); renderDlg.hidden = false; $('#rnGo').focus();
+  if (st.az != null) $('#rnAz').value = st.az; if (st.ev != null) $('#rnEv').value = st.ev; for (const [id, k] of [['#rnTex', 'tex'], ['#rnAO', 'ao'], ['#rnEdges', 'edges'], ['#rnClay', 'clay'], ['#rnDn', 'denoise'], ['#rnBump', 'bump']]) if (st[k] != null) $(id).checked = st[k];
+  $('#rnHPre').innerHTML = HDRI_LIB.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('') + '<option value="file">Свой файл</option>';
+  if (st.hpre) $('#rnHPre').value = st.hpre; if (st.hrot != null) $('#rnHRot').value = st.hrot; if (st.hev != null) $('#rnHEv').value = st.hev; if (st.bevel != null) $('#rnBev').value = String(st.bevel);
+  if (TABLET && st.samples == null){ $('#rnSamp').value = '64'; $('#rnBnc').value = '3'; $('#rnSize').value = '1280x720'; }
+  azLabel(); evLabel(); engLabel(); skyLabel(); renderDlg.hidden = false; $('#rnGo').focus();
 }
+function skyLabel(){
+  const h = $('#rnSky').value === 'hdri'; $('#rnHdri').hidden = !h; for (const id of ['#rnTime', '#rnAz']) $(id).disabled = h;
+  $('#rnHRotV').textContent = $('#rnHRot').value + '°'; const e = +$('#rnHEv').value; $('#rnHEvV').textContent = (e > 0 ? '+' : '') + e + ' EV';
+  $('#rnHName').textContent = HDRI ? 'Загружено: ' + (HDRI.name.startsWith('ph:') ? (HDRI_LIB.find(x => 'ph:' + x[0] === HDRI.name) || [0, HDRI.name])[1] : HDRI.name.replace(/^file:/, '')) + ` (${HDRI.w}×${HDRI.h})` : (h ? 'Панорама скачается с Poly Haven при визуализации (около 5 МБ, один раз)' : '');
+}
+$('#rnSky').onchange = skyLabel; $('#rnHRot').oninput = skyLabel; $('#rnHEv').oninput = skyLabel;
+$('#rnHFile').onclick = () => { const i = $('#rnHIn'); i.value = ''; i.click(); };
+$('#rnHIn').onchange = async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  $('#rnHName').textContent = 'Читаю ' + f.name + '…';
+  try { await hdriFile(f); $('#rnHPre').value = 'file'; skyLabel(); toast('HDRI загружено: ' + f.name); } catch (err){ $('#rnHName').textContent = 'Не получилось: ' + (err.message || err); }
+};
 const AZ_NAMES = ['север', 'северо-восток', 'восток', 'юго-восток', 'юг', 'юго-запад', 'запад', 'северо-запад'];
 function azLabel(){ const a = +$('#rnAz').value; $('#rnAzV').textContent = `— ${AZ_NAMES[Math.round(a / 45) % 8]}, ${a}°`; }
 $('#rnAz').oninput = azLabel;
@@ -6015,8 +6291,18 @@ $('#rnClose').onclick = () => renderDlg.hidden = true;
 $('#rbRender').onclick = openRender;
 $('#rnGo').onclick = async () => {
   const o = { view:$('#rnView').value, size:$('#rnSize').value, time:$('#rnTime').value, sky:$('#rnSky').value, az:+$('#rnAz').value, ground:$('#rnGround').value, tex:$('#rnTex').checked, ao:$('#rnAO').checked, edges:$('#rnEdges').checked,
-    engine:$('#rnEng').value, samples:+$('#rnSamp').value, bounces:+$('#rnBnc').value, ev:+$('#rnEv').value, clay:$('#rnClay').checked };
+    engine:$('#rnEng').value, samples:+$('#rnSamp').value, bounces:+$('#rnBnc').value, ev:+$('#rnEv').value, clay:$('#rnClay').checked,
+    denoise:$('#rnDn').checked, bump:$('#rnBump').checked, bevel:+$('#rnBev').value, hpre:$('#rnHPre').value, hrot:+$('#rnHRot').value, hev:+$('#rnHEv').value };
   lsSet('kot.render', JSON.stringify(o));
+  // the HDRI: a Poly Haven preset is downloaded once and kept on the device; «Свой файл» — the last loaded file
+  if (o.sky === 'hdri'){
+    const state0 = $('#rnState'); state0.hidden = false;
+    try {
+      if (o.hpre !== 'file'){ if (!HDRI || HDRI.name !== 'ph:' + o.hpre){ state0.textContent = 'Скачиваю HDRI-панораму…'; await hdriPreset(o.hpre); } }
+      else if (!HDRI || !HDRI.name.startsWith('file:')){ state0.textContent = 'Открываю последний HDRI-файл…'; if (!(await hdriLast())){ state0.textContent = 'Выберите файл .hdr или .exr кнопкой «Свой файл»'; return; } }
+      skyLabel();
+    } catch (err){ state0.textContent = 'HDRI не загрузилось: ' + (err.message || err) + '. Можно выбрать процедурное небо.'; return; }
+  }
   const btn = $('#rnGo'), state = $('#rnState'); btn.disabled = true; $('#rnSave').disabled = true;
   state.hidden = false; state.textContent = o.engine === 'pt' ? 'Готовлю сцену для трассировки лучей…' : 'Рисую… Большие размеры занимают до полуминуты.'; $('#rnImg').hidden = true;
   const live = $('#rnLive'), stop = $('#rnStop'); stop.hidden = o.engine !== 'pt'; stop.disabled = false;
@@ -6024,22 +6310,31 @@ $('#rnGo').onclick = async () => {
   try {
     const t0 = performance.now();
     const prog = (n, total, src) => {
+      if (n < 0){ state.textContent = 'Убираю шум (Intel OIDN)…'; return; }
       if (live.hidden){ const k2 = Math.min(1, 960 / src.width); live.width = Math.round(src.width * k2); live.height = Math.round(src.height * k2); live.hidden = false; }
       live.getContext('2d').drawImage(src, 0, 0, live.width, live.height);
       const el = (performance.now() - t0) / 1000, left = n > 1 ? el / n * (total - n) : 0;
       state.textContent = `Проход ${Math.floor(n)} из ${total}` + (n > 2 ? ` · осталось около ${left < 90 ? Math.ceil(left) + ' с' : Math.ceil(left / 60) + ' мин'}` : '');
     };
     const res = await renderPhoto(o, prog);
-    live.hidden = true;
-    const blob = await new Promise(r => res.canvas.toBlob(r, 'image/png'));
-    if (RN_LAST && RN_LAST.url) URL.revokeObjectURL(RN_LAST.url);
-    RN_LAST = { blob, url:URL.createObjectURL(blob), name:(views.find(v => v.id === o.view) || {}).name || 'Вид' };
-    $('#rnImg').src = RN_LAST.url; $('#rnImg').hidden = false; state.hidden = true; $('#rnSave').disabled = false;
-    toast(`Готово: ${res.W} × ${res.H}${res.samples ? ', ' + res.samples + ' проходов' : ''}${res.scaled ? ' (уменьшено под возможности устройства)' : ''}, ${((performance.now() - t0) / 1000).toFixed(1)} с`);
+    // the frame buffer: corrections are applied to the stored linear image and can be changed without rendering again
+    RN_RES = res.R;
+    const saved = (() => { try { return JSON.parse(lsGet('kot.post') || 'null'); } catch(e){ return null; } })();
+    RN_POST = { ...POST_DEF, ...(saved || {}) }; if (res.R.wb && res.R.wb !== 6500) RN_POST.wb = res.R.wb;
+    if (res.R.ldr){ RN_POST.curve = 'linear'; }
+    renderPostUI(); refreshPost(true);
+    RN_LAST = { name:(views.find(v => v.id === o.view) || {}).name || 'Вид' };
+    state.hidden = true; $('#rnSave').disabled = false;
+    toast(`Готово: ${res.W} × ${res.H}${res.samples ? ', ' + res.samples + ' проходов' : ''}${res.R.den ? ', шум убран' : ''}${res.scaled ? ' (уменьшено под возможности устройства)' : ''}, ${((performance.now() - t0) / 1000).toFixed(1)} с`);
+    if (res.dnErr) toast('Шумоподавление недоступно: ' + res.dnErr);
   } catch(err){ live.hidden = true; state.hidden = false; state.textContent = 'Не получилось нарисовать: ' + (err && err.message || err) + '. Попробуйте размер поменьше или быстрый движок.'; console.error(err); }
   finally { btn.disabled = false; stop.hidden = true; }
 };
-$('#rnSave').onclick = () => { if (RN_LAST) saveBlob(safeName(`${proj.name || 'Проект'} — визуализация — ${RN_LAST.name}`), 'png', RN_LAST.blob, 'image/png', 'Визуализация PNG'); };
+$('#rnSave').onclick = () => {
+  if (!RN_LAST || !RN_RES) return;
+  clearTimeout(POST_T); const img = postProcess(RN_RES, RN_POST); RN_OUT.width = RN_RES.W; RN_OUT.height = RN_RES.H; RN_OUT.getContext('2d').putImageData(img, 0, 0);
+  RN_OUT.toBlob(b => { if (b) saveBlob(safeName(`${proj.name || 'Проект'} — визуализация — ${RN_LAST.name}`), 'png', b, 'image/png', 'Визуализация PNG'); }, 'image/png');
+};
 
 /* ---------- ViewCube ---------- */
 const vcCanvas = $('#vcube');
