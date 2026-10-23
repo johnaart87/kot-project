@@ -1591,6 +1591,8 @@ function sanitizeStd(o){
     gap:N(a.gap) ? clamp(+a.gap, 0, 20) : d.anno.gap, over:N(a.over) ? clamp(+a.over, 0, 20) : d.anno.over, ext:N(a.ext) ? clamp(+a.ext, 0, 20) : d.anno.ext, tagMm:N(a.tagMm) ? clamp(+a.tagMm, 1, 10) : d.anno.tagMm,
     tickMm:N(a.tickMm) ? clamp(+a.tickMm, 0.5, 8) : d.anno.tickMm, tickW:N(a.tickW) ? clamp(+a.tickW, 0.1, 1.5) : d.anno.tickW };
   out.stamps = sanitizeStamps(o.stamps); out.lw = sanitizeLW(o.lw); out.ph = sanitizePh(o.ph); if (o.ieAuto) out.ieAuto = true; if (o.svOff) out.svOff = true;
+  // the grid of the zones, common to all sheets (dragged lines) and its version (the sheets follow it)
+  if (o.sheetGrid && typeof o.sheetGrid === 'object'){ const g0 = o.sheetGrid, sg = {}; if (Number.isFinite(+g0.top) && +g0.top > 0) sg.top = clamp(+g0.top, 0.25, 0.92); if (Array.isArray(g0.cols) && g0.cols.length) sg.cols = g0.cols.slice(0, 12).map(x => clamp(+x || 0.1, 0.02, 1)); if (Number.isFinite(+g0.ver)) sg.ver = Math.round(+g0.ver); out.sheetGrid = sg; }
   // the side column of the sheets (for all sheets): on, width, notes
   out.side = { on:!(o.side && o.side.on === false), w:o.side && Number.isFinite(+o.side.w) ? clamp(+o.side.w, 50, 140) : 80, ...(o.side && typeof o.side.notes === 'string' ? { notes:o.side.notes.slice(0, 3000) } : {}) };
   { const fr = sanFrame(o.frame); if (fr) out.frame = fr; }
@@ -6966,7 +6968,7 @@ function sanitizeViews(arr){
       if (v.area && [v.area.x, v.area.y, v.area.w, v.area.h].every(N) && v.area.w > 10 && v.area.h > 10) o.area = { x:+v.area.x, y:+v.area.y, w:+v.area.w, h:+v.area.h }; if (v.autoLay) o.autoLay = true;
       if (v.expl === false) o.expl = false; else if (v.expl && N(v.expl.x) && N(v.expl.y)) o.expl = { x:+v.expl.x, y:+v.expl.y, ...(typeof v.expl.view === 'string' ? { view:v.expl.view.slice(0, 40) } : {}), ...(v.expl.manual ? { manual:true } : {}), ...sanExplCfg(v.expl) };
       { const fr = sanFrame(v.frame); if (fr) o.frame = fr; }
-      if (v.lay === 'zones' || v.lay === 'rows') o.lay = v.lay; if (v.zonesDone) o.zonesDone = 1;
+      if (v.lay === 'zones' || v.lay === 'rows') o.lay = v.lay; if (v.zonesDone) o.zonesDone = 1; if (Number.isFinite(+v.gridVer) && +v.gridVer > 0) o.gridVer = Math.round(+v.gridVer);
       if (v.side && typeof v.side === 'object'){ const s = v.side, sd = {}; if (s.on === true || s.on === false) sd.on = s.on; if (N(s.w)) sd.w = clamp(+s.w, 50, 140); if (typeof s.notes === 'string') sd.notes = s.notes.slice(0, 3000);
         if (s.parts && typeof s.parts === 'object'){ const p = {}; for (const k of Object.keys(SIDE_PARTS)) if (s.parts[k] === false) p[k] = false; if (Object.keys(p).length) sd.parts = p; }
         if (typeof s.stamp === 'string') sd.stamp = s.stamp.slice(0, 24); if (typeof s.own === 'string') sd.own = s.own.slice(0, 24);
@@ -7513,6 +7515,9 @@ function renderViewImage(v, vp){
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); resize(); if (S.view !== 'sheet') rebuild(true); annoDirty = true;
   return { url:can.toDataURL('image/png'), wmm, hmm, reg };
 }
+/* ГОСТ 2.304: the heights of the letters on drawings are 2,5; 3,5; 5; 7… mm (1,8 is not recommended). On sheets and prints: dimension
+   numbers, marks, tables and the stamp — at least 2,5 mm, room names and grid bubbles — 3,5 mm, titles of views — 5 mm. */
+const GOST_MIN = 2.5;
 function drawImageLabels(g, PX){
   const font = (sz, b) => `${b ? '600 ' : ''}${sz}px "Golos Text", Arial, sans-serif`;
   for (const L of buildLabels()){
@@ -7521,28 +7526,28 @@ function drawImageLabels(g, PX){
     if (/^dl/.test(cls) && L.lead){ g.restore(); g.save(); g.strokeStyle = L.col || '#1b252c'; g.lineWidth = 0.18 * PX; g.beginPath(); L.lead.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)); g.stroke(); g.translate(s.x, s.y); }
     else if (/^dl/.test(cls) && L.leader){ const q = leaderPx(L, s, STD.anno.textMm * PX * 1.15); if (q){ g.restore(); g.save(); g.strokeStyle = L.col || '#1b252c'; g.lineWidth = 0.18 * PX; g.beginPath(); q.pts.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)); g.stroke(); g.translate(q.tx, q.ty); } }
     if (/^dl/.test(cls)){ g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(STD.anno.textMm * PX); g.fillStyle = L.col || '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
-    else if (/^gb/.test(cls)){ g.beginPath(); g.arc(0, 0, 3.6 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.25 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(3 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.2 * PX); }
-    else if (/^wt/.test(cls)){ g.font = font(STD.anno.tagMm * 0.8 * PX, true); const tw = g.measureText(L.t).width + 1.2 * PX, th = 3.2 * PX; g.fillStyle = '#fff'; g.strokeStyle = '#1b252c'; g.lineWidth = 0.2 * PX; if (/dr/.test(cls)){ g.beginPath(); g.ellipse(0, 0, Math.max(tw, th) / 2, th / 2, 0, 0, Math.PI * 2); g.fill(); g.stroke(); } else { g.fillRect(-tw / 2, -th / 2, tw, th); g.strokeRect(-tw / 2, -th / 2, tw, th); } g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.1 * PX); }
+    else if (/^gb/.test(cls)){ g.beginPath(); g.arc(0, 0, 3.8 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.25 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(3.5 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.2 * PX); }
+    else if (/^wt/.test(cls)){ g.font = font(Math.max(GOST_MIN, STD.anno.tagMm * 0.8) * PX, true); const tw = g.measureText(L.t).width + 1.2 * PX, th = 3.6 * PX; g.fillStyle = '#fff'; g.strokeStyle = '#1b252c'; g.lineWidth = 0.2 * PX; if (/dr/.test(cls)){ g.beginPath(); g.ellipse(0, 0, Math.max(tw, th) / 2, th / 2, 0, 0, Math.PI * 2); g.fill(); g.stroke(); } else { g.fillRect(-tw / 2, -th / 2, tw, th); g.strokeRect(-tw / 2, -th / 2, tw, th); } g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.1 * PX); }
     else if (/^rm/.test(cls)){
       const ln = String(L.t).split('\n'); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = /open/.test(cls) ? '#c62828' : '#1b252c';
-      g.font = font(2.8 * PX, true); const w0 = g.measureText(ln[0]).width; g.font = font(2.4 * PX); const w1 = g.measureText(ln[1] || '').width, w = Math.max(w0, w1) + 2 * PX;
-      g.font = font(2.8 * PX, true); g.fillText(ln[0], 0, -1.6 * PX); g.font = font(2.4 * PX); g.fillText(ln[1] || '', 0, 1.6 * PX);
-      g.strokeStyle = g.fillStyle; g.lineWidth = 0.3 * PX; g.beginPath(); g.moveTo(-w / 2, -3.6 * PX); g.lineTo(w / 2, -3.6 * PX); g.moveTo(-w / 2, 3.6 * PX); g.lineTo(w / 2, 3.6 * PX); g.stroke();
+      g.font = font(3.5 * PX, true); const w0 = g.measureText(ln[0]).width; g.font = font(2.5 * PX); const w1 = g.measureText(ln[1] || '').width, w = Math.max(w0, w1) + 2 * PX;
+      g.font = font(3.5 * PX, true); g.fillText(ln[0], 0, -2 * PX); g.font = font(2.5 * PX); g.fillText(ln[1] || '', 0, 2 * PX);
+      g.strokeStyle = g.fillStyle; g.lineWidth = 0.3 * PX; g.beginPath(); g.moveTo(-w / 2, -4.3 * PX); g.lineTo(w / 2, -4.3 * PX); g.moveTo(-w / 2, 4 * PX); g.lineTo(w / 2, 4 * PX); g.stroke();
     }
-    else if (/^svn/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.beginPath(); g.arc(0, 0, 2.6 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.2 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(2.2 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.15 * PX); }
-    else if (/^sva/.test(cls)){ g.font = font(2.3 * PX); g.fillStyle = /open/.test(cls) ? '#c62828' : '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); const tw = g.measureText(L.t).width; g.fillRect(-tw / 2, 1.5 * PX, tw, 0.18 * PX); }
-    else if (/^hb/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(2.4 * PX); g.fillStyle = L.col || '#2433c8'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
+    else if (/^svn/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.beginPath(); g.arc(0, 0, 2.9 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.2 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(2.5 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.15 * PX); }
+    else if (/^sva/.test(cls)){ g.font = font(2.5 * PX); g.fillStyle = /open/.test(cls) ? '#c62828' : '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); const tw = g.measureText(L.t).width; g.fillRect(-tw / 2, 1.5 * PX, tw, 0.18 * PX); }
+    else if (/^hb/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(2.5 * PX); g.fillStyle = L.col || '#2433c8'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
     else if (/^(lv|spt)/.test(cls)){ // ГОСТ height mark: a triangle on the point, the value above the shelf (a level: its name under the value)
       const ln = String(L.t).split('\n'), a = 1.4 * PX, hh = 1.9 * PX, left = / left/.test(cls);
       g.strokeStyle = g.fillStyle = '#1b252c'; g.lineWidth = 0.18 * PX; if (L.elbow && L.base){ g.beginPath(); g.moveTo(L.base.x - s.x, L.base.y - s.y); g.lineTo(0, 0); g.stroke(); } g.beginPath(); g.moveTo(0, 0); g.lineTo(-a, -hh); g.lineTo(a, -hh); g.closePath(); g.stroke();
-      g.font = font(2.4 * PX, !!ln[1]); const w = Math.max(...ln.map(s => g.measureText(s).width)) + 1.2 * PX, sx = left ? -w : 0;
+      g.font = font(2.5 * PX, !!ln[1]); const w = Math.max(...ln.map(s => g.measureText(s).width)) + 1.2 * PX, sx = left ? -w : 0;
       g.beginPath(); g.moveTo(left ? a : -a, -hh); g.lineTo(sx + (left ? 0 : w), -hh); g.stroke();
       g.textAlign = 'left'; g.textBaseline = 'bottom';
-      if (ln[1]){ g.fillText(ln[0], sx + 0.6 * PX, -hh - 3 * PX); g.font = font(2.2 * PX); g.fillText(ln[1], sx + 0.6 * PX, -hh - 0.4 * PX); }
+      if (ln[1]){ g.fillText(ln[0], sx + 0.6 * PX, -hh - 3.2 * PX); g.font = font(2.5 * PX); g.fillText(ln[1], sx + 0.6 * PX, -hh - 0.4 * PX); }
       else g.fillText(ln[0], sx + 0.6 * PX, -hh - 0.4 * PX);
     }
-    else if (/^sx/.test(cls)){ g.font = font(3.2 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
-    else if (/^tx/.test(cls)){ g.font = font((L.size || 14) / 14 * 3 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText(L.t, 0, 0); }
+    else if (/^sx/.test(cls)){ g.font = font(3.5 * PX, true); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
+    else if (/^tx/.test(cls)){ g.font = font(Math.max(GOST_MIN, (L.size || 14) / 14 * 3.5) * PX); g.fillStyle = '#1b252c'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText(L.t, 0, 0); }
     g.restore();
   }
 }
@@ -7570,7 +7575,7 @@ function paintPics(g, v){
     if (im.complete && im.naturalWidth) g.drawImage(im, p.x, p.y, p.w, p.h);
     else { g.fillStyle = '#f1f3f4'; g.fillRect(p.x, p.y, p.w, p.h); }
     if (p.fr){ g.strokeStyle = '#111'; g.lineWidth = 0.35; g.strokeRect(p.x, p.y, p.w, p.h); }
-    if (p.cap){ g.fillStyle = '#111'; g.font = '3px "Golos Text", Arial'; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillText(p.cap, p.x + p.w / 2, p.y + p.h + 1.5, p.w + 20); }
+    if (p.cap){ g.fillStyle = '#111'; g.font = '3.5px "Golos Text", Arial'; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillText(p.cap, p.x + p.w / 2, p.y + p.h + 1.5, p.w + 20); }
     if (SHEET.sel === 'pic:' + p.id){
       g.strokeStyle = '#1a73e8'; g.lineWidth = 0.6; g.setLineDash([2, 1.2]); g.strokeRect(p.x - 1, p.y - 1, p.w + 2, p.h + 2); g.setLineDash([]);
       const s = 7 / (SHEET.k || 1); g.fillStyle = '#fff'; g.lineWidth = 1.2 / (SHEET.k || 1);
@@ -7634,13 +7639,14 @@ function paintSheet(g, v){
     const cbx = im && im.cb, tx = vp.x + (cbx ? w * cbx.l : 0), cy = vp.y + (cbx ? h * cbx.t : 0) - VP_TITLE / 2 - 1, title = vpTitle(vp, view);
     vp._tb = null;
     if (vp.ttlOn === true){
-      g.strokeStyle = '#111'; g.lineWidth = 0.3; g.beginPath(); g.arc(tx + 4, cy, 3.4, 0, Math.PI * 2); g.stroke();
-      g.fillStyle = '#111'; g.font = '600 3.4px "Golos Text", Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(i + 1), tx + 4, cy + 0.1);
-      g.textAlign = 'left'; g.font = '600 3.6px "Golos Text", Arial'; g.fillText(title, tx + 10, cy - 1.3);
+      // ГОСТ 2.304: the title of a view — 5 mm, its scale and stage — 3,5 mm, the number in the circle — 3,5 mm
+      g.strokeStyle = '#111'; g.lineWidth = 0.3; g.beginPath(); g.arc(tx + 4, cy, 4, 0, Math.PI * 2); g.stroke();
+      g.fillStyle = '#111'; g.font = '600 3.5px "Golos Text", Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(i + 1), tx + 4, cy + 0.1);
+      g.textAlign = 'left'; g.font = '600 5px "Golos Text", Arial'; g.fillText(title, tx + 11, cy - 2.4);
       const tw = g.measureText(title).width;
-      g.font = '2.8px "Golos Text", Arial'; g.fillText(view ? (SCALED(view) || view.kind === 'elev' ? 'М 1:' + vp.scale : KIND_NAME[view.kind]) + (view.phase && view.phase !== 'all' ? ' · ' + phName(view.phase) : '') : '', tx + 10, cy + 2.7);
-      g.lineWidth = 0.5; g.beginPath(); g.moveTo(tx + 8, cy + 0.6); g.lineTo(tx + 12 + Math.max(36, tw), cy + 0.6); g.stroke();
-      vp._tb = { x:tx, y:cy - 4.5, w:12 + Math.max(36, tw), h:9 };
+      g.font = '3.5px "Golos Text", Arial'; g.fillText(view ? (SCALED(view) || view.kind === 'elev' ? 'М 1:' + vp.scale : KIND_NAME[view.kind]) + (view.phase && view.phase !== 'all' ? ' · ' + phName(view.phase) : '') : '', tx + 11, cy + 3.3);
+      g.lineWidth = 0.5; g.beginPath(); g.moveTo(tx + 9, cy + 0.7); g.lineTo(tx + 13 + Math.max(40, tw), cy + 0.7); g.stroke();
+      vp._tb = { x:tx, y:cy - 5.5, w:13 + Math.max(40, tw), h:11 };
     }
     if (SHEET.sel === vp.id){
       g.strokeStyle = '#1a73e8'; g.lineWidth = 0.6; g.setLineDash([2, 1.2]); g.strokeRect(vp.x - 1.5, vp.y - 1.5, w + 3, h + 3); g.setLineDash([]);
@@ -7723,7 +7729,7 @@ function paintExpl(g, v, Wm, Hm){
   explAuto(v, Wm); if (!v.expl) return;
   const F = frameOf(v);
   if ([185, 130].some(w0 => Math.abs(v.expl.x - (Wm - 5 - w0)) < 0.01)) v.expl.x = Wm - F.r - explW(v.expl); // a table placed with an older width stays at the right frame
-  const E = v.expl, T = explTable(v), cols = T.cols, W = explW(E), RH = explRH(E), HH = explHH(E), FS = explFS(E), TT = explTT(E), x0 = E.x, y0 = E.y + TT;
+  const E = v.expl, T = explTable(v), cols = T.cols, W = explW(E), RH = explRH(E), HH = explHH(E), FS = Math.max(GOST_MIN, explFS(E)), TT = explTT(E), x0 = E.x, y0 = E.y + TT;
   const nr = T.rows.length + (T.tot ? 1 : 0);
   // a table standing at the right frame stays there when its columns get wider or narrower
   if (E._w && E._w !== W && Math.abs(E.x + E._w - (Wm - F.r)) < 0.6 && !SHEET.drag && !SHEET.exCol){ E.x = Wm - F.r - W; return paintExpl(g, v, Wm, Hm); }
@@ -7733,7 +7739,7 @@ function paintExpl(g, v, Wm, Hm){
   if (TT){ g.font = `600 ${FS * 1.28}px "Golos Text", Arial`; g.fillText(E.ttl != null ? E.ttl : 'Экспликация помещений' + (T.plan && !sideOn(v) ? ' · ' + T.plan.name : ''), x0 + W / 2, E.y + TT / 2, W); }
   const H = HH + RH * Math.max(1, nr);
   g.strokeStyle = '#111'; g.lineWidth = 0.5; g.strokeRect(x0, y0, W, H);
-  let cx = x0; g.font = `${FS * 0.93}px "Golos Text", Arial`;
+  let cx = x0; g.font = `${Math.max(GOST_MIN, FS * 0.93)}px "Golos Text", Arial`;
   cols.forEach((c, i) => { if (i){ g.lineWidth = 0.5; g.beginPath(); g.moveTo(cx, y0); g.lineTo(cx, y0 + H); g.stroke(); }
     const ln = String(c.n).split(/\n|, /); ln.forEach((t, j) => g.fillText(t + (j < ln.length - 1 && /, /.test(c.n) ? ',' : ''), cx + c.w / 2, y0 + HH / 2 + (j - (ln.length - 1) / 2) * FS * 1.2, c.w - 1)); cx += c.w; });
   g.lineWidth = 0.5; g.beginPath(); g.moveTo(x0, y0 + HH); g.lineTo(x0 + W, y0 + HH); g.stroke();
@@ -7784,7 +7790,8 @@ function sideLegend(v){
 // text wrapped to a width (mm)
 function wrapText(g, s, W){ const out = []; for (const para of String(s).split('\n')){ let line = ''; for (const w of para.split(/\s+/)){ const t = line ? line + ' ' + w : w; if (g.measureText(t).width > W && line){ out.push(line); line = w; } else line = t; } out.push(line); } return out; }
 function paintSide(g, v, Wm, Hm){
-  const B = sideBox(v), FS = 2.6, pad = 2; let y = B.y;
+  // ГОСТ 2.304: the texts of the column 2,5 mm, the titles of its parts 3,5 mm
+  const B = sideBox(v), FS = 2.5, FT = 3.5, pad = 2; let y = B.y;
   g.save(); g.fillStyle = '#fff'; g.fillRect(B.x, B.y, B.w, B.h);
   g.strokeStyle = '#111'; g.lineWidth = frameOf(v).lw || 0.5; g.beginPath(); g.moveTo(B.x, B.y); g.lineTo(B.x, B.y + B.h); g.stroke(); // the border of the column — as thick as the frame
   const sep = () => { g.lineWidth = 0.35; g.beginPath(); g.moveTo(B.x, y); g.lineTo(B.x + B.w, y); g.stroke(); };
@@ -7798,7 +7805,7 @@ function paintSide(g, v, Wm, Hm){
   const ved = sidePart(v, 'ved') ? sideVed(v) : null;
   if (ved && ved.length){
     const cw = [B.w * 0.42, B.w * 0.28, B.w * 0.30], RH = 7, x = B.x;
-    g.fillStyle = '#111'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `600 ${FS * 1.15}px "Golos Text", Arial`; g.fillText('Ведомость монтажа', x + B.w / 2, y + 4, B.w - 2); y += 8; sep();
+    g.fillStyle = '#111'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `600 ${FT}px "Golos Text", Arial`; g.fillText('Ведомость монтажа', x + B.w / 2, y + 4.5, B.w - 2); y += 9; sep();
     const row = (vals, bold) => { let cx = x; g.font = (bold ? '600 ' : '') + FS + 'px "Golos Text", Arial'; vals.forEach((t, i) => { g.textAlign = i ? 'center' : 'left'; g.fillText(String(t), i ? cx + cw[i] / 2 : cx + pad, y + RH / 2, cw[i] - 2); cx += cw[i]; if (i < vals.length - 1){ g.lineWidth = 0.35; g.beginPath(); g.moveTo(cx, y); g.lineTo(cx, y + RH); g.stroke(); } }); y += RH; sep(); };
     row(['Наименование', 'S, м²', 'Длина, мм'], true);
     let ta = 0, tl = 0; for (const r of ved){ row([r.n, f2c(r.a), Math.round(r.l * 1000).toLocaleString('ru-RU')]); ta += r.a; tl += r.l; }
@@ -7807,7 +7814,7 @@ function paintSide(g, v, Wm, Hm){
   // «Условные обозначения»
   const leg = sidePart(v, 'legend') ? sideLegend(v) : [];
   if (leg.length){
-    g.fillStyle = '#111'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `600 ${FS}px "Golos Text", Arial`; g.fillText('Условные обозначения', B.x + pad, y + 3); y += 7;
+    g.fillStyle = '#111'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `600 ${FT}px "Golos Text", Arial`; g.fillText('Условные обозначения', B.x + pad, y + 3.5, B.w - pad * 2); y += 8;
     for (const L of leg){
       const sx = B.x + pad, sw = 14, sh = 6;
       g.fillStyle = L.fill; g.fillRect(sx, y, sw, sh);
@@ -7820,9 +7827,9 @@ function paintSide(g, v, Wm, Hm){
   // «Примечание»: numbered lines, wrapped to the column
   const notes = sidePart(v, 'notes') ? (v.side && typeof v.side.notes === 'string' ? v.side.notes : typeof sideCfg().notes === 'string' ? sideCfg().notes : SIDE_NOTES_DEF) : '';
   if (notes.trim()){
-    g.fillStyle = '#111'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `600 ${FS}px "Golos Text", Arial`; g.fillText('Примечание:', B.x + pad, y + 2); g.lineWidth = 0.25; g.beginPath(); g.moveTo(B.x + pad, y + 3.6); g.lineTo(B.x + pad + g.measureText('Примечание:').width, y + 3.6); g.stroke(); y += 6;
-    g.font = (FS * 0.9) + 'px "Golos Text", Arial';
-    notes.split('\n').filter(s => s.trim()).forEach((s, i) => { for (const [j, ln] of wrapText(g, (i + 1) + '. ' + s.trim(), B.w - pad * 2).entries()){ g.fillText(ln, B.x + pad + (j ? 2.5 : 0), y + 1.6); y += FS * 1.25; } });
+    g.fillStyle = '#111'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `600 ${FT}px "Golos Text", Arial`; g.fillText('Примечание:', B.x + pad, y + 2.5); g.lineWidth = 0.25; g.beginPath(); g.moveTo(B.x + pad, y + 4.6); g.lineTo(B.x + pad + g.measureText('Примечание:').width, y + 4.6); g.stroke(); y += 7;
+    g.font = FS + 'px "Golos Text", Arial';
+    notes.split('\n').filter(s => s.trim()).forEach((s, i) => { for (const [j, ln] of wrapText(g, (i + 1) + '. ' + s.trim(), B.w - pad * 2 - 2.5).entries()){ g.fillText(ln, B.x + pad + (j ? 2.5 : 0), y + 1.7); y += FS * 1.45; } });
     y += 3;
   }
   // own block (texts, lines, tables made in the stamp editor), under the notes
@@ -8061,8 +8068,10 @@ const ZONE_TOP = 0.66, ZONE_GAP = 6, ZONE_MIN = 0.17; // ZONE_MIN — the least 
 const sheetLay = v => v.lay === 'zones' || v.lay === 'rows' ? v.lay : v.vps.some(p => { const x = views.find(y => y.id === p.view); return x && x.kind === 'plan' && x.phase && x.phase !== 'all'; }) ? 'zones' : 'rows';
 /* the grid of the zones (v.grid = { top — the part of the height for the main plan, cols — the parts of the width of the lower
    cells }): its lines are dragged on the sheet (only on the screen, it is not printed); a view dropped into a cell gets it (vp.zone) */
+const sheetGrid = () => (STD.sheetGrid = STD.sheetGrid && typeof STD.sheetGrid === 'object' ? STD.sheetGrid : {});
 function sheetZones(v){
-  const A = sheetArea(v), G = v.grid || {}, others = v.vps.length - 1 + (v.pics || []).length;
+  // the lines dragged by the user are common to all sheets (STD.sheetGrid); the automatic line under the plan is the sheet's own (v.grid.atop)
+  const A = sheetArea(v), G = { ...sheetGrid(), atop:v.grid && v.grid.atop }, others = v.vps.length - 1 + (v.pics || []).length;
   let n = Array.isArray(G.cols) && G.cols.length ? G.cols.length : 3; if (others > n) n = others;
   const fr = Array.isArray(G.cols) && G.cols.length === n ? G.cols.map(x => Math.max(0.05, +x || 0)) : Array(n).fill(1), sum = fr.reduce((s, x) => s + x, 0);
   // G.top — set by the user (dragging the line), G.atop — chosen by the layout for the plan (no empty space), else ZONE_TOP
@@ -8094,14 +8103,14 @@ function zoneMain(v){
   const vw = p => views.find(x => x.id === p.view);
   return v.vps.find(p => p.zone === 0) || v.vps.find(p => { const x = vw(p); return x && x.kind === 'plan' && x.phase === 'obmer'; }) || v.vps.find(p => { const x = vw(p); return x && x.kind === 'plan'; }) || v.vps[0] || null;
 }
-async function layoutZones(v, quiet, again){
+async function layoutZones(v, quiet, again, noUndo){
   const wait = async () => { for (let i = 0; i < 80 && vpBusy; i++) await new Promise(r => setTimeout(r, 100)); };
   await wait(); await ensureVpImages(v); await wait();
   // the line under the plan by itself (unless the user dragged it): the largest scale of the plan for which the lower zones keep
   // at least ZONE_MIN of the height; the upper cell is then as high as the plan (no empty space above and below it)
   { const main0 = zoneMain(v), view = main0 && views.find(x => x.id === main0.view), im = main0 && vpImgs.get(main0.id), G = v.grid = v.grid || {};
     const rest = v.vps.length - 1 + (v.pics || []).length;
-    if (!G.top && view && im && SCALED(view)){
+    if (!sheetGrid().top && view && im && SCALED(view)){
       const A = sheetArea(v), cb = im.cb || { l:0, t:0, r:1, b:1 }, cw = Math.max(0.05, cb.r - cb.l), ch = Math.max(0.05, cb.b - cb.t), th = vpTitleH(main0), s0 = main0.scale;
       const minLow = rest ? Math.max(40, A.h * ZONE_MIN) : 0, room = A.h - (rest ? minLow + ZONE_GAP : 0);
       // the first pass tries a larger scale a little optimistically (dimensions and texts of the plan do not grow with the scale);
@@ -8110,7 +8119,8 @@ async function layoutZones(v, quiet, again){
       const s = VP_SCALES.find(fitS) || VP_SCALES[VP_SCALES.length - 1];
       const need = im.hmm * s0 / s * ch + th + 2;
       G.atop = rest ? Math.round(clamp(need / A.h, 0.25, 0.92) * 1000) / 1000 : 0.92;
-    } else if (!G.top) delete G.atop;
+    } else if (!sheetGrid().top) delete G.atop;
+    delete G.top; delete G.cols; // old per-sheet lines (the lines are common now)
     if (!Object.keys(G).length) delete v.grid;
   }
   const Z = sheetZones(v), main = zoneMain(v), cbs = new Map();
@@ -8129,7 +8139,7 @@ async function layoutZones(v, quiet, again){
       vp.x = Math.round((box.x + (box.w - vp.w * cw) / 2 - vp.w * cb.l) * 10) / 10; vp.y = Math.round((box.y + th + (bh - vp.h * ch) / 2 - vp.h * cb.t) * 10) / 10;
     }
   };
-  if (!again) pushUndo('Разместить виды по зонам');
+  if (!again && !noUndo) pushUndo('Разместить виды по зонам');
   // the cells: the one a view was dropped into (vp.zone / p.zone) is kept, the main plan goes to the top, the rest — to free cells in order
   const cells = [Z.top, ...Z.zones], all = [...v.vps.map(o => ({ o, pic:false })), ...(v.pics || []).map(o => ({ o, pic:true }))], used = new Map();
   if (main && !(Number.isInteger(main.zone) && main.zone < cells.length)) main.zone = 0;
@@ -8140,7 +8150,7 @@ async function layoutZones(v, quiet, again){
     if (!it.pic){ place(it.o, box); continue; }
     const p = it.o, ar = p.h / p.w, w = Math.min(box.w, box.h / ar); p.w = Math.round(w * 10) / 10; p.h = Math.round(w * ar * 10) / 10; p.x = Math.round((box.x + (box.w - p.w) / 2) * 10) / 10; p.y = Math.round((box.y + (box.h - p.h) / 2) * 10) / 10;
   }
-  v.zonesDone = 1; drawSheet(); scheduleSave(); renderOptbar();
+  v.zonesDone = 1; v.gridVer = sheetGrid().ver || 0; drawSheet(); scheduleSave(); renderOptbar();
   if (!quiet) toast(`Виды размещены по зонам: план сверху${main ? ' 1:' + main.scale : ''}, снизу ${Z.zones.length} зоны`);
   // the images are drawn again at the new sizes; with other geometry boxes the arrangement is made once more
   if (!again) (async () => { await wait(); await ensureVpImages(v); await wait();
@@ -8254,14 +8264,15 @@ const sidePart = (v, k) => !(v.side && v.side.parts && v.side.parts[k] === false
 // the narrow stamp (like the user's sample): top — the logo (or the organisation) and the address in two lines,
 // bottom — the name of the sheet and the cell «Лист» with the sheet number
 function SIDE_STAMP(W = SIDE_W){
-  const H = 26, mid = 13, xl = Math.round(W * 0.34 * 10) / 10, xn = W - 18;
+  // ГОСТ 2.304: texts 2,5 mm, the sheet name and number 3,5 mm
+  const H = 28, mid = 13, xl = Math.round(W * 0.34 * 10) / 10, xn = W - 18, hl = 5;
   const el = [{ t:'r', x:0, y:0, w:W, h:H, lw:0.6 }, { t:'l', x:0, y:mid, x2:W, y2:mid, lw:0.5 }, { t:'l', x:xl, y:0, x2:xl, y2:mid, lw:0.35 },
-    { t:'l', x:xn, y:mid, x2:xn, y2:H, lw:0.5 }, { t:'l', x:xn, y:mid + 4, x2:W, y2:mid + 4, lw:0.25 }];
+    { t:'l', x:xn, y:mid, x2:xn, y2:H, lw:0.5 }, { t:'l', x:xn, y:mid + hl, x2:W, y2:mid + hl, lw:0.25 }];
   const T = (tx, x, y, s, b = false, al = 'left') => el.push({ t:'t', tx, x, y, s, b, al });
-  T('{org}', xl / 2, mid / 2, 2.4, true, 'center');                      // the logo goes here (editor: «+ Логотип»)
-  T('{obj}', (xl + W) / 2, 4.2, 2.6, false, 'center'); T('{addr}', (xl + W) / 2, 8.8, 2.6, false, 'center');
-  T('{sheet}', 3, mid + (H - mid) / 2, 3.4, false, 'left');
-  T('Лист', (xn + W) / 2, mid + 2, 1.9, false, 'center'); T('{num}', (xn + W) / 2, mid + 4 + (H - mid - 4) / 2, 3, false, 'center');
+  T('{org}', xl / 2, mid / 2, 2.5, true, 'center');                      // the logo goes here (editor: «+ Логотип»)
+  T('{obj}', (xl + W) / 2, 4, 2.5, false, 'center'); T('{addr}', (xl + W) / 2, 9, 2.5, false, 'center');
+  T('{sheet}', 3, mid + (H - mid) / 2, 3.5, false, 'left');
+  T('Лист', (xn + W) / 2, mid + hl / 2, 2.5, false, 'center'); T('{num}', (xn + W) / 2, mid + hl + (H - mid - hl) / 2, 3.5, false, 'center');
   return { id:'st-side', n:'Узкий штамп (боковая колонка)', w:W, h:H, el };
 }
 function sideStamp(){ let s = stamps().find(x => x.id === 'st-side'); if (!s){ s = SIDE_STAMP(); stamps().push(s); } return s; }
@@ -8290,7 +8301,7 @@ function drawStampEls(g, st, x0, y0, txt, sel){
     if (e.t === 'i'){ const im = stampImg(e.src); if (im.complete && im.naturalWidth) g.drawImage(im, x0 + e.x, y0 + e.y, e.w, e.h); if (i === sel){ g.lineWidth = 0.3; g.strokeRect(x0 + e.x, y0 + e.y, e.w, e.h); } continue; }
     if (e.t === 'l'){ g.lineWidth = e.lw; g.beginPath(); g.moveTo(x0 + e.x, y0 + e.y); g.lineTo(x0 + e.x2, y0 + e.y2); g.stroke(); }
     else if (e.t === 'r'){ g.lineWidth = e.lw; g.strokeRect(x0 + e.x, y0 + e.y, e.w, e.h); }
-    else { g.font = `${e.b ? '600 ' : ''}${e.s}px "Golos Text", Arial`; g.textAlign = e.al; g.textBaseline = 'middle'; g.fillText(txt(e.tx), x0 + e.x, y0 + e.y); }
+    else { /* ГОСТ 2.304: not smaller than 2,5 mm */ g.font = `${e.b ? '600 ' : ''}${Math.max(GOST_MIN, e.s)}px "Golos Text", Arial`; g.textAlign = e.al; g.textBaseline = 'middle'; g.fillText(txt(e.tx), x0 + e.x, y0 + e.y); }
   }
 }
 // title block: the stamp chosen for the sheet (by default GOST 21.101 form 3)
@@ -8329,8 +8340,8 @@ function drawSheet(){
 }
 // titles moved over the views (ГОСТ): a sheet arranged before, whose title now leaves the frame, is arranged once again by itself
 function ttlTopCheck(v){
-  // a survey sheet gets its zones once by itself (the plan at the top, axonometries below)
-  if (sheetLay(v) === 'zones' && !v.zonesDone && v.vps.length && v.vps.every(p => vpImgs.has(p.id))){ v.zonesDone = 1; v.sideLaid = 1; setTimeout(() => layoutSheet(v, true), 50); return; }
+  // a sheet with zones gets them by itself: once, and again after the common grid was changed on another sheet
+  if (sheetLay(v) === 'zones' && (!v.zonesDone || (v.gridVer || 0) !== (sheetGrid().ver || 0)) && v.vps.length && v.vps.every(p => vpImgs.has(p.id))){ v.zonesDone = 1; v.sideLaid = 1; v.gridVer = sheetGrid().ver || 0; setTimeout(() => layoutZones(v, true, false, true), 50); return; }
   // the side column came onto a sheet whose views reach under it: arranged once again (left of the column)
   if (sideOn(v) && !v.sideLaid && v.vps.length && v.vps.every(p => vpImgs.has(p.id))){ v.sideLaid = 1; const B = sideBox(v); if (v.vps.some(p => { const c = (vpImgs.get(p.id) || {}).cb || { r:1 }; return p.x + (p._w || 0) * c.r > B.x - 1; })) setTimeout(() => layoutSheet(v, true), 50); }
   if (v.ttlTop || !v.vps.length || !v.vps.every(p => vpImgs.has(p.id))) return;
@@ -8404,11 +8415,11 @@ $('#sheetCv').addEventListener('pointermove', e => {
   if (SHEET.areaDrag){ const h = sheetHit(e), a = SHEET.areaDrag; a.x = Math.min(a.x0, h.x); a.y = Math.min(a.y0, h.y); a.w = Math.abs(h.x - a.x0); a.h = Math.abs(h.y - a.y0); drawSheet(); return; }
   if (SHEET.exCol){ const h = sheetHit(e), c = SHEET.exCol; c.c.w = clamp(Math.round((c.w0 + h.x - c.sx) * 2) / 2, 4, 250); c.moved = true; drawSheet(); return; }
   if (SHEET.grid){
-    const h = sheetHit(e), G = SHEET.grid, v = G.v, Z = G.Z, A = Z.A; v.grid = v.grid || {}; G.moved = true;
-    if (G.k === 'top') v.grid.top = Math.round(clamp((h.y - A.y - ZONE_GAP / 2) / A.h, 0.25, 0.9) * 1000) / 1000;
+    const h = sheetHit(e), G = SHEET.grid, Z = G.Z, A = Z.A, SG = sheetGrid(); G.moved = true;
+    if (G.k === 'top') SG.top = Math.round(clamp((h.y - A.y - ZONE_GAP / 2) / A.h, 0.25, 0.92) * 1000) / 1000;
     else { // the line between cell i and i+1: the two cells share their width, the others stay
       const ws = Z.zones.map(z => z.w), a = ws[G.i] + ws[G.i + 1], x0 = Z.zones[G.i].x, nw = clamp(h.x - ZONE_GAP / 2 - x0, 15, a - 15);
-      ws[G.i] = nw; ws[G.i + 1] = a - nw; const s = ws.reduce((p, q) => p + q, 0); v.grid.cols = ws.map(w => Math.round(w / s * 1000) / 1000);
+      ws[G.i] = nw; ws[G.i + 1] = a - nw; const s = ws.reduce((p, q) => p + q, 0); SG.cols = ws.map(w => Math.round(w / s * 1000) / 1000);
     }
     drawSheet(); return;
   }
@@ -8439,7 +8450,9 @@ $('#sheetCv').addEventListener('pointerup', () => {
     if (SHEET.colDrag){ const d = SHEET.colDrag; SHEET.colDrag = null; if (d.moved){ FDIRTY.file = FDIRTY.copy = true; scheduleSave(); } else undoStack.pop(); drawSheet(); return; }
     if (E.r0 && E.cur){ const a = E.r0, c = E.cur; E.r0 = null; if (Math.abs(c.x - a.x) > 1 && Math.abs(c.y - a.y) > 1) colChange(v, L => L.push({ t:'r', x:Math.min(a.x, c.x), y:Math.min(a.y, c.y), w:Math.abs(c.x - a.x), h:Math.abs(c.y - a.y), lw:+(SHEET.colLw || 0.35) }), 'Прямоугольник в колонке'); else drawSheet(); return; }
   }
-  if (SHEET.grid){ const G = SHEET.grid; SHEET.grid = null; if (G.moved){ FDIRTY.file = FDIRTY.copy = true; scheduleSave(); layoutZones(G.v, true, true); } return; }
+  // the grid line let go: every view of this sheet is fitted to its new cell (two passes — with fresh images);
+  // the other sheets with zones follow when they are opened (STD.sheetGrid.ver)
+  if (SHEET.grid){ const G = SHEET.grid; SHEET.grid = null; if (G.moved){ const SG = sheetGrid(); SG.ver = (SG.ver || 0) + 1; FDIRTY.file = FDIRTY.copy = true; scheduleSave(); layoutZones(G.v, true, false, true); toast('Сетка изменена — виды подстроены; на других листах — при их открытии'); } return; }
   // the «Зоны» layout: a view or a photo dropped into a cell takes it (the one that was there goes to the cell it left) and is fitted
   { const d = SHEET.drag, v = curView();
     if (d && d.moved && !d.ex && v && v.kind === 'sheet' && sheetLay(v) === 'zones' && d.lx != null){
@@ -10721,7 +10734,7 @@ function renderSheetOptbar(ob){
   const pic = String(SHEET.sel || '').startsWith('pic:') ? (v.pics || []).find(p => p.id === SHEET.sel.slice(4)) : null;
   if (pic) h += `<span class="ctx">Фото</span><label for="shPW">Ширина, мм<input id="shPW" class="n2" type="number" min="10" max="800" step="1" value="${Math.round(pic.w)}"></label><label for="shPH">Высота, мм<input id="shPH" class="n2" type="number" min="10" max="800" step="1" value="${Math.round(pic.h)}"></label><label for="shPCap">Подпись<input id="shPCap" value="${esc(pic.cap || '')}" placeholder="нет"></label><label class="pchk"><input type="checkbox" id="shPFr"${pic.fr ? ' checked' : ''}> рамка</label><button class="btn sm" id="shPUp" title="Поверх других фото">Наверх</button><button class="btn sm danger" id="shPDel">Убрать фото</button>`;
   h += `<button class="btn sm" id="shPic" title="Добавить фото на лист (можно несколько; или перетащите файлы прямо на лист)">Фото…</button>`;
-  h += `<label for="shLayM" title="Зоны: главный план сверху, снизу три зоны для аксонометрий и фото — всё масштабируется под свою зону. Рядами: виды рядами по размеру">Раскладка<select id="shLayM"><option value="zones"${sheetLay(v) === 'zones' ? ' selected' : ''}>зоны (план сверху, 3 снизу)</option><option value="rows"${sheetLay(v) === 'rows' ? ' selected' : ''}>рядами</option></select></label>${sheetLay(v) === 'zones' && v.grid && (v.grid.top || v.grid.cols) ? '<button class="btn sm" id="shGridAuto" title="Линии сетки снова сами: план как можно крупнее, снизу зоны под аксонометрии">Сетка сама</button>' : ''}`;
+  h += `<label for="shLayM" title="Зоны: главный план сверху, снизу три зоны для аксонометрий и фото — всё масштабируется под свою зону. Рядами: виды рядами по размеру">Раскладка<select id="shLayM"><option value="zones"${sheetLay(v) === 'zones' ? ' selected' : ''}>зоны (план сверху, 3 снизу)</option><option value="rows"${sheetLay(v) === 'rows' ? ' selected' : ''}>рядами</option></select></label>${sheetLay(v) === 'zones' && (sheetGrid().top || sheetGrid().cols) ? '<button class="btn sm" id="shGridAuto" title="Линии сетки снова сами: план как можно крупнее, снизу зоны под аксонометрии">Сетка сама</button>' : ''}`;
   h += `<button class="btn sm" id="shLay" title="Разложить все виды листа в области размещения; если не помещаются — уменьшить масштаб">Разместить виды</button><button class="btn sm" id="shArea" aria-pressed="${!!SHEET.areaDraw}" title="Протяните прямоугольник на листе — в нём будут размещаться виды">Область размещения…</button>${v.area ? '<button class="btn sm" id="shAreaDef" title="Вернуть область по умолчанию (вся рамка над штампом)">Область по умолчанию</button>' : ''}<button class="btn sm" id="shAreaShow" aria-pressed="${!!SHEET.areaShow}">Показать область</button><label class="pchk" title="Сами раскладывать виды, когда вид добавлен на лист или убран с него"><input type="checkbox" id="shAuto"${v.autoLay ? ' checked' : ''}> авто</label>`;
   // the side column: on/off, width, its parts, notes, own block
   { const on = sideOn(v), P = k => `<label class="pchk"><input type="checkbox" data-sdp="${k}"${sidePart(v, k) ? ' checked' : ''}> ${SIDE_PARTS[k].toLowerCase()}</label>`;
@@ -10740,7 +10753,7 @@ function renderSheetOptbar(ob){
   q('shName').onchange = upd(x => v.name = x.trim().slice(0, 80) || v.name);
   q('shStamp').onchange = upd(x => { if (sideOn(v)){ v.side = v.side || {}; if (x === 'st-side') delete v.side.stamp; else v.side.stamp = x; } else v.stamp = x; });
   q('shZo').onclick = () => sheetZoomTo((SHEET.zoom || 1) / 1.25); q('shZi').onclick = () => sheetZoomTo((SHEET.zoom || 1) * 1.25); q('shZf').onclick = () => sheetFit();
-  if (q('shGridAuto')) q('shGridAuto').onclick = () => { if (v.grid){ delete v.grid.top; delete v.grid.cols; } scheduleSave(); layoutSheet(v); };
+  if (q('shGridAuto')) q('shGridAuto').onclick = () => { const SG = sheetGrid(); delete SG.top; delete SG.cols; SG.ver = (SG.ver || 0) + 1; scheduleSave(); layoutSheet(v); };
   if (q('shLayM')) q('shLayM').onchange = e => { v.lay = e.target.value; scheduleSave(); layoutSheet(v); };
   const sideCh = () => { FDIRTY.file = FDIRTY.copy = true; scheduleSave(); drawSheet(); renderOptbar(); if (v.autoLay) layoutSheet(v, true); };
   q('shSide').onchange = e => { pushUndo('Боковая колонка'); v.side = v.side || {}; v.side.on = e.target.checked; sideCh(); };
@@ -12181,7 +12194,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-0035');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-0047');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
