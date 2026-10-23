@@ -228,8 +228,11 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .dim.sva.open{color:var(--bad)}
 .dim.hb{background:transparent;font-size:11.5px;padding:0 2px;white-space:nowrap}
 .dim.rm.open{color:var(--bad);border-color:var(--bad)}
-.dim.lv{white-space:pre-line;line-height:1.2;font-size:var(--dimfs,11px);transform:translate(0,-100%);text-align:left;border-bottom:1px solid var(--datum);border-radius:0;background:transparent;padding:0 3px;pointer-events:auto;cursor:ns-resize}
+.dim.lv{white-space:pre-line;line-height:1.2;font-size:var(--dimfs,11px);transform:translate(0,-100%);text-align:left;border-bottom:1px solid var(--datum);border-radius:0;background:transparent;padding:0 3px;pointer-events:auto;cursor:move}
 .dim.lv:hover{color:var(--sel);background:var(--accent-soft)}
+.dim.lvg{width:9px;height:9px;padding:0;border:1.5px solid var(--sel);border-radius:50%;background:var(--sheet);transform:translate(-50%,-50%);pointer-events:auto;cursor:ns-resize;opacity:.55}
+.dim.lvg:hover{opacity:1;background:var(--accent-soft)}.dim.lvg.pin{border-color:var(--muted);cursor:not-allowed}
+.dim.lockl.lvk{transform:translate(0,-50%)}
 .dim.spt{white-space:nowrap;font-size:var(--dimfs,11px);transform:translate(0,-100%);border-bottom:1px solid currentColor;border-radius:0;background:transparent;padding:0 3px;pointer-events:auto;cursor:pointer}
 .dim.spt.left{transform:translate(-100%,-100%)}
 .dim.spt.sel{color:var(--sel)}
@@ -242,6 +245,8 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .hnd.pt{clip-path:none;border-radius:50%;width:14px;height:14px;margin:-7px 0 0 -7px;transform:none}
 .hnd.we{width:13px;height:13px;margin:-6.5px 0 0 -6.5px}
 .hnd.we.dj{background:var(--sheet);border:2.5px solid var(--sel)}
+.hnd.crop{clip-path:none;border-radius:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;transform:none;background:#4a90e2;border:1.5px solid #1f5fae;cursor:grab}
+.hnd.crop:hover{background:#7fb2f0}.hnd.crop:active{cursor:grabbing}
 .hnd.flip{clip-path:none;border-radius:4px;width:24px;height:20px;margin:-10px 0 0 -12px;transform:none;color:#fff;font-size:13px;line-height:16px;font-weight:700;cursor:pointer}
 @media (pointer:coarse){.hnd{width:24px;height:24px;margin:-12px 0 0 -12px}.hnd.pt{width:22px;height:22px;margin:-11px 0 0 -11px}}
 .pchk{display:flex;align-items:center;gap:6px;font-size:12px}
@@ -3363,6 +3368,7 @@ function buildElevDatum(v){
   SECT_LABELS = out;
 }
 // section and elevation views: grids cut by the view and level lines, as in Revit
+let CROP_M = null;
 function buildSectDatum(){
   const v = viewNow(), f = sectFrame(v), out = [], eps = 0.02;
   const on = (s, y) => f.p1.clone().addScaledVector(f.dir, s).setY(y).addScaledVector(f.d, -eps);
@@ -3373,6 +3379,18 @@ function buildSectDatum(){
     const s = p.clone().sub(f.p1).dot(f.dir); if (s < -0.01 || s > f.L + 0.01) continue;
     datum.add(lineOf([on(s, f.y0), on(s, f.y1 - 0.75)], M.lvlDash));
     out.push({ x:on(s, 0).x, y:f.y1 - 0.45, z:on(s, 0).z, t:gr.name, cls:'gb' });
+  }
+  // Revit «Область обрезки»: a thin frame with break marks «//» on its sides (only on screen, not on sheets and prints)
+  if (v.crop !== false && !RENDER){
+    const m = paperMm() * 1.6, g = m * 0.7, pts = [];
+    const seg = (a, b) => pts.push(a, b);
+    seg(on(0, f.y0), on(f.L, f.y0)); seg(on(f.L, f.y0), on(f.L, f.y1)); seg(on(f.L, f.y1), on(0, f.y1)); seg(on(0, f.y1), on(0, f.y0));
+    for (const fr of [0.25, 0.75]) for (const i of [0, 1]){
+      const s = f.L * fr + (i - 0.5) * g, y = f.y0 + (f.y1 - f.y0) * fr + (i - 0.5) * g;
+      for (const yy of [f.y0, f.y1]) seg(on(s - m / 2, yy - m), on(s + m / 2, yy + m));
+      for (const ss of [0, f.L]) seg(on(ss - m, y - m / 2), on(ss + m, y + m / 2));
+    }
+    datum.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), CROP_M || (CROP_M = new THREE.LineBasicMaterial({ color:'#2a5aa0' }))));
   }
   // project levels, as in Revit sections: a dashed line with the elevation and the level name
   for (const L of levels){
@@ -4017,7 +4035,7 @@ function syncConstraints(){
 function sanitizeLevels(arr){
   if (!Array.isArray(arr) || !arr.length) return null;
   const out = [], seen = new Set();
-  for (const l of arr){ if (!l || typeof l.id !== 'string' || seen.has(l.id) || !Number.isFinite(+l.elev)) continue; seen.add(l.id); out.push({ id:l.id.slice(0, 20), name:String(l.name || 'Уровень').slice(0, 40), elev:+l.elev }); }
+  for (const l of arr){ if (!l || typeof l.id !== 'string' || seen.has(l.id) || !Number.isFinite(+l.elev)) continue; seen.add(l.id); out.push({ id:l.id.slice(0, 20), name:String(l.name || 'Уровень').slice(0, 40), elev:+l.elev, ...(l.pin ? { pin:true } : {}) }); }
   return out.length ? out.sort((a, b) => a.elev - b.elev) : null;
 }
 const fmtElev = v => (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v).toLocaleString('ru-RU', { minimumFractionDigits:3, maximumFractionDigits:3 });
@@ -4634,9 +4652,51 @@ function placeLevel(px, py){
   pushUndo('Новый уровень'); const L = addLevel(y); afterLevels();
   toast(`Уровень «${L.name}» на отметке ${fmtElev(L.elev)}: создан план этажа. Отметку можно перетащить или ввести числом`);
 }
-// level head on a section: drag up / down to change the elevation (10 mm steps), a click — type the elevation
+/* level heads on sections / elevations (Revit): the head (mark + value + name on a shelf) sits at the end of the level line;
+   heads of close levels never overlap — the upper one goes up and gets an elbow to its line; a head dragged by hand keeps its place
+   in this view (v.lvh[level] = { du, dy } in metres, screen-right and up); a grip on the line changes the elevation; a lock fixes it */
+function layoutLevels(out){
+  const v = viewNow(), hd = (v && v.lvh) || {}, k = wpp(), AZ = RENDER ? 1 : annoZ();
+  const fs = RENDER ? STD.anno.textMm * RENDER.pxmm * 1.15 : STD.anno.textMm * 96 / 25.4 * 1.15 * AZ, mk = RENDER ? 1.9 * RENDER.pxmm : 7 * AZ + 1, H = fs * 2.5 + mk + 2;
+  const lv = out.filter(L => L.cls === 'lv' && L.lvId);
+  const P = lv.map(L => { const p = toScreen(L.x, L.y, L.z), o = hd[L.lvId], w = Math.max(...String(L.t).split('\n').map(s => textW(s, fs))) + 10;
+    return { L, p, w, man:!!o, x:p.x + (o ? o.du / k : 0), y:p.y - (o ? o.dy / k : 0) }; }).filter(q => q.p.ok !== false);
+  P.sort((a, b) => b.y - a.y); // from the bottom of the screen up
+  const placed = P.filter(q => q.man);
+  for (const q of P){
+    if (q.man) continue;
+    let y = q.y, moved = true;
+    for (let n = 0; n < 40 && moved; n++){ moved = false; for (const r of placed) if (Math.abs(r.x - q.x) < Math.max(r.w, q.w) && y > r.y - H - 1 && y - H < r.y + 1){ y = r.y - H - 2; moved = true; } }
+    if (y !== q.y){ q.y = y; q.x += 14 * AZ; } placed.push(q);
+  }
+  for (const q of P){
+    const L = q.L, Lv = levels.find(l => l.id === L.lvId);
+    L.sx = q.x; L.sy = q.y; L.base = { x:q.p.x, y:q.p.y }; L.elbow = Math.hypot(q.x - q.p.x, q.y - q.p.y) > 1.5;
+    if (RENDER) continue;
+    // the grip on the line (drag — elevation) and the lock next to the head
+    out.push({ x:L.x, y:L.y, z:L.z, sx:q.p.x, sy:q.p.y, t:'', cls:'lvg' + (Lv && Lv.pin ? ' pin' : ''), lvId:L.lvId, grip:true });
+    out.push({ sx:q.x + q.w + 4, sy:q.y - mk - fs * 1.9, t:Lv && Lv.pin ? '🔒' : '🔓', cls:'lockl lvk' + (Lv && Lv.pin ? '' : ' open mini'), act:() => {
+      if (!Lv) return; pushUndo(Lv.pin ? 'Открыть замок уровня' : 'Закрыть замок уровня'); if (Lv.pin) delete Lv.pin; else Lv.pin = true; markEdited(); scheduleSave(); annoDirty = true;
+      toast(Lv.pin ? `«${Lv.name}»: замок закрыт — отметку нельзя изменить` : `«${Lv.name}»: замок открыт`); } });
+  }
+}
+// drag the head of a level (its shelf with the text) — only the place of the text in this view changes, not the elevation; a click — type the elevation
+function levelHeadDrag(el, ev){
+  const L = levels.find(l => l.id === el._lvl), v = viewNow(); if (!L || !v) return;
+  const x0 = ev.clientX, y0 = ev.clientY, k = wpp(), h = el._lvh; let moved = false;
+  const o0 = h ? { du:(h[2] - h[0]) * k, dy:(h[1] - h[3]) * k } : ((v.lvh || {})[L.id] || { du:0, dy:0 });
+  const mv = e => { const dx = e.clientX - x0, dy = e.clientY - y0; if (!moved && Math.hypot(dx, dy) < 4) return; if (!moved){ moved = true; pushUndo('Подпись уровня'); }
+    v.lvh = { ...(v.lvh || {}), [L.id]:{ du:r4(o0.du + dx * k), dy:r4(o0.dy - dy * k) } }; annoDirty = true; };
+  const up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up);
+    if (moved){ const q = v.lvh[L.id]; if (Math.hypot(q.du, q.dy) < 4 * k){ delete v.lvh[L.id]; } markEdited(); scheduleSave(); annoDirty = true; return; }
+    if (L.pin){ toast(`«${L.name}»: уровень закреплён замком — сначала откройте замок`); return; }
+    el._edit = val => { L.elev = r4(val); levels.sort((a, b) => a.elev - b.elev); afterLevels(); toast(`«${L.name}»: отметка ${fmtElev(L.elev)}`); }; el._val = L.elev; el._neg = true; startEdit(el); };
+  addEventListener('pointermove', mv); addEventListener('pointerup', up);
+}
+// the grip on a level line: drag up / down to change the elevation (10 mm steps)
 function levelDrag(el, ev){
   const L = levels.find(l => l.id === el._lvl); if (!L) return;
+  if (L.pin){ toast(`«${L.name}»: уровень закреплён замком — сначала откройте замок`); return; }
   const y0 = ev.clientY, e0 = L.elev, k = wpp(); let moved = false;
   const mv = e => { const dy = e.clientY - y0; if (!moved && Math.abs(dy) < 4) return; if (!moved){ moved = true; pushUndo('Отметка уровня'); }
     L.elev = r4(Math.round((e0 - dy * k) * 100) / 100); annoDirty = true; };
@@ -5722,7 +5782,7 @@ function buildLabels(){
         const nm = (it.tag && tagName(it)) || elWord(it); toast(it.pin ? `${nm}: замок закрыт — элемент неподвижен` : `${nm}: замок открыт`); } });
     }
   }
-  if (isSectLike()) out.push(...SECT_LABELS);
+  if (isSectLike()){ out.push(...SECT_LABELS); layoutLevels(out); }
   if (plan){
     for (const d of items) if (d.type === 'dim' && dimShown(d)) dimTexts(d, isSel(d.id) ? 'dl sel' : 'dl', out);
     specialDimTexts(out);
@@ -5781,16 +5841,17 @@ function updateLabels(){
     if (reg && (L.x == null ? /^gb/.test(L.cls) : (L.x < reg.x0 - 0.05 || L.x > reg.x1 + 0.05 || L.z < reg.z0 - 0.05 || L.z > reg.z1 + 0.05))) continue;
     const s = L.sx != null ? { x:L.sx, y:L.sy, ok:true } : toScreen(L.x, L.y, L.z);
     if (!s.ok || s.x < -60 || s.x > W + 60 || s.y < -30 || s.y > H + 30) continue;
-    let el = pool[n]; if (!el){ el = document.createElement('div'); labelsEl.appendChild(el); pool[n] = el; el.addEventListener('pointerdown', ev => { if (el._lvl && ev.button === 0){ ev.stopPropagation(); ev.preventDefault(); levelDrag(el, ev); return; } if (el._dd && ev.button === 0){ ev.stopPropagation(); ev.preventDefault(); dimTextDrag(el, ev); return; } if (el._act){ ev.stopPropagation(); ev.preventDefault(); el._act(); } else if (el._txt){ ev.stopPropagation(); ev.preventDefault(); startTextEdit(el); } else if (el._edit){ ev.stopPropagation(); ev.preventDefault(); startEdit(el); } else if (el._open){ ev.stopPropagation(); ev.preventDefault(); openView(el._open); } }); }
+    let el = pool[n]; if (!el){ el = document.createElement('div'); labelsEl.appendChild(el); pool[n] = el; el.addEventListener('pointerdown', ev => { if (el._lvg && ev.button === 0){ ev.stopPropagation(); ev.preventDefault(); el._lvl = el._lvg; levelDrag(el, ev); return; } if (el._lvl && ev.button === 0){ ev.stopPropagation(); ev.preventDefault(); levelHeadDrag(el, ev); return; } if (el._dd && ev.button === 0){ ev.stopPropagation(); ev.preventDefault(); dimTextDrag(el, ev); return; } if (el._act){ ev.stopPropagation(); ev.preventDefault(); el._act(); } else if (el._txt){ ev.stopPropagation(); ev.preventDefault(); startTextEdit(el); } else if (el._edit){ ev.stopPropagation(); ev.preventDefault(); startEdit(el); } else if (el._open){ ev.stopPropagation(); ev.preventDefault(); openView(el._open); } }); }
     n++;
     el.hidden = false; el.className = L.cls ? 'dim ' + L.cls : 'dim';
     if (el.textContent !== L.t) el.textContent = L.t;
     if (L.lead) lead.push({ pts:L.lead });
     else if (L.leader){ const q = leaderPx(L, s, fsL); if (q){ lead.push(q); s.x = q.tx; s.y = q.ty; } }
     // ГОСТ 21.101 height mark (levels on sections, spot elevations): a triangle on the point, the value above the shelf
+    if (L.elbow) lead.push({ pts:[L.base, { x:L.sx, y:L.sy }] });
     if (/^(lv|spt)/.test(L.cls || '')){ const a = 5 * AZ + 1, hh = 7 * AZ + 1; lead.push({ pts:[{ x:s.x, y:s.y }, { x:s.x - a, y:s.y - hh }, { x:s.x + a, y:s.y - hh }, { x:s.x, y:s.y }] }); s.y -= hh; }
     el.style.left = s.x + 'px'; el.style.top = (s.y + (L.dy || 0)) + 'px';
-    el._dd = L.own || null; el._lvl = L.lvId || null; el._neg = null;
+    el._dd = L.own || null; el._lvl = !L.grip && L.lvId || null; el._lvg = L.grip ? L.lvId : null; el._lvh = L.base ? [L.base.x, L.base.y, L.sx, L.sy] : null; el._neg = null;
     el.style.transform = L.rot ? `translate(-50%,-50%) rotate(${L.rot}deg)` : '';
     el.style.fontSize = L.size ? (L.size * AZ).toFixed(1) + 'px' : ''; el.style.color = L.col || '';
     el._edit = L.edit || null; el._val = L.val; el._open = L.open || null; el._act = L.act || null; el._txt = L.txtEdit || null;
@@ -6131,6 +6192,7 @@ function sanitizeViews(arr){
     }
     if ((v.kind === 'd3' || v.kind === 'camera' || v.kind === 'axo') && v.box && ['x0','x1','y0','y1','z0','z1'].every(k => N(v.box[k]))){ o.box = { on:!!v.box.on }; for (const k of ['x0','x1','y0','y1','z0','z1']) o.box[k] = +v.box[k]; }
     if (typeof v.folder === 'string') o.folder = v.folder.slice(0, 30);
+    if (v.lvh && typeof v.lvh === 'object'){ const h = {}; for (const [k, q] of Object.entries(v.lvh)) if (q && Number.isFinite(+q.du) && Number.isFinite(+q.dy) && (+q.du || +q.dy)) h[String(k).slice(0, 20)] = { du:r4(+q.du), dy:r4(+q.dy) }; if (Object.keys(h).length) o.lvh = h; }
     if (v.kind === 'section' || v.kind === 'ielev'){
       if (!v.p1 || !v.p2 || ![v.p1.x, v.p1.z, v.p2.x, v.p2.z].every(N)) continue;
       Object.assign(o, { code:String(v.code || '1').slice(0, 6), p1:{ x:+v.p1.x, z:+v.p1.z }, p2:{ x:+v.p2.x, z:+v.p2.z }, flip:v.flip !== false, crop:v.crop !== false, far:N(v.far) ? clamp(+v.far, 0.1, 200) : 5, y0:N(v.y0) ? +v.y0 : -0.5, y1:N(v.y1) ? +v.y1 : 4 });
@@ -6255,30 +6317,30 @@ function handleSpecs(){
   const v = curView(), out = [];
   if (!v || S.view === 'sheet' || RENDER || S.tool !== 'select') return out;
   const mode = KIND_MODE[v.kind];
-  const ax = (key, pos, axis, tgt, apply, title) => out.push({ key, pos, axis, tgt, apply, title });
+  const ax = (key, pos, axis, tgt, apply, title, crop) => out.push({ key, pos, axis, tgt, apply, title, ...(crop ? { fine:true, cls:'crop' } : {}) });
   if ((mode === 'd3' || mode === 'axo') && v.box && v.box.on){
     const b = v.box, cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2, cz = (b.z0 + b.z1) / 2;
     const mn = 0.2;
-    ax('x0', new V3(b.x0, cy, cz), new V3(-1, 0, 0), b, (s, t) => { b.x0 = r4(Math.min(s.x0 - t, b.x1 - mn)); }, 'Запад');
-    ax('x1', new V3(b.x1, cy, cz), new V3(1, 0, 0), b, (s, t) => { b.x1 = r4(Math.max(s.x1 + t, b.x0 + mn)); }, 'Восток');
-    ax('z0', new V3(cx, cy, b.z0), new V3(0, 0, -1), b, (s, t) => { b.z0 = r4(Math.min(s.z0 - t, b.z1 - mn)); }, 'Север');
-    ax('z1', new V3(cx, cy, b.z1), new V3(0, 0, 1), b, (s, t) => { b.z1 = r4(Math.max(s.z1 + t, b.z0 + mn)); }, 'Юг');
-    ax('y0', new V3(cx, b.y0, cz), new V3(0, -1, 0), b, (s, t) => { b.y0 = r4(Math.min(s.y0 - t, b.y1 - mn)); }, 'Низ');
-    ax('y1', new V3(cx, b.y1, cz), new V3(0, 1, 0), b, (s, t) => { b.y1 = r4(Math.max(s.y1 + t, b.y0 + mn)); }, 'Верх');
+    ax('x0', new V3(b.x0, cy, cz), new V3(-1, 0, 0), b, (s, t) => { b.x0 = r4(Math.min(s.x0 - t, b.x1 - mn)); }, 'Запад', true);
+    ax('x1', new V3(b.x1, cy, cz), new V3(1, 0, 0), b, (s, t) => { b.x1 = r4(Math.max(s.x1 + t, b.x0 + mn)); }, 'Восток', true);
+    ax('z0', new V3(cx, cy, b.z0), new V3(0, 0, -1), b, (s, t) => { b.z0 = r4(Math.min(s.z0 - t, b.z1 - mn)); }, 'Север', true);
+    ax('z1', new V3(cx, cy, b.z1), new V3(0, 0, 1), b, (s, t) => { b.z1 = r4(Math.max(s.z1 + t, b.z0 + mn)); }, 'Юг', true);
+    ax('y0', new V3(cx, b.y0, cz), new V3(0, -1, 0), b, (s, t) => { b.y0 = r4(Math.min(s.y0 - t, b.y1 - mn)); }, 'Низ', true);
+    ax('y1', new V3(cx, b.y1, cz), new V3(0, 1, 0), b, (s, t) => { b.y1 = r4(Math.max(s.y1 + t, b.y0 + mn)); }, 'Верх', true);
   }
   if (mode === 'sect' && v.crop !== false){
     const f = sectFrame(v), ym = (f.y0 + f.y1) / 2, P = (s, y) => f.p1.clone().addScaledVector(f.dir, s).setY(y);
-    ax('l', P(0, ym), f.dir.clone().negate(), v, (s, t) => { const L = f.L; if (L + t < 0.3 && t < 0) return; v.p1 = { x:r4(s.p1.x - f.dir.x * t), z:r4(s.p1.z - f.dir.z * t) }; if (sectFrame(v).L < 0.3) v.p1 = s.p1; }, 'Боковая граница');
-    ax('r', P(f.L, ym), f.dir.clone(), v, (s, t) => { v.p2 = { x:r4(s.p2.x + f.dir.x * t), z:r4(s.p2.z + f.dir.z * t) }; if (sectFrame(v).L < 0.3) v.p2 = s.p2; }, 'Боковая граница');
-    ax('t', P(f.L / 2, f.y1), new V3(0, 1, 0), v, (s, t) => { v.y1 = r4(Math.max(s.y1 + t, v.y0 + 0.3)); }, 'Верх');
-    ax('b', P(f.L / 2, f.y0), new V3(0, -1, 0), v, (s, t) => { v.y0 = r4(Math.min(s.y0 - t, v.y1 - 0.3)); }, 'Низ');
+    ax('l', P(0, ym), f.dir.clone().negate(), v, (s, t) => { const L = f.L; if (L + t < 0.3 && t < 0) return; v.p1 = { x:r4(s.p1.x - f.dir.x * t), z:r4(s.p1.z - f.dir.z * t) }; if (sectFrame(v).L < 0.3) v.p1 = s.p1; }, 'Боковая граница', true);
+    ax('r', P(f.L, ym), f.dir.clone(), v, (s, t) => { v.p2 = { x:r4(s.p2.x + f.dir.x * t), z:r4(s.p2.z + f.dir.z * t) }; if (sectFrame(v).L < 0.3) v.p2 = s.p2; }, 'Боковая граница', true);
+    ax('t', P(f.L / 2, f.y1), new V3(0, 1, 0), v, (s, t) => { v.y1 = r4(Math.max(s.y1 + t, v.y0 + 0.3)); }, 'Верх', true);
+    ax('b', P(f.L / 2, f.y0), new V3(0, -1, 0), v, (s, t) => { v.y0 = r4(Math.min(s.y0 - t, v.y1 - 0.3)); }, 'Низ', true);
   }
   if (mode === 'plan' && v.region && (v.kind === 'detail' || v.crop)){
     const r = v.region, cx = (r.x0 + r.x1) / 2, cz = (r.z0 + r.z1) / 2;
-    ax('px0', new V3(r.x0, 0, cz), new V3(-1, 0, 0), r, (s, t) => { r.x0 = r4(Math.min(s.x0 - t, r.x1 - 0.3)); }, 'Граница вида');
-    ax('px1', new V3(r.x1, 0, cz), new V3(1, 0, 0), r, (s, t) => { r.x1 = r4(Math.max(s.x1 + t, r.x0 + 0.3)); }, 'Граница вида');
-    ax('pz0', new V3(cx, 0, r.z0), new V3(0, 0, -1), r, (s, t) => { r.z0 = r4(Math.min(s.z0 - t, r.z1 - 0.3)); }, 'Граница вида');
-    ax('pz1', new V3(cx, 0, r.z1), new V3(0, 0, 1), r, (s, t) => { r.z1 = r4(Math.max(s.z1 + t, r.z0 + 0.3)); }, 'Граница вида');
+    ax('px0', new V3(r.x0, 0, cz), new V3(-1, 0, 0), r, (s, t) => { r.x0 = r4(Math.min(s.x0 - t, r.x1 - 0.3)); }, 'Граница вида', true);
+    ax('px1', new V3(r.x1, 0, cz), new V3(1, 0, 0), r, (s, t) => { r.x1 = r4(Math.max(s.x1 + t, r.x0 + 0.3)); }, 'Граница вида', true);
+    ax('pz0', new V3(cx, 0, r.z0), new V3(0, 0, -1), r, (s, t) => { r.z0 = r4(Math.min(s.z0 - t, r.z1 - 0.3)); }, 'Граница вида', true);
+    ax('pz1', new V3(cx, 0, r.z1), new V3(0, 0, 1), r, (s, t) => { r.z1 = r4(Math.max(s.z1 + t, r.z0 + 0.3)); }, 'Граница вида', true);
   }
   // Revit: a selected wall has a blue dot at each end — drag it to lengthen, shorten or turn the wall; joined walls follow
   const w1 = sel.size === 1 ? byId(selId) : null;
@@ -6345,9 +6407,10 @@ function updateHandles(){
         else {
           const a = toScreen(HDRAG.pos0.x, HDRAG.pos0.y, HDRAG.pos0.z), b = toScreen(HDRAG.pos0.x + sp2.axis.x, HDRAG.pos0.y + sp2.axis.y, HDRAG.pos0.z + sp2.axis.z);
           const ux = b.x - a.x, uy = b.y - a.y, L2 = ux * ux + uy * uy; if (L2 < 1e-6) return;
-          const t = roundS((dx * ux + dy * uy) / L2); sp2.apply(HDRAG.start, t);
+          const raw = (dx * ux + dy * uy) / L2, t = sp2.fine ? r4(raw) : roundS(raw); sp2.apply(HDRAG.start, t);
         }
-        viewChanged(curView());
+        // redraw once per screen frame: the crop edge follows the mouse smoothly
+        if (!HDRAG.raf) HDRAG.raf = requestAnimationFrame(() => { if (HDRAG) HDRAG.raf = 0; viewChanged(curView()); });
       });
       const end = () => { if (HDRAG){ const m = HDRAG.spec.model && HDRAG.pushed; HDRAG = null; GUIDES = []; if (m) rebuild(); scheduleSave(); $('#propsBody').dataset.id = 'x'; updatePanel(); } };
       el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
@@ -6519,7 +6582,7 @@ function drawImageLabels(g, PX){
     else if (/^hb/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(2.4 * PX); g.fillStyle = L.col || '#2433c8'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
     else if (/^(lv|spt)/.test(cls)){ // ГОСТ height mark: a triangle on the point, the value above the shelf (a level: its name under the value)
       const ln = String(L.t).split('\n'), a = 1.4 * PX, hh = 1.9 * PX, left = / left/.test(cls);
-      g.strokeStyle = g.fillStyle = '#1b252c'; g.lineWidth = 0.18 * PX; g.beginPath(); g.moveTo(0, 0); g.lineTo(-a, -hh); g.lineTo(a, -hh); g.closePath(); g.stroke();
+      g.strokeStyle = g.fillStyle = '#1b252c'; g.lineWidth = 0.18 * PX; if (L.elbow && L.base){ g.beginPath(); g.moveTo(L.base.x - s.x, L.base.y - s.y); g.lineTo(0, 0); g.stroke(); } g.beginPath(); g.moveTo(0, 0); g.lineTo(-a, -hh); g.lineTo(a, -hh); g.closePath(); g.stroke();
       g.font = font(2.4 * PX, !!ln[1]); const w = Math.max(...ln.map(s => g.measureText(s).width)) + 1.2 * PX, sx = left ? -w : 0;
       g.beginPath(); g.moveTo(left ? a : -a, -hh); g.lineTo(sx + (left ? 0 : w), -hh); g.stroke();
       g.textAlign = 'left'; g.textBaseline = 'bottom';
@@ -7885,7 +7948,7 @@ function renderLevels(){
     tr.innerHTML = `<td><input type="text" maxlength="40" aria-label="Название уровня" value="${esc(L.name)}"></td><td><input type="number" step="10" aria-label="Отметка, мм" value="${Math.round(L.elev * 1000)}"></td><td>${levelUse(L.id)}</td><td><button class="btn sm" data-a="plan">План</button> <button class="btn sm danger" data-a="del" aria-label="Удалить уровень ${esc(L.name)}">×</button></td>`;
     const [nm, el] = tr.querySelectorAll('input');
     nm.onchange = () => { const v = nm.value.trim(); if (!v) return; pushUndo('Уровень'); for (const pv of views) if (pv.kind === 'plan' && pv.lv === L.id && pv.name === L.name) pv.name = v; L.name = v.slice(0, 40); afterLevels(); };
-    el.onchange = () => { const v = Number(el.value) / 1000; if (!Number.isFinite(v)) return; pushUndo('Отметка уровня'); markEdited(); L.elev = r4(v); levels.sort((a, b) => a.elev - b.elev); afterLevels(); toast(`«${L.name}»: отметка ${fmtElev(L.elev)}. Элементы на уровне и привязанные к нему по высоте обновились`); };
+    el.onchange = () => { const v = Number(el.value) / 1000; if (!Number.isFinite(v)) return; if (L.pin){ toast(`«${L.name}»: уровень закреплён замком — откройте замок на разрезе или фасаде`); el.value = Math.round(L.elev * 1000); return; } pushUndo('Отметка уровня'); markEdited(); L.elev = r4(v); levels.sort((a, b) => a.elev - b.elev); afterLevels(); toast(`«${L.name}»: отметка ${fmtElev(L.elev)}. Элементы на уровне и привязанные к нему по высоте обновились`); };
     tr.querySelector('[data-a=plan]').onclick = () => { levelDlg.hidden = true; openView(ensurePlan(L).id); };
     tr.querySelector('[data-a=del]').onclick = () => {
       if (levels.length === 1){ toast('Должен остаться хотя бы один уровень'); return; }

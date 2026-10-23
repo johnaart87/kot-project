@@ -1,5 +1,5 @@
 // Kot project offline cache. Bump VERSION when publishing a new build.
-const VERSION = 'kot-20261023-1021';
+const VERSION = 'kot-20261023-1035';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 const CDN = [
   'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js',
