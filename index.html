@@ -213,7 +213,7 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 #qbar button:hover{background:var(--accent-soft);border-color:var(--line)}#qbar button:disabled{opacity:.35;cursor:default}#qbar svg.mi{width:18px;height:18px}
 #cursor.end{border-radius:2px;background:color-mix(in srgb,var(--temp) 35%,transparent)}
 #cursor.int{border-radius:0;transform:rotate(45deg);background:color-mix(in srgb,var(--temp) 35%,transparent)}
-#sheetWrap{position:absolute;inset:0;background:var(--bg);overflow:auto;z-index:2}
+#sheetWrap{position:absolute;inset:0;background:var(--bg);overflow:hidden;z-index:2}
 #sheetCv{display:block;margin:16px auto;box-shadow:0 6px 24px var(--shade);touch-action:none;cursor:default}
 .dim.wt.el{border-radius:2px 8px 2px 8px}
 .dim.wt.fl{border-width:1px;border-style:dotted;font-weight:600}
@@ -8318,12 +8318,14 @@ function drawSheet(){
   const v = curView(); if (!v || v.kind !== 'sheet') return;
   if (!v.axoDone && v.vps.some(p => { const x = views.find(y => y.id === p.view); return x && x.kind === 'plan' && x.phase && x.phase !== 'all'; })) surveyAxos(v);
   const [Wm, Hm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, wrap = $('#sheetWrap');
+  if (SHEET.lastSheet !== v.id){ SHEET.lastSheet = v.id; SHEET.pan = { x:0, y:0 }; SHEET.zoom = 1; } // another sheet: the whole of it
   // zoom of the sheet (wheel / pinch / buttons): SHEET.zoom × «the whole sheet in the window»; the canvas stays under ~120 Mpx
   const kFit = Math.min(Math.max(200, wrap.clientWidth - 32) / Wm, Math.max(150, wrap.clientHeight - 32) / Hm), dpr0 = Math.min(devicePixelRatio, 2), kMax = Math.sqrt(1.2e8 / (Wm * Hm)) / dpr0;
   SHEET.zoom = clamp(SHEET.zoom || 1, 0.3, Math.max(1, kMax / kFit)); const k = kFit * SHEET.zoom; SHEET.k = k;
   const can = $('#sheetCv'), dpr = Math.min(devicePixelRatio, 2);
   can.width = Math.round(Wm * k * dpr); can.height = Math.round(Hm * k * dpr); can.style.width = Wm * k + 'px'; can.style.height = Hm * k + 'px';
   const g = can.getContext('2d'); g.setTransform(dpr * k, 0, 0, dpr * k, 0, 0); paintSheet(g, v);
+  sheetPanApply();
 }
 // titles moved over the views (ГОСТ): a sheet arranged before, whose title now leaves the frame, is arranged once again by itself
 function ttlTopCheck(v){
@@ -8457,28 +8459,34 @@ document.addEventListener('keydown', e => {
 }, true);
 $('#sheetCv').addEventListener('contextmenu', e => { if (SHEET.colEdit && (SHEET.colEdit.lf || SHEET.colEdit.r0)){ e.preventDefault(); e.stopImmediatePropagation(); SHEET.colEdit.lf = SHEET.colEdit.r0 = null; drawSheet(); } }, true);
 /* zoom of the sheet: the wheel (to the pointer), two fingers, the middle button pans; «Вписать» — the whole sheet */
+// the sheet is moved freely (like Revit): SHEET.pan {x, y} px — a shift of the canvas (CSS transform), at any zoom
+function sheetPanApply(){ const c = $('#sheetCv'), p = SHEET.pan || (SHEET.pan = { x:0, y:0 }); c.style.transform = p.x || p.y ? `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)` : ''; }
 function sheetZoomTo(z, cx, cy){
   const wrap = $('#sheetWrap'), cv0 = $('#sheetCv'), r = cv0.getBoundingClientRect(), wr = wrap.getBoundingClientRect();
   if (cx == null){ cx = wr.left + wr.width / 2; cy = wr.top + wr.height / 2; }
   const mx = (cx - r.left) / SHEET.k, my = (cy - r.top) / SHEET.k; // the sheet point (mm) under the pointer stays under it
   SHEET.zoom = z; drawSheet();
-  const r2 = cv0.getBoundingClientRect();
-  wrap.scrollLeft += (r2.left + mx * SHEET.k) - cx; wrap.scrollTop += (r2.top + my * SHEET.k) - cy;
+  const r2 = cv0.getBoundingClientRect(), p = SHEET.pan || (SHEET.pan = { x:0, y:0 });
+  p.x -= (r2.left + mx * SHEET.k) - cx; p.y -= (r2.top + my * SHEET.k) - cy; sheetPanApply();
   renderSheetZoomTag();
 }
+function sheetFit(){ SHEET.zoom = 1; SHEET.pan = { x:0, y:0 }; const w = $('#sheetWrap'); w.scrollLeft = w.scrollTop = 0; drawSheet(); sheetPanApply(); renderSheetZoomTag(); }
 function renderSheetZoomTag(){ const t = document.getElementById('shZoomV'); if (t) t.textContent = Math.round((SHEET.zoom || 1) * 100) + '%'; }
 $('#sheetWrap').addEventListener('wheel', e => { if (S.view !== 'sheet') return; e.preventDefault(); sheetZoomTo((SHEET.zoom || 1) * Math.exp(-e.deltaY * 0.0016), e.clientX, e.clientY); }, { passive:false });
 { // two fingers: pinch to zoom (the canvas does not get these touches as clicks)
   let pinch = null; const W0 = $('#sheetWrap');
   const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY), mid = t => [(t[0].clientX + t[1].clientX) / 2, (t[0].clientY + t[1].clientY) / 2];
-  W0.addEventListener('touchstart', e => { if (e.touches.length === 2){ pinch = { d:dist(e.touches), z:SHEET.zoom || 1 }; SHEET.drag = null; } }, { passive:true });
-  W0.addEventListener('touchmove', e => { if (pinch && e.touches.length === 2){ e.preventDefault(); const [cx, cy] = mid(e.touches); sheetZoomTo(pinch.z * dist(e.touches) / pinch.d, cx, cy); } }, { passive:false });
+  W0.addEventListener('touchstart', e => { if (e.touches.length === 2){ const [cx, cy] = mid(e.touches); pinch = { d:dist(e.touches), z:SHEET.zoom || 1, cx, cy }; SHEET.drag = null; } }, { passive:true });
+  // two fingers: spread — zoom, move together — the sheet moves with them
+  W0.addEventListener('touchmove', e => { if (pinch && e.touches.length === 2){ e.preventDefault(); const [cx, cy] = mid(e.touches); sheetZoomTo(pinch.z * dist(e.touches) / pinch.d, cx, cy); const p = SHEET.pan || (SHEET.pan = { x:0, y:0 }); p.x += cx - pinch.cx; p.y += cy - pinch.cy; pinch.cx = cx; pinch.cy = cy; sheetPanApply(); } }, { passive:false });
   W0.addEventListener('touchend', e => { if (e.touches.length < 2) pinch = null; });
-  // the middle button drags the sheet
+  // the pressed wheel (middle button) moves the sheet anywhere; the browser's own autoscroll is switched off for it
   let pan = null;
-  W0.addEventListener('pointerdown', e => { if (e.button === 1 && S.view === 'sheet'){ e.preventDefault(); e.stopPropagation(); pan = { x:e.clientX, y:e.clientY, l:W0.scrollLeft, t:W0.scrollTop }; try { W0.setPointerCapture(e.pointerId); } catch (er){} } }, true);
-  W0.addEventListener('pointermove', e => { if (pan){ W0.scrollLeft = pan.l - (e.clientX - pan.x); W0.scrollTop = pan.t - (e.clientY - pan.y); } });
-  W0.addEventListener('pointerup', () => { pan = null; });
+  W0.addEventListener('mousedown', e => { if (e.button === 1 && S.view === 'sheet') e.preventDefault(); }, true);
+  W0.addEventListener('pointerdown', e => { if (e.button === 1 && S.view === 'sheet'){ e.preventDefault(); e.stopPropagation(); const p = SHEET.pan || (SHEET.pan = { x:0, y:0 }); pan = { x:e.clientX, y:e.clientY, px:p.x, py:p.y, id:e.pointerId }; W0.style.cursor = 'grabbing'; $('#sheetCv').style.cursor = 'grabbing'; try { W0.setPointerCapture(e.pointerId); } catch (er){} } }, true);
+  W0.addEventListener('pointermove', e => { if (pan){ e.stopPropagation(); SHEET.pan.x = pan.px + (e.clientX - pan.x); SHEET.pan.y = pan.py + (e.clientY - pan.y); sheetPanApply(); } }, true);
+  const panEnd = e => { if (!pan) return; pan = null; W0.style.cursor = ''; $('#sheetCv').style.cursor = ''; if (e && e.stopPropagation) e.stopPropagation(); };
+  W0.addEventListener('pointerup', panEnd, true); W0.addEventListener('pointercancel', panEnd, true);
   W0.addEventListener('auxclick', e => { if (e.button === 1) e.preventDefault(); });
 }
 // photos dropped onto the sheet land where they are dropped
@@ -10731,7 +10739,7 @@ function renderSheetOptbar(ob){
   q('shUp').onclick = () => { if (moveSheet(v, -1)) renderOptbar(); }; q('shDn').onclick = () => { if (moveSheet(v, 1)) renderOptbar(); }; q('shSecs').onclick = openSheetSecs;
   q('shName').onchange = upd(x => v.name = x.trim().slice(0, 80) || v.name);
   q('shStamp').onchange = upd(x => { if (sideOn(v)){ v.side = v.side || {}; if (x === 'st-side') delete v.side.stamp; else v.side.stamp = x; } else v.stamp = x; });
-  q('shZo').onclick = () => sheetZoomTo((SHEET.zoom || 1) / 1.25); q('shZi').onclick = () => sheetZoomTo((SHEET.zoom || 1) * 1.25); q('shZf').onclick = () => { SHEET.zoom = 1; drawSheet(); const w = $('#sheetWrap'); w.scrollLeft = w.scrollTop = 0; renderSheetZoomTag(); };
+  q('shZo').onclick = () => sheetZoomTo((SHEET.zoom || 1) / 1.25); q('shZi').onclick = () => sheetZoomTo((SHEET.zoom || 1) * 1.25); q('shZf').onclick = () => sheetFit();
   if (q('shGridAuto')) q('shGridAuto').onclick = () => { if (v.grid){ delete v.grid.top; delete v.grid.cols; } scheduleSave(); layoutSheet(v); };
   if (q('shLayM')) q('shLayM').onchange = e => { v.lay = e.target.value; scheduleSave(); layoutSheet(v); };
   const sideCh = () => { FDIRTY.file = FDIRTY.copy = true; scheduleSave(); drawSheet(); renderOptbar(); if (v.autoLay) layoutSheet(v, true); };
@@ -12173,7 +12181,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-0029');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-0035');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -14227,7 +14235,7 @@ function execMore(a, ctx){
       if (!f) throw new Error('Нет такого поля штампа. Поля: ' + STAMP_FIELDS.map(x => x[1]).join(', '));
       stampSetField(sv, f[0], a.val); scheduleSave(); if (S.view === 'sheet') drawSheet(); return `Штамп листа «${sv.name}»: ${f[1]} — ${stampVal(sv, f[0]) || '(пусто)'}`; }
     case 'sheetzoom': { if (S.view !== 'sheet') throw new Error('Откройте лист');
-      if (a.fit){ SHEET.zoom = 1; drawSheet(); const w = $('#sheetWrap'); w.scrollLeft = w.scrollTop = 0; renderSheetZoomTag(); return 'Лист целиком'; }
+      if (a.fit){ sheetFit(); return 'Лист целиком'; }
       const z = Number.isFinite(+a.z) && +a.z > 0 ? +a.z / (+a.z > 10 ? 100 : 1) : (SHEET.zoom || 1) * (a.out ? 0.7 : 1.45); sheetZoomTo(z); return 'Масштаб листа: ' + Math.round(SHEET.zoom * 100) + '%'; }
     case 'side': { // the side column of a sheet
       const sv = viewBy(a.sheet || 'current') || curView(); if (!sv || sv.kind !== 'sheet') throw new Error('Откройте лист или назовите его');
