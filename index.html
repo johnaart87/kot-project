@@ -11123,7 +11123,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-1825');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-1850');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -13793,6 +13793,7 @@ function wakeText(txt, interim){
   txt = String(txt || '').trim(); if (interim || !txt) return true;
   if (WAKE_RE.test(txt)){ const rest = txt.replace(WAKE_RE, '').trim(); if (rest){ WAKE.until = 0; runCommand(rest); } else { WAKE.until = Date.now() + 8000; toast('Слушаю…'); } return true; }
   if (Date.now() < WAKE.until){ WAKE.until = 0; runCommand(txt); }
+  else micState('Услышал «' + txt.slice(0, 60) + '» — для команды начните со слова «Кот»');
   return true;
 }
 function setWake(on){
@@ -13808,7 +13809,7 @@ function voiceText(txt, interim){
   const go = /(?:^|\s)(?:отправ\S*|выполн\S*|готово)[.!]?$/i.test(txt), body = txt.replace(/(?:^|\s)(?:отправ\S*|выполн\S*|готово)[.!]?$/i, '').trim();
   const full = (base + ' ' + body).trim();
   if (go || $('#cAuto').checked){ cmdEl.value = ''; if (full) runCommand(full); return; }
-  cmdEl.value = full; cmdEl.focus();
+  cmdEl.value = full; cmdEl.focus(); if (listening || ASR.on) micState('Услышал — нажмите «Отправить» или скажите «отправить»');
 }
 $('#sendBtn').onclick = () => runCommand(cmdEl.value);
 $('#learnBtn').onclick = () => openLearn();
@@ -13819,8 +13820,20 @@ document.querySelectorAll('#examples button').forEach(b => b.onclick = () => run
 
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null, listening = false;
-function micHelp(){ addMsg('app', ['Браузер не дал программе микрофон. На компьютере нажмите Win+H и говорите в поле чата, на планшете — значок микрофона на клавиатуре. Команда выполнится после паузы.']); cmdEl.focus(); }
-function setMic(on){ listening = on; $('#micBtn').setAttribute('aria-pressed', on); $('#micLabel').textContent = on ? 'Слушаю… стоп' : 'Говорить'; $('#micBtn').title = on ? 'Слушаю… нажмите, чтобы остановить' : 'Говорить: фраза допишется в поле, выполнить — «Отправить» или слово «отправить»'; }
+// why the microphone is not there, in plain words: the preview window of Claude, a «no» of the browser, no microphone at all
+async function micHelp(err){
+  let perm = null; try { perm = (await navigator.permissions.query({ name:'microphone' })).state; } catch (e){}
+  const framed = (() => { try { return window.top !== window; } catch (e){ return true; } })();
+  const t = framed ? 'Здесь (в окне предпросмотра) микрофон недоступен — так устроено окно, в котором открыта программа. Откройте программу как сайт или установленное приложение: https://johnaart87.github.io/kot-project/ — там микрофон работает.'
+    : perm === 'denied' ? 'Браузер запретил этому сайту микрофон. Разрешите: значок слева от адреса сайта (замок или настройки) → «Микрофон» → «Разрешить», затем обновите страницу. В установленном приложении — «⋮» → «Сведения о приложении» → «Разрешения».'
+    : err && /NotFound|DevicesNotFound/i.test(err.name || err) ? 'Микрофон не найден: подключите его или проверьте в Windows «Параметры → Конфиденциальность → Микрофон».'
+    : 'Браузер не дал программе микрофон. Нажмите микрофон ещё раз и разрешите доступ в окне браузера.';
+  addMsg('app', [{ ok:false, t:t + ' Можно и надиктовать в поле чата: на компьютере Win+H, на телефоне — микрофон на клавиатуре, затем «Отправить».' }]); cmdEl.focus();
+}
+// what the microphone is doing — shown right in the input box (the button is only an icon)
+const CMD_PH = () => cmdEl.dataset.ph0 || (cmdEl.dataset.ph0 = cmdEl.placeholder);
+function micState(t){ CMD_PH(); cmdEl.placeholder = t || cmdEl.dataset.ph0; }
+function setMic(on){ listening = on; micState(on ? (WAKE.on ? 'Слушаю всё время… начните фразу со слова «Кот»' : 'Слушаю… говорите (выполнить — «Отправить» или слово «отправить»)') : ''); $('#micBtn').setAttribute('aria-pressed', on); $('#micLabel').textContent = on ? 'Слушаю… стоп' : 'Говорить'; $('#micBtn').title = on ? 'Слушаю… нажмите, чтобы остановить' : 'Говорить: фраза допишется в поле, выполнить — «Отправить» или слово «отправить»'; }
 /* ---------- speech recognition on this device, without the internet: Whisper (base) through transformers.js.
    The model (~80 MB) is downloaded once («Файл → Скачать всё для работы без интернета» or at the first use of the microphone)
    and kept in the browser (Cache «transformers-cache»); the libraries stay in the offline cache of the app (sw.js, LIB). ---------- */
@@ -13849,18 +13862,18 @@ async function asrStart(){
   if (!asrReady()){ msg = addMsg('app', ['Скачиваю распознавание речи для работы без интернета (один раз, около 80 МБ)…']); }
   let pipe; try { pipe = await asrLoad(f => { if (msg) msg.lastChild.textContent = `Скачиваю распознавание речи: ${Math.round(f * 100)}%`; }); } catch (e){ addMsg('app', [{ ok:false, t:'Не удалось загрузить распознавание речи: ' + (e.message || e) }]); return; }
   if (msg) msg.lastChild.textContent = 'Распознавание речи готово: дальше микрофон работает без интернета.';
-  try { ASR.stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } }); } catch (e){ micHelp(); return; }
+  try { ASR.stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } }); } catch (e){ micHelp(e); return; }
   const ctx = ASR.ctx = new AudioContext(), src = ctx.createMediaStreamSource(ASR.stream), pr = ctx.createScriptProcessor(4096, 1, 1), sr = ctx.sampleRate;
   let chunks = [], speech = false, quiet = 0, noise = 0.004, n = 0;
   const flush = async () => {
     const len = chunks.reduce((s, c) => s + c.length, 0); const data = new Float32Array(len); let o = 0; for (const c of chunks) { data.set(c, o); o += c.length; } chunks = []; speech = false; quiet = 0;
     if (len < sr * 0.35) return;
     const oc = new OfflineAudioContext(1, Math.ceil(len * 16000 / sr), 16000), b = oc.createBuffer(1, len, sr); b.copyToChannel(data, 0); const s = oc.createBufferSource(); s.buffer = b; s.connect(oc.destination); s.start(); const r16 = (await oc.startRendering()).getChannelData(0);
-    $('#micLabel').textContent = 'Распознаю…';
+    $('#micLabel').textContent = 'Распознаю…'; micState('Распознаю…');
     try { const out = await pipe(r16, { language:'russian', task:'transcribe' }); const txt = String(out.text || '').replace(/^[\s.,!?…-]+|[\s.!?…]+$/g, '').trim();
       if (txt && !/^(продолжение следует|субтитры|спасибо за просмотр)/i.test(txt)) voiceText(txt); }
     catch (e){ addMsg('app', [{ ok:false, t:'Не распознал: ' + (e.message || e) }]); }
-    if (ASR.on) $('#micLabel').textContent = 'Слушаю… стоп';
+    if (ASR.on){ $('#micLabel').textContent = 'Слушаю… стоп'; micState(WAKE.on ? 'Слушаю всё время… начните фразу со слова «Кот»' : 'Слушаю… говорите'); }
   };
   pr.onaudioprocess = ev => {
     if (!ASR.on) return; const x = ev.inputBuffer.getChannelData(0); let e2 = 0; for (let i = 0; i < x.length; i++) e2 += x[i] * x[i]; const rms = Math.sqrt(e2 / x.length);
@@ -13906,9 +13919,9 @@ function toggleMic(){
     for (let i = e.resultIndex; i < e.results.length; i++){ const r = e.results[i]; if (r.isFinal) fin += r[0].transcript; else interim += r[0].transcript; }
     if (fin.trim()) voiceText(fin.trim()); else voiceText(interim, true);
   };
-  rec.onerror = e => { if (e.error === 'network'){ setMic(false); asrStart(); return; } if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) micHelp(); };
+  rec.onerror = e => { if (e.error === 'network'){ setMic(false); asrStart(); return; } if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) micHelp({ name:e.error === 'audio-capture' ? 'NotFound' : e.error }); else if (e.error === 'no-speech') micState('Не слышу речи — говорите громче или ближе к микрофону'); };
   rec.onend = () => { setMic(false); if (WAKE.on) setTimeout(() => { if (WAKE.on && !listening && !ASR.on) toggleMic(); }, 400); };
-  try { rec.start(); setMic(true); } catch(e){ micHelp(); }
+  try { rec.start(); setMic(true); } catch(e){ micHelp(e); }
 }
 $('#micBtn').onclick = toggleMic;
 $('#cWake').checked = WAKE.on; $('#cWake').onchange = e => setWake(e.target.checked);
