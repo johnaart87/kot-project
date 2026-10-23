@@ -888,7 +888,8 @@ details.more summary::-webkit-details-marker{display:none}
           <button class="mic" id="micBtn" aria-pressed="false" title="Говорить"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M10 3a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-5 0v-4A2.5 2.5 0 0 1 10 3z M5 9.5a5 5 0 0 0 10 0 M10 14.5V17 M7 17h6"/></svg><span id="micLabel">Говорить</span></button>
           <span style="flex:1"></span>
           <button class="btn" id="stopBtn" hidden>Стоп</button>
-          <button class="btn primary" id="sendBtn">Отправить</button>
+          <button class="btn" id="claudeBtn" title="Спросить Claude: сложные фразы и фото планов (нужен интернет). Обычная отправка и голос работают без интернета и без Claude">✦ Claude</button>
+          <button class="btn primary" id="sendBtn" title="Выполнить команду (без интернета)">Отправить</button>
         </div>
       </div>
     </section>
@@ -923,6 +924,7 @@ details.more summary::-webkit-details-marker{display:none}
   <hr>
   <button data-act="png">Картинка вида (PNG)</button>
   <button data-act="print">Печать… <span class="k">Ctrl+P</span></button>
+  <button data-act="offline">Скачать всё для работы без интернета…</button>
   <button data-act="install">Установить приложение…</button>
 </div>
 
@@ -2998,13 +3000,28 @@ function buildingOutline(L){
 function roomData(r){ return regionAt(r.x, r.z, lvOf(r)); }
 // ceiling height of a room for the survey: measured value, else the ceiling drawn over the room
 function roomCeil(r){ if (Number.isFinite(r.hc)) return r.hc; const c = items.find(i => i.type === 'ceiling' && lvOf(i) === lvOf(r) && i.pts && ptInPoly(r.x, r.z, i.pts)); return c ? c.h : null; }
-function nextRoomNum(){ const used = new Set(items.filter(r => r.type === 'room').map(r => String(r.num))); let i = 1; while (used.has(String(i))) i++; return String(i); }
-function addRoom(x, z, name){ const it = { id:nextId++, type:'room', x:r4(x), z:r4(z), name:name || 'Помещение', num:nextRoomNum(), lv:actLv() }; items.push(it); if (STD.ieAuto) setTimeout(() => autoIelevs(true), 0); return it; }
+/* rooms belong to a stage (Revit: the phase of a room). The survey has its rooms, numbers and boundaries; the new layout («Монтаж»)
+   gets its own rooms and numbering. A plan shows the rooms of its stage; a stage without rooms of its own shows the rooms of the
+   nearest earlier stage that has them (a demolition plan — the survey rooms, a furniture plan — the new ones). Old rooms — «Обмер». */
+const roomPh = r => r.ph || 'obmer';
+const RPH = { k:'', m:new Map() };
+function roomPhaseFor(L, P){
+  if (P === 'all') return null;
+  const key = P + '|' + nextId + '|' + items.length + '|' + RPH.v + '|' + undoStack.length + '|' + redoStack.length; if (RPH.k !== key){ RPH.k = key; RPH.m.clear(); }
+  const mk = L + '|' + P; if (RPH.m.has(mk)) return RPH.m.get(mk);
+  const idx = PH_IDX[P] ?? 99; let best = null, bi = -1;
+  for (const r of items) if (r.type === 'room' && lvOf(r) === L){ const i = PH_IDX[roomPh(r)] ?? 0; if (i <= idx && i > bi){ bi = i; best = roomPh(r); } }
+  RPH.m.set(mk, best); return best;
+}
+RPH.v = 0;
+const roomNewPh = () => S.phase === 'all' ? newPhase() : S.phase;
+function nextRoomNum(ph = roomNewPh()){ const used = new Set(items.filter(r => r.type === 'room' && roomPh(r) === ph).map(r => String(r.num))); let i = 1; while (used.has(String(i))) i++; return String(i); }
+function addRoom(x, z, name){ const ph = roomNewPh(), it = { id:nextId++, type:'room', x:r4(x), z:r4(z), name:name || 'Помещение', num:nextRoomNum(ph), lv:actLv(), ph }; items.push(it); if (STD.ieAuto) setTimeout(() => autoIelevs(true), 0); return it; }
 // Revit «Расставить помещения автоматически»: one room in every closed area that has none
 function autoRooms(){
   const G = roomGrid(); if (!G) return 0;
   const seen = new Uint8Array(G.blk.length); let n = 0, L = actLv();
-  for (const r of items) if (r.type === 'room' && lvOf(r) === L){ const d = roomData(r); if (d.fill) for (let k = 0; k < d.fill.length; k++) if (d.fill[k]) seen[k] = 1; }
+  for (const r of items) if (r.type === 'room' && lvOf(r) === L && roomPh(r) === roomNewPh()){ const d = roomData(r); if (d.fill) for (let k = 0; k < d.fill.length; k++) if (d.fill[k]) seen[k] = 1; }
   for (let k = 0; k < G.blk.length; k++){
     if (G.blk[k] || seen[k]) continue;
     const fl = floodGrid(G, [k]); for (let q = 0; q < fl.fill.length; q++) if (fl.fill[q]) seen[q] = 1;
@@ -3108,6 +3125,7 @@ function rebuild(quiet){
   if (!RV) enforceLocks();
   syncConstraints(); syncAttach();
   if (SV_PENDING && S.phase === 'obmer' && !RV){ SV_PENDING = false; refreshSurveyDims(); }
+  if (S.view === 'plan' && S.phase !== 'all' && S.phase !== 'obmer') refreshDemoDims(); // also while a sheet draws this plan
   CUTS = computeCuts();
   for (const it of items){
     if (!shown(it) || (S.render && visState(it) === 'demo')) continue;
@@ -3428,10 +3446,32 @@ function dimTexts(d, cls, out){
       man:!!tp, base:{ x:bx, z:bz }, anc:{ x:o.x + u.x * tm + n.x * off, z:o.z + u.z * tm + n.z * off }, segL:L, own, dimId:d.id || null, ci:i, cn:arr.length - 1, tA:arr[0].t, tB:arr[arr.length - 1].t, tm });
   }
 }
+// the faces of an element on the plan, as segments (or a circle) — for dimensions that end on them
+function elemFaces(it){
+  const P = (x, z) => ({ x, z }), rect = (x0, z0, x1, z1) => [[P(x0, z0), P(x1, z0)], [P(x1, z0), P(x1, z1)], [P(x1, z1), P(x0, z1)], [P(x0, z1), P(x0, z0)]].map(([a, b]) => ({ a, b }));
+  if (it.type === 'wall'){ const f = wallFrame(it), h = it.t / 2, A = (s, n) => P(it.x1 + f.dir.x * s + f.nrm.x * n, it.z1 + f.dir.z * s + f.nrm.z * n); return [{ a:A(0, h), b:A(f.L, h) }, { a:A(0, -h), b:A(f.L, -h) }, { a:A(0, h), b:A(0, -h) }, { a:A(f.L, h), b:A(f.L, -h) }]; }
+  if (it.type === 'column') return it.round ? [{ c:P(it.x, it.z), r:it.w / 2 }] : rect(it.x - it.w / 2, it.z - it.d / 2, it.x + it.w / 2, it.z + it.d / 2);
+  if (it.type === 'box') return rect(it.x, it.z, it.x + it.w, it.z + it.d);
+  if (it.type === 'fam'){ const F = famFoot(it); if (!F) return []; const C = (a, b) => P(F.c.x + F.h1.x * a + F.h2.x * b, F.c.z + F.h1.z * a + F.h2.z * b); return [[C(-1, -1), C(1, -1)], [C(1, -1), C(1, 1)], [C(1, 1), C(-1, 1)], [C(-1, 1), C(-1, -1)]].map(([a, b]) => ({ a, b })); }
+  if (isOp(it)){ const w = byId(it.wall); if (!w) return []; const f = wallFrame(w), h = w.t / 2 + 0.002; return [-1, 1].map(sg => { const s = it.pos + sg * it.w / 2; return { a:P(w.x1 + f.dir.x * s + f.nrm.x * h, w.z1 + f.dir.z * s + f.nrm.z * h), b:P(w.x1 + f.dir.x * s - f.nrm.x * h, w.z1 + f.dir.z * s - f.nrm.z * h) }; }); }
+  // floors, ceilings, roofs and other outlines — their edges
+  if (it.pts && it.pts.length > 1) return it.pts.map((p, i) => ({ a:P(p.x, p.z), b:P(it.pts[(i + 1) % it.pts.length].x, it.pts[(i + 1) % it.pts.length].z) }));
+  if (it.type === 'roof' && Number.isFinite(it.w)) return rect(it.x, it.z, it.x + it.w, it.z + it.d);
+  // a stair: its two sides and both ends
+  if (it.type === 'stair'){ const f = wallFrame(it), h = (it.w || 1) / 2, A = (s, n) => P(it.x1 + f.dir.x * s + f.nrm.x * n, it.z1 + f.dir.z * s + f.nrm.z * n); return [{ a:A(0, h), b:A(f.L, h) }, { a:A(0, -h), b:A(f.L, -h) }, { a:A(0, h), b:A(0, -h) }, { a:A(f.L, h), b:A(f.L, -h) }]; }
+  if (it.type === 'grid' || it.type === 'line') return [{ a:P(it.x1, it.z1), b:P(it.x2, it.z2) }];
+  if (it.type === 'circle') return [{ c:P(it.x, it.z), r:it.r }];
+  if (['text', 'spot', 'room'].includes(it.type)) return [{ c:P(it.x, it.z), r:0.002 }];
+  return [];
+}
 function dimEditor(d){
   if (sel.size !== 1 || S.view !== 'plan') return null;
   const it = byId(selId); if (!it || isMeta(it) || it.type === 'dim') return null;
-  const owns = r => !!r && r.id === it.id;
+  // Revit: a dimension belongs to the selected element when it is tied to it, or when its end lies on a face of it
+  // (survey chains run along one wall but end on the faces of the walls across — selecting such a wall makes them editable)
+  const segs = elemFaces(it), tol = 0.003;
+  const onFace = p => segs.some(s => { if (s.c){ return Math.abs(Math.hypot(p.x - s.c.x, p.z - s.c.z) - s.r) < tol; } const ax = s.b.x - s.a.x, az = s.b.z - s.a.z, L2 = ax * ax + az * az || 1e-9, t = clamp(((p.x - s.a.x) * ax + (p.z - s.a.z) * az) / L2, 0, 1); return Math.hypot(s.a.x + ax * t - p.x, s.a.z + az * t - p.z) < tol; });
+  const owns = r => !!r && (r.id === it.id || (r.id !== it.id && (() => { const p = refPoint(r); return !!p && onFace(p); })()));
   if (!d.refs.some(owns)) return null;
   return { owns, move:(u, sh) => {
     if (Math.abs(sh) < 1e-6) return;
@@ -3837,8 +3877,8 @@ function autoDims(){
     for (const o of opsOf(w, f.L)) refs.push({ k:'o', id:o.o.id, edge:0, side:so }, { k:'o', id:o.o.id, edge:1, side:so });
     refs.push({ k:'w', id:w.id, end:1, side:so });
     const dir = { x:f.dir.x, z:f.dir.z };
-    if (refs.length > 2){ items.push({ id:nextId++, type:'dim', refs, off:so * 0.9, dir, auto:true }); n++; }
-    items.push({ id:nextId++, type:'dim', refs:[refs[0], refs[refs.length - 1]], off:so * (refs.length > 2 ? 1.7 : 0.9), dir, auto:true }); n++;
+    if (refs.length > 2){ items.push({ id:nextId++, type:'dim', refs, off:so * 0.9, dir, auto:true, dph:S.phase }); n++; }
+    items.push({ id:nextId++, type:'dim', refs:[refs[0], refs[refs.length - 1]], off:so * (refs.length > 2 ? 1.7 : 0.9), dir, auto:true, dph:S.phase }); n++;
   }
   return n;
 }
@@ -3992,6 +4032,7 @@ function phStatus(it){
 }
 // 'normal' — drawn as usual; 'exist' / 'demo' — the overridden existing / demolished look; 'new' / 'temp' — overridden new / temporary; 'hide'
 function visState(it){
+  if (it && it.type === 'room') return S.phase === 'all' || roomPh(it) === roomPhaseFor(lvOf(it), S.phase) ? 'normal' : 'hide';
   if (!it || !PHASED.includes(it.type)) return 'normal';
   let host = 'normal';
   if (isOp(it)){ host = visState(byId(it.wall)); if (host === 'hide') return 'hide'; }
@@ -4042,7 +4083,10 @@ const fmtElev = v => (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v).toLocale
 const shown = it => levelOk(it) && visState(it) !== 'hide' && (S.reveal || (!viewHidden(it) && tplVisible(it)));
 // hidden in this view: by the element (EH), temporarily (HH/HI) or by its category in V/G or the template
 const anyHidden = it => viewHidden(it) || !tplVisible(it);
-const dimShown = d => (!d.survey || (S.phase === 'obmer' && !d.dup)) && tplVisible(d) && d.refs.every(r => !r.id || shown(byId(r.id)));
+// Revit: a dimension belongs to the drawing it was put on — here to the stage (phase) of the view; old ones without it — to «Обмер».
+// Survey dimensions — only on «Обмер», demolition dimensions (d.demo) — only on the stage the element is demolished in
+const dimPh = d => d.dph || 'obmer';
+const dimShown = d => (d.survey ? (S.phase === 'obmer' && !d.dup) : d.demo ? S.phase === d.dph : (S.phase === 'all' || dimPh(d) === 'all' || dimPh(d) === S.phase)) && tplVisible(d) && d.refs.every(r => !r.id || shown(byId(r.id)));
 /* survey dimensions (обмерные размеры): drawn by themselves along every wall built on the «Обмер» stage,
    on the inner faces of the walls, split where partitions join (room by room); shown only on the «Обмер» stage */
 let SV_PENDING = false;
@@ -4094,6 +4138,37 @@ function refreshSurveyDims(){
     }
   }
   markSurveyDups();
+}
+/* demolition plan (Revit: dimensions tied only to what is taken down): for every wall demolished on this stage — its length;
+   for every door / window / opening demolished in a wall that stays — its width and its place from the nearest wall face.
+   They are made and kept up to date by themselves (d.demo, d.dk = what they belong to, d.dph = the stage) */
+function refreshDemoDims(){
+  const P = S.phase, L = actLv(), want = new Map();
+  const cuts = computeCuts(), keepCuts = CUTS; CUTS = cuts;
+  try {
+    for (const w of items){
+      if (w.type !== 'wall' || lvOf(w) !== L || !shown(w)) continue;
+      const f = wallFrame(w); if (f.L < 0.05) continue;
+      const side = surveySides(w)[0] || 1, dir = { x:f.dir.x, z:f.dir.z };
+      if (w.dem === P){ want.set('w' + w.id, { refs:[{ k:'w', id:w.id, end:0, side }, { k:'w', id:w.id, end:1, side }], off:r4(side * 0.45), dir }); continue; }
+      const ops = opsOf(w, f.L).filter(o => o.o.dem === P); if (!ops.length) continue;
+      // the faces this opening is measured from: wall ends and the partitions joining this wall on that side
+      const base = surveyRefs(w, side, true).map(r => { const q = refPoint(r); return q ? { r, s:(q.x - f.p1.x) * f.dir.x + (q.z - f.p1.z) * f.dir.z } : null; }).filter(Boolean);
+      for (const op of ops){
+        const lf = base.filter(b => b.s <= op.a - 0.001).sort((a, b) => b.s - a.s)[0], rt = base.filter(b => b.s >= op.b + 0.001).sort((a, b) => a.s - b.s)[0];
+        const refs = [...(lf ? [lf.r] : []), { k:'o', id:op.o.id, edge:0, side }, { k:'o', id:op.o.id, edge:1, side }, ...(rt ? [rt.r] : [])];
+        want.set('o' + op.o.id, { refs, off:r4(side * 0.45), dir });
+      }
+    }
+  } finally { CUTS = keepCuts; }
+  // drop the ones whose element is no longer demolished here, update the rest, add the new ones
+  const have = new Map();
+  items = items.filter(d => { if (d.type !== 'dim' || !d.demo || d.dph !== P) return true; const lvOk = (() => { const e = byId(+String(d.dk).slice(1)); return !e || lvOf(isOp(e) ? byId(e.wall) || e : e) === L; })(); if (!lvOk) return true; if (!want.has(d.dk)) return false; have.set(d.dk, d); return true; });
+  for (const [k, q] of want){
+    const d = have.get(k);
+    if (d){ d.refs = q.refs; d.dir = q.dir; }
+    else items.push({ id:nextId++, type:'dim', demo:true, dk:k, dph:P, refs:q.refs, off:q.off, dir:q.dir });
+  }
 }
 // a survey dimension that repeats another one (opposite walls of one room, same points along the same direction) is not drawn
 // segment by segment: every segment of a survey chain belongs to the room on its side; a segment that repeats one already
@@ -4337,7 +4412,7 @@ function copyItems(ids, dx, dz){
     if (c.type === 'grid') c.name = nextGridName(Math.abs(c.z2 - c.z1) >= Math.abs(c.x2 - c.x1));
     if (TAGGED.includes(c.type)) c.tag = null;
     if (c.type === 'dim' && c.refs.some(r => r.k !== 'p')) continue;
-    translateItem(c, dx, dz); items.push(c); if (TAGGED.includes(c.type)) c.tag = nextTag(c.type); if (c.type === 'room') c.num = nextRoomNum(); map.set(id, c.id); made.push(c.id);
+    translateItem(c, dx, dz); items.push(c); if (TAGGED.includes(c.type)) c.tag = nextTag(c.type); if (c.type === 'room') c.num = nextRoomNum(roomPh(c)); map.set(id, c.id); made.push(c.id);
     if (it.type === 'wall') for (const o of items.filter(o => isOp(o) && o.wall === it.id)){ const co = { ...o, id:nextId++, wall:c.id, tag:null }; co.tag = nextTag(o.type); items.push(co); }
   }
   return made;
@@ -4587,7 +4662,7 @@ function updatePreview(){
 function placeDim(){
   if (DD.refs.length < 2) return false;
   pushUndo(); markEdited();
-  const md = effDimMode(), d = { id:nextId++, type:'dim', refs:DD.refs.slice(), off:r4(DD.off), mode:md !== 'aligned' ? md : undefined };
+  const md = effDimMode(), d = { id:nextId++, type:'dim', refs:DD.refs.slice(), off:r4(DD.off), mode:md !== 'aligned' ? md : undefined, dph:S.phase };
   if (DD.dir) d.dir = DD.dir;
   items.push(d); DD.refs = []; DD.hover = null; DD.dir = null; rebuild(); updateHint(); toast('Размер поставлен');
   return true;
@@ -4740,8 +4815,10 @@ function click(px, py, shift, ctrl){
     if (S.tool === 'column'){ pushUndo(); markEdited(); const c = addColumn(p); rebuild(); toast(`Колонна ${c.tag}: ${mm(c.w)}×${mm(c.round ? c.w : c.d)} мм`); return; }
     if (S.tool === 'room'){
       const d = regionAt(p.x, p.z), G = roomGrid();
-      if (!d.open && items.some(r => r.type === 'room' && d.fill[cellAt(G, r.x, r.z)])){ toast('В этом контуре уже есть помещение'); return; }
+      if (!d.open && items.some(r => r.type === 'room' && roomPh(r) === roomNewPh() && lvOf(r) === actLv() && d.fill[cellAt(G, r.x, r.z)])){ toast('В этом контуре уже есть помещение'); return; }
+      const firstHere = !items.some(r => r.type === 'room' && roomPh(r) === roomNewPh() && lvOf(r) === actLv());
       pushUndo(); markEdited(); const r = addRoom(p.x, p.z); setSel([r.id]); rebuild();
+      if (firstHere && items.some(x => x.type === 'room' && x !== r && lvOf(x) === actLv())) setTimeout(() => toast(`Первое помещение стадии «${phName(r.ph)}»: у этой стадии свои помещения и нумерация с 1. «Расставить автоматически» — остальные`), 1800);
       toast(d.open ? `Помещение ${r.num} «Не окружено»: вокруг нет замкнутого контура стен` : `Помещение ${r.num}: ${m2(d.area)} м²`); return;
     }
     makeInteriorElevations(p); return;
@@ -4928,7 +5005,7 @@ function ielevWallDefs(room, tpl){
 }
 function autoIelevs(quiet){
   const tpl = ielevTpl(); let n = 0, r0 = 0;
-  for (const room of items.filter(r => r.type === 'room')){
+  for (const room of items.filter(r => r.type === 'room' && roomPh(r) === roomPhaseFor(lvOf(r), 'mebel'))){
     if (views.some(v => v.kind === 'ielev' && v.room === room.id)) continue;
     const defs = ielevWallDefs(room, tpl); if (!defs.length) continue;
     views.push(...defs); n += defs.length; r0++;
@@ -4939,7 +5016,7 @@ function autoIelevs(quiet){
 }
 function ielevDefs(p){
   const d = regionAt(p.x, p.z); if (d.open) return null;
-  const R = rectOf(d.poly), G = roomGrid(), room = items.find(r => r.type === 'room' && d.fill[cellAt(G, r.x, r.z)]);
+  const R = rectOf(d.poly), G = roomGrid(), room = items.find(r => r.type === 'room' && shown(r) && d.fill[cellAt(G, r.x, r.z)]);
   const rn = room ? room.name : 'Помещение', mk = vid('mk'), e = 0.1, H = Math.max(S.wallH, ...items.filter(w => w.type === 'wall' && shown(w)).map(w => w.h));
   const defs = [
     { s:'север', p1:{ x:R.x0 - e, z:p.z }, p2:{ x:R.x1 + e, z:p.z }, far:p.z - R.z0 + 0.25 },
@@ -5031,7 +5108,7 @@ function clipGet(){ if (CLIPB) return CLIPB; try { return CLIPB = JSON.parse(lsG
 // place copies of a list of element records, shifted; ids, letters and room numbers are new
 function placeCopies(list, grps, dx, dz, lvTo){
   const map = new Map(), made = [];
-  for (const src of list){ if (isOp(src)) continue; const c = JSON.parse(JSON.stringify(src)); c.id = nextId++; map.set(src.id, c.id); if (lvTo && c.type !== 'grid') c.lv = lvTo; if (c.tlv && lvTo && !levels.some(l => l.id === c.tlv)) delete c.tlv; delete c.pin; translateItem(c, dx, dz); if (TAGGED.includes(c.type)) c.tag = null; if (c.type === 'grid') c.name = nextGridName(Math.abs(c.z2 - c.z1) >= Math.abs(c.x2 - c.x1)); items.push(c); if (TAGGED.includes(c.type)) c.tag = nextTag(c.type); if (c.type === 'room') c.num = nextRoomNum(); made.push(c.id); }
+  for (const src of list){ if (isOp(src)) continue; const c = JSON.parse(JSON.stringify(src)); c.id = nextId++; map.set(src.id, c.id); if (lvTo && c.type !== 'grid') c.lv = lvTo; if (c.tlv && lvTo && !levels.some(l => l.id === c.tlv)) delete c.tlv; delete c.pin; translateItem(c, dx, dz); if (TAGGED.includes(c.type)) c.tag = null; if (c.type === 'grid') c.name = nextGridName(Math.abs(c.z2 - c.z1) >= Math.abs(c.x2 - c.x1)); items.push(c); if (TAGGED.includes(c.type)) c.tag = nextTag(c.type); if (c.type === 'room') c.num = nextRoomNum(roomPh(c)); made.push(c.id); }
   for (const src of list){ if (!isOp(src) || !map.has(src.wall)) continue; const c = { ...JSON.parse(JSON.stringify(src)), id:nextId++, wall:map.get(src.wall), tag:null }; items.push(c); c.tag = nextTag(c.type); map.set(src.id, c.id); }
   for (const c of items) if (made.includes(c.id)){ if (c.cutBy) c.cutBy = c.cutBy.map(i => map.get(i) || i); if (c.jg) c.jg = c.jg.map(i => map.get(i) || i); }
   for (const g of grps || []){ const ids = g.ids.map(i => map.get(i)).filter(Boolean); if (ids.length) items.push({ ...g, id:nextId++, ids, o:g.o ? { x:r4(g.o.x + dx), z:r4(g.o.z + dz) } : undefined }); }
@@ -5737,7 +5814,8 @@ function buildLabels(){
     else if (w.type === 'roof'){ const F = roofFrame(w), p = F.map(F.u1 - 0.35, 0, F.v0 + 0.35); out.push({ x:p.x, y:0, z:p.z, t:w.tag, cls:'wt rf' + sc }); }
   }
   // annotation categories «Высоты потолков» and «Высоты окон» (shown only where a template / view turns them on)
-  const ceilO = plan ? optCat('ceilh') : null, winO = plan ? optCat('winh') : null;
+  // ceiling heights belong to the survey and the new state: not on demolition plans
+  const ceilO = plan && S.phase !== 'demontazh' ? optCat('ceilh') : null, winO = plan && S.phase !== 'demontazh' ? optCat('winh') : null;
   if (plan) for (const r of items){
     if (r.type !== 'room' || !shown(r)) continue;
     const d = roomData(r);
@@ -6202,7 +6280,7 @@ function sanitizeViews(arr){
     if (v.kind === 'sheet'){
       Object.assign(o, { num:String(v.num || 'А101').slice(0, 12), size:SHEET_SIZES[v.size] ? v.size : 'A3', author:String(v.author || '').slice(0, 40), checker:String(v.checker || '').slice(0, 40), stage:String(v.stage || 'П').slice(0, 4) });
       if (typeof v.stamp === 'string') o.stamp = v.stamp.slice(0, 24);
-      if (v.expl === false) o.expl = false; else if (v.expl && N(v.expl.x) && N(v.expl.y)) o.expl = { x:+v.expl.x, y:+v.expl.y, ...(typeof v.expl.view === 'string' ? { view:v.expl.view.slice(0, 40) } : {}) };
+      if (v.expl === false) o.expl = false; else if (v.expl && N(v.expl.x) && N(v.expl.y)) o.expl = { x:+v.expl.x, y:+v.expl.y, ...(typeof v.expl.view === 'string' ? { view:v.expl.view.slice(0, 40) } : {}), ...(v.expl.manual ? { manual:true } : {}) };
       if (v.pool) o.pool = true; if (typeof v.autoFor === 'string') o.autoFor = v.autoFor.slice(0, 40);
       if (v.f && typeof v.f === 'object'){ const f = {}; for (const [k] of STAMP_FIELDS) if (typeof v.f[k] === 'string') f[k] = v.f[k].slice(0, 120); if (Object.keys(f).length) o.f = f; }
       o.vps = (Array.isArray(v.vps) ? v.vps : []).filter(p => p && typeof p.view === 'string').map(p => ({ id:String(p.id || vid('vp')), view:p.view, x:+p.x || 25, y:+p.y || 10, scale:VP_SCALES.includes(+p.scale) ? +p.scale : 100, w:+p.w || 150, h:+p.h || 110 }));
@@ -6632,21 +6710,25 @@ const EXPL_W = EXPL_COLS.reduce((s, c) => s + c[1], 0), EXPL_HEAD = 15, EXPL_ROW
 const numCmp = (a, b) => String(a.num).localeCompare(String(b.num), 'ru', { numeric:true });
 function explPlan(v){
   const plans = v.vps.map(p => views.find(x => x.id === p.view)).filter(x => x && x.kind === 'plan');
-  return (v.expl && plans.find(x => x.id === v.expl.view)) || plans.find(x => x.phase === 'obmer') || plans[0] || null;
+  return (v.expl && plans.find(x => x.id === v.expl.view)) || plans.find(explOwn) || plans[0] || null;
 }
 function explRows(plan){
   const keep = S.phase; S.phase = plan.phase || 'all';
   try {
-    return items.filter(r => r.type === 'room' && lvOf(r) === (plan.lv || levels[0].id)).sort(numCmp).map(r => {
+    return items.filter(r => r.type === 'room' && lvOf(r) === (plan.lv || levels[0].id) && visState(r) !== 'hide').sort(numCmp).map(r => {
       const d = roomData(r), hc = roomCeil(r);
       return { num:String(r.num || ''), name:r.name || 'Помещение', a:d.open ? null : d.area, p:d.open ? null : d.perim, h:Number.isFinite(hc) ? hc : null };
     });
   } finally { S.phase = keep; }
 }
 // a sheet with a survey plan gets the table by itself (once; after «Убрать» it stays removed)
+// a plan whose stage has rooms of its own (the survey, the new layout) gets its own room schedule
+const explOwn = x => x && x.kind === 'plan' && x.phase && x.phase !== 'all' && roomPhaseFor(x.lv || levels[0].id, x.phase) === x.phase;
 function explAuto(v, Wm){
+  // a table put here by itself goes away when the sheet has no survey plan (e.g. a demolition sheet); one added by the button stays
+  if (v.expl && !v.expl.manual && !v.vps.some(p => explOwn(views.find(y => y.id === p.view)))){ delete v.expl; return; }
   if (v.expl !== undefined) return;
-  const pl = v.vps.map(p => views.find(x => x.id === p.view)).find(x => x && x.kind === 'plan' && x.phase === 'obmer');
+  const pl = v.vps.map(p => views.find(x => x.id === p.view)).find(explOwn);
   if (pl) v.expl = { x:Wm - 5 - EXPL_W, y:10, view:pl.id };
 }
 const explH = n => EXPL_TITLE + EXPL_HEAD + EXPL_ROW * (n + 1);
@@ -8705,7 +8787,7 @@ function renderSheetOptbar(ob){
     q('shDel').onclick = () => { v.vps = v.vps.filter(p => p !== vp); SHEET.sel = null; drawSheet(); renderOptbar(); scheduleSave(); };
   }
   q('shPng').onclick = exportSheetPNG;
-  if (q('shExAdd')) q('shExAdd').onclick = () => { const [Wm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, pl = explPlan(v); v.expl = { x:Wm - 5 - EXPL_W, y:10, ...(pl ? { view:pl.id } : {}) }; SHEET.sel = 'expl'; drawSheet(); renderOptbar(); scheduleSave(); };
+  if (q('shExAdd')) q('shExAdd').onclick = () => { const [Wm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, pl = explPlan(v); v.expl = { x:Wm - 5 - EXPL_W, y:10, manual:true, ...(pl ? { view:pl.id } : {}) }; SHEET.sel = 'expl'; drawSheet(); renderOptbar(); scheduleSave(); };
   if (q('shExDel')) q('shExDel').onclick = () => { v.expl = false; SHEET.sel = null; drawSheet(); renderOptbar(); scheduleSave(); toast('Экспликация убрана. Вернуть — кнопка «Экспликация помещений»'); };
   if (q('shExPl')) q('shExPl').onchange = e => { v.expl.view = e.target.value; drawSheet(); scheduleSave(); };
 }
@@ -9144,6 +9226,8 @@ function renderPanel(_el, _it){
     const G = dimGeom(it);
     h += `<div class="typesel"><span class="tname">Размер №${it.id}</span><span class="tsub">${G ? (G.arr.length - 1) + ' сегм. · всего ' + mm(G.arr[G.arr.length - 1].t - G.arr[0].t) + ' мм' : 'потерял привязку'}</span></div>`
       + prow('Отступ линии, мм', pnum('sDOff', Math.abs(it.off || 0), 'min="0" step="50"'))
+      + (it.survey ? prow('Стадия', '<span class="val">Обмер (автоматический)</span>') : it.demo ? prow('Стадия', `<span class="val">${esc(phName(it.dph))} (к демонтируемому, автоматический)</span>`)
+        : prow('Показывать на стадии', `<select id="sDPh">${[...PHASES, { k:'all', n:'Во всех стадиях' }].map(p => `<option value="${p.k}"${p.k === dimPh(it) ? ' selected' : ''}>${esc(p.n)}</option>`).join('')}</select>`))
       + `<p class="pnote">Размер привязан к стенам, проёмам и осям: двигаете стену — размер обновляется. Тяните размерную линию, чтобы отодвинуть её. Число можно перетащить мышью — появится выноска.</p>`
       + (it.tp ? `<div class="pbtns"><button class="btn sm" id="sDimTp">Вернуть числа на место</button></div>` : '')
       + `<div class="pbtns"><button class="btn sm danger" id="sDel">Удалить</button></div>`;
@@ -9206,7 +9290,7 @@ function renderPanel(_el, _it){
       + prow('Длина марша, мм', pnum('sSL', I.f.L, 'min="300" step="50"')) + prow('Подступенков', `<span class="val">${I.n} по ${mm(I.rise)} мм</span>`) + prow('Проступь', `<span class="val">${mm(I.go)} мм</span>`)
       + (I.rise > 0.19 || I.go < 0.25 ? `<p class="pnote">По СП 1.13130 подступенок не выше 190 мм, проступь не меньше 250 мм — сделайте марш длиннее.</p>` : '')
       + `<div class="pbtns"><button class="btn sm" id="sSF">Развернуть направление</button></div>`; }
-    else if (it.type === 'room'){ const d = roomData(it), hc0 = roomCeil(it); h += prow('Номер', `<input id="sRN" type="text" maxlength="10" value="${esc(it.num)}">`) + prow('Имя', `<input id="sRNm" type="text" maxlength="60" value="${esc(it.name)}">`)
+    else if (it.type === 'room'){ const d = roomData(it), hc0 = roomCeil(it); h += prow('Номер', `<input id="sRN" type="text" maxlength="10" value="${esc(it.num)}">`) + prow('Имя', `<input id="sRNm" type="text" maxlength="60" value="${esc(it.name)}">`) + prow('Стадия', `<select id="sRPh" title="У каждой стадии свои помещения, нумерация и экспликация">${PHASES.map(p => `<option value="${p.k}"${p.k === roomPh(it) ? ' selected' : ''}>${esc(p.n)}</option>`).join('')}</select>`)
       + prow('Высота потолка (обмер), мм', `<input id="sRHc" type="number" min="0" step="5" value="${Number.isFinite(it.hc) ? Math.round(it.hc * 1000) : ''}" placeholder="${hc0 != null ? Math.round(hc0 * 1000) + ' — по потолку' : 'не задана'}">`)
       + prow('Площадь', `<span class="val">${d.open ? 'Не окружено' : m2(d.area) + ' м²'}</span>`) + (d.open ? '' : prow('Периметр', `<span class="val">${mm(d.perim)} мм</span>`))
       + (d.open ? `<p class="pnote">Вокруг марки нет замкнутого контура стен. Сдвиньте её внутрь помещения или замкните стены.</p>` : `<div class="pbtns"><button class="btn sm" id="sRF">Пол в помещении</button><button class="btn sm" id="sRC">Потолок</button><button class="btn sm" id="sRE">Развёртки</button></div>`); }
@@ -9294,6 +9378,7 @@ function renderPanel(_el, _it){
     if (q('sDOp')) q('sDOp').onchange = e => { pushUndo(); markEdited(); delete it.op; delete it.gl; if (e.target.value === '1') it.op = true; else if (e.target.value === 'gl') it.gl = true; el.dataset.id = 'x'; rebuild(); };
   } else if (it.type === 'dim'){
     bind('sDOff', v => { it.off = (Math.sign(it.off) || 1) * v; }, true);
+    if (q('sDPh')) q('sDPh').onchange = e => { pushUndo('Стадия размера'); markEdited(); it.dph = e.target.value; if (!dimShown(it)){ clearSel(); toast(`Размер теперь показывается на стадии «${phName(it.dph)}»`); } el.dataset.id = 'x'; rebuild(); };
     if (q('sDimTp')) q('sDimTp').onclick = () => { pushUndo('Числа размера на место'); markEdited(); delete it.tp; annoDirty = true; el.dataset.id = 'x'; rebuild(); };
   } else if (it.type === 'grid'){
     q('sGName').onchange = e => { const v = e.target.value.trim(); if (v){ pushUndo(); markEdited(); it.name = v.slice(0, 6); el.dataset.id = 'x'; rebuild(); } };
@@ -9318,7 +9403,7 @@ function renderPanel(_el, _it){
     if (q('sRR')) q('sRR').value = it.ridge || 'auto'; chg('sRR', t => it.ridge = t.value); chg('sRG', t => it.gab = t.checked);
     if (q('sCR2')) q('sCR2').value = it.round ? '1' : '0'; chg('sCR2', t => { it.round = t.value === '1'; if (it.round) it.d = it.w; });
     const sf = q('sSF'); if (sf) sf.onclick = () => { pushUndo(); markEdited(); [it.x1, it.x2, it.z1, it.z2] = [it.x2, it.x1, it.z2, it.z1]; el.dataset.id = 'x'; rebuild(); };
-    chg('sRN', t => { const v = t.value.trim(); if (v) it.num = v.slice(0, 10); }); chg('sRNm', t => { const v = t.value.trim(); if (v) it.name = v.slice(0, 60); });
+    chg('sRN', t => { const v = t.value.trim(); if (v) it.num = v.slice(0, 10); }); chg('sRNm', t => { const v = t.value.trim(); if (v) it.name = v.slice(0, 60); }); chg('sRPh', t => { it.ph = t.value; RPH.v++; if (visState(it) === 'hide'){ clearSel(); toast(`Помещение перенесено на стадию «${phName(it.ph)}»`); } });
     chg('sRHc', t => { const v = +t.value; if (t.value !== '' && v > 0) it.hc = r4(v / 1000); else delete it.hc; annoDirty = true; });
     const rd = it.type === 'room' ? roomData(it) : null;
     if (q('sRF')) q('sRF').onclick = () => { const f = createFromOutline('floor', rd.poly); if (f) toast(`Пол ${f.tag} в помещении «${it.name}»: ${m2(rd.area)} м²`); };
@@ -9656,7 +9741,7 @@ function sanitizeItems(arr){
     if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it), ...(Array.isArray(it.svNo) ? { svNo:it.svNo.filter(s => s === 1 || s === -1) } : {}), ...(Array.isArray(it.dj) && (it.dj[0] || it.dj[1]) ? { dj:[!!it.dj[0], !!it.dj[1]] } : {}), ...(LOC_LINES[it.loc] && it.loc !== 'center' ? { loc:it.loc } : {}), ...(it.nrb ? { nrb:true } : {}) };
     else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
     else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand, ...(it.type === 'door' && it.op ? { op:true } : it.type === 'door' && it.gl ? { gl:true } : {}), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
-    else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1, ...(it.dup ? { dup:true } : {}), ...(it.tot ? { tot:true } : {}) } : {}),
+    else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1, ...(it.dup ? { dup:true } : {}), ...(it.tot ? { tot:true } : {}) } : {}), ...(typeof it.dph === 'string' ? { dph:it.dph.slice(0, 24) } : {}), ...(it.demo ? { demo:true, dk:String(it.dk || '').slice(0, 30) } : {}),
       ...(it.tp && typeof it.tp === 'object' ? { tp:Object.fromEntries(Object.entries(it.tp).filter(([k, v]) => /^\d{1,3}$/.test(k) && v && N(v.u) && N(v.v)).map(([k, v]) => [k, { u:clamp(+v.u, -100, 100), v:clamp(+v.v, -100, 100) }])) } : {}),
       ...(it.txt && typeof it.txt === 'object' ? { txt:Object.fromEntries(Object.entries(it.txt).filter(([k, v]) => /^\d{1,3}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.slice(0, 40)])) } : {}) };
     else if (it.type === 'grid' && seg(it)) o = { id, type:'grid', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, name:String(it.name || '?').slice(0, 6) };
@@ -9676,7 +9761,7 @@ function sanitizeItems(arr){
     else if (it.type === 'lock' && it.a && it.b && N(it.a.id) && N(it.b.id)) o = { id, type:'lock', a:{ id:+it.a.id, idx:Math.round(+it.a.idx) || 0 }, b:{ id:+it.b.id, idx:Math.round(+it.b.idx) || 0 } };
     else if ((it.type === 'grp' || it.type === 'asm') && Array.isArray(it.ids)) o = { id, type:it.type, name:String(it.name || 'Группа').slice(0, 60), tname:String(it.tname || it.name || 'Группа').slice(0, 60), ids:it.ids.map(Number).filter(Number.isFinite), o:it.o && N(it.o.x) && N(it.o.z) ? { x:+it.o.x, z:+it.o.z } : { x:0, z:0 } };
     else if (it.type === 'part' && N(it.host) && N(it.li)) o = { id, type:'part', host:+it.host, li:Math.round(+it.li), m:MATS[it.m] ? it.m : 'generic', ...(it.ex ? { ex:true } : {}) };
-    else if (it.type === 'room' && N(it.x) && N(it.z)) o = { id, type:'room', x:+it.x, z:+it.z, name:String(it.name || 'Помещение').slice(0, 60), num:String(it.num || '1').slice(0, 10), ...(N(it.hc) && +it.hc > 0 ? { hc:+it.hc } : {}) };
+    else if (it.type === 'room' && N(it.x) && N(it.z)) o = { id, type:'room', x:+it.x, z:+it.z, name:String(it.name || 'Помещение').slice(0, 60), num:String(it.num || '1').slice(0, 10), ...(N(it.hc) && +it.hc > 0 ? { hc:+it.hc } : {}), ...(typeof it.ph === 'string' ? { ph:it.ph.slice(0, 24) } : {}) };
     else if (it.type === 'spot' && N(it.x) && N(it.z)) o = { id, type:'spot', x:+it.x, z:+it.z, ...(N(it.y) ? { y:+it.y } : {}), ...(typeof it.view === 'string' ? { view:it.view.slice(0, 40) } : {}), ...(it.left ? { left:true } : {}) };
     else if (it.type === 'text' && N(it.x) && N(it.z) && it.s) o = { id, type:'text', x:+it.x, z:+it.z, s:String(it.s).slice(0, 200), size:[11, 14, 18, 24].includes(+it.size) ? +it.size : 14 };
     if (o){
@@ -10075,7 +10160,7 @@ const fileMenu = $('#fileMenu'), fileBtn = $('#fileBtn');
 function openFileMenu(){ const r = fileBtn.getBoundingClientRect(); fileMenu.style.left = r.left + 'px'; fileMenu.style.top = (r.bottom + 2) + 'px'; fileMenu.hidden = false; fileBtn.setAttribute('aria-expanded', 'true'); fileMenu.querySelector('button').focus(); }
 function closeFileMenu(){ if (fileMenu.hidden) return; fileMenu.hidden = true; fileBtn.setAttribute('aria-expanded', 'false'); }
 fileBtn.onclick = () => fileMenu.hidden ? openFileMenu() : closeFileMenu();
-const ACTS = { new:newProject, library:openLib, save:saveNow, saveFile:() => saveAsFile(), openFile:openFileDialog, ydOpen:() => openYdBrowser('open'), ydSave:() => openYdBrowser('save'), ydLogin:() => openYdLogin(), dup:duplicateCurrent, png:exportPNG, print:openPrint, install:openInstall };
+const ACTS = { new:newProject, library:openLib, save:saveNow, saveFile:() => saveAsFile(), openFile:openFileDialog, ydOpen:() => openYdBrowser('open'), ydSave:() => openYdBrowser('save'), ydLogin:() => openYdLogin(), dup:duplicateCurrent, png:exportPNG, print:openPrint, offline:() => openOfflinePack(), install:openInstall };
 fileMenu.querySelectorAll('[data-act]').forEach(b => b.onclick = () => { closeFileMenu(); ACTS[b.dataset.act](); });
 document.addEventListener('pointerdown', e => { if (!fileMenu.hidden && !fileMenu.contains(e.target) && e.target !== fileBtn) closeFileMenu(); });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && proj.id) persist(); });
@@ -10702,7 +10787,7 @@ function findEl(spec){
   if (!it) throw new Error(`Нет элемента: ${CAT[type].toLowerCase()} ${m[2].toUpperCase()}`);
   return it;
 }
-const CMD = /уровен|уровн|отсоедин|присоедин|соедини|крыш|кровл|потол|(?:^|\s)пол(?:\s|$)|перекрыт|колонн|лестниц|разрез|развертк|границ|стади|снес|снос|демонтир|узел|обмер|монтаж|мебел|откр|диспетчер|букв|сдвин|передвин|перемест|отодвин|подвин|смест|стен|перегород|комнат|помещени|двер|окн|объем|блок|шкаф|стол|кроват|диван|крыльц|тумб|куб|вид|план|аксоном|изометр|диметр|3д|перспектив|фасад|отмен|верни|повтор|покажи|очист|лист|удали|замкн|начн|точк|высот[а-я]* стен|толщин|лини|тонир|выбер|выдели|сетк|размер|ос[ия](?:[^а-я]|$)|осей|поверн/;
+const CMD = /нажми|инструмент|выдел|выбер|скрой|спрячь|закреп|откреп|раздел|переименуй|размести|назови|отметк|подними|опусти|скопир|зеркал|изолир|сохран|печат|визуализ|рендер|вкладк|выделени|библиотек|экспликац|яндекс|умеешь|уровен|уровн|отсоедин|присоедин|соедини|крыш|кровл|потол|(?:^|\s)пол(?:\s|$)|перекрыт|колонн|лестниц|разрез|развертк|границ|стади|снес|снос|демонтир|узел|обмер|монтаж|мебел|откр|диспетчер|букв|сдвин|передвин|перемест|отодвин|подвин|смест|стен|перегород|комнат|помещени|двер|окн|объем|блок|шкаф|стол|кроват|диван|крыльц|тумб|куб|вид|план|аксоном|изометр|диметр|3д|перспектив|фасад|отмен|верни|повтор|покажи|очист|лист|удали|замкн|начн|точк|высот[а-я]* стен|толщин|лини|тонир|выбер|выдели|сетк|размер|ос[ия](?:[^а-я]|$)|осей|поверн/;
 function splitFrags(s){
   const parts = s.split(/\s*(?:[,;]|\.(?!\d))\s*|\s+(?:и|затем|потом|далее|после этого)\s+/).filter(p => p && p.trim());
   const out = [];
@@ -10736,7 +10821,74 @@ function viewIn(f){
   if (/фасад/.test(g)){ const sd = /север/.test(g) ? 'N' : /восто/.test(g) ? 'E' : /запад/.test(g) ? 'W' : 'S'; return views.find(v => v.kind === 'elev' && v.side === sd) || null; }
   return null;
 }
+/* offline phrases for the newer functions (no Claude, no internet): furniture, selection, editing the selection, visibility,
+   levels, sections of the browser, sheets, and «нажми …» / «инструмент …» for any button of the ribbon */
+const VG_WORDS = [[/двер/, 'door'], [/окн|окон/, 'window'], [/стен/, 'wall'], [/мебел|семейств/, 'fam'], [/размер/, 'dim'], [/(?:^|\s)ос[иь]|осей/, 'grid'], [/потолк/, 'ceiling'], [/(?:^|\s)пол(?:ы|ов)?(?:\s|$)|перекрыт/, 'floor'], [/помещени|комнат/, 'room'], [/текст/, 'text'], [/отметк/, 'spot'], [/крыш|кровл/, 'roof'], [/колонн/, 'column'], [/лестниц/, 'stair'], [/линии детал/, 'line']];
+const SEL_TYPES = [[/окн|окон/, 'window'], [/двер/, 'door'], [/стен|перегород/, 'wall'], [/мебел|диван|кресл|кроват|стол|шкаф/, 'fam'], [/помещени|комнат/, 'room'], [/размер/, 'dim'], [/колонн/, 'column'], [/объем/, 'box']];
+const DIR_V = f => /вправо|направо|восток/.test(f) ? [1, 0] : /влево|налево|запад/.test(f) ? [-1, 0] : /вверх|наверх|север/.test(f) ? [0, -1] : /вниз|юг/.test(f) ? [0, 1] : null;
+// brand names are written in Latin letters, speech gives Cyrillic: «tommy» → «томми»
+const lat2cyr = s => s.replace(/sh/g, 'ш').replace(/ch/g, 'ч').replace(/zh/g, 'ж').replace(/ya/g, 'я').replace(/yu/g, 'ю').replace(/x/g, 'кс').replace(/[a-z]/g, c => ({ a:'а', b:'б', c:'к', d:'д', e:'е', f:'ф', g:'г', h:'х', i:'и', j:'дж', k:'к', l:'л', m:'м', n:'н', o:'о', p:'п', q:'к', r:'р', s:'с', t:'т', u:'у', v:'в', w:'в', y:'и', z:'з' }[c] || c));
+function offlineMore(f){
+  const roomN = (f.match(/помещени[а-я]*\s*(?:номер|№)?\s*(\d+)|комнат[а-я]*\s*(?:номер|№)?\s*(\d+)/) || []).slice(1).find(Boolean);
+  // «нажми визуализация», «инструмент стена»
+  let m = f.match(/^(?:нажми|нажать|кнопк[а-я]*)\s+(.+)$/);
+  if (m){ const q = m[1].trim(), line = uiCatalog().split('\n').find(l => lc(l.split(' — ')[1] || '').includes(q)); return line ? { a:'press', id:line.split(' — ')[0] } : { err:'Не нашёл кнопку «' + q + '»' }; }
+  m = f.match(/^(?:включи\s+)?инструмент\s+(.+)$/);
+  if (m){ const q = m[1].trim(), k = Object.keys(TOOL_NAMES).find(t => lc(TOOL_NAMES[t]).includes(q)); return k ? { a:'tool', t:k } : { err:'Нет инструмента «' + q + '»' }; }
+  // furniture from the library: «поставь диван tommy в помещении 1»
+  if (/постав|добав|размест/.test(f) && !/\d+\s*на\s*\d+/.test(f)){
+    const hit = Object.entries(FURN_LIB).map(([k, L]) => { const w = lc(L.n).split(/[\s-]+/).flatMap(x => /[a-z]/.test(x) ? [x, lat2cyr(x)] : [x]); const score = w.filter(x => x.length > 2 && f.includes(x.slice(0, Math.max(4, x.length - 2)))).length; return { k, score }; }).sort((a, b) => b.score - a.score)[0];
+    if (hit && hit.score > 0){ const rot = (f.match(/поверн[а-я]*\s*на\s*(\d+)/) || [])[1], bo = f.match(new RegExp('(?:на высот[а-я]*|над полом|от пола)\\s*' + NUM)); return { a:'furn', k:hit.k, ...(roomN ? { room:roomN } : {}), ...(rot ? { rot:+rot } : {}), ...(bo ? { bo:toM(bo[1], bo[2]) } : {}) }; }
+  }
+  // spot elevation
+  if (/отметк/.test(f) && /постав|добав/.test(f) && !/уровн/.test(f)) return { a:'spot', ...(roomN ? { room:roomN } : {}) };
+  // selection by description: «выдели все окна в стене д», «выбери мебель в помещении 2»
+  if (/выдел|выбер/.test(f) && /вс[еёх]|кажд/.test(f)){ const tys = SEL_TYPES.filter(([re]) => re.test(f)).map(x => x[1]); if (tys.length){ const tg = wallTagsIn(f).find(t => t.tag); return { a:'selectq', type:tys, ...(tg ? { wall:'@' + tg.tag } : {}), ...(roomN ? { room:roomN } : {}) }; } }
+  // editing the selection
+  if (/выбран|выделен/.test(f)){
+    const L = lensOf(stripNamed(f)), dv = DIR_V(f);
+    if (/скопир|копи/.test(f) && dv && L[0]) return { a:'move', dx:dv[0] * L[0], dz:dv[1] * L[0], copy:true };
+    if (/сдвин|передвин|перемест|подвин|смест/.test(f) && dv && L[0]) return { a:'move', dx:dv[0] * L[0], dz:dv[1] * L[0] };
+    if (/поверн/.test(f)){ const d = (f.match(/на\s*(-?\d+(?:\.\d+)?)/) || [])[1]; return { a:'rotsel', deg:d ? +d : 90, copy:/копи/.test(f) }; }
+    if (/зеркал/.test(f)) return { a:'mirror', axis:/вертикал|сверху|верх/.test(f) ? 'z' : 'x', copy:/копи/.test(f) };
+    if (/подними|опусти/.test(f) && L[0]) return { a:'prop', el:'selected', set:{ bo:(/опусти/.test(f) ? -1 : 1) * L[0] } };
+    if (/скрой|спрячь/.test(f)) return { a:'hide', on:true };
+    if (/изолир/.test(f)) return { a:'hide', mode:'isolate' };
+  }
+  if (/верни скрыт|сбрось скрыт|сбрось изоляц/.test(f)) return { a:'hide', mode:'reset' };
+  // visibility of categories in the view: «скрой двери», «покажи размеры на этом виде»
+  if (/^(скрой|спрячь|убери|выключи|покажи|включи|верни)\s/.test(f) && !/фасад|модель|вс[её]|стади|букв|скрыт/.test(f)){
+    const c = VG_WORDS.find(([re]) => re.test(f)); if (c && !/выбран|выделен/.test(f)) return { a:'vg', cat:/высот[а-я]* потолк/.test(f) ? 'ceilh' : /высот[а-я]* окон/.test(f) ? 'winh' : c[1], vis:/^(покажи|включи|верни)/.test(f) };
+  }
+  // levels: «закрепи уровень кровля», «уровень этаж 2 отметка 3300»
+  m = f.match(/(закреп|откреп|зафиксир)[а-я]*\s+уров[а-я]*\s+(.+)$/); if (m) return { a:'levelset', lv:m[2].trim(), pin:!/откреп/.test(m[1]) };
+  m = f.match(/уров[а-я]*\s+(.+?)\s+(?:отметк[а-я]*|на отметк[а-я]*)\s*(-?\d+(?:\.\d+)?)\s*(мм|м|метр[а-я]*)?/); if (m) return { a:'levelset', lv:m[1].trim(), elev:(m[3] ? toM(m[2], m[3]) : (Math.abs(+m[2]) >= 100 ? +m[2] / 1000 : +m[2])) };
+  // sections of the browser and views
+  m = f.match(/(?:созда|сделай|добав|нов)[а-я]*\s+раздел[а-я]*\s+(.+)$/); if (m) return { a:'folder', name:m[1].trim() };
+  m = f.match(/(?:перенеси|положи|помести)\s+(?:вид\s+)?(.+?)\s+в\s+раздел\s+(.+)$/); if (m) return { a:'viewset', view:m[1].trim(), folder:m[2].trim() };
+  m = f.match(/переименуй\s+(?:вид\s+)?(.+?)\s+в\s+(.+)$/); if (m) return { a:'renameview', view:m[1].trim(), name:m[2].trim() };
+  m = f.match(/(?:размести|поставь|положи)\s+(?:вид\s+)?(.+?)\s+на\s+лист\s+([a-zа-я]?\d+)/); if (m) return { a:'sheetadd', view:m[1].trim(), sheet:m[2].toUpperCase().replace(/^A/, 'А') };
+  // rooms: «помещение 2 назови спальня», «назови помещение 1 кухня»
+  m = f.match(/(?:назови\s+)?помещени[а-я]*\s*(\d+)\s+(?:назови|назвать|имя|это)\s+(.+)$/) || f.match(/назови\s+помещени[а-я]*\s*(\d+)\s+(.+)$/); if (m) return { a:'roomset', num:m[1], name:m[2].trim().replace(/^./, c => c.toUpperCase()) };
+  return null;
+}
 function parseOne(f){
+  // simple commands understood without Claude (offline)
+  if (/что (ты )?умеешь|^помощь$|^справка$|какие команды/.test(f)) return { a:'help' };
+  if (/яндекс|диск/.test(f) && /сохран|запиш/.test(f)) return { a:'ydsave' };
+  if (/яндекс|диск/.test(f) && /откр|загруз/.test(f)) return { a:'ydopen' };
+  if (/^(?:сохрани|сохранить|сохран[а-я]* проект)/.test(f)) return { a:'save' };
+  if (/распечат|^печат/.test(f)) return { a:'print' };
+  if (/визуализ|рендер/.test(f) && !/стил/.test(f)) return { a:'render' };
+  if (/закр[а-я]* вкладк/.test(f)) return { a:'closetab' };
+  if (/сним[а-я]* (?:выделени|выбор)|отмени выделени/.test(f)) return { a:'deselect' };
+  if (/библиотек[а-я]* мебел/.test(f)) return { a:'opendlg', d:'furnlib' };
+  if (/без интернет|офлайн|оффлайн/.test(f) && /скача|загруз|подготов/.test(f)) return { a:'offline' };
+  if (/окн[а-я]* уровн|^уровни$/.test(f)) return { a:'opendlg', d:'levels' };
+  if (/материал[а-я]*$/.test(f) && /откр|окн|покаж/.test(f)) return { a:'opendlg', d:'mats' };
+  if (/экспликаци/.test(f) && S.view === 'sheet') return { a:'expl', on:!/убер|удали|скрой|без/.test(f) };
+  if (/(?:сохрани|запомни)[а-я]* ракурс|камер[а-я]* из вида/.test(f)) return { a:'savecam' };
+  const off = offlineMore(f); if (off) return off;
   const stepsN = () => { const m = f.match(/(\d+)\s*(?:шаг|действ|раз|изменен)/); return m ? Number(m[1]) : /(?:все|всё)\s+(?:последн|десять)/.test(f) ? 10 : 1; };
   if ((/отмен|откат/.test(f) && !/снос|снес/.test(f)) || /^назад$/.test(f) || (/назад/.test(f) && /шаг|действ/.test(f))) return { a:'undo', n:stepsN() };
   if (/верни|повтори/.test(f)) return { a:'redo', n:stepsN() };
@@ -11112,8 +11264,8 @@ function execOne(a, ctx){
       const made = makeInteriorElevations(p, true); if (!made.length) throw new Error('Помещение не окружено стенами');
       return `Развёртки: ${made.length} вида — в диспетчере проекта`;
     }
-    case 'openview': { const v = views.find(x => x.id === a.id); if (!v) throw new Error('Нет такого вида'); openView(v.id); return 'Открыт: ' + (v.kind === 'sheet' ? 'лист ' + v.num + ' — ' + v.name : v.name); }
-    case 'newview': { newView(a.kind); return a.kind === 'detail' ? 'Обведите рамкой участок плана для узла' : 'Создано: ' + viewTitle(curView()); }
+    case 'openview': { const v = views.find(x => x.id === a.id) || viewBy(a.name || a.id); if (!v) throw new Error('Нет такого вида'); openView(v.id); return 'Открыт: ' + (v.kind === 'sheet' ? 'лист ' + v.num + ' — ' + v.name : v.name); }
+    case 'newview': { if (a.name || a.phase || a.lv || a.folder) return execMore({ ...a, a:'newview2' }, ctx); newView(a.kind); return a.kind === 'detail' ? 'Обведите рамкой участок плана для узла' : 'Создано: ' + viewTitle(curView()); }
     case 'demolish': {
       const it = a.el === 'selected' || a.el == null ? (sel.size === 1 ? byId(selId) : null) : findEl(a.el);
       if (!it) throw new Error('Назовите элемент буквой, например «снеси стену Д»');
@@ -11134,15 +11286,163 @@ function execOne(a, ctx){
     case 'fit': fit(); return 'Показываю всё';
     case 'undo': { const names = undo(a.n || 1); return names.length ? 'Отменено: ' + names.join('; ') : 'Нечего отменять'; }
     case 'redo': { const names = redo(a.n || 1); return names.length ? 'Возвращено: ' + names.join('; ') : 'Нечего возвращать'; }
-    default: throw new Error('Неизвестное действие: ' + String(a.a).slice(0, 20));
+    default: { const r = execMore(a, ctx); if (r !== undefined) return r; throw new Error('Неизвестное действие: ' + String(a.a).slice(0, 20)); }
   }
+}
+/* ---------- the chat can do everything the program can: generic actions (any button, any tool, any property, selection by
+   description, editing the selection) and actions for views, sections of the browser, sheets, furniture, rooms, levels,
+   spot elevations, visibility, printing, rendering, files and the Yandex Disk. RULE: every new function of the program is added
+   here and to ACTIONS_DOC (and buttons get an id or data-tool, so «press» finds them by themselves). ---------- */
+const lc = s => String(s == null ? '' : s).toLowerCase().replace(/ё/g, 'е').trim();
+function viewBy(spec){
+  if (spec == null || spec === 'current') return curView();
+  const s = lc(spec); if (!s) return curView();
+  return views.find(v => v.id === spec) || views.find(v => lc(v.name) === s || (v.kind === 'sheet' && lc(v.num) === s)) || views.find(v => lc(v.name).includes(s) || (v.kind === 'sheet' && lc(v.num + ' ' + v.name).includes(s))) || null;
+}
+function roomBy(num){ const L = actLv(); const all = items.filter(r => r.type === 'room' && String(r.num) === String(num)); return all.find(r => shown(r) && lvOf(r) === L) || all.find(shown) || all[0] || null; }
+function elsOf(spec){
+  if (spec == null || spec === 'selected') return liveIds(sel).map(byId).filter(Boolean);
+  if (Array.isArray(spec)) return spec.flatMap(elsOf);
+  if (typeof spec === 'number' || /^\d+$/.test(String(spec))) { const it = byId(Number(spec)); return it ? [it] : []; }
+  if (/^room:/.test(spec)){ const r = roomBy(String(spec).slice(5)); return r ? [r] : []; }
+  if (String(spec)[0] === '@'){ const it = findEl(spec); return it ? [it] : []; }
+  return [];
+}
+function uiCatalog(){
+  const out = [], seen = new Set();
+  const add = (key, el) => { if (seen.has(key)) return; seen.add(key); const t = (el.getAttribute('title') || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 90); if (t) out.push(key + ' — ' + t); };
+  document.querySelectorAll('.rb-panel button[id], .rb-panel [data-tool], .rb-panel [data-view], .rb-panel [data-std], #rbModify button[id]').forEach(el => {
+    if (el.dataset.tool) add('tool:' + el.dataset.tool, el); else if (el.dataset.view) add('view:' + el.dataset.view, el); else if (el.dataset.std) add('std:' + el.dataset.std, el); else add(el.id, el); });
+  document.querySelectorAll('#fileMenu [data-act]').forEach(el => add('act:' + el.dataset.act, el));
+  document.querySelectorAll('#vbar button[id]').forEach(el => add(el.id, el));
+  return out.slice(0, 260).join('\n');
+}
+function pressUI(key){
+  const k = String(key || '');
+  if (k.startsWith('tool:')){ setTool(k.slice(5)); return 'Инструмент: ' + (TOOL_NAMES[k.slice(5)] || k.slice(5)).replace(/^Изменить \| /, ''); }
+  if (k.startsWith('act:')){ if (!ACTS[k.slice(4)]) throw new Error('Нет такого пункта меню'); ACTS[k.slice(4)](); return 'Выполнено: ' + (document.querySelector(`#fileMenu [data-act="${k.slice(4)}"]`)?.textContent || k).trim(); }
+  const el = k.startsWith('view:') ? document.querySelector(`[data-view="${k.slice(5)}"]`) : k.startsWith('std:') ? document.querySelector(`[data-std="${k.slice(4)}"]`) : document.getElementById(k);
+  if (!el) throw new Error('Нет такой кнопки: ' + k);
+  if (el.disabled) throw new Error('Кнопка сейчас недоступна: ' + (el.textContent || k).trim());
+  el.click(); return 'Нажато: ' + ((el.getAttribute('title') || el.textContent || k).replace(/\s+/g, ' ').trim().split(/[.(]/)[0]);
+}
+const PROP_KEYS = { h:'n', t:'n', bo:'n', to:'n', w:'n', d:'n', sill:'n', hc:'n', rot:'n', r:'n', off:'n', slope:'n', over:'n', size:'n', y:'n', m:'s', name:'s', num:'s', s:'s', tag:'s', ph:'s', dem:'s', dph:'s', loc:'s', kind:'s', ls:'s', wt:'s', mir:'b', pin:'b', flip:'b', hand:'b', op:'b', gl:'b', nrb:'b', left:'b', round:'b' };
+function execMore(a, ctx){
+  switch (a.a){
+    case 'press': return pressUI(a.id);
+    case 'tool': return pressUI('tool:' + a.t);
+    case 'help': return 'Без интернета понимаю, например: «оси 4 по 6000 на 3 по 4500», «стена 5 метров на север», «комната 5 на 4», «дверь в южной стене», «окно 1500 в стене Б», «сдвинь стену В на 1200 от стены А», «снеси стену Д», «стадия монтаж», «расставь помещения», «назови помещение 1 кухня», «поставь диван томми в помещении 1», «выдели все окна», «сдвинь выбранное на 500 вправо», «поверни выбранное на 45», «подними выбранное на 400», «скрой двери», «покажи размеры», «закрепи уровень кровля», «уровень этаж 2 отметка 3300», «поставь отметку в помещении 1», «создай раздел 02_обмерный план», «перенеси план монтажа в раздел 04_план монтажа», «размести план монтажа на лист а102», «открой план демонтажа», «закрой вкладку», «нажми визуализация», «инструмент дверь», «сохрани», «распечатай», «сохрани на яндекс диск», «отмени». С интернетом и Claude понимаю любые фразы и фото планов.';
+    case 'openview': case 'view2': { const v = viewBy(a.name || a.id); if (!v) throw new Error('Нет вида «' + (a.name || a.id) + '»'); openView(v.id); return 'Открыт: ' + (v.kind === 'sheet' ? 'лист ' + v.num + ' — ' + v.name : v.name); }
+    case 'closetab': { const v = viewBy(a.name || a.id || 'current'); if (!v) throw new Error('Нет такого вида'); tabClose(v.id); return 'Вкладка закрыта: ' + v.name; }
+    case 'newview2': {
+      const k = a.kind || 'plan'; newView(k);
+      const v = curView(); if (!v) return 'Создано';
+      if (a.name && v.kind !== 'sheet') v.name = String(a.name).slice(0, 80); if (a.name && v.kind === 'sheet') v.name = String(a.name).slice(0, 80);
+      if (a.phase && (PH_IDX[a.phase] != null || a.phase === 'all') && v.kind !== 'sheet'){ v.phase = a.phase; S.phase = a.phase; surveyTpl(v); }
+      if (a.lv && v.kind === 'plan'){ const L = levels.find(l => l.id === a.lv || lc(l.name) === lc(a.lv)); if (L) v.lv = L.id; }
+      if (a.folder){ const f = (STD.folders || []).find(x => lc(x.n) === lc(a.folder)); if (f) v.folder = f.id; }
+      openView(v.id); renderTree(); scheduleSave(); return 'Создано: ' + viewTitle(v);
+    }
+    case 'renameview': { const v = viewBy(a.view); if (!v) throw new Error('Нет такого вида'); const n = String(a.name || '').trim(); if (!n) throw new Error('Назовите новое имя'); v.name = n.slice(0, 80); renderTree(); scheduleSave(); if (v.id === S.viewId) $('#viewtag').textContent = viewTitle(v); return 'Вид переименован: ' + v.name; }
+    case 'delview': { const v = viewBy(a.view); if (!v) throw new Error('Нет такого вида'); deleteView(v.id); return 'Удалён вид: ' + v.name; }
+    case 'viewset': {
+      const v = viewBy(a.view); if (!v) throw new Error('Нет такого вида'); const done = [];
+      if (a.phase && (PH_IDX[a.phase] != null || a.phase === 'all')){ v.phase = a.phase; if (v.id === S.viewId) setPhase(a.phase); surveyTpl(v); done.push('стадия «' + phName(a.phase) + '»'); }
+      if (a.tpl !== undefined){ const t = a.tpl ? TPLS.find(x => x.id === a.tpl || lc(x.name) === lc(a.tpl)) : null; if (a.tpl && !t) throw new Error('Нет шаблона «' + a.tpl + '»'); if (t) v.tpl = t.id; else delete v.tpl; done.push(t ? 'шаблон «' + t.name + '»' : 'без шаблона'); }
+      if (a.scale && Number.isFinite(+a.scale)){ v.scale = Math.round(+a.scale); done.push('масштаб 1:' + v.scale); }
+      if (a.folder !== undefined){ const f = a.folder ? (STD.folders || []).find(x => lc(x.n) === lc(a.folder)) : null; if (a.folder && !f) throw new Error('Нет раздела «' + a.folder + '»'); if (f) v.folder = f.id; else delete v.folder; done.push(f ? 'в разделе «' + f.n + '»' : 'вне разделов'); }
+      if (a.lv){ const L = levels.find(l => l.id === a.lv || lc(l.name) === lc(a.lv)); if (L && v.kind === 'plan'){ v.lv = L.id; done.push('уровень «' + L.name + '»'); } }
+      renderTree(); scheduleSave(); if (v.id === S.viewId) openView(v.id);
+      return `Вид «${v.name}»: ${done.join(', ') || 'без изменений'}`;
+    }
+    case 'folder': {
+      const n = String(a.name || '').trim(); if (!n) throw new Error('Назовите раздел');
+      let f = (STD.folders || []).find(x => lc(x.n) === lc(n)); if (!f){ f = { id:vid('fd'), n:n.slice(0, 80) }; STD.folders = [...(STD.folders || []), f]; }
+      let moved = 0; for (const s of (a.views || [])){ const v = viewBy(s); if (v){ v.folder = f.id; moved++; } }
+      renderTree(); scheduleSave(); return `Раздел «${f.n}»` + (moved ? `: видов в нём ${moved}` : ' создан');
+    }
+    case 'delfolder': { const f = (STD.folders || []).find(x => lc(x.n) === lc(a.name)); if (!f) throw new Error('Нет раздела «' + a.name + '»'); STD.folders = STD.folders.filter(x => x !== f); for (const v of views) if (v.folder === f.id) delete v.folder; renderTree(); scheduleSave(); return 'Раздел удалён: ' + f.n; }
+    case 'selectq': {
+      const ty = a.type ? [].concat(a.type) : null, w = a.wall ? elsOf(a.wall)[0] : null, room = a.room ? roomBy(a.room) : null, rd = room ? roomData(room) : null;
+      let list = items.filter(it => !isMeta(it) && shown(it) && (!ty || ty.includes(it.type)) && (!w || it.wall === w.id || it.id === w.id) && (!a.phase || (it.ph || '') === a.phase) && (!a.dem || !!it.dem));
+      if (rd && !rd.open) list = list.filter(it => { const p = itemPts(it)[0]; return p && ptInPoly(p.x, p.z, rd.poly); });
+      if (a.letter) list = list.filter(it => lc(it.tag) === lc(a.letter));
+      if (!list.length) throw new Error('Ничего не нашёл по такому описанию');
+      setSel(list.map(i => i.id)); rebuild(); updatePanel(); return `Выбрано: ${list.length}`;
+    }
+    case 'deselect': clearSel(); rebuild(); updatePanel(); return 'Выбор снят';
+    case 'prop': {
+      const els = elsOf(a.el); if (!els.length) throw new Error('Выберите элемент или назовите его буквой');
+      const set = a.set || {}, done = [];
+      for (const [k, v] of Object.entries(set)){
+        const kind = PROP_KEYS[k]; if (!kind) { done.push('нельзя менять «' + k + '»'); continue; }
+        for (const it of els){
+          if (it.pin && !['pin'].includes(k)) continue;
+          if (kind === 'n'){ const x = Number(v); if (!Number.isFinite(x)) continue; if (k === 'rot') it.rot = ((x % 360) + 360) % 360; else it[k] = r4(x); }
+          else if (kind === 'b'){ if (v) it[k] = true; else delete it[k]; }
+          else { if (k === 'm' && !MATS[v]) throw new Error('Нет материала «' + v + '»'); if (k === 'wt'){ const ty = typeById(v); if (!ty) throw new Error('Нет типа стены'); keepLocLine(it, () => { it.wt = ty.id; it.t = typeT(ty); }); continue; } it[k] = String(v).slice(0, 80); if (k === 'ph') RPH.v++; }
+          if (it.type === 'fam') famFitWalls(it);
+        }
+        done.push(k);
+      }
+      $('#propsBody').dataset.id = 'x';
+      return `Изменено у ${els.length} эл.: ${done.join(', ')}`;
+    }
+    case 'move': { const ids = unpinned(liveIds(sel)); if (!ids.length) throw new Error('Сначала выберите элементы'); const dx = Number(a.dx) || 0, dz = Number(a.dz) || 0;
+      if (a.copy){ const made = copyItems(ids, r4(dx), r4(dz)); setSel(made); return `Скопировано: ${made.length}`; }
+      for (const id of ids){ const it = byId(id); if (it.type === 'wall') moveWallJoined(it, r4(dx), r4(dz)); else translateItem(it, r4(dx), r4(dz)); if (it.type === 'fam') famFitWalls(it); } return `Сдвинуто: ${ids.length} на ${mm(Math.hypot(dx, dz))} мм`; }
+    case 'rotsel': { const ids = liveIds(sel); if (!ids.length) throw new Error('Сначала выберите элементы'); const pts = selKeyPoints(ids), c = new THREE.Box3().setFromPoints(pts).getCenter(new V3()); undoStack.pop(); rotateSelBy({ x:c.x, z:c.z }, (Number(a.deg) || 90) * Math.PI / 180, !!a.copy); return 'Повёрнуто на ' + (Number(a.deg) || 90) + '°' + (a.copy ? ' с копированием' : ''); }
+    case 'mirror': { const ids = liveIds(sel); if (!ids.length) throw new Error('Сначала выберите элементы'); const pts = selKeyPoints(ids), c = new THREE.Box3().setFromPoints(pts).getCenter(new V3()); undoStack.pop(); mirrorSel(new V3(c.x, 0, c.z), a.axis === 'z' ? new V3(1, 0, 0) : new V3(0, 0, 1), !!a.copy); return null; }
+    case 'hide': { if (a.mode === 'temp'){ tempHide('hide'); return null; } if (a.mode === 'isolate'){ tempHide('isolate'); return null; } if (a.mode === 'reset'){ tempHide('reset'); return null; } hideInView(a.on !== false); return null; }
+    case 'vg': {
+      const v = viewBy(a.view); if (!v || v.kind === 'sheet') throw new Error('Нет такого вида'); const c = String(a.cat || ''); if (!c) throw new Error('Назовите категорию');
+      v.ov = { ...(v.ov || {}), [c]:{ ...((v.ov || {})[c] || {}), vis:a.vis !== false, ...(a.half != null ? { half:!!a.half } : {}) } }; v.ov = sanOv(v.ov) || v.ov;
+      OVM.clear(); scheduleSave(); return `Вид «${v.name}»: категория «${c}» ${a.vis === false ? 'скрыта' : 'показана'}`;
+    }
+    case 'furn': {
+      const keys = Object.keys(FURN_LIB); let k = a.k && FURN_LIB[a.k] ? a.k : keys.find(x => lc(FURN_LIB[x].n).includes(lc(a.k || a.name)));
+      if (!k) throw new Error('Нет такой модели в библиотеке');
+      const f = famModelFamily(k); if (a.w || a.d || a.h){ f.mesh.p = { ...f.mesh.p, ...(a.w ? { w:Math.round(+a.w * 1000) } : {}), ...(a.d ? { d:Math.round(+a.d * 1000) } : {}), ...(a.h ? { h:Math.round(+a.h * 1000) } : {}) }; FBOX.delete(f.id); }
+      let p = null; if (a.room){ const r = roomBy(a.room); if (!r) throw new Error('Нет помещения ' + a.room); const d = roomData(r); const c = d.open ? { x:r.x, z:r.z } : polyCenter(d.poly); p = { x:c.x, z:c.z }; }
+      else if (a.x != null && a.z != null) p = { x:+a.x, z:+a.z }; else { const q = penPoint(); p = { x:q.x, z:q.z }; }
+      const it = { id:nextId++, type:'fam', f:f.id, x:r4(p.x), z:r4(p.z), rot:Number(a.rot) || 0, tag:nextTag('fam'), ph:newPhase(), lv:actLv(), ...(a.bo ? { bo:r4(+a.bo) } : {}) };
+      famFitWalls(it); items.push(it); setSel([it.id]); return `${f.name} ${it.tag} поставлено${a.room ? ' в помещении ' + a.room : ''}`;
+    }
+    case 'famplace': { const f = fams.find(x => lc(x.name) === lc(a.name)) || fams.find(x => lc(x.name).includes(lc(a.name))); if (!f) throw new Error('Нет семейства «' + a.name + '»'); const q = a.x != null ? { x:+a.x, z:+a.z } : penPoint(); const it = { id:nextId++, type:'fam', f:f.id, x:r4(q.x), z:r4(q.z), rot:Number(a.rot) || 0, tag:nextTag('fam'), ph:newPhase(), lv:actLv() }; famFitWalls(it); items.push(it); return `${f.name} ${it.tag} поставлено`; }
+    case 'roomset': { const r = roomBy(a.num); if (!r) throw new Error('Нет помещения ' + a.num); if (a.name) r.name = String(a.name).slice(0, 60); if (a.newnum) r.num = String(a.newnum).slice(0, 10); if (a.hc != null) r.hc = r4(+a.hc); if (a.ph && PH_IDX[a.ph] != null){ r.ph = a.ph; RPH.v++; } return `Помещение ${r.num} «${r.name}»`; }
+    case 'levelset': {
+      const L = levels.find(l => l.id === a.lv || lc(l.name) === lc(a.lv || a.name)); if (!L) throw new Error('Нет уровня «' + (a.lv || a.name) + '»');
+      if (a.pin != null){ if (a.pin) L.pin = true; else delete L.pin; }
+      if (a.elev != null){ if (L.pin) throw new Error(`Уровень «${L.name}» закреплён замком`); L.elev = r4(+a.elev); levels.sort((x, y) => x.elev - y.elev); }
+      if (a.rename) L.name = String(a.rename).slice(0, 40);
+      afterLevels(); return `Уровень «${L.name}»: ${fmtElev(L.elev)}${L.pin ? ', замок закрыт' : ''}`;
+    }
+    case 'spot': {
+      if (S.view !== 'plan') throw new Error('Отметку по команде ставлю на плане; на разрезе — щёлкните инструментом «Высотная отметка»');
+      let p; if (a.room){ const r = roomBy(a.room); if (!r) throw new Error('Нет помещения ' + a.room); p = { x:r.x + 0.3, z:r.z + 0.3 }; } else p = a.x != null ? { x:+a.x, z:+a.z } : penPoint();
+      const it = { id:nextId++, type:'spot', x:r4(p.x), z:r4(p.z), lv:actLv() }; items.push(it); return 'Высотная отметка ' + fmtElev(spotVal(it));
+    }
+    case 'sheetadd': { const sh = viewBy(a.sheet); if (!sh || sh.kind !== 'sheet') throw new Error('Нет листа «' + a.sheet + '»'); const v = viewBy(a.view); if (!v || v.kind === 'sheet') throw new Error('Нет вида «' + a.view + '»'); openView(sh.id); placeOnSheet(v.id); const vp = sh.vps[sh.vps.length - 1]; if (vp && a.scale) vp.scale = Math.round(+a.scale); delete sh.pool; ensureVpImages(sh); renderTree(); scheduleSave(); return `На лист ${sh.num} размещён вид «${v.name}»`; }
+    case 'sheetset': { const sh = viewBy(a.sheet || 'current'); if (!sh || sh.kind !== 'sheet') throw new Error('Нет такого листа'); if (a.num) sh.num = String(a.num).slice(0, 12); if (a.name) sh.name = String(a.name).slice(0, 80); if (a.size && SHEET_SIZES[a.size]) sh.size = a.size; if (a.pool === false) delete sh.pool; renderTree(); scheduleSave(); if (S.viewId === sh.id) drawSheet(); return `Лист ${sh.num} — ${sh.name}`; }
+    case 'expl': { const sh = viewBy(a.sheet || 'current'); if (!sh || sh.kind !== 'sheet') throw new Error('Откройте или назовите лист'); if (a.on === false){ sh.expl = false; } else { const [Wm] = SHEET_SIZES[sh.size] || SHEET_SIZES.A3, pl = explPlan(sh); sh.expl = { x:Wm - 5 - EXPL_W, y:10, manual:true, ...(pl ? { view:pl.id } : {}) }; } scheduleSave(); if (S.viewId === sh.id) drawSheet(); return a.on === false ? 'Экспликация убрана' : 'Экспликация на листе ' + sh.num; }
+    case 'print': openPrint(); return 'Окно печати открыто';
+    case 'png': exportPNG(); return 'Картинка вида сохраняется';
+    case 'render': openRender(); return 'Окно визуализации открыто';
+    case 'savecam': saveCamFromView(); return null;
+    case 'save': saveNow(); return 'Сохраняю';
+    case 'ydsave': openYdBrowser('save'); return 'Выберите папку на Яндекс Диске';
+    case 'ydopen': openYdBrowser('open'); return 'Выберите файл на Яндекс Диске';
+    case 'offline': openOfflinePack(); return 'Окно «Работа без интернета» открыто';
+    case 'opendlg': { const m = { levels:openLevels, phases:openPhases, mats:openMats, furnlib:openFurnLib, tpl:() => openTpl(curView().tpl), lib:openLib }; if (!m[a.d]) throw new Error('Нет такого окна'); m[a.d](); return null; }
+  }
+  return undefined;
 }
 function outerWalls(){
   const walls = items.filter(i => i.type === 'wall'); if (!walls.length) return [];
   const b = bounds(), e = 0.4;
   return walls.filter(w => [w.x1, w.x2].every(x => Math.abs(x - b.min.x) < e + w.t) || [w.x1, w.x2].every(x => Math.abs(x - b.max.x) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.min.z) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.max.z) < e + w.t));
 }
-const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags', 'phase', 'openview', 'newview', 'box3d', 'section', 'ielev'];
+const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags', 'phase', 'openview', 'newview', 'box3d', 'section', 'ielev', 'press', 'tool', 'help', 'closetab', 'print', 'png', 'render', 'save', 'ydsave', 'ydopen', 'opendlg', 'deselect', 'selectq', 'savecam', 'offline'];
 function execAll(actions, opt = {}){
   const mutating = actions.some(a => a && !PASSIVE.includes(a.a));
   if (mutating) pushUndo(opt.label);
@@ -11215,7 +11515,13 @@ function modelSummary(){
   const ops = items.filter(isOp).slice(-80).map(o => ({ id:o.id, letter:o.tag, type:o.type, wall:o.wall, w:o.w, h:o.h }));
   const boxes = items.filter(i => i.type === 'box').slice(-40).map(b => ({ id:b.id, letter:b.tag, x:r2(b.x), z:r2(b.z), w:b.w, d:b.d, h:b.h }));
   const gridsL = items.filter(i => i.type === 'grid').slice(-40).map(g => ({ id:g.id, name:g.name, x1:r2(g.x1), z1:r2(g.z1), x2:r2(g.x2), z2:r2(g.z2) }));
-  return JSON.stringify({ walls, openings:ops, boxes, grids:gridsL, start:voice.pen ? { x:r2(voice.pen.x), z:r2(voice.pen.z) } : null, selected:[...sel],
+  const cv0 = curView(), roomsL = items.filter(i => i.type === 'room').slice(-80).map(r => ({ id:r.id, num:r.num, name:r.name, stage:roomPh(r), level:lvOf(r), x:r2(r.x), z:r2(r.z), shown:shown(r) }));
+  const viewsL = views.slice(0, 120).map(v => ({ id:v.id, kind:v.kind, name:v.name, ...(v.kind === 'sheet' ? { num:v.num, size:v.size, views:v.vps.map(p => (views.find(x => x.id === p.view) || {}).name), pool:!!v.pool } : { stage:v.phase || 'all', ...(v.lv ? { level:v.lv } : {}), ...(v.tpl ? { tpl:(TPLS.find(t => t.id === v.tpl) || {}).name } : {}), ...(v.folder ? { folder:((STD.folders || []).find(f => f.id === v.folder) || {}).n } : {}) }) }));
+  const famsL = items.filter(i => i.type === 'fam').slice(-60).map(f => ({ id:f.id, letter:f.tag, name:(famById(f.f) || {}).name, x:r2(f.x), z:r2(f.z), rot:f.rot || 0, bo:f.bo || 0 }));
+  return JSON.stringify({ currentView:cv0 ? { id:cv0.id, kind:cv0.kind, name:cv0.name, stage:S.phase } : null, views:viewsL, folders:(STD.folders || []).map(f => f.n), templates:TPLS.map(t => t.name),
+    levels:levels.map(l => ({ id:l.id, name:l.name, elev:l.elev, ...(l.pin ? { pin:true } : {}) })), stages:PHASES.map(p => ({ k:p.k, name:p.n })), rooms:roomsL, furniture:famsL,
+    furnitureLibrary:Object.entries(FURN_LIB).map(([k, L]) => ({ k, name:L.n, size:[L.p.w, L.p.d, L.p.h] })), families:fams.slice(0, 60).map(f => f.name), materials:Object.entries(MATS).slice(0, 80).map(([k, m]) => k + ':' + m.n),
+    walls, openings:ops, boxes, grids:gridsL, start:voice.pen ? { x:r2(voice.pen.x), z:r2(voice.pen.z) } : null, selected:[...sel],
     wallTypes:types.map(t => ({ id:t.id, name:t.name, thickness:typeT(t) })), defaults:{ wallType:S.wallType, wallH:S.wallH, doorW:S.doorW, doorH:S.doorH, winW:S.winW, winH:S.winH, winSill:S.winSill } });
 }
 const ACTIONS_DOC = `Все размеры в метрах. Ось X направлена вправо (восток), ось Z на плане вниз (юг); север — это минус Z.
@@ -11247,11 +11553,29 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 {"a":"roof","kind":"gable","slope":30,"over":0.5} — крыша по стенам ("gable","hip","shed","flat"); {"a":"column","g1":"1","g2":"А","w":0.4,"d":0.4} — колонна на пересечении осей (без осей — в точке пера);
 {"a":"stair","len":3,"angle":90,"w":1,"h":2.7}; {"a":"autorooms"} — помещения во всех контурах; {"a":"roomname","num":"1","name":"Кухня"};
 {"a":"section","grid":"2"} — разрез по оси или через середину; {"a":"ielev","room":"1"} — развёртки помещения; {"a":"box3d","on":true} — границы 3D-вида.
-{"a":"level","elev":6} — новый уровень (отметка в метрах) со своим планом; {"a":"join","wall":"@А","on":false,"end":0} — отсоединить (on:false) или присоединить (on:true) начало (0), конец (1), без end — оба конца.`;
+{"a":"level","elev":6} — новый уровень (отметка в метрах) со своим планом; {"a":"join","wall":"@А","on":false,"end":0} — отсоединить (on:false) или присоединить (on:true) начало (0), конец (1), без end — оба конца.
+ЛЮБАЯ ФУНКЦИЯ ПРОГРАММЫ:
+{"a":"press","id":"rbRender"} — нажать кнопку ленты, нижней строки или меню «Файл» по ключу из списка «Кнопки» ниже (tool:… — инструмент, act:… — пункт меню «Файл», view:… — вид, std:… — окно стандартов). Используй, когда нет отдельного действия.
+{"a":"tool","t":"wall"} — включить инструмент (дальше пользователь щёлкает сам).
+Элементы: "@Д" (стена Д), "@door:Б", "@window:А", "@box:В", "@floor:А", "@ceiling:А", "@roof:А", "@column:А", "@stair:А", число — id элемента, "room:3" — помещение 3, "selected" — выбранные.
+{"a":"selectq","type":["window"],"wall":"@Д","room":"2","phase":"montazh","letter":"А","dem":true} — выбрать по описанию (любые поля по желанию); {"a":"deselect"}.
+{"a":"prop","el":"selected","set":{"h":3,"bo":0.4}} — изменить свойства: h высота, t толщина, w ширина, d глубина, sill подоконник, bo смещение/высота от уровня (мебель ±), to смещение сверху, rot поворот°, m материал, wt тип стены, name, num, tag буква, ph стадия создания, dem стадия сноса (\"\" — не сносить), dph стадия показа размера (\"all\" — во всех), loc линия привязки, nrb не граница помещения, mir зеркально, pin замок, flip/hand открывание двери, op проём без полотна, gl балконная остеклённая дверь, hc высота потолка помещения, left полка отметки влево.
+{"a":"move","dx":1,"dz":0,"copy":false} — сдвинуть (или скопировать) выбранное; {"a":"rotsel","deg":45,"copy":false}; {"a":"mirror","axis":"x","copy":true} — зеркально (x — слева-направо, z — сверху-вниз); {"a":"hide","on":true} скрыть выбранное в виде (on:false — показать), {"a":"hide","mode":"temp"|"isolate"|"reset"}.
+Виды: {"a":"openview","name":"План демонтажа"} (имя, часть имени или номер листа); {"a":"newview","kind":"plan","name":"План монтажа","phase":"montazh","lv":"Этаж 1","folder":"04_План монтажа"} — kind: plan, d3, axo, sheet, detail, section, ielev, camera, elev:S/N/E/W; {"a":"renameview","view":"…","name":"…"}; {"a":"delview","view":"…"}; {"a":"viewset","view":"current","phase":"demontazh","tpl":"Обмерный план","scale":50,"folder":"03_План демонтажа","lv":"Этаж 1"}; {"a":"closetab","name":"…"} — закрыть вкладку вида.
+Разделы диспетчера: {"a":"folder","name":"02_Обмерный план","views":["Обмерный план"]} — создать раздел и положить в него виды; {"a":"delfolder","name":"…"}.
+Видимость/графика вида: {"a":"vg","view":"current","cat":"door","vis":false,"half":false} — категории: wall, door, window, floor, ceiling, roof, column, stair, box, room, fam, grid, dim, line, text, spot, ceilh (высоты потолков), winh (высоты окон).
+Мебель: {"a":"furn","k":"<ключ или часть названия из списка мебели>","room":"1","x":0,"z":0,"rot":90,"w":3.2,"d":1.6,"h":0.68,"bo":0} — поставить модель (в центр помещения или в точку; в стены не встанет); w/d/h меняют размер модели для всех её экземпляров; {"a":"famplace","name":"Стол","x":0,"z":0}.
+Помещения: у каждой стадии свои помещения и нумерация (обмер, монтаж); {"a":"roomset","num":"1","name":"Кухня","newnum":"101","hc":2.7,"ph":"montazh"}.
+Уровни: {"a":"levelset","lv":"Этаж 2","elev":3.3,"rename":"2 этаж","pin":true}. Высотная отметка на плане: {"a":"spot","room":"1"} или {"a":"spot","x":0,"z":0}.
+Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetset","sheet":"А101","num":"А102","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений.
+Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
+Если просят то, что делается мышью (нарисовать произвольный контур, щёлкнуть по месту), включи нужный инструмент действием tool и в reply объясни, куда щёлкнуть.`;
 function commandPrompt(text){
   return `Ты переводишь команду пользователя для программы архитектурного черчения «Kot project» в список действий JSON.
 ${ACTIONS_DOC}
 Текущий проект: ${modelSummary()}
+Кнопки (ключ — подпись) для действия press:
+${uiCatalog()}
 Команда пользователя: «${text}»
 Ответь только JSON вида {"actions":[...],"reply":"одно-два коротких предложения по-русски о том, что сделано"}. Если это вопрос, а не команда, верни пустой actions и ответь в reply. Если команда непонятна, верни пустой actions и коротко спроси, что сделать.`;
 }
@@ -11287,13 +11611,13 @@ function speak(res){
 }
 function greet(){
   msgsEl.replaceChildren();
-  addMsg('app', ['Пишите или говорите команды: «оси 4 по 6000 на 3 по 4500», «комната 5 на 4, дверь в южной стене, два окна в северной», «проставь размеры», «покажи фасад». Можно прикрепить фото плана, эскиза или фасада — модель построится по нему.']);
+  addMsg('app', ['Пишите или говорите команды: «оси 4 по 6000 на 3 по 4500», «комната 5 на 4, дверь в южной стене, два окна в северной», «проставь размеры», «покажи фасад». Можно прикрепить фото плана, эскиза или фасада — модель построится по нему (нужен интернет). Без интернета понимаю простые команды — скажите «что умеешь».']);
 }
 async function runCommand(raw){
   const text = (raw || '').trim(); clearTimeout(autoT);
   if (busy || (!text && !attached)) return;
   cmdEl.value = '';
-  if (attached) return runPhoto(text);
+  if (attached){ addMsg('app', [{ ok:true, t:'Фото прикреплено. Чтобы построить по нему модель, нажмите «✦ Claude» (нужен интернет).' }]); cmdEl.value = text; return; }
   addMsg('user', [text]);
   const nt = normalize(text);
   if (pendingUndo){
@@ -11307,13 +11631,24 @@ async function runCommand(raw){
   const hist = parsed.find(p => p && (p.a === 'undo' || p.a === 'redo' || p.a === 'history'));
   if (hist){ askUndo(hist.a, hist.n || 1); return; }
   if (parsed.length && parsed.every(p => p && !p.err)){ const res = execAll(parsed, { label:text }); addMsg('app', res.length ? res : [{ ok:true, t:'Готово' }]); speak(res); return; }
-  if (!(await aiMode())){
+  {
     const res = execAll(parsed.filter(p => p && !p.err), { label:text });
     const frags = splitFrags(normalize(text));
     parsed.forEach((p, i) => { if (!p) res.push({ ok:false, t:'Не понял: «' + frags[i] + '»' }); else if (p.err) res.push({ ok:false, t:p.err }); });
-    res.push({ ok:false, t:'Сложные фразы понимает Claude — включите его шестерёнкой вверху чата.' });
-    addMsg('app', res); speak(res); return;
+    res.push({ ok:false, t:'Эту фразу я не понял сам. Примеры команд — «что умеешь». Или спросите Claude (нужен интернет):' });
+    const m = addMsg('app', res); speak(res.slice(0, -1));
+    const b = document.createElement('button'); b.className = 'btn sm'; b.textContent = '✦ Спросить Claude'; b.onclick = () => { b.remove(); askClaude(text, true); }; const row = document.createElement('div'); row.className = 'row'; row.style.marginTop = '6px'; row.append(b); m.append(row);
+    return;
   }
+}
+// Claude is asked only by the button «✦ Claude» (or «Спросить Claude» under a phrase the program did not understand)
+async function askClaude(raw, shown){
+  const text = (raw || '').trim(); if (busy) return;
+  if (attached){ cmdEl.value = ''; return runPhoto(text); }
+  if (!text){ toast('Напишите или скажите, что сделать, и нажмите «✦ Claude»'); return; }
+  if (navigator.onLine === false){ addMsg('app', [{ ok:false, t:'Нет интернета: Claude недоступен. Простые команды выполняю сам — нажмите «Отправить».' }]); return; }
+  if (!(await aiMode())){ addMsg('app', [{ ok:false, t:'Claude не подключён: нажмите шестерёнку вверху чата и введите ключ API.' }]); openAI(); return; }
+  if (!shown){ cmdEl.value = ''; addMsg('user', ['✦ ' + text]); }
   await withAI(async signal => {
     const r = await askAI(commandPrompt(text), null, signal);
     let acts = Array.isArray(r && r.actions) ? r.actions.slice(0, 60) : [];
@@ -11362,7 +11697,7 @@ function resolvePending(ok, silent){
 async function runPhoto(text){
   const ph = attached; clearAttach();
   addMsg('user', text ? [text] : ['Построй модель по фото'], ph.url);
-  if (!(await aiMode())){ const res = [{ ok:false, t:'Чтобы строить по фото, нужен Claude: нажмите шестерёнку вверху чата.' }]; addMsg('app', res); openAI(); return; }
+  if (!(await aiMode()) || navigator.onLine === false){ const res = [{ ok:false, t:'Чтобы строить по фото, нужен Claude: нажмите шестерёнку вверху чата.' }]; addMsg('app', res); openAI(); return; }
   await withAI(async signal => {
     const r = await askAI(photoPrompt(text), ph.blob, signal);
     const acts = Array.isArray(r && r.actions) ? r.actions.slice(0, 200) : [];
@@ -11400,6 +11735,7 @@ cmdEl.addEventListener('paste', e => { const f = [...(e.clipboardData?.files || 
 cmdEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); runCommand(cmdEl.value); } });
 cmdEl.addEventListener('input', () => { clearTimeout(autoT); if ($('#cAuto').checked && cmdEl.value.trim() && !attached) autoT = setTimeout(() => runCommand(cmdEl.value), 2000); });
 $('#sendBtn').onclick = () => runCommand(cmdEl.value);
+$('#claudeBtn').onclick = () => askClaude(cmdEl.value);
 $('#chatClear').onclick = greet;
 document.querySelectorAll('#examples button').forEach(b => b.onclick = () => runCommand(b.textContent));
 
@@ -11407,8 +11743,83 @@ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null, listening = false;
 function micHelp(){ addMsg('app', ['Браузер не дал программе микрофон. На компьютере нажмите Win+H и говорите в поле чата, на планшете — значок микрофона на клавиатуре. Команда выполнится после паузы.']); cmdEl.focus(); }
 function setMic(on){ listening = on; $('#micBtn').setAttribute('aria-pressed', on); $('#micLabel').textContent = on ? 'Слушаю… стоп' : 'Говорить'; }
+/* ---------- speech recognition on this device, without the internet: Whisper (base) through transformers.js.
+   The model (~80 MB) is downloaded once («Файл → Скачать всё для работы без интернета» or at the first use of the microphone)
+   and kept in the browser (Cache «transformers-cache»); the libraries stay in the offline cache of the app (sw.js, LIB). ---------- */
+const TFJS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/dist/transformers.js';
+const ASR = { p:null, on:false, stream:null, ctx:null, busy:false };
+const asrReady = () => lsGet('kot.asr.ok') === '1';
+function asrLoad(onProg){
+  if (ASR.p) return ASR.p;
+  ASR.p = (async () => {
+    const T = await import(TFJS_URL);
+    const gpu = !!navigator.gpu && !TABLET;
+    const files = {};
+    const pipe = await T.pipeline('automatic-speech-recognition', 'Xenova/whisper-base', {
+      device:gpu ? 'webgpu' : 'wasm', dtype:gpu ? { encoder_model:'fp32', decoder_model_merged:'q4' } : { encoder_model:'q8', decoder_model_merged:'q8' },
+      progress_callback:p => { if (p.status === 'progress' && p.file){ files[p.file] = [p.loaded || 0, p.total || 0]; const L = Object.values(files).reduce((s, f) => s + f[0], 0), Tt = Object.values(files).reduce((s, f) => s + f[1], 0); if (onProg) onProg(Tt ? L / Tt : 0, L); } }
+    }).catch(async e => { if (!gpu) throw e; return T.pipeline('automatic-speech-recognition', 'Xenova/whisper-base', { device:'wasm', dtype:{ encoder_model:'q8', decoder_model_merged:'q8' } }); });
+    lsSet('kot.asr.ok', '1');
+    return pipe;
+  })().catch(e => { ASR.p = null; throw e; });
+  return ASR.p;
+}
+// listen phrase by phrase: a phrase ends after ~1 s of silence; each phrase is recognised and run as a command
+async function asrStart(){
+  if (!asrReady() && navigator.onLine === false){ addMsg('app', [{ ok:false, t:'Голос без интернета ещё не скачан. Подключитесь к интернету и выберите «Файл → Скачать всё для работы без интернета».' }]); return; }
+  let msg = null;
+  if (!asrReady()){ msg = addMsg('app', ['Скачиваю распознавание речи для работы без интернета (один раз, около 80 МБ)…']); }
+  let pipe; try { pipe = await asrLoad(f => { if (msg) msg.lastChild.textContent = `Скачиваю распознавание речи: ${Math.round(f * 100)}%`; }); } catch (e){ addMsg('app', [{ ok:false, t:'Не удалось загрузить распознавание речи: ' + (e.message || e) }]); return; }
+  if (msg) msg.lastChild.textContent = 'Распознавание речи готово: дальше микрофон работает без интернета.';
+  try { ASR.stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } }); } catch (e){ micHelp(); return; }
+  const ctx = ASR.ctx = new AudioContext(), src = ctx.createMediaStreamSource(ASR.stream), pr = ctx.createScriptProcessor(4096, 1, 1), sr = ctx.sampleRate;
+  let chunks = [], speech = false, quiet = 0, noise = 0.004, n = 0;
+  const flush = async () => {
+    const len = chunks.reduce((s, c) => s + c.length, 0); const data = new Float32Array(len); let o = 0; for (const c of chunks) { data.set(c, o); o += c.length; } chunks = []; speech = false; quiet = 0;
+    if (len < sr * 0.35) return;
+    const oc = new OfflineAudioContext(1, Math.ceil(len * 16000 / sr), 16000), b = oc.createBuffer(1, len, sr); b.copyToChannel(data, 0); const s = oc.createBufferSource(); s.buffer = b; s.connect(oc.destination); s.start(); const r16 = (await oc.startRendering()).getChannelData(0);
+    $('#micLabel').textContent = 'Распознаю…';
+    try { const out = await pipe(r16, { language:'russian', task:'transcribe' }); const txt = String(out.text || '').replace(/^[\s.,!?…-]+|[\s.!?…]+$/g, '').trim();
+      if (txt && !/^(продолжение следует|субтитры|спасибо за просмотр)/i.test(txt)) runCommand(txt); }
+    catch (e){ addMsg('app', [{ ok:false, t:'Не распознал: ' + (e.message || e) }]); }
+    if (ASR.on) $('#micLabel').textContent = 'Слушаю… стоп';
+  };
+  pr.onaudioprocess = ev => {
+    if (!ASR.on) return; const x = ev.inputBuffer.getChannelData(0); let e2 = 0; for (let i = 0; i < x.length; i++) e2 += x[i] * x[i]; const rms = Math.sqrt(e2 / x.length);
+    if (n++ < 6){ noise = Math.max(noise, rms); return; } // the first ~0.5 s: the level of the room
+    const loud = rms > Math.max(0.012, noise * 2.6);
+    if (loud){ speech = true; quiet = 0; } else if (speech) quiet += x.length / sr; else noise = noise * 0.98 + rms * 0.02;
+    if (speech || loud) chunks.push(new Float32Array(x));
+    const dur = chunks.reduce((s, c) => s + c.length, 0) / sr;
+    if (speech && (quiet > 0.9 || dur > 12) && !ASR.busy){ ASR.busy = true; flush().finally(() => { ASR.busy = false; }); }
+  };
+  src.connect(pr); pr.connect(ctx.destination);
+  ASR.on = true; setMic(true);
+}
+function asrStop(){ ASR.on = false; try { ASR.stream && ASR.stream.getTracks().forEach(t => t.stop()); } catch (e){} try { ASR.ctx && ASR.ctx.close(); } catch (e){} ASR.stream = ASR.ctx = null; setMic(false); }
+// «Скачать всё для работы без интернета»: loads once every library and data file the program may need, so nothing is fetched later
+async function openOfflinePack(){
+  const d = mkModal('offDlg', 'Работа без интернета', `<p style="margin:0 0 8px">Программа уже открывается без интернета. Здесь можно заранее скачать всё остальное, что она подгружает только при первом использовании.</p><div id="offList" style="display:grid;gap:4px;margin-bottom:10px"></div><div class="row" style="justify-content:flex-end;gap:6px"><button class="btn primary" id="offGo">Скачать всё</button><button class="btn" id="offNo">Закрыть</button></div>`, 560);
+  const steps = [
+    ['Загрузчики моделей и геометрия', async () => { await Promise.all(['loaders/OBJLoader.js', 'loaders/MTLLoader.js', 'loaders/GLTFLoader.js', 'loaders/DRACOLoader.js', 'libs/meshopt_decoder.module.js', 'geometries/RoundedBoxGeometry.js', 'loaders/EXRLoader.js', 'loaders/RGBELoader.js'].map(f => import('three/addons/' + f))); await Promise.all(['draco_decoder.js', 'draco_decoder.wasm', 'draco_wasm_wrapper.js'].map(f => fetch('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/' + f).catch(() => null))); }],
+    ['Визуализация: быстрый рендер и трассировка лучей', async () => { await Promise.all(['postprocessing/EffectComposer.js', 'postprocessing/RenderPass.js', 'postprocessing/GTAOPass.js', 'postprocessing/OutputPass.js', 'environments/RoomEnvironment.js'].map(f => import('three/addons/' + f))); await import('three-gpu-pathtracer'); }],
+    ['Шумоподавление рендера (Intel OIDN)', async () => { await import('https://cdn.jsdelivr.net/npm/oidn-web@0.5.0/dist/oidn.js'); await fetch(`https://cdn.jsdelivr.net/gh/pissang/oidn-web@0.5.0/weights/${TABLET ? 'rt_hdr_alb_nrm_small' : 'rt_hdr_alb_nrm'}.tza`); }],
+    ['Голос без интернета (распознавание речи, ~80 МБ)', async set => { await asrLoad(f => set(Math.round(f * 100) + '%')); }]
+  ];
+  const L = d.querySelector('#offList'); L.innerHTML = steps.map((s, i) => `<div class="row" style="gap:8px;align-items:center"><span id="offS${i}" style="width:72px;color:var(--muted);font-size:12px">${i === 3 && asrReady() ? 'готово' : '—'}</span><span>${esc(s[0])}</span></div>`).join('');
+  d.querySelector('#offNo').onclick = () => { d.hidden = true; };
+  d.querySelector('#offGo').onclick = async () => {
+    if (navigator.onLine === false){ toast('Нужен интернет, чтобы скачать'); return; }
+    const go = d.querySelector('#offGo'); go.disabled = true;
+    for (const [i, s] of steps.entries()){ const el = d.querySelector('#offS' + i); el.textContent = 'качаю…'; try { await s[1](t => el.textContent = t); el.textContent = '✓ готово'; } catch (e){ el.textContent = '✗ ошибка'; console.warn(e); } }
+    go.disabled = false; lsSet('kot.offline', '1'); toast('Готово: всё нужное сохранено на этом устройстве');
+  };
+  d.hidden = false;
+}
 function toggleMic(){
-  if (!SR){ micHelp(); return; }
+  // without the internet (or when the voice model is already on this device) — recognition on the device
+  if (ASR.on){ asrStop(); return; }
+  if (asrReady() || navigator.onLine === false || !SR || lsGet('kot.asr.local') === '1'){ asrStart(); return; }
   if (listening){ try { rec.stop(); } catch(e){} return; }
   rec = new SR(); rec.lang = 'ru-RU'; rec.interimResults = true; rec.continuous = true;
   rec.onresult = e => {
@@ -11416,7 +11827,7 @@ function toggleMic(){
     for (let i = e.resultIndex; i < e.results.length; i++){ const r = e.results[i]; if (r.isFinal) fin += r[0].transcript; else interim += r[0].transcript; }
     if (fin.trim()) runCommand(fin.trim()); else cmdEl.value = interim;
   };
-  rec.onerror = e => { if (['not-allowed', 'service-not-allowed', 'audio-capture', 'network'].includes(e.error)) micHelp(); };
+  rec.onerror = e => { if (e.error === 'network'){ setMic(false); asrStart(); return; } if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) micHelp(); };
   rec.onend = () => setMic(false);
   try { rec.start(); setMic(true); } catch(e){ micHelp(); }
 }

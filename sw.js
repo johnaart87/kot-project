@@ -1,9 +1,16 @@
-// Kot project offline cache. Bump VERSION when publishing a new build.
-const VERSION = 'kot-20261023-1035';
+// Kot project offline cache. VERSION is set by build.ps1 for every build.
+// Two caches: VERSION — the app itself (replaced with every new build); LIB — libraries, fonts and big data files from
+// other sites (three.js, path tracer, denoiser, speech model runtime…). Their addresses carry exact versions, so LIB is kept
+// between builds: the program keeps working without the internet after an update.
+const VERSION = 'kot-20261023-1130';
+const LIB = 'kot-lib-1';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 const CDN = [
   'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js',
   'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js',
+  'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/LineSegments2.js',
+  'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/LineSegmentsGeometry.js',
+  'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/LineMaterial.js',
   'https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap'
 ];
 const CACHEABLE = /^https:\/\/(cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;
@@ -12,14 +19,15 @@ self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await caches.open(VERSION);
     await c.addAll(SHELL);
-    await Promise.all(CDN.map(u => fetch(u, { mode:'cors' }).then(r => r.ok && c.put(u, r)).catch(() => {})));
+    const l = await caches.open(LIB);
+    await Promise.all(CDN.map(async u => { if (await l.match(u)) return; try { const r = await fetch(u, { mode:'cors' }); if (r.ok) await l.put(u, r); } catch (err){} }));
     await self.skipWaiting();
   })());
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k !== VERSION) await caches.delete(k);
+    for (const k of await caches.keys()) if (k !== VERSION && k !== LIB && k.startsWith('kot-')) await caches.delete(k);
     await self.clients.claim();
   })());
 });
@@ -37,10 +45,11 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (url.origin === location.origin || CACHEABLE.test(req.url)){
+    const own = url.origin === location.origin;
     e.respondWith((async () => {
-      const hit = await caches.match(req);
+      const hit = await caches.match(req, { ignoreVary:true });
       if (hit) return hit;
-      try { const r = await fetch(req); if (r.ok || r.type === 'opaque'){ const c = await caches.open(VERSION); c.put(req, r.clone()); } return r; }
+      try { const r = await fetch(req); if (r.ok || r.type === 'opaque'){ const c = await caches.open(own ? VERSION : LIB); c.put(req, r.clone()); } return r; }
       catch (err){ return Response.error(); }
     })());
   }
