@@ -1977,6 +1977,20 @@ function opsOf(w, L){
     return { o, a:pos - ww / 2, b:pos + ww / 2, pos, bot, top };
   }).sort((p, q) => p.a - q.a);
 }
+/* «Балконный блок» (окно с балконной дверью в одном проёме): a window with it.bd = { w — door width (m), side 'l'|'r' — the door
+   at the start or the end of the opening along the wall }. The door goes down to the floor, the window keeps its sill, one top.
+   opsOf gives the whole block (a…b); the wall and the symbols use the two parts from balcParts. */
+const isBalc = o => !!(o && o.type === 'window' && o.bd && o.bd.w > 0);
+function balcSplit(op){ const o = op.o, dw = clamp(o.bd.w, 0.3, Math.max(0.3, op.b - op.a - 0.2)); return o.bd.side === 'l' ? op.a + dw : op.b - dw; }
+function balcParts(op){
+  const x = balcSplit(op), left = op.o.bd.side === 'l';
+  const win = { ...op, a:left ? x : op.a, b:left ? op.b : x, inner:left ? 'a' : 'b' };
+  const door = { ...op, a:left ? op.a : x, b:left ? x : op.b, bot:0, sill:op.bot, inner:left ? 'b' : 'a', door:true };
+  win.pos = (win.a + win.b) / 2; door.pos = (door.a + door.b) / 2;
+  return [win, door];
+}
+const opPieces = op => isBalc(op.o) ? balcParts(op) : [op];
+const opArea = op => opPieces(op).reduce((s, p) => s + (p.b - p.a) * Math.max(0, p.top - p.bot), 0);
 function xLines(p, d, q, e){
   const den = d.x * e.z - d.z * e.x; if (Math.abs(den) < 1e-9) return null;
   const t = ((q.x - p.x) * e.z - (q.z - p.z) * e.x) / den;
@@ -2100,7 +2114,7 @@ function buildWall(w, prevMat, prevEdge){
   const em = prevEdge || (s ? M.edgeSel : st === 'demo' ? M.demoEdge : st === 'exist' ? M.existEdge : M.edge);
   const phMat = st === 'demo' ? (plan ? M.pick : M.demo3D) : st === 'exist' ? (plan ? M.existFlat : (S.style === 'lines' ? M.lines : M.exist3D)) : null;
   // openings: doors and windows, plus the gaps cut by boxes and columns («Вырезать / Присоединить геометрию»)
-  const ops0 = opsOf(w, f.L), ops = [...ops0, ...wallCutOps(w, f)].sort((p, q) => p.a - q.a), H = w.h, [c0, c1] = wallCuts(w);
+  const ops0 = opsOf(w, f.L), ops = [...ops0.flatMap(opPieces), ...wallCutOps(w, f)].sort((p, q) => p.a - q.a), H = w.h, [c0, c1] = wallCuts(w);
   const parts = w.id && !(plan && S.detail === 'coarse') ? partsOf(w.id) : [];
   const layers = plan && S.detail === 'coarse' ? [{ m:'generic', s0:-w.t / 2, s1:w.t / 2 }] : wallLayers(w);
   const T0 = Math.min(...layers.map(l => l.s0)), T1 = Math.max(...layers.map(l => l.s1));
@@ -2151,11 +2165,15 @@ function buildWall(w, prevMat, prevEdge){
     }
     const bounds = [...new Set(layers.flatMap(l => [l.s0, l.s1]))];
     for (const o of ops){
+      // a part of a balcony block: its inner side (window ↔ door) has no jamb; the door's inner side is the side of the wall under the sill
+      const jamb = (x, side) => o.inner !== side ? [o.bot, o.top] : o.door ? [0, o.sill] : null;
       for (const z of bounds){
         if (o.bot > 1e-4) seg(P(o.a, o.bot, z), P(o.b, o.bot, z));
-        seg(P(o.b, o.bot, z), P(o.b, o.top, z)); seg(P(o.b, o.top, z), P(o.a, o.top, z)); seg(P(o.a, o.top, z), P(o.a, o.bot, z));
+        const jb = jamb(o.b, 'b'), ja = jamb(o.a, 'a');
+        if (jb) seg(P(o.b, jb[0], z), P(o.b, jb[1], z)); seg(P(o.b, o.top, z), P(o.a, o.top, z)); if (ja) seg(P(o.a, ja[0], z), P(o.a, ja[1], z));
       }
-      for (const [x, y] of [[o.a, o.bot], [o.b, o.bot], [o.a, o.top], [o.b, o.top]]) seg(P(x, y, T0), P(x, y, T1));
+      for (const [x, y, sd] of [[o.a, o.bot, 'a'], [o.b, o.bot, 'b'], [o.a, o.top, 'a'], [o.b, o.top, 'b']]) if (!(o.inner === sd && y === o.top)) seg(P(x, y, T0), P(x, y, T1));
+      if (o.door && o.inner) seg(P(o[o.inner], o.sill, T0), P(o[o.inner], o.sill, T1));
     }
   }
   if (plan && !prevEdge && w.id){
@@ -2163,15 +2181,15 @@ function buildWall(w, prevMat, prevEdge){
     const a = fatLines(segs, sty, col); if (a){ a.userData.cut = true; g.add(a); }
     const b = segsI.length && fatLines(segsI, st === 'demo' || st === 'exist' ? sty : 'layer', col); if (b){ b.userData.cut = true; g.add(b); }
   } else { if (segs.length) g.add(lineOf(segs, em, true)); if (segsI.length) g.add(lineOf(segsI, em, true)); }
-  if (plan) for (const o of ops0) planSymbol(g, o, w.t);
-  else for (const o of ops0){
+  if (plan) for (const o of ops0.flatMap(opPieces)) planSymbol(g, o, w.t);
+  else for (const o of ops0.flatMap(opPieces)){
     const os = isSel(o.o.id), ost = S.render ? 'normal' : visState(o.o), oe = os ? M.edgeSel : ost === 'demo' ? M.demoEdge : ost === 'exist' ? M.existEdge : M.edge;
     const pm = os ? null : ost === 'demo' ? M.demo3D : ost === 'exist' ? M.exist3D : null;
     const om = pm || (!os && o.o.m && MATS[o.o.m] && S.style !== 'lines' ? layerMat(o.o.m) : null);
-    if (o.o.type === 'window') g.add(part(new THREE.BoxGeometry(o.b - o.a, o.top - o.bot, 0.02), om || matFor('glass', os), oe, o.o.id, o.pos, (o.bot + o.top) / 2, 0));
+    if (o.o.type === 'window' && !o.door) g.add(part(new THREE.BoxGeometry(o.b - o.a, o.top - o.bot, 0.02), om || matFor('glass', os), oe, o.o.id, o.pos, (o.bot + o.top) / 2, 0));
     else if (o.o.op) g.add(part(new THREE.BoxGeometry(o.b - o.a, o.top, w.t), os ? M.selShade : M.pick, null, o.o.id, o.pos, o.top / 2, 0)); // проём: an empty opening, picked by its volume
-    else if (o.o.gl){ // balcony door: a frame with a glazed upper part and a solid lower panel
-      const wd = o.b - o.a - 0.01, H = o.top - 0.005, f = 0.07, dp = 0.07, x0 = o.pos - wd / 2, fm = om || matFor('door', os), pn = Math.min(0.8, H * 0.4);
+    else if (o.o.gl || o.door){ // balcony door: a frame with a glazed upper part and a solid lower panel (also the door of a balcony block)
+      const wd = o.b - o.a - 0.01, H = o.top - 0.005, f = 0.07, dp = 0.07, x0 = o.pos - wd / 2, fm = o.door ? matFor('door', os) : om || matFor('door', os), pn = Math.min(0.8, H * 0.4);
       const P = (w2, h2, d2, x, y, m) => g.add(part(new THREE.BoxGeometry(w2, h2, d2), m, oe, o.o.id, x, y, 0));
       P(f, H, dp, x0 + f / 2, H / 2, fm); P(f, H, dp, x0 + wd - f / 2, H / 2, fm); P(wd - 2 * f, f, dp, o.pos, H - f / 2, fm); P(wd - 2 * f, f * 1.4, dp, o.pos, f * 0.7, fm);
       P(wd - 2 * f, f, dp, o.pos, pn, fm); P(wd - 2 * f, pn - f * 1.4 - f / 2, 0.03, o.pos, (f * 1.4 + pn - f / 2) / 2, fm);
@@ -2183,7 +2201,7 @@ function buildWall(w, prevMat, prevEdge){
 }
 function planSymbol(g, o, t){
   const ost = visState(o.o), s = isSel(o.o.id), em = s ? M.edgeSel : ost === 'demo' ? M.demoEdge : ost === 'exist' ? M.existEdge : M.edge, wd = o.b - o.a;
-  if (o.o.type === 'window'){
+  if (o.o.type === 'window' && !o.door){
     g.add(part(new THREE.BoxGeometry(wd, 0.4, t), s ? M.selFlat : M.glassFlat, em, o.o.id, o.pos, 0.2, 0));
     const y = 0.42;
     g.add(lineOf([new V3(o.a, y, -t / 6), new V3(o.b, y, -t / 6), new V3(o.a, y, t / 6), new V3(o.b, y, t / 6)], em, true));
@@ -2192,7 +2210,7 @@ function planSymbol(g, o, t){
     if (o.o.op) return; // проём: only the jambs of the wall, no leaf and no swing
     const side = o.o.flip ? -1 : 1, hx = o.o.hand ? o.b : o.a, ox = o.o.hand ? o.a : o.b, sx = Math.sign(ox - hx), y = 0.06, z0 = side * t / 2;
     g.add(lineOf([new V3(hx, y, z0), new V3(hx, y, z0 + side * wd)], em));
-    if (o.o.gl) g.add(lineOf([new V3(hx + sx * 0.05, y, z0), new V3(hx + sx * 0.05, y, z0 + side * wd), new V3(hx, y, z0 + side * wd)], em)); // glazed leaf: a frame of two lines
+    if (o.o.gl || o.door) g.add(lineOf([new V3(hx + sx * 0.05, y, z0), new V3(hx + sx * 0.05, y, z0 + side * wd), new V3(hx, y, z0 + side * wd)], em)); // glazed leaf: a frame of two lines
     const arc = [];
     for (let k = 0; k <= 20; k++){ const a = k / 20 * Math.PI / 2; arc.push(new V3(hx + sx * wd * Math.sin(a), y, z0 + side * wd * Math.cos(a))); }
     g.add(lineOf(arc, em));
@@ -3404,7 +3422,9 @@ function refPoint(r){
   if (r.k === 'o' && isOp(it)){
     const w = byId(it.wall); if (!w) return null;
     const f = wallFrame(w), op = opsOf(w, f.L).find(o => o.o.id === it.id); if (!op) return null;
-    const p = f.p1.clone().addScaledVector(f.dir, r.edge ? op.b : op.a).addScaledVector(f.nrm, (r.side || 0) * w.t / 2); return { x:p.x, z:p.z };
+    // edge 2 — the border of the window and the door of a balcony block
+    const x = r.edge === 2 ? (isBalc(it) ? balcSplit(op) : (op.a + op.b) / 2) : r.edge ? op.b : op.a;
+    const p = f.p1.clone().addScaledVector(f.dir, x).addScaledVector(f.nrm, (r.side || 0) * w.t / 2); return { x:p.x, z:p.z };
   }
   if (r.k === 'b' && it.type === 'box') return { x:it.x + (r.cx ? it.w : 0), z:it.z + (r.cz ? it.d : 0) };
   if (r.k === 'g' && it.type === 'grid'){ const f = wallFrame(it), v = r.s != null ? r.s : 0.5; const p = f.p1.clone().addScaledVector(f.dir, v * f.L); return { x:p.x, z:p.z }; }
@@ -4397,7 +4417,7 @@ function surveyRefs(w, side, noOps){
     });
   }
   // doors, windows and openings: the chain also gets their edges (piers and the width of each opening)
-  if (!noOps) for (const op of opsOf(w, f.L)) mids.push({ s:op.a, r:[{ k:'o', id:op.o.id, edge:0, side }] }, { s:op.b, r:[{ k:'o', id:op.o.id, edge:1, side }] });
+  if (!noOps) for (const op of opsOf(w, f.L)){ mids.push({ s:op.a, r:[{ k:'o', id:op.o.id, edge:0, side }] }, { s:op.b, r:[{ k:'o', id:op.o.id, edge:1, side }] }); if (isBalc(op.o)) mids.push({ s:balcSplit(op), r:[{ k:'o', id:op.o.id, edge:2, side }] }); }
   mids.sort((a, b) => a.s - b.s).forEach(m => refs.push(...m.r));
   refs.push({ k:'w', id:w.id, end:1, side });
   return refs;
@@ -4975,7 +4995,7 @@ function freeOpPos(wall, pos, w, skipId, joints = wallJoints(wall)){
   const best = c.map(q => r4(clamp(q, lo, hi))).filter(ok).sort((x, y) => Math.abs(x - p0) - Math.abs(y - p0))[0];
   return best == null ? null : best;
 }
-function opSpec(){ return S.tool === 'door' ? { type:'door', w:S.doorW, h:S.doorH, sill:0, op:S.doorOp === '1' || S.doorOp === true, gl:S.doorOp === 'gl' } : { type:'window', w:S.winW, h:S.winH, sill:S.winSill }; }
+function opSpec(){ return S.tool === 'door' ? { type:'door', w:S.doorW, h:S.doorH, sill:0, op:S.doorOp === '1' || S.doorOp === true, gl:S.doorOp === 'gl' } : { type:'window', w:S.winW, h:S.winH, sill:S.winSill, ...(S.winBd ? { bd:{ w:S.balcDW || 0.74, side:S.balcSide === 'l' ? 'l' : 'r' } } : {}) }; }
 function opTarget(px, py){
   let wall = null;
   if (S.view !== 'plan'){ setRay(px, py); const h = ray.intersectObjects(model.children, true).find(x => x.object.isMesh && x.object.userData.id && clipKeep(x.point)); const it = h && byId(h.object.userData.id); if (it) wall = it.type === 'wall' ? it : isOp(it) ? byId(it.wall) : null; }
@@ -5225,7 +5245,7 @@ function click(px, py, shift, ctrl){
     if (!t){ toast('Наведите на стену'); return; }
     if (!t.valid){ toast(t.why); return; }
     pushUndo(); markEdited();
-    addOp(t.spec.type, t.wall.id, t.pos, t.spec.w, t.spec.h, t.spec.sill, t.spec.op ? { op:true } : t.spec.gl ? { gl:true } : {});
+    addOp(t.spec.type, t.wall.id, t.pos, t.spec.w, t.spec.h, t.spec.sill, t.spec.op ? { op:true } : t.spec.gl ? { gl:true } : t.spec.bd ? { bd:{ ...t.spec.bd } } : {});
     rebuild(); D.op = coarsePtr ? null : opTarget(px, py); updatePreview();
     if (t.moved) toast(`${t.spec.type === 'door' ? 'Дверь' : 'Окно'} не встаёт на стык стен — поставлено на ближайшее свободное место`);
     return;
@@ -10069,7 +10089,8 @@ function renderOptbar(){
       + (t === 'wall' ? `<label><input type="checkbox" id="oChain"${S.chain ? ' checked' : ''}> Цепь</label>` : '')
       + `<span class="tip">Пробел — наружная сторона. Точки липнут к осям здания и направлениям X/Y</span>`;
   } else if (t === 'door') h += `<label for="oDOp">Вид<select id="oDOp"><option value="">Дверь</option><option value="gl"${S.doorOp === 'gl' ? ' selected' : ''}>Балконная, остеклённая</option><option value="1"${S.doorOp === '1' || S.doorOp === true ? ' selected' : ''}>Проём (без полотна)</option></select></label>` + num('oDW', 'Ширина', S.doorW) + num('oDH', 'Высота', S.doorH);
-  else if (t === 'window') h += num('oWW', 'Ширина', S.winW) + num('oWH', 'Высота', S.winH) + num('oWS', 'Подоконник', S.winSill);
+  else if (t === 'window') h += `<label for="oWBd">Вид<select id="oWBd"><option value="">Окно</option><option value="1"${S.winBd ? ' selected' : ''}>Балконный блок (окно + дверь)</option></select></label>` + num('oWW', S.winBd ? 'Ширина блока' : 'Ширина', S.winW) + num('oWH', 'Высота окна', S.winH) + num('oWS', 'Подоконник', S.winSill)
+    + (S.winBd ? num('oWDW', 'Ширина двери', S.balcDW || 0.74) + `<label for="oWDS">Дверь<select id="oWDS"><option value="r">справа</option><option value="l"${S.balcSide === 'l' ? ' selected' : ''}>слева</option></select></label>` : '');
   else if (t === 'box') h += num('oBH', 'Высота', S.boxH);
   else if (t === 'grid') h += `<span class="tip">Укажите начало и конец оси.</span><label>Сетка: по X<input class="n2" id="oGnx" type="number" min="1" max="30" value="4"></label><label>шаг<input id="oGsx" type="number" min="100" step="100" value="6000"></label><label>по Y<input class="n2" id="oGny" type="number" min="1" max="30" value="3"></label><label>шаг<input id="oGsy" type="number" min="100" step="100" value="4500"></label><button class="btn sm" id="oGmake">Создать сетку осей</button>`;
   else if (t === 'line') h += `<label for="oLm">Форма<select id="oLm"><option value="line">Отрезок (цепочкой)</option><option value="rect">Прямоугольник</option><option value="circle">Окружность</option></select></label><label for="oLs">Стиль<select id="oLs">${styleOpts(S.lineStyle || 'thin')}</select></label><span class="tip">Линии видны только на плане, как линии детализации в Revit</span>`;
@@ -10107,9 +10128,11 @@ function renderOptbar(){
   const loc = ob.querySelector('#oLoc'); if (loc){ loc.value = S.loc; loc.onchange = e => { S.loc = e.target.value; updatePreview(); }; }
   on('oChain', 'change', e => { S.chain = e.target.checked; });
   if (ob.querySelector('#oDOp')) ob.querySelector('#oDOp').onchange = e => { S.doorOp = e.target.value; if (e.target.value === 'gl' && S.doorW < 0.7){ S.doorW = 0.8; S.doorH = 2.2; renderOptbar(); } };
+  if (ob.querySelector('#oWBd')) ob.querySelector('#oWBd').onchange = e => { S.winBd = !!e.target.value; if (S.winBd && S.winW < 1.3){ S.winW = 1.72; S.winH = 1.45; S.winSill = 0.9; } renderOptbar(); updatePreview(); };
+  if (ob.querySelector('#oWDS')) ob.querySelector('#oWDS').onchange = e => { S.balcSide = e.target.value; updatePreview(); };
   if (ob.querySelector('#oIeAll')) ob.querySelector('#oIeAll').onchange = e => { STD.ieAuto = e.target.checked; scheduleSave(); if (STD.ieAuto) autoIelevs(); };
   if (ob.querySelector('#oIeGo')) ob.querySelector('#oIeGo').onclick = () => autoIelevs();
-  mmv('oH', 'wallH'); mmv('oDW', 'doorW'); mmv('oDH', 'doorH'); mmv('oWW', 'winW'); mmv('oWH', 'winH'); mmv('oWS', 'winSill'); mmv('oBH', 'boxH');
+  mmv('oH', 'wallH'); mmv('oDW', 'doorW'); mmv('oDH', 'doorH'); mmv('oWW', 'winW'); mmv('oWH', 'winH'); mmv('oWS', 'winSill'); mmv('oWDW', 'balcDW'); mmv('oBH', 'boxH');
   const dr = ob.querySelector('#oDimRef'); if (dr){ dr.value = S.dimRef; dr.onchange = e => { S.dimRef = e.target.value; }; }
   const dm = ob.querySelector('#oDimMode'); if (dm){ dm.value = S.dimMode; dm.onchange = e => { S.dimMode = e.target.value; annoDirty = true; }; }
   on('oLs', 'change', e => { S.lineStyle = e.target.value; });
@@ -10146,7 +10169,7 @@ const NEWCAT = ['floor', 'ceiling', 'roof', 'column', 'stair', 'room'];
 const famOptions = cur => Object.entries(FAM_CATS).map(([k, n]) => { const l = fams.filter(f => f.cat === k); return l.length ? `<optgroup label="${esc(n)}">${l.map(f => `<option value="${f.id}"${f.id === cur ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}</optgroup>` : ''; }).join('');
 // Revit wall quantities: length of the wall line, area of one face minus openings, volume = area × thickness
 function wallStats(w){
-  const f = wallFrame(w), ops = opsOf(w, f.L), opA = ops.reduce((s, o) => s + (o.b - o.a) * Math.max(0, o.top - o.bot), 0);
+  const f = wallFrame(w), ops = opsOf(w, f.L), opA = ops.reduce((s, o) => s + opArea(o), 0);
   const area = Math.max(0, f.L * w.h - opA); return { L:f.L, area, vol:area * w.t };
 }
 /* Revit «Линия привязки»: the line of the wall that stays put when its type or thickness changes */
@@ -10484,14 +10507,18 @@ function renderPanel(_el, _it){
       + `<div class="pbtns"><button class="btn sm" id="sFlipL">Поменять стороны (Пробел)</button><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else if (isOp(it)){
     const door = it.type === 'door';
-    h += `<div class="typesel"><span class="tname">${door ? (it.op ? 'Проём' : 'Дверь') : 'Окно'} ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span><span class="tsub">${mm(it.w)} × ${mm(it.h)} мм · в стене ${esc(byId(it.wall)?.tag || '№' + it.wall)}</span></div>`
+    const bal = isBalc(it);
+    h += `<div class="typesel"><span class="tname">${door ? (it.op ? 'Проём' : 'Дверь') : bal ? 'Балконный блок' : 'Окно'} ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span><span class="tsub">${mm(it.w)} × ${mm(it.h)} мм · в стене ${esc(byId(it.wall)?.tag || '№' + it.wall)}</span></div>`
       + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
       + (door ? prow('Вид', `<select id="sDOp"><option value="">Дверь</option><option value="gl"${it.gl ? ' selected' : ''}>Балконная, остеклённая</option><option value="1"${it.op ? ' selected' : ''}>Проём (без полотна)</option></select>`) : '')
-      + `<div class="pgrp">Размеры</div>` + prow('Ширина, мм', pnum('sOW', it.w, 'min="100" step="50"')) + prow('Высота, мм', pnum('sOH', it.h, 'min="100" step="50"'))
-      + (door ? '' : prow('Подоконник, мм', pnum('sOS', it.sill, 'min="50" step="50"')))
+      + (door ? '' : prow('Вид', `<select id="sWBd"><option value="">Окно</option><option value="1"${bal ? ' selected' : ''}>Балконный блок (окно + дверь)</option></select>`))
+      + `<div class="pgrp">Размеры</div>` + prow(bal ? 'Ширина блока, мм' : 'Ширина, мм', pnum('sOW', it.w, 'min="100" step="10"')) + prow(bal ? 'Высота окна, мм' : 'Высота, мм', pnum('sOH', it.h, 'min="100" step="10"'))
+      + (door ? '' : prow('Подоконник, мм', pnum('sOS', it.sill, 'min="50" step="10"')))
+      + (bal ? prow('Ширина двери, мм', pnum('sBDW', it.bd.w, 'min="300" step="10"')) + prow('Ширина окна, мм', pnum('sBWW', it.w - it.bd.w, 'min="200" step="10"')) + prow('Высота двери, мм', `<span class="val">${mm(it.sill + it.h)} (до верха окна)</span>`)
+        + prow('Дверь', `<select id="sBDS"><option value="r">справа (у конца стены)</option><option value="l"${it.bd.side === 'l' ? ' selected' : ''}>слева (у начала стены)</option></select>`) : '')
       + (door && it.op ? '' : prow('Материал', matPick('sMatX', it.m, door ? 'По умолчанию (дверное полотно)' : 'По умолчанию (стекло)')))
       + prow('От начала стены, мм', pnum('sOA', it.pos - it.w / 2, 'min="0" step="50"'))
-      + (door && !it.op ? `<div class="pbtns"><button class="btn sm" id="sFlip">Открывание: ${it.flip ? 'сторона Б' : 'сторона А'}</button><button class="btn sm" id="sHand">Петли: ${it.hand ? 'справа' : 'слева'}</button></div>` : '')
+      + ((door && !it.op) || bal ? `<div class="pbtns"><button class="btn sm" id="sFlip">Открывание: ${it.flip ? 'сторона Б' : 'сторона А'}</button><button class="btn sm" id="sHand">Петли: ${it.hand ? 'справа' : 'слева'}</button></div>` : '')
       + `<div class="pbtns"><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else if (it.type === 'dim'){
     const G = dimGeom(it);
@@ -10647,6 +10674,11 @@ function renderPanel(_el, _it){
     bind('sOH', v => it.h = v); bind('sOS', v => it.sill = v); bind('sOA', v => { if (it.pin){ toast(`${tagName(it)}: замок закрыт — положение не меняется`); return; } it.pos = r4(v + it.w / 2); }, true);
     const tg = (id, key) => { const b = q(id); if (b) b.onclick = () => { pushUndo(); markEdited(); it[key] = !it[key]; el.dataset.id = 'x'; rebuild(); }; };
     tg('sFlip', 'flip'); tg('sHand', 'hand');
+    // balcony block: the door width (the window part changes, the block stays), the window width (the block grows from the door side out), the side
+    bind('sBDW', v => { if (it.bd) it.bd.w = clamp(v, 0.3, it.w - 0.2); });
+    bind('sBWW', v => { if (!it.bd) return; const nw = Math.max(0.2, v) + it.bd.w, a = it.pos - it.w / 2, b = it.pos + it.w / 2; it.pos = r4(it.bd.side === 'l' ? a + nw / 2 : b - nw / 2); it.w = nw; });
+    if (q('sBDS')) q('sBDS').onchange = e => { pushUndo(); markEdited(); it.bd.side = e.target.value === 'l' ? 'l' : 'r'; el.dataset.id = 'x'; rebuild(); };
+    if (q('sWBd')) q('sWBd').onchange = e => { pushUndo(); markEdited(); if (e.target.value){ it.bd = { w:0.74, side:'r' }; if (it.w < 1.2){ it.pos = r4(it.pos - it.w / 2 + 1.72 / 2); it.w = 1.72; } } else delete it.bd; el.dataset.id = 'x'; rebuild(); };
     if (q('sDOp')) q('sDOp').onchange = e => { pushUndo(); markEdited(); delete it.op; delete it.gl; if (e.target.value === '1') it.op = true; else if (e.target.value === 'gl') it.gl = true; el.dataset.id = 'x'; rebuild(); };
   } else if (it.type === 'dim'){
     bind('sDOff', v => { it.off = (Math.sign(it.off) || 1) * v; }, true);
@@ -11017,7 +11049,7 @@ function sanitizeItems(arr){
     let o = null;
     if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it), ...(Array.isArray(it.svNo) ? { svNo:it.svNo.filter(s => s === 1 || s === -1) } : {}), ...(Array.isArray(it.dj) && (it.dj[0] || it.dj[1]) ? { dj:[!!it.dj[0], !!it.dj[1]] } : {}), ...(LOC_LINES[it.loc] && it.loc !== 'center' ? { loc:it.loc } : {}), ...(it.nrb ? { nrb:true } : {}) };
     else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
-    else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand, ...(it.type === 'door' && it.op ? { op:true } : it.type === 'door' && it.gl ? { gl:true } : {}), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+    else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand, ...(it.type === 'door' && it.op ? { op:true } : it.type === 'door' && it.gl ? { gl:true } : {}), ...(it.type === 'window' && it.bd && N(it.bd.w) && +it.bd.w > 0 ? { bd:{ w:Math.max(+it.bd.w, 0.3), side:it.bd.side === 'l' ? 'l' : 'r' } } : {}), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
     else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1, ...(it.dup ? { dup:true } : {}), ...(it.tot ? { tot:true } : {}) } : {}), ...(typeof it.dph === 'string' ? { dph:it.dph.slice(0, 24) } : {}), ...(typeof it.dt === 'string' && it.dt ? { dt:it.dt.slice(0, 24) } : {}), ...(it.demo ? { demo:true, dk:String(it.dk || '').slice(0, 30) } : {}),
       ...(it.tp && typeof it.tp === 'object' ? { tp:Object.fromEntries(Object.entries(it.tp).filter(([k, v]) => /^\d{1,3}$/.test(k) && v && N(v.u) && N(v.v)).map(([k, v]) => [k, { u:clamp(+v.u, -100, 100), v:clamp(+v.v, -100, 100) }])) } : {}),
       ...(it.txt && typeof it.txt === 'object' ? { txt:Object.fromEntries(Object.entries(it.txt).filter(([k, v]) => /^\d{1,3}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.slice(0, 40)])) } : {}) };
@@ -11432,7 +11464,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2207');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2221');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -11734,8 +11766,8 @@ function exportIFC(){
     const ty = typeById(w.wt), name = `Стена ${w.tag || w.id}`;
     const e = add(`IFCWALL('${ifcGuid()}',${oh},${ifcStr(name)},${ifcStr(ty ? ty.name : 'Стена ' + Math.round(w.t * 1000) + ' мм')},$,${pl},${shape('SweptSolid', [box(f.L / 2, 0, f.L, w.t, w.h)])},${ifcStr(w.tag)})`);
     cont.get(lvOf(w)).push(e); matOf(ty ? ty.name : 'Стена').els.push(e); nW++;
-    for (const op of opsOf(w, f.L)){
-      const o = op.o, ww = op.b - op.a, hh = op.top - op.bot, opl = place(pl, op.pos, 0, op.bot);
+    for (const op of opsOf(w, f.L).flatMap(opPieces)){ // a balcony block goes as a window and a door
+      const o = op.door ? { ...op.o, type:'door', gl:true, tag:(op.o.tag || op.o.id) + '-д' } : op.o, ww = op.b - op.a, hh = op.top - op.bot, opl = place(pl, op.pos, 0, op.bot);
       const oe = add(`IFCOPENINGELEMENT('${ifcGuid()}',${oh},${ifcStr('Проём')},$,$,${opl},${shape('SweptSolid', [box(0, 0, ww, w.t + 0.2, hh)])},$)`);
       add(`IFCRELVOIDSELEMENT('${ifcGuid()}',${oh},$,$,${e},${oe})`);
       if (o.op) { nO++; continue; } // an opening without a leaf (проём)
@@ -12478,6 +12510,8 @@ function toM(n, u){
   if (/^см|^сантиметр/.test(u)) return n / 100;
   return n;
 }
+// «балконный блок», «окно с балконной дверью»: the whole phrase is one command (its «, дверь слева» is not a new door)
+const BALC_RE = /балкон[а-яё]*\s+блок|окн[а-яё]*\s+(?:с|и)\s+балкон[а-яё]*\s+двер/;
 function numAfter(s, re){ const m = s.match(new RegExp('(?:' + re + ')[а-я]*\\s*(?:в|на|от|:)?\\s*' + NUM)); return m ? toM(m[1], m[2]) : null; }
 function stripNamed(s){ return s.replace(new RegExp('(?:ширин|высот|подоконник|на высоте|от пола|отступ|толщин)[а-я]*\\s*(?:в|на|от)?\\s*' + NUM, 'g'), ' ')
   .replace(new RegExp(NUM + '\\s*от\\s*(?:угла|начала|края|левого|правого)', 'g'), ' ').replace(/стен[а-я]*\s*(?:номер|№)\s*\d+/g, ' ').replace(/точк[а-я]*\s*-?\d+(?:\.\d+)?\s*-?\d+(?:\.\d+)?/g, ' '); }
@@ -12807,6 +12841,14 @@ function parseOne(f){
     const w = numAfter(f, 'ширин'), h = numAfter(f, 'высот'), sill = numAfter(f, 'подоконник|от пола|на высоте');
     if (w || h || sill) return { a:'setop', el:op1.ref, w, h, sill };
   }
+  // «балконный блок» / «окно с балконной дверью»: one opening with a window and a door down to the floor
+  if (BALC_RE.test(f)){
+    const dw = numAfter(f, 'двер[а-яё]*\\s+(?:шириной\\s+)?'), side = /двер[а-яё]*(?:\s+[\d.,]+(?:\s*мм)?)?\s+слева|слева\s+двер|левая\s+двер/.test(f) ? 'l' : /двер[а-яё]*(?:\s+[\d.,]+(?:\s*мм)?)?\s+справа|справа\s+двер|правая\s+двер/.test(f) ? 'r' : null;
+    if (op1 && !/добав|постав|встав|нов/.test(f)) return { a:'setop', el:op1.ref, balc:!/убер|без|обычн/.test(f), dw, side };
+    if (/удали/.test(f)) return { a:'delop', kind:'window', wall:tagsHere.length ? '@' + tagsHere[0].tag : sideOf(f) };
+    return { a:'opening', kind:'window', balc:true, wall:tagsHere.length ? '@' + tagsHere[0].tag : sideOf(f), count:1,
+      w:numAfter(f, 'ширин[а-яё]*\\s+блок[а-яё]*') ?? numAfter(f, 'блок[а-яё]*\\s+(?:шириной\\s+)?') ?? null, h:numAfter(f, 'высот'), sill:numAfter(f, 'подоконник|от пола'), dw, side };
+  }
   if (/двер|окн|окон/.test(f)){
     const kind = /двер/.test(f) ? 'door' : 'window';
     const cm = f.match(/(\d+)\s+(?:окн|двер)/);
@@ -12961,19 +13003,21 @@ function execOne(a, ctx){
       const kind = a.kind === 'door' ? 'door' : 'window';
       const wall = findWall(a.wall ?? (kind === 'door' ? 'S' : 'N'), ctx.refs);
       if (!wall) throw new Error('Не нашёл стену для проёма');
-      const w = okNum(a.w) || (kind === 'door' ? S.doorW : S.winW);
-      const h = okNum(a.h) || (kind === 'door' ? S.doorH : S.winH);
-      const sill = kind === 'door' ? 0 : (okNum(a.sill) || S.winSill);
+      const balc = kind === 'window' && !!a.balc; // балконный блок: окно + балконная дверь в одном проёме
+      const w = okNum(a.w) || (balc ? 1.72 : kind === 'door' ? S.doorW : S.winW);
+      const h = okNum(a.h) || (balc ? 1.45 : kind === 'door' ? S.doorH : S.winH);
+      const sill = kind === 'door' ? 0 : (okNum(a.sill) || (balc ? 0.9 : S.winSill));
       const n = Math.max(1, Math.min(12, Math.round(Number(a.count) || 1)));
       const { L } = wallFrame(wall);
       const off = a.offset != null && Number.isFinite(Number(a.offset)) ? Number(a.offset) : null;
       const made = [];
       for (let k = 0; k < n; k++){ const pref = off != null ? off + w / 2 + k * (w + 0.6) : L * (k + 1) / (n + 1); made.push(placeOpening(kind, wall, w, h, sill, pref)); }
+      if (balc) for (const o of made) if (o) o.bd = { w:clamp(okNum(a.dw) || 0.74, 0.3, o.w - 0.2), side:a.side === 'l' ? 'l' : 'r' };
       if (a.ref && made[0]) ctx.refs[a.ref] = made[0].id;
       if (ctx.quiet){ ctx.ops = (ctx.ops || 0) + n; return null; }
       const side = typeof a.wall === 'string' && SIDE_NAME[a.wall] ? `в ${SIDE_NAME[a.wall]} стене (${wall.tag})` : `в стене ${wall.tag}`;
-      const what = kind === 'door' ? (n > 1 ? 'Двери' : 'Дверь') : (n > 1 ? 'Окна' : 'Окно');
-      return `${what} ${made.map(m => m.tag).join(', ')} — ${mm(w)} × ${mm(h)} мм ${side}`;
+      const what = balc ? (n > 1 ? 'Балконные блоки' : 'Балконный блок') : kind === 'door' ? (n > 1 ? 'Двери' : 'Дверь') : (n > 1 ? 'Окна' : 'Окно');
+      return `${what} ${made.map(m => m.tag).join(', ')} — ${mm(w)} × ${mm(h)} мм${balc && made[0] && made[0].bd ? `, дверь ${mm(made[0].bd.w)} ${made[0].bd.side === 'l' ? 'слева' : 'справа'}` : ''} ${side}`;
     }
     case 'box': {
       const w = okNum(a.w), d = okNum(a.d ?? a.w); if (!w || !d) throw new Error('Не понял размеры объёма');
@@ -13051,7 +13095,9 @@ function execOne(a, ctx){
       const it = findEl(a.el); if (!isOp(it)) throw new Error('Это не окно и не дверь');
       const w = okNum(a.w), h = okNum(a.h), sill = okNum(a.sill);
       if (w){ it.pos = r4(it.pos - it.w / 2 + w / 2); it.w = w; } if (h) it.h = h; if (sill && it.type === 'window') it.sill = sill;
-      return `${tagName(it)}: ${mm(it.w)} × ${mm(it.h)} мм${it.type === 'window' ? ', подоконник ' + mm(it.sill) : ''}`;
+      if (it.type === 'window'){ if (a.balc === true && !it.bd) it.bd = { w:0.74, side:'r' }; if (a.balc === false) delete it.bd;
+        if (it.bd){ const dw = okNum(a.dw); if (dw) it.bd.w = clamp(dw, 0.3, it.w - 0.2); if (a.side) it.bd.side = a.side === 'l' ? 'l' : 'r'; } }
+      return `${tagName(it)}: ${mm(it.w)} × ${mm(it.h)} мм${it.type === 'window' ? ', подоконник ' + mm(it.sill) : ''}${isBalc(it) ? `, дверь ${mm(it.bd.w)} ${it.bd.side === 'l' ? 'слева' : 'справа'}` : ''}`;
     }
     case 'moveop': {
       const it = findEl(a.el); if (!isOp(it)) throw new Error('Это не окно и не дверь');
@@ -13527,7 +13573,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 {"a":"wall","len":3,"angle":0,"type":"gkl"} — стена от текущей точки; angle в градусах против часовой стрелки от востока (0 вправо, 90 вверх/север, 180 влево, 270 вниз/юг)
 {"a":"close"} — замкнуть цепочку стен к её началу
 {"a":"room","w":4,"d":3,"x":0,"z":0,"h":2.7,"type":"ext","ref":"r1"} — прямоугольная комната из 4 стен; (x,z) — левый верхний угол; ref "r1" даёт стены "r1N","r1E","r1S","r1W"
-{"a":"opening","kind":"door","wall":"w1","w":0.9,"h":2.1,"sill":0.9,"offset":0.5,"count":1} — проём; wall: ref, "N","S","E","W","last" или номер стены; offset — от начала стены до края проёма, без него проём ставится по центру; sill только для окна
+{"a":"opening","kind":"door","wall":"w1","w":0.9,"h":2.1,"sill":0.9,"offset":0.5,"count":1} — проём; wall: ref, "N","S","E","W","last" или номер стены; offset — от начала стены до края проёма, без него проём ставится по центру; sill только для окна; балконный блок (окно + балконная дверь в одном проёме): {"a":"opening","kind":"window","balc":true,"wall":"S","w":1.72,"h":1.45,"sill":0.9,"dw":0.74,"side":"r"} (w — ширина всего блока, h — высота окна, dw — ширина двери, side — дверь "r" справа / "l" слева; дверь до пола, верх общий); у готового окна: {"a":"setop","el":"@Б","balc":true,"dw":0.8,"side":"l"} (balc:false — обычное окно)
 {"a":"box","w":2,"d":0.6,"h":0.9,"x":0,"z":0} — объём (мебель, крыльцо, блок), x,z — угол на плане
 У стен, дверей, окон и объёмов есть русские буквы (поле letter), в каждой категории свой счёт с «А»: стены А, Б, В…, окна А, Б…, двери А, Б… После «Я» идут АА, АБ… Буквы Ё, Й, Ъ, Ы, Ь не используются. Ссылки: стена Д — "@Д"; окно А — "@window:А"; дверь Б — "@door:Б"; объём В — "@box:В". Пользователь может называть буквы словами («дэ», «эль», «эм»).
 {"a":"movewall","wall":"@В","from":"@А","by":1.2} — сдвинуть стену В на 1,2 м от стены А (по нормали к А; "toward":true — к стене А); "dist" вместо "by" — поставить на это расстояние от А между осями; без "from" — с "angle" как у "wall". Примыкающие стены тянутся следом.
@@ -13697,7 +13743,7 @@ const LLM_CMDS = `комната 5 на 4 | стена 3 метра вправо
 покажи план | покажи 3д | покажи аксонометрию | покажи южный фасад | разрез | разрез от 0 2 до 8 2 | развёртки помещения 1 | камера из 1 5 на 4 1 | узел от 1 1 до 2 2
 стадия демонтаж (обмер, монтаж, мебель, все) | снеси стену Б | открой план демонтажа | новый лист | размести виды | экспликация помещений | рамка листа
 скрой буквы | покажи буквы | скрытые линии | тонированный | графичный | на весь экран | покажи панели | фон бумага | ровный фон | отмени | верни | сохрани | распечатай | визуализация | что умеешь
-экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | в штампе разработал Иванов | в штампе объект Саранск | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
+экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | балконный блок в южной стене | балконный блок 1720 дверь 740 справа в северной стене | в окне Б балконный блок дверь 800 | в штампе разработал Иванов | в штампе объект Саранск | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
 выбери все экземпляры | выбери предыдущий | скрой категорию | графика элемента | полутона для выбранного | сдвинь выбранное вправо на 100 | поверни выбранное на 90 | скопируй выбранное вправо на 1000 | скрой выбранное
 открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы
 посчитай объём всех стен | посчитай площадь всех помещений | добавь аксонометрии на лист | калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
@@ -13758,7 +13804,7 @@ const LEARN_BUILTIN = [
   ['покажи сверху', 'покажи план'], ['давай в объёме', 'покажи 3д'], ['в три дэ', 'покажи 3д'], ['аксонометрию покажи', 'покажи аксонометрию'], ['фасад с юга', 'покажи южный фасад'], ['сделай разрез', 'разрез'], ['развёртку первой комнаты', 'развёртки помещения 1'],
   ['включи демонтаж', 'стадия демонтаж'], ['перейди на обмер', 'стадия обмер'], ['покажи все стадии', 'стадия все'], ['снеси стену бэ', 'снеси стену Б'], ['открой план демонтажа', 'открой план демонтажа'],
   ['новый лист', 'новый лист'], ['разложи виды на листе', 'размести виды'], ['таблицу помещений на лист', 'экспликация помещений'], ['поля листа', 'рамка листа'],
-  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['впиши в штамп что разработал петров', 'в штампе разработал Петров'], ['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
+  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['поставь окно с балконной дверью на юге', 'балконный блок в южной стене'], ['выход на балкон с окном в северной стене, дверь слева', 'балконный блок дверь слева в северной стене'], ['впиши в штамп что разработал петров','в штампе разработал Петров'], ['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
   ['отмени последнее', 'отмени'], ['верни как было', 'верни'], ['сохрани проект', 'сохрани'], ['напечатай', 'распечатай'], ['сделай красивую картинку', 'визуализация'], ['что ты умеешь', 'что умеешь'],
   ['сделай нормальную спальню', 'комната 3500 на 4'], ['нужна детская', 'комната 3 на 3500'], ['гостиную побольше', 'комната 5 на 4'], ['маленькую кухню', 'комната 3 на 3'], ['кухню гостиную', 'комната 6 на 4'],
   ['совмещённый санузел', 'комната 2 на 1700'], ['ванную комнату', 'комната 2 на 1700'], ['прихожую', 'комната 2500 на 1500'], ['кладовку', 'комната 1500 на 1200'], ['гардеробную', 'комната 2 на 1500'],
@@ -13877,7 +13923,7 @@ function lawCheck(text, lines){
 function llmParse(lines){
   if (!lines.length || lines.some(l => /^непонятно/i.test(l))) return null;
   const acts = [];
-  for (const l of lines){ const n = normalize(l); const whole = /размер/.test(n) && /(?:заново|перестро)/.test(n) ? [{ a:'redims' }] : null; const ps = whole || splitFrags(n).map(parseOne); if (!ps.length || ps.some(p => !p || p.err)) return null; acts.push(...ps); }
+  for (const l of lines){ const n = normalize(l); const whole = /размер/.test(n) && /(?:заново|перестро)/.test(n) ? [{ a:'redims' }] : BALC_RE.test(n) ? [parseOne(n.replace(/[,;]/g, ' '))] : null; const ps = whole || splitFrags(n).map(parseOne); if (!ps.length || ps.some(p => !p || p.err)) return null; acts.push(...ps); }
   return acts;
 }
 // «Скачать ИИ без интернета»: once, with progress in the chat
@@ -13968,10 +14014,10 @@ function calcModel(t){
   const list = ty => items.filter(i => i.type === ty && shown(i)), r3 = v => String(Math.round(v * 1000) / 1000);
   if (/стен/.test(t) && /(?:все|всех|сумм|итог|общ)/.test(t)){
     const W = list('wall'); if (!W.length) return null;
-    const ops = W.flatMap(w => opsOf(w, wallFrame(w).L).map(o => (o.b - o.a) * (o.top - o.bot)));
+    const ops = W.flatMap(w => opsOf(w, wallFrame(w).L).map(opArea));
     const L = W.reduce((s, w) => s + wallFrame(w).L, 0), A = W.reduce((s, w) => s + wallFrame(w).L * w.h, 0), V = W.reduce((s, w) => s + wallFrame(w).L * w.h * w.t, 0), O = ops.reduce((s, v) => s + v, 0);
     const net = /(?:без|вычет|минус|кроме)\s*(?:\S+\s+)?проем/.test(t);
-    if (/объем/.test(t)) return { expr:r3(net ? V - W.reduce((s, w) => s + opsOf(w, wallFrame(w).L).reduce((a, o) => a + (o.b - o.a) * (o.top - o.bot) * w.t, 0), 0) : V), what:`объём всех стен (${W.length} шт.)${net ? ' за вычетом проёмов' : ''}, м³` };
+    if (/объем/.test(t)) return { expr:r3(net ? V - W.reduce((s, w) => s + opsOf(w, wallFrame(w).L).reduce((a, o) => a + opArea(o) * w.t, 0), 0) : V), what:`объём всех стен (${W.length} шт.)${net ? ' за вычетом проёмов' : ''}, м³` };
     if (/площад/.test(t)) return { expr:net ? `${r3(A)}-${r3(O)}` : r3(A), what:`площадь всех стен (${W.length} шт.)${net ? ` за вычетом проёмов (${ops.length} шт.)` : ', с проёмами'}, м²` };
     return { expr:r3(L), what:`длина всех стен (${W.length} шт.), м` };
   }
@@ -14180,7 +14226,7 @@ async function runCommand(raw){
   const taught = learnExact(text), tacts = taught && llmParse(taught.split('\n'));
   if (tacts){ const res = execAll(tacts, { label:text }); addMsg('app', [{ ok:true, t:'По выученному: ' + taught.split('\n').join('; ') }, ...res]); speak(res); return; }
   // a phrase about rebuilding the dimensions is one command even with «и» in it («удали все размеры … и построй заново»)
-  const whole = /размер/.test(nt) && /(?:заново|занова|перестро|пересоздай)/.test(nt) ? [{ a:'redims' }] : null;
+  const whole = /размер/.test(nt) && /(?:заново|занова|перестро|пересоздай)/.test(nt) ? [{ a:'redims' }] : BALC_RE.test(nt) ? [parseOne(nt.replace(/[,;]/g, ' '))] : null;
   const parsed = whole || splitFrags(nt).map(parseOne);
   const hist = parsed.find(p => p && (p.a === 'undo' || p.a === 'redo' || p.a === 'history'));
   if (hist){ askUndo(hist.a, hist.n || 1); return; }
