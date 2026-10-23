@@ -250,12 +250,14 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .calcin{width:100%;font:600 13px/1.2 ui-monospace,Consolas,monospace;padding:3px 6px;text-align:right}
 .calcres{font:700 16px/1.15 ui-monospace,Consolas,monospace;text-align:right;color:var(--ink);min-height:19px;word-break:break-all}
 .calcres.bad{color:var(--bad);font-size:12px;font-weight:500}
-.calckeys{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
-.calckeys button{height:22px;padding:0;border:1px solid var(--line);border-radius:3px;background:var(--panel,#fff);font:600 12px/1 inherit;cursor:pointer;color:var(--ink)}
+.calckeys{display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+.calckeys button{height:20px;padding:0;border:1px solid var(--line);border-radius:3px;background:var(--panel,#fff);font:600 12px/1 inherit;cursor:pointer;color:var(--ink)}
 .calcw .row .btn.sm{padding:1px 6px;font-size:11px}
 .calcai input{font-size:12px;padding:2px 5px}
 .calcnote{font-size:11px}
-@media (pointer:coarse){.calckeys button{height:30px;font-size:14px}}
+@media (pointer:coarse){.calckeys button{height:26px;font-size:13px}}
+.calct{display:inline-flex;align-items:center;color:var(--muted)}
+.calct .i{width:15px;height:15px}
 .calckeys button:hover{background:var(--accent-soft)}
 .calckeys button.op{color:var(--accent)}
 .calckeys button.eq{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -964,7 +966,7 @@ details.more summary::-webkit-details-marker{display:none}
 
     <aside class="side dock" id="right" aria-label="Правая панель окон">
     <section class="panel" id="calc" aria-label="Калькулятор">
-      <div class="side-h"><span class="ptl">Калькулятор</span><div class="row"><button id="calcClose" aria-label="Скрыть калькулятор" title="Скрыть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div></div>
+      <div class="side-h"><span class="ptl calct" title="Калькулятор"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="4" y="2.5" width="12" height="15" rx="1.5"/><path d="M6.5 5h7v2.5h-7z"/><path d="M7 11h.01M10 11h.01M13 11h.01M7 14h.01M10 14h.01M13 14h.01" stroke-width="2.2" stroke-linecap="round"/></svg><span class="vh">Калькулятор</span></span><div class="row"><button id="calcClose" aria-label="Скрыть калькулятор" title="Скрыть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div></div>
       <div class="scroll calcw">
         <input id="calcIn" class="calcin" autocomplete="off" spellcheck="false" placeholder="Например: 3,2 * 4,5 + 12%" aria-label="Выражение">
         <div class="calcres" id="calcRes" aria-live="polite">0</div>
@@ -11170,7 +11172,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-1911');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-1929');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -13351,8 +13353,10 @@ const LLM_STORE = {
   name:k => String(k).replace(/^https?:\/\//, '').replace(/[^\w.-]+/g, '_').slice(-180),
   async match(req){
     const k = typeof req === 'string' ? req : req && req.url; if (!k) return undefined;
-    try { const fh = await (await this.dir()).getFileHandle(this.name(k)), f = await fh.getFile(); if (!f.size) return undefined;
-      return new Response(f, { status:200, headers:{ 'content-length':String(f.size) } }); } catch (e){ return undefined; }
+    try { const fh = await (await this.dir()).getFileHandle(this.name(k)), f = await fh.getFile(); if (f.size) return new Response(f, { status:200, headers:{ 'content-length':String(f.size) } }); } catch (e){}
+    // files downloaded before into the browser cache (older versions) are still used
+    try { const c = await caches.open('transformers-cache'), r = await c.match(k); if (r) return r; } catch (e){}
+    return undefined;
   },
   async put(req, resp){
     const k = typeof req === 'string' ? req : req && req.url; if (!k || !resp || !resp.body) return;
@@ -13403,7 +13407,7 @@ const LLM_CMDS = `комната 5 на 4 | стена 3 метра вправо
 экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
 выбери все экземпляры | выбери предыдущий | скрой категорию | графика элемента | полутона для выбранного | сдвинь выбранное вправо на 100 | поверни выбранное на 90 | скопируй выбранное вправо на 1000 | скрой выбранное
 открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы
-калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
+посчитай объём всех стен | посчитай площадь всех помещений | калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
 // what a good architect and interior designer knows (Russian norms SP 54 / GOST and practice): used when the user does not say a size
 const ARCH_RULES = 'Если размер не назван — выбирай грамотный, как архитектор, по нормам и практике: '
   + 'спальня 3500 на 4 (от 10 м²), детская 3 на 3500, гостиная 5 на 4, кабинет 3 на 3, кухня 3 на 3 (от 8 м²), кухня-гостиная 6 на 4, '
@@ -13483,6 +13487,7 @@ const LEARN_BUILTIN = [
   ['удали все двери', 'выдели все двери\nудали выбранное'], ['убери все окна', 'выдели все окна\nудали выбранное'], ['удали двери вообще все', 'выдели все двери\nудали выбранное'],
   ['дверь пошире на запад', 'дверь 1000 в западной стене'], ['окна побольше на юг', 'окно 1800 в южной стене'], ['покажи всё в трёхмерном виде', 'покажи 3д'], ['размерчики проставь', 'проставь размеры'],
   ['экспортируй в ревит', 'экспорт в ревит'], ['сохрани для макса', 'экспорт в 3д макс'],
+  ['какой объём всех стен', 'посчитай объём всех стен'], ['сколько площадь всех комнат', 'посчитай площадь всех помещений'], ['площадь стен без окон и дверей', 'посчитай площадь всех стен за вычетом проёмов'],
   ['открой калькулятор', 'калькулятор'], ['покажи калькулятор', 'калькулятор'], ['убери калькулятор', 'закрой калькулятор'], ['перемножь 3,5 и 4,2', 'посчитай 3,5 * 4,2'], ['сколько это будет три на четыре', 'посчитай 3 * 4'],
   ['посчитай площадь пола 3 на 4', 'посчитай 3 * 4'], ['сколько плитки надо на кухню 3 на 4 с запасом', 'посчитай сколько плитки на пол 3 на 4 с запасом 10%'],
   ['типы размеров открой', 'типы размеров'], ['размеры обмера красным', 'цвет размеров обмер красный'], ['камера из точки один пять смотрит на четыре один', 'камера из 1 5 на 4 1']
@@ -13663,8 +13668,36 @@ function calcFromModel(){
 }
 /* building tasks by rules (exact, no model): the sizes, the area, the layer / thickness, the reserve, the bag, the coats and the rate
    are found in the words; the norms of consumption are those of FOREMAN_TOPICS («Расход»). Returns { expr, what } or null. */
+// sums over the model (what is shown in the open view: its level and stage): «объём всех стен», «площадь помещений»…
+function calcModel(t){
+  if (/\d+(?:[.,]\d+)?\s*(?:м\S*\s*)?(?:на|x|х|×|\*)\s*\d/.test(t)) return null; // sizes are given: not the model
+  const list = ty => items.filter(i => i.type === ty && shown(i)), r3 = v => String(Math.round(v * 1000) / 1000);
+  if (/стен/.test(t) && /(?:все|всех|сумм|итог|общ)/.test(t)){
+    const W = list('wall'); if (!W.length) return null;
+    const ops = W.flatMap(w => opsOf(w, wallFrame(w).L).map(o => (o.b - o.a) * (o.top - o.bot)));
+    const L = W.reduce((s, w) => s + wallFrame(w).L, 0), A = W.reduce((s, w) => s + wallFrame(w).L * w.h, 0), V = W.reduce((s, w) => s + wallFrame(w).L * w.h * w.t, 0), O = ops.reduce((s, v) => s + v, 0);
+    const net = /(?:без|вычет|минус|кроме)\s*(?:\S+\s+)?проем/.test(t);
+    if (/объем/.test(t)) return { expr:r3(net ? V - W.reduce((s, w) => s + opsOf(w, wallFrame(w).L).reduce((a, o) => a + (o.b - o.a) * (o.top - o.bot) * w.t, 0), 0) : V), what:`объём всех стен (${W.length} шт.)${net ? ' за вычетом проёмов' : ''}, м³` };
+    if (/площад/.test(t)) return { expr:net ? `${r3(A)}-${r3(O)}` : r3(A), what:`площадь всех стен (${W.length} шт.)${net ? ` за вычетом проёмов (${ops.length} шт.)` : ', с проёмами'}, м²` };
+    return { expr:r3(L), what:`длина всех стен (${W.length} шт.), м` };
+  }
+  if (/(?:помещени|комнат)/.test(t) && /(?:все|всех|сумм|итог|общ|площад)/.test(t)){
+    const R = list('room').map(r => roomData(r)).filter(d => !d.open); if (!R.length) return null;
+    if (/периметр/.test(t)) return { expr:r3(R.reduce((s, d) => s + d.perim, 0)), what:`периметр всех помещений (${R.length} шт.), м` };
+    return { expr:r3(R.reduce((s, d) => s + d.area, 0)), what:`площадь всех помещений (${R.length} шт.), м²` };
+  }
+  if (/(?:пол|полов|перекрыти)/.test(t) && /(?:все|всех|площад)/.test(t) && !/на\s+пол\s+\d/.test(t)){ const F = list('floor'); if (F.length) return { expr:r3(F.reduce((s, f) => s + Math.abs(polyArea(f.pts)), 0)), what:`площадь всех полов (${F.length} шт.), м²` }; }
+  if (/потолк/.test(t) && /(?:все|всех|площад)/.test(t)){ const F = list('ceiling'); if (F.length) return { expr:r3(F.reduce((s, f) => s + Math.abs(polyArea(f.pts)), 0)), what:`площадь всех потолков (${F.length} шт.), м²` }; }
+  if (/(?:окн|окон|окош|двер)/.test(t) && /(?:сколько|число|количеств|площад|все)/.test(t)){
+    const ty = /окн|окон|окош/.test(t) ? 'window' : 'door', O = items.filter(o => o.type === ty && shown(o)); if (!O.length) return null;
+    if (/площад/.test(t)) return { expr:r3(O.reduce((s, o) => s + o.w * o.h, 0)), what:`площадь всех ${ty === 'window' ? 'окон' : 'дверей'} (${O.length} шт.), м²` };
+    return { expr:String(O.length), what:`${ty === 'window' ? 'окон' : 'дверей'} в виде, шт.` };
+  }
+  return null;
+}
 function calcRules(task){
   const t = normalize(task).replace(/ё/g, 'е'), n = x => String(+String(x).replace(',', '.'));
+  { const M = calcModel(t); if (M) return M; }
   const two = t.match(/(\d+(?:[.,]\d+)?)\s*(?:м(?:етр\S*)?\s*)?(?:на|x|х|×|\*)\s*(\d+(?:[.,]\d+)?)/), sq = t.match(/(\d+(?:[.,]\d+)?)\s*(?:м2|м²|кв\S*\s*м\S*|квадрат\S*|кв(?=\s|$|\.))/);
   const A = two ? `${n(two[1])}*${n(two[2])}` : sq ? n(sq[1]) : null; if (!A) return null;
   const thk = t.match(/(?:толщин\S*|слоем|слой)\s*(?:в\s*)?(\d+(?:[.,]\d+)?)\s*(мм|см|м(?=\s|$))?/);
@@ -13710,7 +13743,11 @@ async function calcAsk(task){
   finally { busy = false; }
 }
 function calcInit(){
-  const keys = [['C', 'c'], ['(', '('], [')', ')'], ['⌫', 'bs'], ['7'], ['8'], ['9'], ['÷', '/'], ['4'], ['5'], ['6'], ['×', '*'], ['1'], ['2'], ['3'], ['−', '-'], ['0'], [',', ','], ['%'], ['+'], ['√', '√('], ['x²', '^2'], ['π', 'π'], ['=', '=']];
+  // 6 columns × 4 rows: compact
+  const keys = [['7'], ['8'], ['9'], ['÷', '/'], ['(', '('], [')', ')'],
+    ['4'], ['5'], ['6'], ['×', '*'], ['√', '√('], ['x²', '^2'],
+    ['1'], ['2'], ['3'], ['−', '-'], ['%'], ['π', 'π'],
+    ['0'], [',', ','], ['C', 'c'], ['⌫', 'bs'], ['+'], ['=', '=']];
   const K = $('#calcKeys'), inp = $('#calcIn');
   K.innerHTML = keys.map(([t, v]) => `<button type="button" data-k="${esc(v || t)}"${t === '=' ? ' class="eq"' : /[÷×−+]/.test(t) ? ' class="op"' : ''}>${esc(t)}</button>`).join('');
   K.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
@@ -14039,6 +14076,8 @@ function asrLoad(onProg){
   if (ASR.p) return ASR.p;
   ASR.p = (async () => {
     const T = await import(TFJS_URL);
+    // the voice model too lives on the disk (OPFS), not in the browser cache that may refuse big files
+    if (llmStoreOk()){ T.env.useBrowserCache = false; T.env.useCustomCache = true; T.env.customCache = LLM_STORE; try { navigator.storage.persist && navigator.storage.persist(); } catch (e){} }
     const gpu = !!navigator.gpu && !TABLET;
     const files = {};
     const pipe = await T.pipeline('automatic-speech-recognition', 'Xenova/whisper-base', {
@@ -14098,8 +14137,19 @@ async function openOfflinePack(){
   d.querySelector('#offGo').onclick = async () => {
     if (navigator.onLine === false){ toast('Нужен интернет, чтобы скачать'); return; }
     const go = d.querySelector('#offGo'); go.disabled = true;
-    for (const [i, s] of steps.entries()){ const el = d.querySelector('#offS' + i); el.textContent = 'качаю…'; try { await s[1](t => el.textContent = t); el.textContent = '✓ готово'; } catch (e){ el.textContent = '✗ ошибка'; console.warn(e); } }
+    // the reason of an error, in plain words, right under its line
+    const why = e => { const m = String((e && (e.message || e.name)) || e || ''); return /quota|QuotaExceeded|internal error|NotReadable|NoModification/i.test(m) ? 'не хватает места для хранения: освободите место на диске (нужно 1–2 ГБ) и повторите'
+      : /failed to fetch|network|load failed|NetworkError|ERR_/i.test(m) ? 'не удалось скачать с huggingface.co: проверьте интернет (или VPN) и повторите'
+      : /bad_alloc|Aborted|out of memory|memory/i.test(m) ? 'не хватает памяти устройства: закройте другие вкладки и программы и повторите'
+      : /webgpu|adapter|GPU/i.test(m) ? 'видеокарта не запустила модель — повторите; при повторе программа попробует без видеокарты'
+      : m.slice(0, 160) || 'неизвестная ошибка'; };
+    for (const [i, s] of steps.entries()){ const el = d.querySelector('#offS' + i); el.textContent = 'качаю…'; const row = el.parentElement; const old = row.nextElementSibling && row.nextElementSibling.classList.contains('offwhy') ? row.nextElementSibling : null; if (old) old.remove();
+      try { await s[1](t => el.textContent = t); el.textContent = '✓ готово'; }
+      catch (e){ el.textContent = '✗ ошибка'; console.warn(e); const w = document.createElement('div'); w.className = 'offwhy libnote'; w.style.cssText = 'margin:-2px 0 4px 80px;color:var(--bad)'; w.textContent = 'Причина: ' + why(e) + '. (' + String((e && e.message) || e).slice(0, 120) + ')'; row.after(w); } }
     go.disabled = false; lsSet('kot.offline', '1'); toast('Готово: всё нужное сохранено на этом устройстве');
+    // without «persistent storage» the browser may clear the downloads when the disk is nearly full
+    let per = false; try { per = navigator.storage && (await navigator.storage.persist()); } catch (e){}
+    if (!per){ const w = document.createElement('p'); w.className = 'libnote'; w.style.color = 'var(--bad)'; w.textContent = 'Браузер не дал постоянное хранилище: при нехватке места на диске он может удалить скачанное. Установите программу как приложение («Файл → Установить приложение…») и держите на диске свободными 2–3 ГБ.'; d.querySelector('#offList').after(w); }
   };
   d.hidden = false;
 }
