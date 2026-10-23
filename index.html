@@ -1572,7 +1572,7 @@ const STD_DEF = () => ({
   ],
   mat:{ brick:{ f:'diag' }, facade:{ f:'diag' }, gas:{ f:'cross' }, block:{ f:'cross' }, concrete:{ f:'concrete' }, screed:{ f:'dots' }, insul:{ f:'insul' }, eps:{ f:'insul' },
     plaster:{ f:'dots' }, gkl:{ f:'dots' }, wood:{ f:'wood' }, frame:{ f:'none' }, generic:{ f:'diag2' }, tile:{ f:'diag' }, steel:{ f:'cross' } },
-  anno:{ tick:'tick', textMm:2.5, units:'mm', dec:0, gap:1.5, over:2, ext:2, tagMm:2.8 }
+  anno:{ tick:'tick', textMm:2.5, units:'mm', dec:0, gap:1.5, over:2, ext:2, tagMm:2.8, tickMm:2, tickW:0.35 }
 });
 let STD = STD_DEF();
 function sanitizeStd(o){
@@ -1588,7 +1588,8 @@ function sanitizeStd(o){
   out.mat = { ...d.mat }; if (o.mat) for (const [k, v] of Object.entries(o.mat)) if (MATS[k] && v) out.mat[k] = { f:typeof v.f === 'string' ? v.f : (d.mat[k] || {}).f || 'diag', ...(/^#[0-9a-f]{6}$/i.test(v.fg) ? { fg:v.fg } : {}), ...(/^#[0-9a-f]{6}$/i.test(v.bg) ? { bg:v.bg } : {}) };
   const a = o.anno || {};
   out.anno = { tick:['tick','arrow','dot'].includes(a.tick) ? a.tick : d.anno.tick, textMm:N(a.textMm) ? clamp(+a.textMm, 1, 10) : d.anno.textMm, units:['mm','cm','m'].includes(a.units) ? a.units : 'mm', dec:clamp(Math.round(+a.dec) || 0, 0, 3),
-    gap:N(a.gap) ? clamp(+a.gap, 0, 20) : d.anno.gap, over:N(a.over) ? clamp(+a.over, 0, 20) : d.anno.over, ext:N(a.ext) ? clamp(+a.ext, 0, 20) : d.anno.ext, tagMm:N(a.tagMm) ? clamp(+a.tagMm, 1, 10) : d.anno.tagMm };
+    gap:N(a.gap) ? clamp(+a.gap, 0, 20) : d.anno.gap, over:N(a.over) ? clamp(+a.over, 0, 20) : d.anno.over, ext:N(a.ext) ? clamp(+a.ext, 0, 20) : d.anno.ext, tagMm:N(a.tagMm) ? clamp(+a.tagMm, 1, 10) : d.anno.tagMm,
+    tickMm:N(a.tickMm) ? clamp(+a.tickMm, 0.5, 8) : d.anno.tickMm, tickW:N(a.tickW) ? clamp(+a.tickW, 0.1, 1.5) : d.anno.tickW };
   out.stamps = sanitizeStamps(o.stamps); out.lw = sanitizeLW(o.lw); out.ph = sanitizePh(o.ph); if (o.ieAuto) out.ieAuto = true; if (o.svOff) out.svOff = true;
   { const fr = sanFrame(o.frame); if (fr) out.frame = fr; }
   out.dimTypes = sanDimTypes(o.dimTypes);
@@ -3607,7 +3608,7 @@ function addDimGeom(d, lineMat, tickMat){
         const g = new THREE.BufferGeometry().setFromPoints([tip, base.clone().addScaledVector(nn, 0.45 * k), base.clone().addScaledVector(nn, -0.45 * k)]);
         const m = new THREE.Mesh(g, tickMat); m.renderOrder = 6; anno.add(m);
       }
-    } else { const m = new THREE.Mesh(tickGeo, tickMat); m.position.copy(P); m.rotation.y = rot; m.scale.set(3 * k, 1, 0.5 * k); anno.add(m); }
+    } else { const m = new THREE.Mesh(tickGeo, tickMat); m.position.copy(P); m.rotation.y = rot; m.scale.set((A.tickMm || 2) * k, 1, (A.tickW || 0.35) * k); anno.add(m); }
   });
 }
 function tempDims(){
@@ -4019,7 +4020,7 @@ function addEndMark(P, dirv, k, tickMat){
   const A = STD.anno;
   if (A.tick === 'arrow') addArrow(P, dirv, k, tickMat);
   else if (A.tick === 'dot'){ const m = new THREE.Mesh(dotGeo, tickMat); m.position.copy(P); m.scale.set(0.7 * k, 1, 0.7 * k); anno.add(m); }
-  else { const m = new THREE.Mesh(tickGeo, tickMat); m.position.copy(P); m.rotation.y = -(Math.atan2(dirv.z, dirv.x) + Math.PI / 4); m.scale.set(3 * k, 1, 0.5 * k); anno.add(m); }
+  else { const m = new THREE.Mesh(tickGeo, tickMat); m.position.copy(P); m.rotation.y = -(Math.atan2(dirv.z, dirv.x) + Math.PI / 4); m.scale.set((A.tickMm || 2) * k, 1, (A.tickW || 0.35) * k); anno.add(m); }
 }
 function addAngGeom(d, sel){
   const G = angGeom(d); if (!G) return; const k = paperMm(), Y = 30, pts = [];
@@ -4560,25 +4561,50 @@ function surveyRefs(w, side, noOps){
   refs.push({ k:'w', id:w.id, end:1, side });
   return refs;
 }
+/* the chains of one side of a wall, room by room (like a survey drawing): the chain of the whole side is cut at every partition
+   that joins it — one chain from corner to corner in each room, with its doors and windows; the thickness of the partition
+   is not in them (the chains do not go through the neighbouring rooms and do not cross their dimensions) */
+function surveyChains(w, side){
+  const f = wallFrame(w), all = surveyRefs(w, side);
+  const sOf = r => { const q = refPoint(r); return q ? (q.x - f.p1.x) * f.dir.x + (q.z - f.p1.z) * f.dir.z : null; };
+  const out = []; let cur = [];
+  for (let i = 0; i < all.length; i++){
+    const r = all[i], nx = all[i + 1];
+    if (r.k === 'w' && r.id !== w.id && nx && nx.k === 'w' && nx.id === r.id){
+      // the two faces of a partition: the nearer one ends this chain, the farther one starts the next
+      const a = sOf(r), b = sOf(nx), [near, far] = a != null && b != null && b < a ? [nx, r] : [r, nx];
+      cur.push(near); out.push(cur); cur = [far]; i++; continue;
+    }
+    cur.push(r);
+  }
+  out.push(cur);
+  // a chain needs two ends and some length (a stub of wall between two partitions is left out)
+  return out.filter(c => { if (c.length < 2) return false; const a = sOf(c[0]), b = sOf(c[c.length - 1]); return a == null || b == null || Math.abs(b - a) > 0.2; });
+}
 function refreshSurveyDims(){
   if (STD.svOff) return; // «Убрать все размеры» on the survey plan: they stay away until «Размеры заново»
   CUTS = computeCuts();
   for (const w of items){
     if (w.type !== 'wall' || w.ph !== 'obmer' || !shown(w) || wallFrame(w).L < 0.2) continue;
     if (lvOf(w) !== actLv()) continue;
-    const want = surveySides(w), f = wallFrame(w);
+    const want = surveySides(w), f = wallFrame(w), dir = { x:f.dir.x, z:f.dir.z };
     items = items.filter(d => !(d.type === 'dim' && d.survey && d.sw === w.id && !want.includes(d.side)));
     for (const side of want){
-      const refs = surveyRefs(w, side), d = items.find(x => x.type === 'dim' && x.survey && !x.tot && x.sw === w.id && x.side === side);
-      if (d){ d.refs = refs; d.dir = { x:f.dir.x, z:f.dir.z }; }
-      else items.push({ id:nextId++, type:'dim', survey:true, sw:w.id, side, refs, off:r4(side * 0.45), dir:{ x:f.dir.x, z:f.dir.z } });
-      // with doors or windows in the chain, the overall size between the walls goes on a second line (repeats are dropped by markSurveyDups)
-      const T = items.find(x => x.type === 'dim' && x.survey && x.tot && x.sw === w.id && x.side === side);
-      if (refs.some(r => r.k === 'o')){
-        const tr = surveyRefs(w, side, true);
-        if (T){ T.refs = tr; T.dir = { x:f.dir.x, z:f.dir.z }; }
-        else items.push({ id:nextId++, type:'dim', survey:true, tot:true, sw:w.id, side, refs:tr, off:r4(side * 1.05), dir:{ x:f.dir.x, z:f.dir.z } });
-      } else if (T) items = items.filter(x => x !== T);
+      const chains = surveyChains(w, side), mine = tot => items.filter(x => x.type === 'dim' && x.survey && !!x.tot === tot && x.sw === w.id && x.side === side).sort((a, b) => (a.sg || 0) - (b.sg || 0));
+      const D0 = mine(false), T0 = mine(true), keep = new Set();
+      chains.forEach((refs, sg) => {
+        let d = D0.find(x => (x.sg || 0) === sg);
+        if (d){ d.refs = refs; d.dir = dir; d.sg = sg; } else { d = { id:nextId++, type:'dim', survey:true, sw:w.id, side, sg, refs, off:r4(side * 0.45), dir }; items.push(d); }
+        keep.add(d);
+        // with doors or windows in the chain, the overall size of the room's wall goes on a second line (repeats are dropped by markSurveyDups)
+        if (refs.some(r => r.k === 'o') && !(w.svNoT || []).includes(side)){
+          const tr = [refs[0], refs[refs.length - 1]];
+          let T = T0.find(x => (x.sg || 0) === sg);
+          if (T){ T.refs = tr; T.dir = dir; T.sg = sg; } else { T = { id:nextId++, type:'dim', survey:true, tot:true, sw:w.id, side, sg, refs:tr, off:r4(side * 1.05), dir }; items.push(T); }
+          keep.add(T);
+        }
+      });
+      items = items.filter(x => !(x.type === 'dim' && x.survey && x.sw === w.id && x.side === side && !keep.has(x)));
     }
   }
   markSurveyDups();
@@ -4969,7 +4995,8 @@ function deleteSel(){
   const ids = new Set(sel), walls = [...ids].filter(id => byId(id)?.type === 'wall').length;
   pushUndo(); markEdited();
   // a survey dimension deleted by hand stays deleted for that side of the wall
-  for (const id of ids){ const d = byId(id); if (d && d.type === 'dim' && d.survey){ const w = byId(d.sw); if (w) w.svNo = [...new Set([...(w.svNo || []), d.side])]; } }
+  // (the overall size of the second line — only it: the chain with the doors and windows stays)
+  for (const id of ids){ const d = byId(id); if (d && d.type === 'dim' && d.survey){ const w = byId(d.sw), k = d.tot ? 'svNoT' : 'svNo'; if (w) w[k] = [...new Set([...(w[k] || []), d.side])]; } }
   items = items.filter(i => !ids.has(i.id) && !ids.has(i.wall) && !(i.type === 'part' && ids.has(i.host)));
   pruneMeta(); pruneDims(); clearSel(); rebuild();
   toast(`Удалено элементов: ${ids.size}${walls ? ' (стены — вместе с проёмами)' : ''}. Отменить: Ctrl+Z`);
@@ -6911,7 +6938,8 @@ function sanitizeViews(arr){
     if (v.tplAuto && o.tpl) o.tplAuto = true;
     if (v.ov && typeof v.ov === 'object'){ const ov = sanOv(v.ov); if (Object.keys(ov).length) o.ov = ov; }
     if (typeof v.phf === 'string' && v.phf) o.phf = v.phf.slice(0, 24);
-    if (['coarse', 'fine'].includes(v.detail)) o.detail = v.detail; // «Уровень детализации» of the view (medium — by default)
+    if (['coarse', 'fine'].includes(v.detail)) o.detail = v.detail;
+    if (v.noSheet) o.noSheet = true; // its sheet was deleted by the user // «Уровень детализации» of the view (medium — by default)
 
     if (v.kind === 'camera'){
       if (!o.cam) continue;
@@ -7334,8 +7362,22 @@ function surveyAxos(s, force){
 }
 function autoSheetFor(v){
   const sec = { obmer:'obmer', demontazh:'dem', montazh:'mont', mebel:'mont' }[v.phase] || 'gen';
-  const s = { id:vid('v'), kind:'sheet', num:'', sec, ord:1e5, name:v.name, size:'A3', author:'', checker:'', stage:'П', vps:[{ id:vid('vp'), view:v.id, x:25, y:12, scale:100, w:150, h:110 }], pool:true, autoFor:v.id };
+  // the sheet of a plan goes straight into «Листы (все)» (the user's rule: every plan has its sheet there)
+  const s = { id:vid('v'), kind:'sheet', num:'', sec, ord:1e5, name:v.name, size:'A3', author:'', checker:'', stage:'П', vps:[{ id:vid('vp'), view:v.id, x:25, y:12, scale:100, w:150, h:110 }], autoFor:v.id, autoLay:true };
   views.push(s); syncSheetNums(); if (v.phase === 'obmer') surveyAxos(s); return s;
+}
+/* every floor plan is on a sheet: a plan that is on none gets its own (also the plans made by the chat or in older projects);
+   the sheets that waited in «Добавить лист» go into the list. A sheet of a plan deleted by the user does not come back (v.noSheet). */
+function ensurePlanSheets(){
+  let n = 0;
+  for (const s of views) if (s.kind === 'sheet' && s.pool){ delete s.pool; s.ord = s.ord ?? 1e5; n++; }
+  for (const v of [...views]){
+    if (v.kind !== 'plan' || v.noSheet) continue;
+    if (views.some(s => s.kind === 'sheet' && s.vps.some(p => p.view === v.id))) continue;
+    autoSheetFor(v); n++;
+  }
+  if (n) syncSheetNums();
+  return n;
 }
 function newView(kind){
   if (kind === 'detail'){ setTool('callout'); return; }
@@ -7349,7 +7391,7 @@ function newView(kind){
   else if (kind === 'd3'){ let n = same.length + 1; v = { id:vid('v'), kind:'d3', name:'3D-вид ' + n, phase:S.phase }; }
   else if (kind === 'sheet' || /^sheet:/.test(kind)){ const cur = curView(); newSheetIn(kind.slice(6) || (cur && cur.kind === 'sheet' && cur.sec !== 'cover' ? cur.sec : 'gen'), 'Новый лист'); return; }
   else return;
-  views.push(v); if (kind === 'plan') autoSheetFor(v); openView(v.id); toast(`Создано: ${KIND_NAME[v.kind].toLowerCase()} «${v.kind === 'sheet' ? v.num : v.name}»${kind === 'plan' ? '. Лист для него — в списке «Добавить лист» у «Листы (все)»' : ''}`);
+  views.push(v); if (kind === 'plan') autoSheetFor(v); openView(v.id); toast(`Создано: ${KIND_NAME[v.kind].toLowerCase()} «${v.kind === 'sheet' ? v.num : v.name}»${kind === 'plan' ? '. Его лист — в «Листы (все)»' : ''}`);
 }
 // «+» at «Виды (все)»: a menu of the views that can be created
 function viewNewMenu(anchor){
@@ -7369,6 +7411,8 @@ function deleteView(id){
   const v = views.find(x => x.id === id); if (!v) return;
   if (v.kind === 'plan' && views.filter(x => x.kind === 'plan').length === 1){ toast('Должен остаться хотя бы один план этажа'); return; }
   views = views.filter(x => x !== v);
+  // the user deleted the sheet of a plan: it is not made again by itself
+  if (v.kind === 'sheet') for (const p of v.vps){ const pv = views.find(x => x.id === p.view); if (pv && pv.kind === 'plan') pv.noSheet = true; }
   for (const s of views) if (s.kind === 'sheet') s.vps = s.vps.filter(p => p.view !== id);
   if (S.viewId === id){ S.viewId = null; openView((views.find(x => x.kind === 'plan') || views[0]).id); }
   renderTree(); scheduleSave(); toast(`Удалено: ${v.kind === 'sheet' ? 'лист ' + v.num : v.name}`);
@@ -7814,8 +7858,8 @@ function setVpTitle(vp, text, on, renameView){
   FDIRTY.file = FDIRTY.copy = true; scheduleSave(); if (S.view === 'sheet'){ drawSheet(); renderOptbar(); } renderTree();
 }
 function sheetAreaDefault(v){
-  const [Wm, Hm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, st = stampOf(v);
-  const F = frameOf(v), right = Wm - F.r - 4 - (v.expl ? explW(v.expl) + 6 : 0), bottom = Hm - F.b - st.h - 4, L = F.l + 5, T = F.t + 4;
+  const [Wm, Hm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, stH = stampExt(stampOf(v)).h;
+  const F = frameOf(v), right = Wm - F.r - 4 - (v.expl ? explW(v.expl) + 6 : 0), bottom = Hm - F.b - stH - 4, L = F.l + 5, T = F.t + 4;
   return { x:L, y:T, w:Math.max(60, right - L), h:Math.max(60, bottom - T) };
 }
 const sheetArea = v => v.area && v.area.w > 10 && v.area.h > 10 ? v.area : sheetAreaDefault(v);
@@ -7933,9 +7977,22 @@ function drawStampEls(g, st, x0, y0, txt, sel){
   }
 }
 // title block: the stamp chosen for the sheet (by default GOST 21.101 form 3)
+/* the stamp stands in the corner of the frame by its own lines (not by the «Ширина/Высота» of the editor): the right-bottom
+   corner of its lines and rectangles goes to the frame corner — after deleting columns or changing the size it never leaves the frame */
+function stampExt(st){
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const e of st.el){
+    if (e.t === 'l'){ x0 = Math.min(x0, e.x, e.x2); x1 = Math.max(x1, e.x, e.x2); y0 = Math.min(y0, e.y, e.y2); y1 = Math.max(y1, e.y, e.y2); }
+    else if (e.t === 'r'){ x0 = Math.min(x0, e.x); x1 = Math.max(x1, e.x + e.w); y0 = Math.min(y0, e.y); y1 = Math.max(y1, e.y + e.h); }
+  }
+  if (!isFinite(x0)) return { x0:0, y0:0, x1:st.w, y1:st.h, w:st.w, h:st.h };
+  return { x0, y0, x1, y1, w:x1 - x0, h:y1 - y0 };
+}
+// where the stamp's coordinates start on the sheet (mm) and its box there
+function stampPlace(v, Wm, Hm){ const st = stampOf(v), F = frameOf(v), E = stampExt(st), ox = Wm - F.r - E.x1, oy = Hm - F.b - E.y1; return { st, E, ox, oy, x:ox + E.x0, y:oy + E.y0, w:E.w, h:E.h }; }
 function paintStamp(g, v, Wm, Hm){
-  const st = stampOf(v), F = frameOf(v), x0 = Wm - F.r - st.w, y0 = Hm - F.b - st.h;
-  g.fillStyle = '#fff'; g.fillRect(x0, y0, st.w, st.h);
+  const F = frameOf(v), { st, ox:x0, oy:y0, x:bx, y:by, w:bw, h:bh } = stampPlace(v, Wm, Hm);
+  g.fillStyle = '#fff'; g.fillRect(bx, by, bw, bh);
   drawStampEls(g, st, x0, y0, tx => stampText(v, tx));
   g.fillStyle = '#111'; g.font = '600 3.4px "Golos Text", Arial'; g.textAlign = 'right'; g.textBaseline = 'middle'; g.fillText(v.num || '', Wm - F.r - 1, F.t + 3.5);
 }
@@ -8146,8 +8203,8 @@ function stampSetField(v, k, val){
    a field ({author}, {obj}…) is written for this sheet; a plain text of the stamp is changed in the stamp (all sheets with it);
    an empty cell gets a text in the stamp. */
 function stampAtSheet(v, x, y){
-  const st = stampOf(v), [Wm, Hm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, F = frameOf(v), x0 = Wm - F.r - st.w, y0 = Hm - F.b - st.h;
-  if (x < x0 || y < y0 || x > x0 + st.w || y > y0 + st.h) return null;
+  const [Wm, Hm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, P = stampPlace(v, Wm, Hm), st = P.st, x0 = P.ox, y0 = P.oy;
+  if (x < P.x || y < P.y || x > P.x + P.w || y > P.y + P.h) return null;
   const p = { x:x - x0, y:y - y0 }, c = stampCell(st, p);
   const inC = e => c ? e.x >= c.x0 - 0.5 && e.x <= c.x1 + 0.5 && e.y >= c.y0 - 0.3 && e.y <= c.y1 + 0.3 : false;
   const texts = st.el.map((e, i) => ({ e, i })).filter(o => o.e.t === 't' && inC(o.e)).sort((a, b) => Math.hypot(a.e.x - p.x, a.e.y - p.y) - Math.hypot(b.e.x - p.x, b.e.y - p.y));
@@ -8264,7 +8321,7 @@ function openStampEd(id){
   const d = mkModal('stDlg', 'Штампы', `<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><select id="stSel" aria-label="Штамп"></select><button class="btn sm" id="stNew">Новый</button><button class="btn sm" id="stDup">Копия</button><button class="btn sm" id="stRen">Переименовать</button><button class="btn sm danger" id="stDel">Удалить</button><button class="btn sm" id="stReset" title="Вернуть встроенный штамп по ГОСТ">ГОСТ по умолчанию</button>
       <label>Ширина, мм <input id="stW" type="number" min="20" max="800" style="width:64px"></label><label>Высота, мм <input id="stH" type="number" min="10" max="600" style="width:64px"></label></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start"><div style="flex:1 1 520px;min-width:0;overflow:auto;border:1px solid var(--line);background:#fff;border-radius:4px"><canvas id="stCv" style="display:block;touch-action:none"></canvas></div>
-      <div style="flex:0 1 280px;min-width:240px"><div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><button class="btn sm" id="stAddL">+ Линия</button><button class="btn sm" id="stAddR">+ Прямоугольник</button><button class="btn sm" id="stAddT">+ Текст</button><select id="stAddF" aria-label="Добавить поле"><option value="">+ Поле…</option>${STAMP_FIELDS.map(([k, n]) => `<option value="${k}">${esc(n)}</option>`).join('')}</select></div>
+      <div style="flex:0 1 280px;min-width:240px"><div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><button class="btn sm" id="stDrawL" aria-pressed="false" title="Чертить линии щелчками: первый щелчок — начало, следующие — концы (линии идут цепочкой). Привязка к концам, углам и линиям, шаг 0,5 мм; почти горизонтальная/вертикальная линия выпрямляется (Shift — всегда прямо). Правая кнопка, двойной щелчок или Esc — закончить цепочку">✎ Чертить линии</button><select id="stLw" aria-label="Толщина новых линий" title="Толщина новых линий"><option value="0.25">тонкая 0,25</option><option value="0.35">0,35</option><option value="0.5">основная 0,5</option><option value="0.6">0,6</option><option value="0.7">0,7</option></select><button class="btn sm" id="stAddL">+ Линия</button><button class="btn sm" id="stAddR">+ Прямоугольник</button><button class="btn sm" id="stAddT">+ Текст</button><select id="stAddF" aria-label="Добавить поле"><option value="">+ Поле…</option>${STAMP_FIELDS.map(([k, n]) => `<option value="${k}">${esc(n)}</option>`).join('')}</select></div>
       <div style="border:1px solid var(--line);border-radius:4px;padding:6px;margin-bottom:8px"><div class="row" style="gap:6px;align-items:center;margin-bottom:6px"><b style="font-size:12px">Ячейка</b><span class="libnote" id="stCellInfo">щёлкните ячейку на штампе</span></div>
         <div class="row" style="gap:4px;flex-wrap:wrap"><label>Высота/ширина новой, мм <input id="stBand" type="number" min="1" max="200" step="0.5" value="5" style="width:56px"></label>
         <button class="btn sm" id="stRowAb">Строка выше</button><button class="btn sm" id="stRowA">Строка ниже</button><button class="btn sm danger" id="stRowD">Удалить строку</button>
@@ -8289,6 +8346,11 @@ function openStampEd(id){
     const e = st.el[STE.sel], hs = 5 / k;
     if (e && e.t !== 't'){ g.fillStyle = '#fff'; g.strokeStyle = '#1a73e8'; g.lineWidth = 1 / k;
       for (const [x, y] of e.t === 'l' ? [[e.x, e.y], [e.x2, e.y2]] : [[e.x, e.y], [e.x + e.w, e.y], [e.x + e.w, e.y + e.h], [e.x, e.y + e.h]]){ g.fillRect(pad + x - hs / 2, pad + y - hs / 2, hs, hs); g.strokeRect(pad + x - hs / 2, pad + y - hs / 2, hs, hs); } }
+    // drawing lines: the snapped point and the rubber line from the start of the segment, with its length
+    if (STE.drawL && STE.cur){ const c = STE.cur; g.strokeStyle = '#1a73e8'; g.lineWidth = 0.8 / k; g.beginPath(); g.moveTo(pad + c.x - 2.5 / k * 4, pad + c.y); g.lineTo(pad + c.x + 2.5 / k * 4, pad + c.y); g.moveTo(pad + c.x, pad + c.y - 2.5 / k * 4); g.lineTo(pad + c.x, pad + c.y + 2.5 / k * 4); g.stroke();
+      if (c.snap){ g.strokeRect(pad + c.x - 3 / k, pad + c.y - 3 / k, 6 / k, 6 / k); }
+      if (STE.lf){ const f = STE.lf; g.setLineDash([1.2, 0.8]); g.lineWidth = Math.max(0.25, +(q('stLw') || {}).value || 0.35); g.beginPath(); g.moveTo(pad + f.x, pad + f.y); g.lineTo(pad + c.x, pad + c.y); g.stroke(); g.setLineDash([]);
+        const L = Math.hypot(c.x - f.x, c.y - f.y); g.fillStyle = '#1a73e8'; g.font = `${10 / k}px Arial`; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText(String(Math.round(L * 10) / 10).replace('.', ',') + ' мм', pad + c.x + 4 / k, pad + c.y - 3 / k); } }
     const inf = q('stCellInfo'); if (inf) inf.textContent = cl ? `${String(Math.round((cl.x1 - cl.x0) * 10) / 10).replace('.', ',')} × ${String(Math.round((cl.y1 - cl.y0) * 10) / 10).replace('.', ',')} мм` : 'щёлкните ячейку на штампе';
   };
   const cellOp = op => { if (!STE.pt){ toast('Сначала щёлкните ячейку на штампе'); return; } try { const m = stampCellOp(cur(), STE.pt, op, q('stBand').value); STE.sel = -1; all(); save(); toast(m); } catch (er){ toast(er.message); } };
@@ -8304,6 +8366,7 @@ function openStampEd(id){
   };
   const all = () => {
     const st = cur(); q('stSel').innerHTML = stamps().map(s => `<option value="${s.id}"${s.id === st.id ? ' selected' : ''}>${esc(s.n)}</option>`).join('');
+    { const E = stampExt(st); if (st.el.some(e => e.t !== 't')){ st.w = Math.round(E.x1 * 100) / 100; st.h = Math.round(E.y1 * 100) / 100; } } // the size = what the lines take
     q('stW').value = st.w; q('stH').value = st.h; q('stDel').disabled = stamps().length < 2; draw(); props();
   };
   const add = e => { const st = cur(); st.el.push(e); STE.sel = st.el.length - 1; draw(); props(); save(); };
@@ -8313,8 +8376,9 @@ function openStampEd(id){
   q('stRen').onclick = () => { const s = cur(), n = prompt('Имя штампа', s.n); if (n && n.trim()){ s.n = n.trim().slice(0, 60); all(); save(); } };
   q('stDel').onclick = () => { const s = cur(); if (stamps().length < 2 || !confirm(`Удалить штамп «${s.n}»? Листы с ним получат первый штамп из списка.`)) return; STD.stamps = stamps().filter(x => x !== s); for (const v of views) if (v.stamp === s.id) delete v.stamp; STE.id = stamps()[0].id; STE.sel = -1; all(); save(); };
   q('stReset').onclick = () => { const s = cur(); if (!confirm(`Заменить содержимое штампа «${s.n}» встроенным штампом по ГОСТ 21.101?`)) return; const gst = GOST_STAMP(); s.w = gst.w; s.h = gst.h; s.el = gst.el; STE.sel = -1; all(); save(); };
-  q('stW').onchange = () => { cur().w = clamp(+q('stW').value || 185, 20, 800); all(); save(); };
-  q('stH').onchange = () => { cur().h = clamp(+q('stH').value || 55, 10, 600); all(); save(); };
+  // the size moves the right / bottom border together with its lines (the last column / row gets wider), the rest stays
+  q('stW').onchange = () => { const st = cur(), E = stampExt(st), nw = clamp(+q('stW').value || 185, 20, 800), d = nw - E.x1; if (Math.abs(d) > 0.01){ stampShift(st, 'x', E.x1 - 0.02, d); st.w = nw; } all(); save(); };
+  q('stH').onchange = () => { const st = cur(), E = stampExt(st), nh = clamp(+q('stH').value || 55, 10, 600), d = nh - E.y1; if (Math.abs(d) > 0.01){ stampShift(st, 'y', E.y1 - 0.02, d); st.h = nh; } all(); save(); };
   q('stAddL').onclick = () => add({ t:'l', x:0, y:cur().h / 2, x2:cur().w, y2:cur().h / 2, lw:0.35 });
   q('stAddR').onclick = () => add({ t:'r', x:5, y:5, w:40, h:10, lw:0.35 });
   q('stAddT').onclick = () => add({ t:'t', tx:'Текст', x:5, y:5, s:2.5, b:false, al:'left' });
@@ -8337,10 +8401,41 @@ function openStampEd(id){
   const handleAt = p => { const e = cur().el[STE.sel]; if (!e || e.t === 't') return null; const tol = 5 / STE.k;
     const hs = e.t === 'l' ? [['p1', e.x, e.y], ['p2', e.x2, e.y2]] : [['c00', e.x, e.y], ['c10', e.x + e.w, e.y], ['c11', e.x + e.w, e.y + e.h], ['c01', e.x, e.y + e.h]];
     const f = hs.find(([, x, y]) => Math.abs(p.x - x) <= tol && Math.abs(p.y - y) <= tol); return f ? f[0] : null; };
-  cv2.onpointerdown = ev => { const p = at(ev), hd = handleAt(p);
+  // «Чертить линии»: snap to ends and corners of lines / rectangles and the stamp border, then onto lines, then to the 0,5 mm step
+  const snapSt = (p, from, shift) => {
+    const st = cur(), tol = 7 / STE.k, pts = [[0, 0], [st.w, 0], [st.w, st.h], [0, st.h]], ln = [];
+    for (const e of st.el){ if (e.t === 'l'){ pts.push([e.x, e.y], [e.x2, e.y2]); ln.push([e.x, e.y, e.x2, e.y2]); } else if (e.t === 'r'){ const r = [[e.x, e.y], [e.x + e.w, e.y], [e.x + e.w, e.y + e.h], [e.x, e.y + e.h]]; pts.push(...r); for (let i = 0; i < 4; i++) ln.push([...r[i], ...r[(i + 1) % 4]]); } }
+    ln.push([0, 0, st.w, 0], [st.w, 0, st.w, st.h], [0, st.h, st.w, st.h], [0, 0, 0, st.h]);
+    let q2 = { x:Math.round(p.x * 2) / 2, y:Math.round(p.y * 2) / 2, snap:false };
+    // straight from the start: Shift, or a line within ~4° of horizontal / vertical
+    if (from){ const dx = p.x - from.x, dy = p.y - from.y; if (shift || Math.abs(dy) < Math.abs(dx) * 0.07) q2.y = from.y; else if (Math.abs(dx) < Math.abs(dy) * 0.07) q2.x = from.x;
+      if (shift && Math.abs(dx) < Math.abs(dy)){ q2.y = Math.round(p.y * 2) / 2; q2.x = from.x; } }
+    const near = pts.filter(([x, y]) => Math.hypot(p.x - x, p.y - y) <= tol).sort((A, B) => Math.hypot(p.x - A[0], p.y - A[1]) - Math.hypot(p.x - B[0], p.y - B[1]))[0];
+    if (near && !(from && (q2.x === from.x || q2.y === from.y) && Math.abs(near[0] - q2.x) > 0.01 && Math.abs(near[1] - q2.y) > 0.01)) return { x:near[0], y:near[1], snap:true };
+    for (const [x1, y1, x2, y2] of ln){
+      if (Math.abs(y1 - y2) < EPS_ST && p.x >= Math.min(x1, x2) - tol && p.x <= Math.max(x1, x2) + tol && Math.abs(p.y - y1) <= tol && !(from && q2.y === from.y && from.y !== y1)) { q2.y = y1; q2.snap = true; }
+      else if (Math.abs(x1 - x2) < EPS_ST && p.y >= Math.min(y1, y2) - tol && p.y <= Math.max(y1, y2) + tol && Math.abs(p.x - x1) <= tol && !(from && q2.x === from.x && from.x !== x1)) { q2.x = x1; q2.snap = true; }
+    }
+    return q2;
+  };
+  const drawBtn = () => { const b = q('stDrawL'); b.setAttribute('aria-pressed', STE.drawL ? 'true' : 'false'); b.classList.toggle('primary', !!STE.drawL); cv2.style.cursor = STE.drawL ? 'crosshair' : ''; };
+  q('stDrawL').onclick = () => { STE.drawL = !STE.drawL; STE.lf = null; STE.cur = null; drawBtn(); draw(); if (STE.drawL) toast('Чертите линии щелчками. Закончить цепочку — правая кнопка, двойной щелчок или Esc'); };
+  cv2.oncontextmenu = ev => { if (STE.drawL){ ev.preventDefault(); STE.lf = null; draw(); } };
+  // the dialog is made once and opened again: the handlers of this opening are kept on the elements, the listeners are added once
+  d._esc = ev => { if (ev.key === 'Escape' && STE.drawL){ ev.stopPropagation(); if (STE.lf){ STE.lf = null; draw(); } else { STE.drawL = false; drawBtn(); draw(); } } };
+  cv2._dmove = ev => { if (!STE.drawL) return; STE.cur = snapSt(at(ev), STE.lf, ev.shiftKey); draw(); };
+  cv2._ddown = ev => {
+    if (!STE.drawL || ev.button !== 0) return; ev.stopImmediatePropagation();
+    const p = snapSt(at(ev), STE.lf, ev.shiftKey);
+    if (STE.lf && Math.hypot(p.x - STE.lf.x, p.y - STE.lf.y) > 0.3){ const st = cur(); st.el.push({ t:'l', x:STE.lf.x, y:STE.lf.y, x2:p.x, y2:p.y, lw:+q('stLw').value || 0.35 }); stampDedupe(st); save(); }
+    STE.lf = { x:p.x, y:p.y }; STE.cur = p; draw();
+  };
+  if (!cv2._hooked){ cv2._hooked = true; d.addEventListener('keydown', ev => d._esc(ev), true); cv2.addEventListener('pointermove', ev => cv2._dmove(ev)); cv2.addEventListener('pointerdown', ev => cv2._ddown(ev), true); }
+  STE.drawL = false; STE.lf = null; STE.cur = null; drawBtn();
+  cv2.onpointerdown = ev => { if (STE.drawL) return; const p = at(ev), hd = handleAt(p);
     if (hd){ STE.drag = { p, o:JSON.parse(JSON.stringify(cur().el[STE.sel])), hd }; try { cv2.setPointerCapture(ev.pointerId); } catch (er){} return; }
     const i = hit(p); STE.sel = i; STE.pt = p; if (i >= 0){ const e = cur().el[i]; STE.drag = { p, o:JSON.parse(JSON.stringify(e)) }; try { cv2.setPointerCapture(ev.pointerId); } catch (er){} } draw(); props(); };
-  cv2.ondblclick = ev => { const p = at(ev), i = hit(p), e = cur().el[i];
+  cv2.ondblclick = ev => { if (STE.drawL){ STE.lf = null; draw(); return; } const p = at(ev), i = hit(p), e = cur().el[i];
     if (e && e.t === 't'){ const t = prompt('Текст', e.tx); if (t != null){ e.tx = t.slice(0, 200); draw(); props(); save(); } return; }
     STE.pt = p; cellText(); };
   cv2.onpointermove = ev => { if (!STE.drag) return; const p = at(ev), e = cur().el[STE.sel], o = STE.drag.o, sn = v => Math.round(v * 2) / 2, dx = sn(p.x - STE.drag.p.x), dy = sn(p.y - STE.drag.p.y);
@@ -8621,6 +8716,8 @@ function renderStd(){
     row('Выход выносной линии за размерную, мм', num('over', 0.5, 0, 20));
     row('Выход размерной линии за выносную, мм', num('ext', 0.5, 0, 20));
     row('Высота текста марок (буквы элементов), мм', num('tagMm', 0.5, 1, 10));
+    row('Длина засечки, мм (ГОСТ 2.307: 2–4)', num('tickMm', 0.5, 0.5, 8));
+    row('Толщина засечки, мм', num('tickW', 0.05, 0.1, 1.5));
   }
 }
 function openStd(tab){ if (tab) STD_TAB = tab; renderStd(); stdDlg.hidden = false; }
@@ -10659,6 +10756,7 @@ function renderPanel(_el, _it){
       + prow('Стыки (начало / конец)', `<span class="val">${cuts[0].dj ? 'отсоединено' : jn(cuts[0].kind)} / ${cuts[1].dj ? 'отсоединено' : jn(cuts[1].kind)}</span>`)
       + `<div class="pbtns">${[0, 1].map(e => { const on = !(it.dj && it.dj[e]) && cuts[e].kind !== 'free'; return `<button class="btn sm" id="sJ${e}" title="${on ? 'Разорвать стык: торец станет прямым, соседняя стена не будет двигаться вместе с этой' : 'Соединить: восстановить стык или дотянуть конец до ближайшей стены'}">${e ? 'Конец' : 'Начало'}: ${on ? 'отсоединить' : 'присоединить'}</button>`; }).join('')}</div>`
       + `<div class="pgrp">Слои (снаружи → внутрь)</div>` + wallLayers(it).map((l, i) => prow(`${i + 1}. <span class="swatch" style="background:${(MATS[l.m] || MATS.generic).c}"></span>${esc((MATS[l.m] || MATS.generic).n)}`, `<span class="val">${mm(l.s1 - l.s0)}</span>`)).join('')
+      + ((it.svNo && it.svNo.length) || (it.svNoT && it.svNoT.length) ? `<div class="pbtns"><button class="btn sm" id="sSvBack" title="Обмерные размеры этой стены удалены вручную — поставить их снова">Вернуть обмерные размеры</button></div>` : '')
       + `<div class="pbtns"><button class="btn sm" id="sFlipL">Поменять стороны (Пробел)</button><button class="btn sm" id="sDup">Копия</button><button class="btn sm danger" id="sDel">Удалить</button></div>`;
   } else if (isOp(it)){
     const door = it.type === 'door';
@@ -10826,6 +10924,7 @@ function renderPanel(_el, _it){
     q('sType').onchange = e => { pushUndo(); markEdited(); keepLocLine(it, () => { it.wt = e.target.value; if (typeById(it.wt)) it.t = typeT(typeById(it.wt)); }); el.dataset.id = 'x'; rebuild(); };
     const te = q('sTypeEdit'); if (te) te.onclick = () => openTypes(it.wt);
     q('sFlipL').onclick = () => flipSelected();
+    if (q('sSvBack')) q('sSvBack').onclick = () => { pushUndo('Вернуть обмерные размеры'); markEdited(); delete it.svNo; delete it.svNoT; delete STD.svOff; SV_PENDING = true; el.dataset.id = 'x'; rebuild(); toast(S.phase === 'obmer' ? 'Обмерные размеры стены возвращены' : 'Обмерные размеры стены вернутся на плане стадии «Обмер»'); };
     for (const e of [0, 1]){ const b = q('sJ' + e); if (b) b.onclick = () => toggleJoin(it, e); }
   } else if (isOp(it)){
     bind('sOW', v => { it.pos = r4(it.pos - it.w / 2 + v / 2); it.w = v; });
@@ -10978,6 +11077,8 @@ function openFolderAdd(fid){
   d.hidden = false;
 }
 function renderTree(){
+  // a plan made in any way (chat, copy, older project) gets its sheet — checked when the list of plans changes
+  { const sig = views.filter(v => v.kind === 'plan').map(v => v.id).join(','); if (sig !== renderTree.planSig){ renderTree.planSig = sig; if (ensurePlanSheets()) scheduleSave(); } }
   const ul = $('#tree');
   const btn = (label, act, cur) => `<li><button data-tree="${act}"${cur ? ' aria-current="true"' : ''}>${label}</button></li>`;
   const grs = items.filter(g => g.type === 'grid');
@@ -11208,10 +11309,10 @@ function sanitizeItems(arr){
     if (!it || typeof it !== 'object') continue;
     const id = Math.round(+it.id); if (!(id > 0) || seen.has(id)) continue;
     let o = null;
-    if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it), ...(Array.isArray(it.svNo) ? { svNo:it.svNo.filter(s => s === 1 || s === -1) } : {}), ...(Array.isArray(it.dj) && (it.dj[0] || it.dj[1]) ? { dj:[!!it.dj[0], !!it.dj[1]] } : {}), ...(LOC_LINES[it.loc] && it.loc !== 'center' ? { loc:it.loc } : {}), ...(it.nrb ? { nrb:true } : {}) };
+    if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it), ...(Array.isArray(it.svNo) ? { svNo:it.svNo.filter(s => s === 1 || s === -1) } : {}), ...(Array.isArray(it.svNoT) ? { svNoT:it.svNoT.filter(s => s === 1 || s === -1) } : {}), ...(Array.isArray(it.dj) && (it.dj[0] || it.dj[1]) ? { dj:[!!it.dj[0], !!it.dj[1]] } : {}), ...(LOC_LINES[it.loc] && it.loc !== 'center' ? { loc:it.loc } : {}), ...(it.nrb ? { nrb:true } : {}) };
     else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
     else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0, flip:!!it.flip, hand:!!it.hand, ...(it.type === 'door' && it.op ? { op:true } : it.type === 'door' && it.gl ? { gl:true } : {}), ...(it.type === 'window' && [1, 2, 3].includes(+it.sash) ? { sash:+it.sash } : {}), ...(it.type === 'door' && it.lf === 'flat' ? { lf:'flat' } : {}), ...(it.type === 'window' && it.bd && N(it.bd.w) && +it.bd.w > 0 ? { bd:{ w:Math.max(+it.bd.w, 0.3), side:it.bd.side === 'l' ? 'l' : 'r', ...(it.bd.low === 'panel' ? { low:'panel' } : {}) } } : {}), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
-    else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1, ...(it.dup ? { dup:true } : {}), ...(it.tot ? { tot:true } : {}) } : {}), ...(typeof it.dph === 'string' ? { dph:it.dph.slice(0, 24) } : {}), ...(typeof it.dt === 'string' && it.dt ? { dt:it.dt.slice(0, 24) } : {}), ...(it.demo ? { demo:true, dk:String(it.dk || '').slice(0, 30) } : {}),
+    else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1, ...(it.dup ? { dup:true } : {}), ...(it.tot ? { tot:true } : {}), ...(Number.isInteger(+it.sg) && +it.sg > 0 ? { sg:+it.sg } : {}) } : {}), ...(typeof it.dph === 'string' ? { dph:it.dph.slice(0, 24) } : {}), ...(typeof it.dt === 'string' && it.dt ? { dt:it.dt.slice(0, 24) } : {}), ...(it.demo ? { demo:true, dk:String(it.dk || '').slice(0, 30) } : {}),
       ...(it.tp && typeof it.tp === 'object' ? { tp:Object.fromEntries(Object.entries(it.tp).filter(([k, v]) => /^\d{1,3}$/.test(k) && v && N(v.u) && N(v.v)).map(([k, v]) => [k, { u:clamp(+v.u, -100, 100), v:clamp(+v.v, -100, 100) }])) } : {}),
       ...(it.txt && typeof it.txt === 'object' ? { txt:Object.fromEntries(Object.entries(it.txt).filter(([k, v]) => /^\d{1,3}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.slice(0, 40)])) } : {}) };
     else if (it.type === 'grid' && seg(it)) o = { id, type:'grid', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, name:String(it.name || '?').slice(0, 6) };
@@ -11296,7 +11397,7 @@ function loadRecord(rec){
   fileHandle = null;
   applySettings(rec.settings); showName();
   for (const k in fitted) delete fitted[k];
-  views = sanitizeViews(rec.views) || DEFAULT_VIEWS(); vpImgs.clear(); SHEET.sel = null; SV_PENDING = true;
+  views = sanitizeViews(rec.views) || DEFAULT_VIEWS(); vpImgs.clear(); SHEET.sel = null; SV_PENDING = true; ensurePlanSheets();
   if (!rec.svl) for (const v of views) surveyTpl(v);
   S.viewId = null;
   const start = views.find(v => v.id === rec.viewId) || views.find(v => v.kind === 'plan');
@@ -11625,7 +11726,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2325');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2348');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -12934,6 +13035,12 @@ function parseOne(f){
     if (/(?:скрой|убер|выключ|спрячь|без)/.test(f)) return { a:'vptitle', on:false };
     if (/(?:покажи|верни|включ)/.test(f)) return { a:'vptitle', on:true };
   }
+  // lines of the stamp: «линия в штампе от 0 10 до 65 10», «начерти штамп линиями»
+  if (/штамп/.test(f) && /(?:лини|черт|начерт|нарису)/.test(f)){
+    const m = f.match(new RegExp('от\\s+(-?[\\d.]+)\\s+(-?[\\d.]+)\\s+до\\s+(-?[\\d.]+)\\s+(-?[\\d.]+)'));
+    if (m) return { a:'stampline', x:+m[1], y:+m[2], x2:+m[3], y2:+m[4], lw:/толст|основн/.test(f) ? 0.5 : /тонк/.test(f) ? 0.25 : 0.35 };
+    return { a:'stampline', draw:true };
+  }
   { const m = f.match(/(?:^|\s)(?:в\s+)?штамп[а-яё]*\s+(?:(?:напиши|впиши|поставь|укажи)\s+)?(разработал|разраб|проверил|н\.?\s*контрол[а-яё]*|нормоконтрол[а-яё]*|гип|объект|шифр|стади[а-яё]*|дат[а-яё]*|организаци[а-яё]*|проект|название листа)\s*[:—-]?\s*(.+)$/);
     if (m){ const K = { разработал:'author', разраб:'author', проверил:'checker', гип:'gip', объект:'obj', шифр:'code', проект:'proj', 'название листа':'sheet' }, w = m[1].replace(/\s+/g, ' ');
       const k = K[w] || (/контрол/.test(w) ? 'nk' : /^стади/.test(w) ? 'stage' : /^дат/.test(w) ? 'date' : /^организ/.test(w) ? 'org' : w);
@@ -13091,6 +13198,11 @@ function parseOne(f){
   if (/3д|перспектив|объемн/.test(f)) return { a:'view', v:'d3' };
   if (/план|сверху/.test(f)) return { a:'view', v:'plan' };
   if (/(?:скрыт[а-яё]*\s+лини|стиль\s+лини|^линии$|^(?:стиль\s+)?(?:контур|каркас))/.test(f)) return { a:'style', s:'lines' };
+  // dimension ticks and text: «засечки меньше», «засечки 2 мм», «текст размеров 2,5 мм», «размеры стрелками»
+  if (/засеч/.test(f)){ const m = f.match(new RegExp('засеч[а-яё]*\\s+(?:размер[а-яё]*\\s+)?' + NUM)); if (m) return { a:'anno', tickMm:toM(m[1], m[2] || 'мм') * 1000 };
+    if (/меньш|мельч|короч|уменьш/.test(f)) return { a:'anno', smaller:true }; if (/больш|крупн|длинн|увелич/.test(f)) return { a:'anno', bigger:true }; }
+  { const m = f.match(new RegExp('текст[а-яё]*\\s+размер[а-яё]*\\s+' + NUM)); if (m) return { a:'anno', textMm:toM(m[1], m[2] || 'мм') * 1000 }; }
+  if (/размер[а-яё]*\s+стрелк/.test(f)) return { a:'anno', tick:'arrow' };
   // level of detail of the view: «детализация высокая», «высокая детализация», «подробно», «низкая детализация»
   { const m = f.match(/(?:детализац[а-яё]*\s+(высок|средн|низк|подробн|детальн)|(высок|средн|низк)[а-яё]*\s+детализац|(?:нарисуй|покажи|сделай)\s+(?:план\s+)?(подробн|детальн))/);
     if (m){ const w = m[1] || m[2] || m[3]; return { a:'dlevel', d:/высок|подробн|детальн/.test(w) ? 'fine' : /низк/.test(w) ? 'coarse' : 'medium' }; } }
@@ -13275,7 +13387,7 @@ function execOne(a, ctx){
     }
     case 'clear': { const n = items.filter(i => !isMeta(i)).length; if (!n) return 'Модель и так пуста'; if (!confirm(`Удалить ВСЮ модель — ${n} элементов (стены, двери, размеры…)?\n\nВернуть можно кнопкой «Отменить» (Ctrl+Z).`)) return 'Отменено: модель не тронута'; pushUndo('Очистить всё'); markEdited(); items = []; clearSel(); voice.pen = voice.chainStart = voice.room = null; return `Модель очищена (${n} элементов). Вернуть — Ctrl+Z`; }
     case 'deldims': { const all = a.what === 'all', ids = items.filter(d => (d.type === 'dim' || d.type === 'adim' || d.type === 'rdim') && (all || (d.type === 'dim' ? dimShown(d) : shown(d)))).map(d => d.id); if (!ids.length) return 'Размеров нет'; pushUndo('Удалить размеры'); markEdited(); const del = new Set(ids); items = items.filter(i => !del.has(i.id)); clearSel(); const sv = !all && S.phase === 'obmer'; if (sv) STD.svOff = true; return `Удалено размеров: ${ids.length}`+ (sv ? '. Обмерные размеры убраны — проставить их снова: «Размеры заново» (Аннотации) или «построй размеры заново»' : ''); }
-    case 'redims': { if (S.phase !== 'obmer' && !a.force) throw new Error('Обмерные размеры строятся на плане стадии «Обмер» — откройте обмерный план'); pushUndo('Обмерные размеры заново'); markEdited(); delete STD.svOff; const n0 = items.filter(d => d.type === 'dim' && d.survey && lvOf(d) === actLv()).length; items = items.filter(d => !(d.type === 'dim' && d.survey)); refreshSurveyDims(); const n1 = items.filter(d => d.type === 'dim' && d.survey).length; return `Обмерные размеры построены заново: ${n1} (было ${n0})`; }
+    case 'redims': { if (S.phase !== 'obmer' && !a.force) throw new Error('Обмерные размеры строятся на плане стадии «Обмер» — откройте обмерный план'); pushUndo('Обмерные размеры заново'); markEdited(); delete STD.svOff; for (const w of items) if (w.type === 'wall'){ delete w.svNo; delete w.svNoT; } /* «заново» — also the sides whose chain was deleted by hand */ const n0 = items.filter(d => d.type === 'dim' && d.survey && lvOf(d) === actLv()).length; items = items.filter(d => !(d.type === 'dim' && d.survey)); refreshSurveyDims(); const n1 = items.filter(d => d.type === 'dim' && d.survey).length; return `Обмерные размеры построены заново: ${n1} (было ${n0})`; }
     case 'select': { const it = String(a.id)[0] === '@' ? findEl(a.id) : byId(Number(a.id)); if (!it) throw new Error(`Нет элемента №${a.id}`); setSel([it.id]); rebuild(); return `Выбрано: ${tagNameL(it)}`; }
     case 'setop': {
       const it = findEl(a.el); if (!isOp(it)) throw new Error('Это не окно и не дверь');
@@ -13378,6 +13490,14 @@ function execOne(a, ctx){
       setView(a.v); return viewNames[a.v];
     }
     case 'style': { const s = ['lines', 'real', 'graph'].includes(a.s) ? a.s : 'shaded'; setStyle(s); return 'Стиль: ' + STYLE_NAME[s]; }
+    case 'anno': { // dimension settings: засечки, текст, выносные линии (all values in mm of paper)
+      const A = STD.anno, ch = [];
+      const set = (k, n, lo, hi) => { if (a[k] != null && Number.isFinite(+a[k])){ A[k] = clamp(+a[k], lo, hi); ch.push(`${n} ${String(A[k]).replace('.', ',')} мм`); } };
+      if (['tick', 'arrow', 'dot'].includes(a.tick)){ A.tick = a.tick; ch.push({ tick:'засечки', arrow:'стрелки', dot:'точки' }[a.tick]); }
+      if (a.smaller || a.bigger){ const f = a.smaller ? 0.75 : 1.33; A.tickMm = clamp(Math.round((A.tickMm || 2) * f * 10) / 10, 0.5, 8); ch.push(`засечка ${String(A.tickMm).replace('.', ',')} мм`); }
+      set('tickMm', 'засечка', 0.5, 8); set('tickW', 'толщина засечки', 0.1, 1.5); set('textMm', 'текст', 1, 10); set('ext', 'выход линии', 0, 20); set('over', 'выносная за линию', 0, 20); set('gap', 'отступ выносной', 0, 20);
+      if (!ch.length) throw new Error('Что поменять у размеров? Например: засечки 2 мм, текст 2,5 мм');
+      applyStd(); annoDirty = true; return 'Размеры: ' + ch.join(', '); }
     case 'dlevel': { const d = DETAIL_NAME[a.d] ? a.d : 'medium'; setDetail(d); return 'Детализация вида: ' + DETAIL_NAME[d]; }
     case 'grid': S.grid = !!a.on; grids.visible = S.grid; $('#cGrid').checked = S.grid; return S.grid ? 'Сетка включена' : 'Сетка скрыта';
     case 'fit': fit(); return 'Показываю всё';
@@ -13642,6 +13762,11 @@ function execMore(a, ctx){
       const q = String(a.k || '').toLowerCase().trim(), f = STAMP_FIELDS.find(x => x[0] === q || x[1].toLowerCase() === q || x[1].toLowerCase().startsWith(q.slice(0, 5)));
       if (!f) throw new Error('Нет такого поля штампа. Поля: ' + STAMP_FIELDS.map(x => x[1]).join(', '));
       stampSetField(sv, f[0], a.val); scheduleSave(); if (S.view === 'sheet') drawSheet(); return `Штамп листа «${sv.name}»: ${f[1]} — ${stampVal(sv, f[0]) || '(пусто)'}`; }
+    case 'stampline': { const sv = viewBy(a.sheet || 'current') || curView(), st = a.stamp ? stamps().find(s => s.n === a.stamp || s.id === a.stamp) : stampOf(sv && sv.kind === 'sheet' ? sv : views.find(x => x.kind === 'sheet') || {});
+      if (!st) throw new Error('Нет такого штампа');
+      if (a.draw || ![a.x, a.y, a.x2, a.y2].every(v => Number.isFinite(+v))){ openStampEd(st.id); const b = document.getElementById('stDrawL'); if (b && !STE.drawL) b.click(); return `Штамп «${st.n}»: чертите линии щелчками (правая кнопка или Esc — закончить цепочку)`; }
+      const L = { t:'l', x:+a.x, y:+a.y, x2:+a.x2, y2:+a.y2, lw:clamp(+a.lw || 0.35, 0.05, 3) }; st.el.push(L); stampDedupe(st); scheduleSave(); if (S.view === 'sheet') drawSheet();
+      return `В штамп «${st.n}» добавлена линия ${L.x}, ${L.y} → ${L.x2}, ${L.y2} мм`; }
     case 'stampcell': { const st = a.stamp ? stamps().find(s => s.n === a.stamp || s.id === a.stamp) : stampOf(viewBy(a.sheet || 'current') || curView()); if (!st) throw new Error('Нет такого штампа');
       if (a.open){ openStampEd(st.id); return 'Открыт редактор штампа'; }
       const p = { x:+a.x, y:+a.y }; if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) throw new Error('Нужна точка ячейки x, y в мм от левого верхнего угла штампа');
@@ -13779,7 +13904,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 {"a":"autodim"} — проставить размеры по наружным стенам
 {"a":"rotate"} — повернуть выбранное на 90°
 {"a":"delete","target":"selected"} — "selected", "last" или номер; {"a":"select","id":5}
-{"a":"view","v":"plan"} — "plan","d3","axo","dim"; {"a":"facade","side":"S"}; {"a":"dlevel","d":"coarse"|"medium"|"fine"} — уровень детализации открытого вида (fine — высокий: коробки и наличники дверей, полотно 40 мм, рамы и стёкла окон, подоконники и отливы); {"a":"style","s":"lines"|"shaded"|"graph"|"real"} (graph — графичный: светлые тона, мягкие тени, тёмный разрез с крапом); {"a":"fit"}; {"a":"undo"}; {"a":"redo"}; {"a":"clear"}
+{"a":"view","v":"plan"} — "plan","d3","axo","dim"; {"a":"facade","side":"S"}; {"a":"anno","tickMm":2,"tickW":0.35,"tick":"tick"|"arrow"|"dot","textMm":2.5,"ext":2,"over":2,"gap":1.5,"smaller":true} — оформление размеров (мм на бумаге; smaller/bigger — засечки мельче/крупнее); {"a":"dlevel","d":"coarse"|"medium"|"fine"} — уровень детализации открытого вида (fine — высокий: коробки и наличники дверей, полотно 40 мм, рамы и стёкла окон, подоконники и отливы); {"a":"style","s":"lines"|"shaded"|"graph"|"real"} (graph — графичный: светлые тона, мягкие тени, тёмный разрез с крапом); {"a":"fit"}; {"a":"undo"}; {"a":"redo"}; {"a":"clear"}
 Стадии как в Revit: "obmer" (обмер, существующее), "demontazh", "montazh", "mebel"; новые элементы создаются в текущей стадии вида.
 {"a":"phase","k":"demontazh"} — стадия вида, "all" = показать все; {"a":"demolish","el":"@Д"} — снести элемент в текущей стадии (undo:true — отменить снос);
 {"a":"openview","id":"<id вида>"}; {"a":"newview","kind":"sheet"} — "plan","d3","sheet","detail".
@@ -13809,7 +13934,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 Мебель: {"a":"furn","k":"<ключ или часть названия из списка мебели>","room":"1","x":0,"z":0,"rot":90,"w":3.2,"d":1.6,"h":0.68,"bo":0} — поставить модель (в центр помещения или в точку; в стены не встанет); w/d/h меняют размер модели для всех её экземпляров; {"a":"famplace","name":"Стол","x":0,"z":0}.
 Помещения: у каждой стадии свои помещения и нумерация (обмер, монтаж); {"a":"roomset","num":"1","name":"Кухня","newnum":"101","hc":2.7,"ph":"montazh"}.
 Уровни: {"a":"levelset","lv":"Этаж 2","elev":3.3,"rename":"2 этаж","pin":true}. Высотная отметка на плане: {"a":"spot","room":"1"} или {"a":"spot","x":0,"z":0}.
-Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetnew","sec":"obmer","name":"Обмерный план 2"} — новый лист в разделе (cover — обложка без номера, gen — общие данные 1-…, obmer — обмер 2-…, dem — демонтаж 3-…, mont — монтаж 4-…; или название раздела); номера листов ставятся сами; {"a":"sheetmove","sheet":"2-3","dir":"up"} — сдвинуть лист в своём разделе; {"a":"sheetset","sheet":"2-1","sec":"mont","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений. {"a":"frame","sheet":"А101","l":20,"t":5,"r":5,"b":5,"lw":0.6,"all":true} — рамка листа (all — для всех листов; reset:true — по ГОСТ; open:true — окно); {"a":"explcfg","sheet":"А101", "addcol":{"k":"num|name|area|perim|h|txt","n":"Примечание","w":30}, "delcol":"Примечание", "colw":{"col":"Наименование","w":50}, "colname":{"col":"№","n":"Поз."}, "rh":8, "hh":15, "fs":2.8, "ttl":"…"|false, "tot":true, "addrow":{"cells":{"Наименование":"Балкон","Площадь":"3,20"}}, "delrow":"last", "cell":{"room":"3","col":"Наименование","text":"Кухня-гостиная"}, "reset":true, "open":true} — настройка экспликации (любые поля вместе); {"a":"stampcell","op":"rowAbove|rowBelow|rowDel|colLeft|colRight|colDel|splitH|splitV|text","x":30,"y":12,"size":5,"text":"…"} — строки/столбцы/текст штампа листа по ячейке в точке x, y мм от левого верхнего угла штампа (open:true — редактор); {"a":"phf","view":"План монтажа","f":"allnew"} — фильтр стадий вида (all — «Показать все», allnew — «Показать все, новое зелёным» (так у планов монтажа по умолчанию), done, demo, new, prevdemo, prevnew, prev, none или название); {"a":"vptitle","sheet":"2-1","view":"Обмерный план","text":"План квартиры","on":true} — название вида на листе (text — свой текст, "" — как у вида; on:false — скрыть название; без view — все виды листа или выбранный); {"a":"stampfield","sheet":"2-1","k":"author|checker|nk|gip|obj|code|stage|date|org|proj|sheet","val":"Иванов"} — вписать поле в штамп листа (proj — название проекта, sheet — название листа; номер листа считается сам);{"a":"sheetaxo","sheet":"2-1"} — поставить на лист обмерного плана две аксонометрии обмера (создаются, если нет); {"a":"sheetpic","sheet":"А101"} — добавить фото на лист (откроется выбор файла; del:true — убрать последнее фото); {"a":"sheetlayout","sheet":"А101","auto":true} — разложить виды листа в области размещения (если не помещаются — мельче масштаб; auto — делать это само при добавлении видов); {"a":"sheetarea","sheet":"А101","x":25,"y":10,"w":230,"h":220} — область размещения видов в мм от левого верхнего угла листа (reset:true — по умолчанию).
+Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetnew","sec":"obmer","name":"Обмерный план 2"} — новый лист в разделе (cover — обложка без номера, gen — общие данные 1-…, obmer — обмер 2-…, dem — демонтаж 3-…, mont — монтаж 4-…; или название раздела); номера листов ставятся сами; {"a":"sheetmove","sheet":"2-3","dir":"up"} — сдвинуть лист в своём разделе; {"a":"sheetset","sheet":"2-1","sec":"mont","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений. {"a":"frame","sheet":"А101","l":20,"t":5,"r":5,"b":5,"lw":0.6,"all":true} — рамка листа (all — для всех листов; reset:true — по ГОСТ; open:true — окно); {"a":"explcfg","sheet":"А101", "addcol":{"k":"num|name|area|perim|h|txt","n":"Примечание","w":30}, "delcol":"Примечание", "colw":{"col":"Наименование","w":50}, "colname":{"col":"№","n":"Поз."}, "rh":8, "hh":15, "fs":2.8, "ttl":"…"|false, "tot":true, "addrow":{"cells":{"Наименование":"Балкон","Площадь":"3,20"}}, "delrow":"last", "cell":{"room":"3","col":"Наименование","text":"Кухня-гостиная"}, "reset":true, "open":true} — настройка экспликации (любые поля вместе); {"a":"stampcell","op":"rowAbove|rowBelow|rowDel|colLeft|colRight|colDel|splitH|splitV|text","x":30,"y":12,"size":5,"text":"…"} — строки/столбцы/текст штампа листа по ячейке в точке x, y мм от левого верхнего угла штампа (open:true — редактор); {"a":"stampline","x":0,"y":10,"x2":65,"y2":10,"lw":0.5} — линия в штампе (мм от левого верхнего угла штампа; без координат или draw:true — открыть редактор в режиме «Чертить линии»); штамп стоит в углу рамки по своим линиям;{"a":"phf","view":"План монтажа","f":"allnew"} — фильтр стадий вида (all — «Показать все», allnew — «Показать все, новое зелёным» (так у планов монтажа по умолчанию), done, demo, new, prevdemo, prevnew, prev, none или название); {"a":"vptitle","sheet":"2-1","view":"Обмерный план","text":"План квартиры","on":true} — название вида на листе (text — свой текст, "" — как у вида; on:false — скрыть название; без view — все виды листа или выбранный); {"a":"stampfield","sheet":"2-1","k":"author|checker|nk|gip|obj|code|stage|date|org|proj|sheet","val":"Иванов"} — вписать поле в штамп листа (proj — название проекта, sheet — название листа; номер листа считается сам);{"a":"sheetaxo","sheet":"2-1"} — поставить на лист обмерного плана две аксонометрии обмера (создаются, если нет); {"a":"sheetpic","sheet":"А101"} — добавить фото на лист (откроется выбор файла; del:true — убрать последнее фото); {"a":"sheetlayout","sheet":"А101","auto":true} — разложить виды листа в области размещения (если не помещаются — мельче масштаб; auto — делать это само при добавлении видов); {"a":"sheetarea","sheet":"А101","x":25,"y":10,"w":230,"h":220} — область размещения видов в мм от левого верхнего угла листа (reset:true — по умолчанию).
 Экспорт: {"a":"export","f":"ifc"} — для Revit (IFC: стены с проёмами, двери, окна, перекрытия, крыши, колонны, лестницы, мебель, помещения, уровни), "obj" — для 3ds Max (ZIP с OBJ, MTL и текстурами), "glb" — glTF.
 Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"paper","on":true} — фон рабочего поля «мятая бумага» (false — ровный цвет);{"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
 Если просят то, что делается мышью (нарисовать произвольный контур, щёлкнуть по месту), включи нужный инструмент действием tool и в reply объясни, куда щёлкнуть.`;
@@ -13936,7 +14061,7 @@ const LLM_CMDS = `комната 5 на 4 | стена 3 метра вправо
 покажи план | покажи 3д | покажи аксонометрию | покажи южный фасад | разрез | разрез от 0 2 до 8 2 | развёртки помещения 1 | камера из 1 5 на 4 1 | узел от 1 1 до 2 2
 стадия демонтаж (обмер, монтаж, мебель, все) | снеси стену Б | открой план демонтажа | новый лист | размести виды | экспликация помещений | рамка листа
 скрой буквы | покажи буквы | скрытые линии | тонированный | графичный | на весь экран | покажи панели | фон бумага | ровный фон | отмени | верни | сохрани | распечатай | визуализация | что умеешь
-экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | балконный блок в южной стене | балконный блок 1720 дверь 740 справа в северной стене | в окне Б балконный блок дверь 800 | в окне Б балконный блок низ двери глухой | у окна Б две створки | у окна Б створки сами | дверь А гладкая | у двери А филёнки | в штампе разработал Иванов | в штампе объект Саранск | детализация высокая | детализация средняя | детализация низкая | проставь обмерные размеры | новое зелёным | новое обычным цветом | фильтр стадий показать все | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
+экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | балконный блок в южной стене | балконный блок 1720 дверь 740 справа в северной стене | в окне Б балконный блок дверь 800 | в окне Б балконный блок низ двери глухой | у окна Б две створки | у окна Б створки сами | дверь А гладкая | у двери А филёнки | начерти штамп линиями | линия в штампе от 0 10 до 65 10 | в штампе разработал Иванов | в штампе объект Саранск | засечки меньше | засечки 2 мм | текст размеров 2,5 мм | детализация высокая | детализация средняя | детализация низкая | проставь обмерные размеры | новое зелёным | новое обычным цветом | фильтр стадий показать все | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
 выбери все экземпляры | выбери предыдущий | скрой категорию | графика элемента | полутона для выбранного | сдвинь выбранное вправо на 100 | поверни выбранное на 90 | скопируй выбранное вправо на 1000 | скрой выбранное
 открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы
 посчитай объём всех стен | посчитай площадь всех помещений | добавь аксонометрии на лист | калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
@@ -13997,7 +14122,7 @@ const LEARN_BUILTIN = [
   ['покажи сверху', 'покажи план'], ['давай в объёме', 'покажи 3д'], ['в три дэ', 'покажи 3д'], ['аксонометрию покажи', 'покажи аксонометрию'], ['фасад с юга', 'покажи южный фасад'], ['сделай разрез', 'разрез'], ['развёртку первой комнаты', 'развёртки помещения 1'],
   ['включи демонтаж', 'стадия демонтаж'], ['перейди на обмер', 'стадия обмер'], ['покажи все стадии', 'стадия все'], ['снеси стену бэ', 'снеси стену Б'], ['открой план демонтажа', 'открой план демонтажа'],
   ['новый лист', 'новый лист'], ['разложи виды на листе', 'размести виды'], ['таблицу помещений на лист', 'экспликация помещений'], ['поля листа', 'рамка листа'],
-  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['сделай окно Б двустворчатым', 'у окна Б две створки'], ['выдели всё новое зелёным', 'новое зелёным'], ['нарисуй план подробно, со всеми деталями', 'детализация высокая'], ['сделай план попроще, только заливка стен', 'детализация низкая'],['на обмере поставь все размеры автоматически', 'проставь обмерные размеры'], ['я удалил размеры, верни обмерные', 'проставь обмерные размеры'], ['размеры на обмерном плане пусть стоят сами', 'проставь обмерные размеры'],['не надо зелёного, покажи как обычно', 'новое обычным цветом'],['хочу дверь А без рисунка, ровную', 'дверь А гладкая'], ['верни у двери А филенки', 'у двери А филёнки'],['пусть окно Б будет на три створки', 'у окна Б 3 створки'], ['поставь окно с балконной дверью на юге','балконный блок в южной стене'], ['у балконной двери в окне Б внизу филёнка, не стекло', 'в окне Б балконный блок низ двери глухой'],['выход на балкон с окном в северной стене, дверь слева', 'балконный блок дверь слева в северной стене'], ['впиши в штамп что разработал петров','в штампе разработал Петров'], ['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
+  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['сделай окно Б двустворчатым', 'у окна Б две створки'], ['выдели всё новое зелёным', 'новое зелёным'], ['нарисуй план подробно, со всеми деталями', 'детализация высокая'], ['засечки на размерах слишком большие', 'засечки меньше'], ['сделай засечки покрупнее', 'засечки больше'],['сделай план попроще, только заливка стен', 'детализация низкая'],['на обмере поставь все размеры автоматически', 'проставь обмерные размеры'], ['я удалил размеры, верни обмерные', 'проставь обмерные размеры'], ['размеры на обмерном плане пусть стоят сами', 'проставь обмерные размеры'],['не надо зелёного, покажи как обычно', 'новое обычным цветом'],['хочу дверь А без рисунка, ровную', 'дверь А гладкая'], ['верни у двери А филенки', 'у двери А филёнки'],['пусть окно Б будет на три створки', 'у окна Б 3 створки'], ['поставь окно с балконной дверью на юге','балконный блок в южной стене'], ['у балконной двери в окне Б внизу филёнка, не стекло', 'в окне Б балконный блок низ двери глухой'],['выход на балкон с окном в северной стене, дверь слева', 'балконный блок дверь слева в северной стене'], ['впиши в штамп что разработал петров','в штампе разработал Петров'], ['хочу сам нарисовать штамп линиями', 'начерти штамп линиями'], ['проведи в штампе черту от 0 10 до 65 10', 'линия в штампе от 0 10 до 65 10'],['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
   ['отмени последнее', 'отмени'], ['верни как было', 'верни'], ['сохрани проект', 'сохрани'], ['напечатай', 'распечатай'], ['сделай красивую картинку', 'визуализация'], ['что ты умеешь', 'что умеешь'],
   ['сделай нормальную спальню', 'комната 3500 на 4'], ['нужна детская', 'комната 3 на 3500'], ['гостиную побольше', 'комната 5 на 4'], ['маленькую кухню', 'комната 3 на 3'], ['кухню гостиную', 'комната 6 на 4'],
   ['совмещённый санузел', 'комната 2 на 1700'], ['ванную комнату', 'комната 2 на 1700'], ['прихожую', 'комната 2500 на 1500'], ['кладовку', 'комната 1500 на 1200'], ['гардеробную', 'комната 2 на 1500'],
