@@ -851,6 +851,8 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" data-tool="rdim" title="Радиальный размер окружности или круглой колонны"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 10l5-5"/><circle cx="10" cy="10" r="1" fill="currentColor"/></svg>Радиус</button>
         <button class="rbtn" data-tool="ddim" title="Размер диаметра"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M5 15L15 5"/></svg>Диаметр</button>
         <button class="rbtn" id="rbAutoDim" title="Размеры по наружным стенам"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="5" y="7" width="12" height="10"/><path d="M5 3.5h12M5 2v3M17 2v3M11 2v3"/></svg>Размеры<br>по стенам</button>
+        <button class="rbtn" id="rbDelDims" title="Убрать все размеры этого вида (обмерные на обмерном плане тоже)">Убрать все размеры</button>
+        <button class="rbtn" id="rbReDims" title="Обмерный план: убрать обмерные размеры и проставить их заново по стенам, дверям и окнам">Размеры заново</button>
         <button class="rbtn" id="rbDimTypes" title="Типы размеров: свой тип и цвет у каждого вида"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 7h14M3 5v4M17 5v4"/><path d="M3 15h9M3 13v4M12 13v4" stroke="#1a73e8"/><circle cx="16" cy="15" r="2" fill="#1a73e8" stroke="none"/></svg>Типы<br>размеров</button>
       </div><div class="grp-label">Размер</div></div>
       <div class="grp"><div class="grp-items">
@@ -1587,7 +1589,7 @@ function sanitizeStd(o){
   const a = o.anno || {};
   out.anno = { tick:['tick','arrow','dot'].includes(a.tick) ? a.tick : d.anno.tick, textMm:N(a.textMm) ? clamp(+a.textMm, 1, 10) : d.anno.textMm, units:['mm','cm','m'].includes(a.units) ? a.units : 'mm', dec:clamp(Math.round(+a.dec) || 0, 0, 3),
     gap:N(a.gap) ? clamp(+a.gap, 0, 20) : d.anno.gap, over:N(a.over) ? clamp(+a.over, 0, 20) : d.anno.over, ext:N(a.ext) ? clamp(+a.ext, 0, 20) : d.anno.ext, tagMm:N(a.tagMm) ? clamp(+a.tagMm, 1, 10) : d.anno.tagMm };
-  out.stamps = sanitizeStamps(o.stamps); out.lw = sanitizeLW(o.lw); out.ph = sanitizePh(o.ph); if (o.ieAuto) out.ieAuto = true;
+  out.stamps = sanitizeStamps(o.stamps); out.lw = sanitizeLW(o.lw); out.ph = sanitizePh(o.ph); if (o.ieAuto) out.ieAuto = true; if (o.svOff) out.svOff = true;
   { const fr = sanFrame(o.frame); if (fr) out.frame = fr; }
   out.dimTypes = sanDimTypes(o.dimTypes);
   if (Array.isArray(o.sheetSecs) && o.sheetSecs.length) out.sheetSecs = o.sheetSecs.filter(s => s && typeof s.k === 'string').slice(0, 40).map(s => ({ k:s.k.slice(0, 24), n:String(s.n || 'Раздел').slice(0, 40), no:Math.max(0, Math.round(+s.no) || 0) }));
@@ -1849,6 +1851,7 @@ function makeMaterials(){
   M.exist3D = new THREE.MeshStandardMaterial({ color:PGX ? PGX.exist.cpc : C.exist || '#c4c8cb', roughness:0.9, ...po });
   M.existEdge = new THREE.LineBasicMaterial({ color:PGX ? PGX.exist.c : C['exist-edge'] || '#8a939a' });
   M.demoEdge = new THREE.LineDashedMaterial({ color:PGX ? PGX.demo.c : C.demo || '#d43a2a', dashSize:0.12, gapSize:0.07 });
+  M.demoPlan = new THREE.MeshBasicMaterial({ color:PGX ? PGX.demo.c : C.demo || '#d43a2a', transparent:true, opacity:0.32, depthWrite:false });
   M.demo3D = new THREE.MeshStandardMaterial({ color:PGX ? PGX.demo.c : C.demo || '#d43a2a', transparent:true, opacity:0.22, depthWrite:false });
   M.callout = new THREE.LineDashedMaterial({ color:C.accent, dashSize:0.18, gapSize:0.1 });
   // transparent so it sorts after the plan's transparent symbols (glass, grids) and covers them too
@@ -2292,12 +2295,15 @@ function doorModel(g, o, os, oe, om, t){
 const winSashes = (it, w) => it && it.sash >= 1 && it.sash <= 3 ? Math.round(it.sash) : w < 1.25 ? 1 : w < 2.1 ? 2 : 3;
 function planSymbol(g, o, t){
   const ost = visState(o.o), s = isSel(o.o.id), em = s ? M.edgeSel : ost === 'demo' ? M.demoEdge : ost === 'exist' ? M.existEdge : M.edge, wd = o.b - o.a;
+  // demolished on this stage (Revit «Снесено»): the opening is filled with the colour of demolition and outlined with dashes
+  const demo = ost === 'demo' && !s;
+  if (demo){ const y = 0.43, A = o.a, B = o.b, z = t / 2; g.add(lineOf([new V3(A, y, -z), new V3(B, y, -z), new V3(B, y, -z), new V3(B, y, z), new V3(B, y, z), new V3(A, y, z), new V3(A, y, z), new V3(A, y, -z)], M.demoEdge, true)); }
   if (o.o.type === 'window' && !o.door){
-    g.add(part(new THREE.BoxGeometry(wd, 0.4, t), s ? M.selFlat : M.glassFlat, em, o.o.id, o.pos, 0.2, 0));
+    g.add(part(new THREE.BoxGeometry(wd, 0.4, t), s ? M.selFlat : demo ? M.demoPlan : M.glassFlat, em, o.o.id, o.pos, 0.2, 0));
     const y = 0.42;
     g.add(lineOf([new V3(o.a, y, -t / 6), new V3(o.b, y, -t / 6), new V3(o.a, y, t / 6), new V3(o.b, y, t / 6)], em, true));
   } else {
-    g.add(part(new THREE.BoxGeometry(wd, 0.05, t), s ? M.selFlat : M.pick, null, o.o.id, o.pos, 0.025, 0));
+    g.add(part(new THREE.BoxGeometry(wd, demo ? 0.4 : 0.05, t), s ? M.selFlat : demo ? M.demoPlan : M.pick, null, o.o.id, o.pos, demo ? 0.2 : 0.025, 0));
     if (o.o.op) return; // проём: only the jambs of the wall, no leaf and no swing
     const side = o.o.flip ? -1 : 1, hx = o.o.hand ? o.b : o.a, ox = o.o.hand ? o.a : o.b, sx = Math.sign(ox - hx), y = 0.06, z0 = side * t / 2;
     g.add(lineOf([new V3(hx, y, z0), new V3(hx, y, z0 + side * wd)], em));
@@ -4255,7 +4261,8 @@ function addGridSet(nx, sx, ny, sy, x0 = 0, z0 = 0){
 function snapshot(){ return JSON.stringify({ items, nextId, types, levels }); }
 // history entries: { s: state before the action, label: optional (voice command text) }; names are worked out by comparing states
 let UNDO_MUTE = false; // one undo step for an edit applied to many selected elements
-function pushUndo(label){ if (S.phase === 'obmer') SV_PENDING = true; FDIRTY.file = FDIRTY.copy = true; if (UNDO_MUTE) return; undoStack.push({ s:snapshot(), label:label || null }); if (undoStack.length > 300) undoStack.shift(); redoStack.length = 0; }
+// survey dimensions follow every change made on any stage (they are rebuilt when the «Обмер» plan is drawn)
+function pushUndo(label){ SV_PENDING = true; FDIRTY.file = FDIRTY.copy = true; if (UNDO_MUTE) return; undoStack.push({ s:snapshot(), label:label || null }); if (undoStack.length > 300) undoStack.shift(); redoStack.length = 0; }
 function restore(s){ const o = JSON.parse(s); items = o.items; nextId = o.nextId; if (o.types) types = o.types; if (o.levels) levels = o.levels; setSel([...sel], selId); rebuild(); renderOptbar(); }
 function undo(n = 1){
   n = Math.min(Math.max(1, n | 0), undoStack.length); if (!n){ toast('Нечего отменять'); return []; }
@@ -4514,6 +4521,7 @@ function surveyRefs(w, side, noOps){
   return refs;
 }
 function refreshSurveyDims(){
+  if (STD.svOff) return; // «Убрать все размеры» on the survey plan: they stay away until «Размеры заново»
   CUTS = computeCuts();
   for (const w of items){
     if (w.type !== 'wall' || w.ph !== 'obmer' || !shown(w) || wallFrame(w).L < 0.2) continue;
@@ -5055,7 +5063,18 @@ function alongWall(w, px, py){
   if (!p) p = groundAt(px, py);
   return p ? p.sub(f.p1).dot(f.dir) : null;
 }
-function overlaps(wallId, pos, w, skipId){ return items.some(o => isOp(o) && o.wall === wallId && o.id !== skipId && Math.abs(o.pos - pos) < (o.w + w) / 2 + 0.05); }
+// only openings that are there in this view block the place: not the ones of a later stage, demolished before or hidden
+const opBlocks = (o, wallId, skipId) => isOp(o) && o.wall === wallId && o.id !== skipId && shown(o);
+function overlaps(wallId, pos, w, skipId){ return items.some(o => opBlocks(o, wallId, skipId) && Math.abs(o.pos - pos) < (o.w + w) / 2 + 0.05); }
+// what keeps an opening from this place: a wall joint or another opening (for the message)
+function opBlocker(wall, pos, w, skipId){
+  const o = items.find(o => opBlocks(o, wall.id, skipId) && Math.abs(o.pos - pos) < (o.w + w) / 2 + 0.05);
+  if (o) return `мешает ${tagNameL(o)}`;
+  const L = wallFrame(wall).L, j = wallJoints(wall).filter(([a, b]) => b > 0.001 && a < L - 0.001);
+  const free = []; let cur = 0; for (const [a, b] of j.sort((p, q) => p[0] - q[0])){ if (a > cur) free.push(a - cur); cur = Math.max(cur, b); } if (cur < L) free.push(L - cur);
+  const most = Math.max(0, ...free);
+  return `свободный участок стены между стыками только ${Math.round(most * 1000)} мм, а проём ${Math.round(w * 1000)} мм`;
+}
 /* places along a wall where other walls meet it or cross it (Revit does not put a window or a door into a wall joint):
    [a, b] in metres from the start of the wall, with the body of the other wall and a small clearance */
 function wallJoints(wall){
@@ -5081,7 +5100,7 @@ function freeOpPos(wall, pos, w, skipId, joints = wallJoints(wall)){
   // candidates: right next to each obstacle, on both sides; the nearest that is free wins
   const c = [];
   for (const [a, b] of joints) c.push(a - w / 2, b + w / 2);
-  for (const o of items) if (isOp(o) && o.wall === wall.id && o.id !== skipId){ const m = (o.w + w) / 2 + 0.05 + 1e-4; c.push(o.pos - m, o.pos + m); }
+  for (const o of items) if (opBlocks(o, wall.id, skipId)){ const m = (o.w + w) / 2 + 0.05 + 1e-4; c.push(o.pos - m, o.pos + m); }
   c.push(lo, hi);
   const best = c.map(q => r4(clamp(q, lo, hi))).filter(ok).sort((x, y) => Math.abs(x - p0) - Math.abs(y - p0))[0];
   return best == null ? null : best;
@@ -5112,7 +5131,7 @@ function opTarget(px, py){
   // a joint with another wall under the cursor: the opening goes to the nearest free place of this wall, left or right
   const free = fits ? freeOpPos(wall, pos, spec.w, null) : null, moved = free != null && Math.abs(free - pos) > 1e-4;
   if (free != null) pos = free;
-  return { wall, pos, spec, L, moved, valid: fits && !tooTall && free != null, why: !fits ? 'Стена короче проёма' : tooTall ? 'Проём выше стены' : 'В этой стене нет свободного места: стыки стен и другие проёмы' };
+  return { wall, pos, spec, L, moved, valid: fits && !tooTall && free != null, why: !fits ? `Стена короче проёма (${Math.round(L * 1000)} мм)` : tooTall ? `Проём выше стены: ${Math.round((spec.sill + spec.h) * 1000)} мм, стена ${Math.round(wall.h * 1000)} мм — уменьшите высоту двери или поднимите стену` : 'Здесь не поставить: ' + opBlocker(wall, pos, spec.w, null) };
 }
 
 /* ---------- drawing ---------- */
@@ -6337,6 +6356,8 @@ function hover(px, py, shift){
     cursorEl.hidden = true;
     D.op = opTarget(px, py);
     cv.style.cursor = D.op ? (D.op.valid ? 'copy' : 'not-allowed') : 'crosshair';
+    // red preview: say why once for this wall (the reason was shown only on the click before)
+    if (D.op && !D.op.valid){ const k = D.op.wall.id + '|' + D.op.why; if (D.whyKey !== k){ D.whyKey = k; toast(D.op.why); } } else D.whyKey = null;
     updatePreview(); return;
   }
   if (drawing() || pointTool() || S.tool === 'text'){
@@ -11561,7 +11582,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2236');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2255');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -12365,6 +12386,8 @@ const RB_ICONS = {
   adim:`<path d="M2 14h12.5M2 14L11 2.5" stroke="${cK}"/><path d="M11 14A9 9 0 0 0 7.6 6.9" stroke="${cB}" stroke-width="1.1"/><path d="M10 12.2l1 1.8 1-1.8M6.4 8.3l1.2-1.4.4 1.8" stroke="${cB}"/>`,
   rdim:`<path d="M2 14V3.5A10.5 10.5 0 0 1 12.5 14z" stroke="${cK}"/><path d="M2 14l7.5-7.5" stroke="${cB}" stroke-width="1.1"/><path d="M7.2 6.6h2.3v2.3" stroke="${cB}" stroke-width="1.1"/>`,
   ddim:`<circle cx="8" cy="8" r="6.2" stroke="${cK}"/><path d="M3.6 12.4l8.8-8.8" stroke="${cB}" stroke-width="1.1"/><path d="M10.2 3.6h2.2v2.2M5.8 12.4H3.6v-2.2" stroke="${cB}" stroke-width="1.1"/>`,
+  rbDelDims:`<path d="M2 5h12M2 3.5v3M14 3.5v3" stroke="${cB}" stroke-width="1.1"/><path d="M4 9l8 6M12 9l-8 6" stroke="#d33" stroke-width="1.5"/>`,
+  rbReDims:`<path d="M2 4h12M2 2.5v3M14 2.5v3" stroke="${cB}" stroke-width="1.1"/><path d="M12.5 10.5a4.5 4.5 0 1 1-1.3-3.2" stroke="#2d3a42" stroke-width="1.3"/><path d="M12.6 5.6v2.4h-2.4" stroke="#2d3a42" stroke-width="1.3"/>`,
   rbAutoDim:`<rect x="3" y="5.5" width="10" height="8" fill="#d9d2c3" stroke="#6b5f4b"/><path d="M3 2.5h10" stroke="${cB}" stroke-width="1.2"/><path d="M3 1v3M8 1v3M13 1v3" stroke="${cB}"/>`,
   rbGridVis:`<circle cx="8" cy="4" r="3" fill="#fff" stroke="${cB}" stroke-width="1.2"/><path d="M8 7v8.5" stroke="${cB}" stroke-dasharray="3 1 1 1"/><path d="M2 14L14 2" stroke="${cR}" stroke-width="1.3"/>`,
   measure:`<rect x="1" y="5.5" width="14" height="5" rx=".6" fill="${cY}" stroke="#8a6a2b"/><path d="M3.5 5.5v2M6 5.5v3M8.5 5.5v2M11 5.5v3M13.5 5.5v2" stroke="#8a6a2b"/>`,
@@ -12411,7 +12434,7 @@ const RB_LAYOUT = [
   ], ['[data-tool="move"]', '[data-tool="copy"]', '#rbRotate', '#rbDelete']],
   ['rbAnno', [
     ['Размер', { b:[['#rbDimAl', 'rbDimAl', 'Параллельный'], ['#rbDimLin', 'rbDimLin', 'Линейный'], ['[data-tool="adim"]', 'adim', 'Угловой']],
-      t:[['[data-tool="rdim"]', 'rdim', 'Радиус'], ['[data-tool="ddim"]', 'ddim', 'Диаметр'], ['#rbAutoDim', 'rbAutoDim', 'Размеры по стенам'], ['#rbDimTypes', 'rbDimTypes', 'Типы размеров']] }],
+      t:[['[data-tool="rdim"]', 'rdim', 'Радиус'], ['[data-tool="ddim"]', 'ddim', 'Диаметр'], ['#rbAutoDim', 'rbAutoDim', 'Размеры по стенам'], ['#rbDimTypes', 'rbDimTypes', 'Типы размеров'], ['#rbDelDims', 'rbDelDims', 'Убрать все размеры'], ['#rbReDims', 'rbReDims', 'Размеры заново']] }],
     ['Узел', { t:[['[data-tool="line"]', 'line', 'Линия детализации']] }],
     ['Текст', { t:[['[data-tool="text"]', 'text', 'Текст']] }],
     ['Отметки', { b:[['[data-tool="spot"]', 'spot', 'Высотная отметка']] }],
@@ -12492,6 +12515,10 @@ $('#rbDimLin').onclick = () => { S.dimMode = 'lin'; setTool('dim'); $('#rbDimLin
 $('#rbDimAl').addEventListener('click', () => { S.dimMode = 'aligned'; renderOptbar(); });
 $('#rbAutoDim').onclick = () => { if (S.view !== 'plan') setView('plan'); pushUndo(); markEdited(); const n = autoDims(); rebuild(); toast(n ? `Поставлено размеров: ${n}` : 'Нет стен для размеров'); };
 $('#rbDimTypes').onclick = () => openDimTypes();
+// «Убрать все размеры» (with a question) and «Размеры заново» — the survey dimensions of the «Обмер» plan built again
+const dimBtn = (acts, label) => { const res = execAll(acts, { label }); rebuild(); const r = res && res[0]; if (r) toast(r.t || String(r)); };
+$('#rbDelDims').onclick = () => { if (!confirm('Убрать все размеры этого вида?\n\nВернуть — Ctrl+Z. Обмерные размеры потом можно проставить кнопкой «Размеры заново».')) return; dimBtn([{ a:'deldims', what:'view' }], 'Убрать все размеры'); };
+$('#rbReDims').onclick = () => { if (S.phase !== 'obmer'){ toast('Обмерные размеры ставятся на плане стадии «Обмер» — откройте обмерный план'); return; } dimBtn([{ a:'redims' }], 'Размеры заново'); };
 $('#finishBtn').onclick = () => finishAction();
 $('#vbDetail').onclick = () => setDetail(S.detail === 'coarse' ? 'medium' : 'coarse');
 $('#vbWeights').onclick = toggleThin;
@@ -13195,8 +13222,8 @@ function execOne(a, ctx){
       return `Удалено: ${tagNameL(it)}`;
     }
     case 'clear': { const n = items.filter(i => !isMeta(i)).length; if (!n) return 'Модель и так пуста'; if (!confirm(`Удалить ВСЮ модель — ${n} элементов (стены, двери, размеры…)?\n\nВернуть можно кнопкой «Отменить» (Ctrl+Z).`)) return 'Отменено: модель не тронута'; pushUndo('Очистить всё'); markEdited(); items = []; clearSel(); voice.pen = voice.chainStart = voice.room = null; return `Модель очищена (${n} элементов). Вернуть — Ctrl+Z`; }
-    case 'deldims': { const all = a.what === 'all', ids = items.filter(d => (d.type === 'dim' || d.type === 'adim' || d.type === 'rdim') && (all || (d.type === 'dim' ? dimShown(d) : shown(d)))).map(d => d.id); if (!ids.length) return 'Размеров нет'; pushUndo('Удалить размеры'); markEdited(); const del = new Set(ids); items = items.filter(i => !del.has(i.id)); clearSel(); const sv = !all && S.phase === 'obmer'; if (sv) SV_PENDING = true; return `Удалено размеров: ${ids.length}`+ (sv ? '. Обмерные размеры построятся заново сами' : ''); }
-    case 'redims': { if (S.phase !== 'obmer' && !a.force) throw new Error('Обмерные размеры строятся на плане стадии «Обмер» — откройте обмерный план'); pushUndo('Обмерные размеры заново'); markEdited(); const n0 = items.filter(d => d.type === 'dim' && d.survey && lvOf(d) === actLv()).length; items = items.filter(d => !(d.type === 'dim' && d.survey)); refreshSurveyDims(); const n1 = items.filter(d => d.type === 'dim' && d.survey).length; return `Обмерные размеры построены заново: ${n1} (было ${n0})`; }
+    case 'deldims': { const all = a.what === 'all', ids = items.filter(d => (d.type === 'dim' || d.type === 'adim' || d.type === 'rdim') && (all || (d.type === 'dim' ? dimShown(d) : shown(d)))).map(d => d.id); if (!ids.length) return 'Размеров нет'; pushUndo('Удалить размеры'); markEdited(); const del = new Set(ids); items = items.filter(i => !del.has(i.id)); clearSel(); const sv = !all && S.phase === 'obmer'; if (sv) STD.svOff = true; return `Удалено размеров: ${ids.length}`+ (sv ? '. Обмерные размеры убраны — проставить их снова: «Размеры заново» (Аннотации) или «построй размеры заново»' : ''); }
+    case 'redims': { if (S.phase !== 'obmer' && !a.force) throw new Error('Обмерные размеры строятся на плане стадии «Обмер» — откройте обмерный план'); pushUndo('Обмерные размеры заново'); markEdited(); delete STD.svOff; const n0 = items.filter(d => d.type === 'dim' && d.survey && lvOf(d) === actLv()).length; items = items.filter(d => !(d.type === 'dim' && d.survey)); refreshSurveyDims(); const n1 = items.filter(d => d.type === 'dim' && d.survey).length; return `Обмерные размеры построены заново: ${n1} (было ${n0})`; }
     case 'select': { const it = String(a.id)[0] === '@' ? findEl(a.id) : byId(Number(a.id)); if (!it) throw new Error(`Нет элемента №${a.id}`); setSel([it.id]); rebuild(); return `Выбрано: ${tagNameL(it)}`; }
     case 'setop': {
       const it = findEl(a.el); if (!isOp(it)) throw new Error('Это не окно и не дверь');
@@ -13718,7 +13745,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 Элементы: "@Д" (стена Д), "@door:Б", "@window:А", "@box:В", "@floor:А", "@ceiling:А", "@roof:А", "@column:А", "@stair:А", число — id элемента, "room:3" — помещение 3, "selected" — выбранные.
 {"a":"selectq","type":["window"],"wall":"@Д","room":"2","phase":"montazh","letter":"А","dem":true} — выбрать по описанию (любые поля по желанию); {"a":"deselect"}.
 {"a":"prop","el":"selected","set":{"h":3,"bo":0.4}} — изменить свойства: h высота, t толщина, w ширина, d глубина, sill подоконник, bo смещение/высота от уровня (мебель ±), to смещение сверху, rot поворот°, m материал, wt тип стены, name, num, tag буква, ph стадия создания, dem стадия сноса (\"\" — не сносить), dph стадия показа размера (\"all\" — во всех), loc линия привязки, nrb не граница помещения, mir зеркально, pin замок, flip/hand открывание двери, op проём без полотна, gl балконная остеклённая дверь, hc высота потолка помещения, left полка отметки влево.
-{"a":"move","dx":1,"dz":0,"copy":false} — сдвинуть (или скопировать) выбранное; {"a":"dimtype","type":"Обмер","c":"#d32f2f","tc":"#d32f2f","n":"…","ph":"obmer"} — тип размеров (цвет линий c и текста tc; "" — по умолчанию); {"a":"dimtype","type":"Монтаж","view":true} — тип размеров открытого вида (без type — по стадии); {"a":"dimtype","type":"…","sel":true} — тип выбранных размеров; {"a":"dimtype","add":"Имя"} — новый тип; {"a":"dimtype","open":true} — окно «Типы размеров»; {"a":"wake","on":true} — «Слушать всегда»: микрофон включён, выполняются фразы, начинающиеся со слова «Кот» (on:false — выключить); {"a":"calc","expr":"3,5*4,2 + 10%"} — посчитать в калькуляторе; {"a":"calc","task":"сколько плитки на пол 3 на 4 с запасом 10%"} — задача словами (ИИ без интернета составит выражение); {"a":"calc"} — открыть калькулятор, close:true — скрыть; {"a":"wiki","q":"что такое несущая стена"} — найти ответ в интернете (Perplexity с ключом пользователя, иначе Википедия; нужен интернет); {"a":"pplx"} — окно ключа Perplexity ({"site":true,"q":"…"} — открыть сайт Perplexity с вопросом); {"a":"llm"} — скачать ИИ без интернета (forget:true — забыть выученные фразы; open:true — окно «Обучение ИИ»); {"a":"learn","p":"фраза пользователя","c":"команда; команда"} — запомнить, как понимать фразу; {"a":"deldims","what":"view"|"all"} — удалить размеры этого вида (all — во всём проекте); {"a":"redims"} — построить обмерные размеры заново (на плане «Обмер»); {"a":"clear"} — удалить ВСЮ модель (только если пользователь прямо просит очистить всё; спросит подтверждение); {"a":"selinst","where":"view"|"project"} — выбрать все экземпляры типа выбранного; {"a":"selprev"} — выбрать предыдущий набор; {"a":"hidecat"} — скрыть в виде категорию выбранного; {"a":"elemgfx","c":"#ff0000","w":5,"cc":"#…","cw":8,"half":true,"tr":50,"vis":false,"reset":true,"open":true} — графика выбранных элементов только в этом виде (как Revit «Переопределить графику на виде → Для элемента»); {"a":"wjoin","wall":"Л","end":0|1|"both","on":true} — присоединить (on:false — отсоединить) начало/конец стены по букве (без wall — выбранная стена); {"a":"nudge","sx":1,"sy":0,"mm":50} — сдвинуть выбранное как стрелками на клавиатуре: по экрану (sx 1 — вправо, -1 — влево; sy -1 — вверх, 1 — вниз), на листе — выбранный вид/фото/экспликацию; {"a":"rotsel","deg":45,"copy":false}; {"a":"mirror","axis":"x","copy":true} — зеркально (x — слева-направо, z — сверху-вниз); {"a":"hide","on":true} скрыть выбранное в виде (on:false — показать), {"a":"hide","mode":"temp"|"isolate"|"reset"}.
+{"a":"move","dx":1,"dz":0,"copy":false} — сдвинуть (или скопировать) выбранное; {"a":"dimtype","type":"Обмер","c":"#d32f2f","tc":"#d32f2f","n":"…","ph":"obmer"} — тип размеров (цвет линий c и текста tc; "" — по умолчанию); {"a":"dimtype","type":"Монтаж","view":true} — тип размеров открытого вида (без type — по стадии); {"a":"dimtype","type":"…","sel":true} — тип выбранных размеров; {"a":"dimtype","add":"Имя"} — новый тип; {"a":"dimtype","open":true} — окно «Типы размеров»; {"a":"wake","on":true} — «Слушать всегда»: микрофон включён, выполняются фразы, начинающиеся со слова «Кот» (on:false — выключить); {"a":"calc","expr":"3,5*4,2 + 10%"} — посчитать в калькуляторе; {"a":"calc","task":"сколько плитки на пол 3 на 4 с запасом 10%"} — задача словами (ИИ без интернета составит выражение); {"a":"calc"} — открыть калькулятор, close:true — скрыть; {"a":"wiki","q":"что такое несущая стена"} — найти ответ в интернете (Perplexity с ключом пользователя, иначе Википедия; нужен интернет); {"a":"pplx"} — окно ключа Perplexity ({"site":true,"q":"…"} — открыть сайт Perplexity с вопросом); {"a":"llm"} — скачать ИИ без интернета (forget:true — забыть выученные фразы; open:true — окно «Обучение ИИ»); {"a":"learn","p":"фраза пользователя","c":"команда; команда"} — запомнить, как понимать фразу; {"a":"deldims","what":"view"|"all"} — удалить размеры этого вида (all — во всём проекте; на обмерном плане обмерные размеры больше сами не появляются, пока не дать redims); {"a":"redims"} — убрать и проставить обмерные размеры заново (на плане «Обмер»; кнопки «Убрать все размеры» и «Размеры заново» во вкладке «Аннотации»); {"a":"clear"} — удалить ВСЮ модель (только если пользователь прямо просит очистить всё; спросит подтверждение); {"a":"selinst","where":"view"|"project"} — выбрать все экземпляры типа выбранного; {"a":"selprev"} — выбрать предыдущий набор; {"a":"hidecat"} — скрыть в виде категорию выбранного; {"a":"elemgfx","c":"#ff0000","w":5,"cc":"#…","cw":8,"half":true,"tr":50,"vis":false,"reset":true,"open":true} — графика выбранных элементов только в этом виде (как Revit «Переопределить графику на виде → Для элемента»); {"a":"wjoin","wall":"Л","end":0|1|"both","on":true} — присоединить (on:false — отсоединить) начало/конец стены по букве (без wall — выбранная стена); {"a":"nudge","sx":1,"sy":0,"mm":50} — сдвинуть выбранное как стрелками на клавиатуре: по экрану (sx 1 — вправо, -1 — влево; sy -1 — вверх, 1 — вниз), на листе — выбранный вид/фото/экспликацию; {"a":"rotsel","deg":45,"copy":false}; {"a":"mirror","axis":"x","copy":true} — зеркально (x — слева-направо, z — сверху-вниз); {"a":"hide","on":true} скрыть выбранное в виде (on:false — показать), {"a":"hide","mode":"temp"|"isolate"|"reset"}.
 Виды: {"a":"openview","name":"План демонтажа"} (имя, часть имени или номер листа); {"a":"newview","kind":"plan","name":"План монтажа","phase":"montazh","lv":"Этаж 1","folder":"04_План монтажа"} — kind: plan, d3, axo, sheet, detail, section, ielev, camera, elev:S/N/E/W; {"a":"renameview","view":"…","name":"…"}; {"a":"delview","view":"…"}; {"a":"viewset","view":"current","phase":"demontazh","tpl":"Обмерный план","scale":50,"folder":"03_План демонтажа","lv":"Этаж 1"}; {"a":"closetab","name":"…"} — закрыть вкладку вида.
 Разделы диспетчера: {"a":"folder","name":"02_Обмерный план","views":["Обмерный план"]} — создать раздел и положить в него виды; {"a":"delfolder","name":"…"}.
 Видимость/графика вида: {"a":"vg","view":"current","cat":"door","vis":false,"half":false} — категории: wall, door, window, floor, ceiling, roof, column, stair, box, room, fam, grid, dim, line, text, spot, ceilh (высоты потолков), winh (высоты окон).
