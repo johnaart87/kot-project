@@ -2,7 +2,7 @@
 // Two caches: VERSION — the app itself (replaced with every new build); LIB — libraries, fonts and big data files from
 // other sites (three.js, path tracer, denoiser, speech model runtime…). Their addresses carry exact versions, so LIB is kept
 // between builds: the program keeps working without the internet after an update.
-const VERSION = 'kot-20261023-1130';
+const VERSION = 'kot-20261023-1302';
 const LIB = 'kot-lib-1';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 const CDN = [
@@ -27,7 +27,8 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k !== VERSION && k !== LIB && k.startsWith('kot-')) await caches.delete(k);
+    // only old builds of THIS copy (kot-<date>); the working program's caches (kotapp-*), libraries and the voice model stay
+    for (const k of await caches.keys()) if (k !== VERSION && /^kot-\d/.test(k)) await caches.delete(k);
     await self.clients.claim();
   })());
 });
@@ -36,6 +37,8 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // the working program (…/app/) has its own service worker and caches — never touch it from here
+  if (url.origin === location.origin && url.pathname.startsWith(new URL('./app/', self.registration.scope).pathname)) return;
   // the app page: fresh from the network when online, from the cache when offline
   if (req.mode === 'navigate' || (url.origin === location.origin && url.pathname.endsWith('/index.html'))){
     e.respondWith((async () => {

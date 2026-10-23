@@ -634,6 +634,61 @@ details.more summary::-webkit-details-marker{display:none}
   .len{width:100%}
   #lenInput{flex:1;width:auto}
 }
+/* ---------- phone (narrow screens): everything fits the width, the drawing gets most of the screen ----------
+   The ribbon scrolls sideways and can be folded («Лента» at the bottom); the windows open over the whole screen;
+   a bottom bar of big buttons opens them with one touch. */
+#phoneNav{display:none}
+/* the grip at the top of the drawing (phone, tablet): pull up / tap — the whole screen for the drawing; pull down / tap — the ribbon and windows back */
+#uiGrip{display:none;position:absolute;left:50%;top:0;transform:translateX(-50%);z-index:9;width:76px;height:20px;padding:0;border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;background:color-mix(in srgb,var(--chrome) 92%,transparent);color:var(--muted);cursor:grab;touch-action:none;box-shadow:0 2px 6px var(--shade)}
+#uiGrip svg{width:24px;height:12px;display:block;margin:3px auto 0;transition:transform .15s}
+#uiGrip:hover,#uiGrip:active{color:var(--accent)}
+#app.ui-hide #uiGrip svg{transform:rotate(180deg)}
+@media (pointer:coarse),(max-width:1180px){ #uiGrip{display:block} }
+#app.ui-hide > .rb,#app.ui-hide > #optbar,#app.ui-hide > .status,#app.ui-hide #left,#app.ui-hide #right,#app.ui-hide #splitL,#app.ui-hide #splitR,#app.ui-hide #vtabs,#app.ui-hide .vbar,#app.ui-hide #floatLayer{display:none!important}
+#app.ui-hide{grid-template-rows:minmax(0,1fr)!important}
+#app.ui-hide main{grid-template-columns:minmax(0,1fr)!important;grid-row:1/-1}
+#app.ui-hide #viewport.hastabs .viewtag,#app.ui-hide #viewport.hastabs #vcube,#app.ui-hide #viewport.hastabs #vhome{margin-top:0}
+#app.ui-hide #viewport.hastabs #sheetWrap{top:0}
+@media (max-width:640px){
+  html,body{overflow:hidden;overscroll-behavior:none}
+  .rb-top{flex-wrap:nowrap;min-height:38px;gap:0;padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px));overflow:hidden}
+  .rb-top .tabs{order:3;flex:1 1 0;min-width:0;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
+  .rb-top .tabs::-webkit-scrollbar{display:none}
+  .rb-top .tabs button{flex:none;padding:6px 9px;font-size:13px}
+  .ptitle{display:none}
+  .filebtn{padding:0 10px}
+  .qat button{padding:5px 6px}
+  #histBtn{display:none}
+  .rb-panel{padding:2px 4px 0;scrollbar-width:none}
+  .rb-panel::-webkit-scrollbar{display:none}
+  .grp{padding:0 3px}
+  .grp-label{display:none}
+  #app .rbtn{min-width:54px;padding:4px 3px;font-size:11px}
+  .rbtn svg{width:22px;height:22px}.rbtn.mbig svg.mi{width:26px;height:26px}
+  .rbtn .k{display:none}
+  #app.rb-fold .rb-panel{display:none!important}
+  .optbar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;min-height:0;padding:3px 8px;gap:8px;scrollbar-width:none}
+  .optbar::-webkit-scrollbar{display:none}
+  .optbar .tip{display:none}
+  .optbar:empty{display:none}
+  #hint{display:none}
+  .status{flex-wrap:nowrap;gap:6px;padding:3px max(6px,env(safe-area-inset-right,0px)) max(3px,env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));flex-direction:column;align-items:stretch}
+  .status .len{width:100%;display:flex;gap:6px;align-items:center}
+  .status .len label{white-space:nowrap}
+  #phoneNav{display:flex;gap:4px;justify-content:space-between}
+  #phoneNav button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid transparent;background:transparent;color:var(--ink);border-radius:6px;padding:4px 2px;font-size:11px;cursor:pointer}
+  #phoneNav button svg{width:22px;height:22px}
+  #phoneNav button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+  #left,#right{width:100%!important}
+  #splitL,#splitR{display:none!important}
+  .vbar{max-width:calc(100% - 8px);overflow-x:auto;white-space:nowrap;scrollbar-width:none;font-size:11px}
+  .vbar::-webkit-scrollbar{display:none}
+  .vbar button{font-size:11px;padding:3px 4px}
+  #vcube{width:76px;height:76px;right:6px;top:6px}
+  #viewport.hastabs #vcube{margin-top:30px}
+  .modal .sheetd{max-height:100%;overflow:auto;border-radius:0}
+  .menu-list{max-width:calc(100vw - 8px)}
+}
 @media (pointer:coarse){
   .rbtn{min-width:64px;padding:6px}
   .btn{min-height:40px}
@@ -836,6 +891,7 @@ details.more summary::-webkit-details-marker{display:none}
     </aside>
 
     <div id="viewport">
+      <button id="uiGrip" type="button" title="Потяните вверх — рабочее поле на весь экран, вниз — вернуть ленту и окна (или коснитесь)" aria-label="Скрыть или показать ленту и окна" aria-pressed="false"><svg viewBox="0 0 24 12" aria-hidden="true"><path d="M5 8l7-4 7 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div id="vtabs" role="tablist" aria-label="Открытые виды"></div>
       <div id="labels"></div>
       <div id="cursor" hidden></div>
@@ -906,6 +962,13 @@ details.more summary::-webkit-details-marker{display:none}
     <span id="hint"></span>
     <span class="coords" id="coords">X — · Y —</span>
     <span class="len"><label for="lenInput">Размер, мм</label><input id="lenInput" type="text" inputmode="decimal" autocomplete="off" placeholder="3000 или 4000x3000"><button class="btn sm" id="lenOk">Ввести</button></span>
+    <nav id="phoneNav" aria-label="Окна программы">
+      <button data-pn="rb" aria-pressed="true" title="Показать или свернуть ленту инструментов"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="5" rx="1"/><path d="M5 12h10M5 15.5h6"/></svg>Лента</button>
+      <button data-pn="props" aria-pressed="false" title="Свойства выбранного"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M6 7h8M6 10h8M6 13h5"/></svg>Свойства</button>
+      <button data-pn="browser" aria-pressed="false" title="Диспетчер проекта: виды и листы"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 5h5l1.5 2H17v9H3z"/></svg>Виды</button>
+      <button data-pn="chat" aria-pressed="false" title="Чат команд и голос"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 4h14v9H8l-4 3v-3H3z"/></svg>Чат</button>
+      <button data-pn="fit" title="Показать всё"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/></svg>Всё</button>
+    </nav>
   </footer>
 </div>
 
@@ -926,6 +989,10 @@ details.more summary::-webkit-details-marker{display:none}
   <button data-act="print">Печать… <span class="k">Ctrl+P</span></button>
   <button data-act="offline">Скачать всё для работы без интернета…</button>
   <button data-act="install">Установить приложение…</button>
+  <button data-act="update" data-app>Установить обновление…</button>
+  <button data-act="about">О программе</button>
+  <hr>
+  <button data-act="exit">Выход…</button>
 </div>
 
 <div class="menu-list" id="histMenu" role="menu" hidden style="min-width:320px"></div>
@@ -3914,7 +3981,7 @@ function addGridSet(nx, sx, ny, sy, x0 = 0, z0 = 0){
 function snapshot(){ return JSON.stringify({ items, nextId, types, levels }); }
 // history entries: { s: state before the action, label: optional (voice command text) }; names are worked out by comparing states
 let UNDO_MUTE = false; // one undo step for an edit applied to many selected elements
-function pushUndo(label){ if (S.phase === 'obmer') SV_PENDING = true; if (UNDO_MUTE) return; undoStack.push({ s:snapshot(), label:label || null }); if (undoStack.length > 300) undoStack.shift(); redoStack.length = 0; }
+function pushUndo(label){ if (S.phase === 'obmer') SV_PENDING = true; FDIRTY.file = FDIRTY.copy = true; if (UNDO_MUTE) return; undoStack.push({ s:snapshot(), label:label || null }); if (undoStack.length > 300) undoStack.shift(); redoStack.length = 0; }
 function restore(s){ const o = JSON.parse(s); items = o.items; nextId = o.nextId; if (o.types) types = o.types; if (o.levels) levels = o.levels; setSel([...sel], selId); rebuild(); renderOptbar(); }
 function undo(n = 1){
   n = Math.min(Math.max(1, n | 0), undoStack.length); if (!n){ toast('Нечего отменять'); return []; }
@@ -4357,7 +4424,9 @@ function SAMPLE_VIEWS(){
   if (ie.length) v.push(sh('s-6', 'А106', 'Развёртки стен: Спальня', ie.map((x, i) => ({ id:'vp-ie' + i, view:x.id, x:30 + (i % 2) * 120, y:15 + Math.floor(i / 2) * 120, scale:50, w:100, h:100 }))));
   return v;
 }
-function markEdited(){ if (proj.sample){ proj.sample = false; } }
+function markEdited(){ FDIRTY.file = FDIRTY.copy = true; if (proj.sample){ proj.sample = false; } }
+// changes not yet written to the project file (.kot on the disk / Yandex Disk) and not yet in an autosave copy
+const FDIRTY = { file:false, copy:false };
 
 /* ---------- selection transforms: move, copy, rotate, delete ---------- */
 function translateItem(it, dx, dz){
@@ -4997,7 +5066,7 @@ function ielevWallDefs(room, tpl){
     // the cut line inside the room (as far as its middle), looking at the wall
     const off = clamp(Math.abs((c0.x - mx) * ix + (c0.z - mz) * iz), 0.6, 4), e = 0.05;
     k++;
-    defs.push({ id:vid('v'), kind:'ielev', code:String(k), name:`Развёртка: ${room.name || 'Помещение'} ${room.num ? '(' + room.num + ') ' : ''}— ${k}`, room:room.id,
+    defs.push({ id:vid('v'), kind:'ielev', code:String(k), name:`${room.name || 'Помещение'} ${room.num ? '(' + room.num + ') ' : ''}— ${k}`, room:room.id,
       p1:{ x:r4(A.x + ix * off - ux * e), z:r4(A.z + iz * off - uz * e) }, p2:{ x:r4(B.x + ix * off + ux * e), z:r4(B.z + iz * off + uz * e) },
       flip:inw === 1, crop:true, far:r4(off + 0.3), y0:-0.15, y1:r4(LVL(lvOf(room)).elev + H + 0.15), phase:PH_IDX.mebel != null ? 'mebel' : (PHASES[PHASES.length - 1] || { k:'all' }).k, tpl:tpl.id, lv:lvOf(room) });
   }
@@ -5023,7 +5092,7 @@ function ielevDefs(p){
     { s:'восток', p1:{ x:p.x, z:R.z0 - e }, p2:{ x:p.x, z:R.z1 + e }, far:R.x1 - p.x + 0.25 },
     { s:'юг', p1:{ x:R.x1 + e, z:p.z }, p2:{ x:R.x0 - e, z:p.z }, far:R.z1 - p.z + 0.25 },
     { s:'запад', p1:{ x:p.x, z:R.z1 + e }, p2:{ x:p.x, z:R.z0 - e }, far:p.x - R.x0 + 0.25 }];
-  return defs.map((q, i) => ({ id:vid('v'), kind:'ielev', code:String(i + 1), name:`Развёртка: ${rn} — ${i + 1} (${q.s})`, p1:{ x:r4(q.p1.x), z:r4(q.p1.z) }, p2:{ x:r4(q.p2.x), z:r4(q.p2.z) }, flip:true, crop:true,
+  return defs.map((q, i) => ({ id:vid('v'), kind:'ielev', code:String(i + 1), name:`${rn} — ${i + 1} (${q.s})`, p1:{ x:r4(q.p1.x), z:r4(q.p1.z) }, p2:{ x:r4(q.p2.x), z:r4(q.p2.z) }, flip:true, crop:true,
     far:r4(q.far), y0:-0.15, y1:r4(H + 0.15), phase:S.phase, mk:{ id:mk, x:r4(p.x), z:r4(p.z), i } }));
 }
 // run a drawing click at an exact model point (typed lengths)
@@ -9516,27 +9585,27 @@ function renderTree(){
   const grs = items.filter(g => g.type === 'grid');
   const onSheet = new Set(views.filter(s => s.kind === 'sheet').flatMap(s => s.vps.map(p => p.view)));
   const vItem = (v, pre) => {
-    const cur = v.id === S.viewId, label = (pre && v.kind !== 'sheet' ? esc(KIND_NAME[v.kind]) + ': ' : '') + (v.kind === 'sheet' ? `${esc(v.num)} — ${esc(v.name)}` : esc(v.name));
+    const cur = v.id === S.viewId, label = (v.kind === 'ielev' ? esc(v.name.replace(/^Развёртка:\s*/, '')) : v.kind === 'sheet' ? `${esc(v.num)} — ${esc(v.name)}` : esc(v.name));
     const ph = v.kind !== 'sheet' && v.phase && v.phase !== 'all' ? `<span class="ph">${esc(phName(v.phase))}</span>` : '';
     const mark = v.kind !== 'sheet' && onSheet.has(v.id) ? ' <span class="ph" title="Размещён на листе">▣</span>' : '';
     return `<li class="it"><button data-tree="o:${v.id}" draggable="true" data-drag="${v.id}"${cur ? ' aria-current="true"' : ''} title="Двойной щелчок — переименовать. Перетащите в раздел"><span class="vic k-${v.kind}" aria-hidden="true"></span><span class="tl">${label}</span>${ph}${mark}</button>`
       + (S.view === 'sheet' && v.kind !== 'sheet' && !onSheet.has(v.id) ? `<button class="add" data-tree="p:${v.id}" title="Разместить на открытом листе" aria-label="Разместить на листе">+▣</button>` : '')
       + `<button class="x" data-tree="d:${v.id}" title="Удалить" aria-label="Удалить ${label}">×</button></li>`;
   };
-  const group = (title, kind, list, add) => `<li><div class="node" data-drop="">${title}${add ? `<button class="add" data-tree="n:${kind}" title="${add}" aria-label="${add}">+</button>` : ''}</div><ul>${list.map(vItem).join('') || '<li class="it"><span class="ph">пусто</span></li>'}</ul></li>`;
+  const group = (title, kind, list, add) => `<li><div class="node" data-drop="">${title}${add ? `<button class="add" data-tree="n:${kind}" title="${add}" aria-label="${add}">+</button>` : ''}</div><ul>${list.map(v => vItem(v)).join('') || '<li class="it"><span class="ph">пусто</span></li>'}</ul></li>`;
   const of = k => views.filter(v => v.kind === k);
   // own sections inside «Виды (все)» (Revit: organisation of the browser — «02_Обмерный план», «03_План демонтажа»…); views without a section stay in their kind groups
   const FD = [...(STD.folders || [])].sort((a, b) => a.n.localeCompare(b.n, 'ru', { numeric:true })), inFd = v => !!v.folder && FD.some(f => f.id === v.folder);
   const ofV = k => views.filter(v => v.kind === k && !inFd(v));
   const fdHtml = FD.map(f => `<li><div class="node fd" data-drop="${f.id}"><span class="fdic" aria-hidden="true"></span>${esc(f.n)}<button class="add" data-tree="fadd:${f.id}" title="Добавить виды в раздел или создать план этажа" aria-label="Добавить виды">+</button><button class="add" data-tree="fren:${f.id}" title="Переименовать раздел" aria-label="Переименовать раздел">✎</button><button class="add" data-tree="fdel:${f.id}" title="Удалить раздел (виды останутся)" aria-label="Удалить раздел">×</button></div><ul>`
-    + (views.filter(v => v.folder === f.id).sort((a, b) => (KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind)) || a.name.localeCompare(b.name, 'ru', { numeric:true })).map(v => vItem(v, true)).join('') || '<li class="it"><span class="ph">пусто — нажмите + или перетащите сюда вид</span></li>') + '</ul></li>').join('');
+    + (views.filter(v => v.folder === f.id).sort((a, b) => (KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind)) || a.name.localeCompare(b.name, 'ru', { numeric:true })).map(v => vItem(v)).join('') || '<li class="it"><span class="ph">пусто — нажмите + или перетащите сюда вид</span></li>') + '</ul></li>').join('');
   const lvHtml = `<li><div class="node">Уровни<button class="add" data-tree="lvadd:" title="Новый уровень" aria-label="Новый уровень">+</button></div><ul>` + [...levels].sort((a, b) => b.elev - a.elev).map(L => `<li class="it"><button data-tree="lv:${L.id}" title="Открыть план уровня">${esc(L.name)}<span class="ph">${fmtElev(L.elev)}</span></button><button class="x" data-tree="lved:" title="Изменить уровни" aria-label="Изменить уровни">✎</button></li>`).join('') + `</ul></li>`;
   ul.innerHTML = lvHtml + `<li><div class="node" data-drop="">Виды (все)<button class="add" data-tree="vnew:" title="Создать раздел или вид" aria-label="Создать раздел или вид">+</button></div><ul>${fdHtml}
       ${group('Планы этажей', 'plan', ofV('plan'), 'Новый план')}
       ${group('Узлы', 'detail', ofV('detail'), 'Новый узел — обвести на плане')}
       ${group('3D-виды', 'd3', ofV('d3'), 'Новый 3D-вид')}
       ${group('Камеры', 'camera', ofV('camera'), 'Новая камера — две точки на плане')}
-      ${group('Аксонометрия', 'axo', ofV('axo'))}
+      ${group('Аксонометрия', 'axo', ofV('axo'), 'Новая аксонометрия')}
       ${group('Фасады', 'elev', ofV('elev'))}
       ${group('Разрезы', 'section', ofV('section'), 'Новый разрез — линия на плане')}
       ${group('Развёртки', 'ielev', ofV('ielev'), 'Новые развёртки — щелчок в помещении')}
@@ -9806,7 +9875,7 @@ async function persist(){
   if (ydLink()) ydPush();
   return ok;
 }
-function showName(){ $('#projName').textContent = proj.name || 'Без названия'; document.title = (proj.name ? proj.name + ' — ' : '') + 'Kot project'; }
+function showName(){ $('#projName').textContent = proj.name || 'Без названия'; document.title = (proj.name ? proj.name + ' — ' : '') + 'Kot project' + (IS_APP ? '' : ' · разработка'); }
 function nextName(list, base){ const names = new Set(list.map(p => p.name)); if (!names.has(base)) return base; let i = 2; while (names.has(`${base} ${i}`)) i++; return `${base} ${i}`; }
 function loadRecord(rec){
   endDraw();
@@ -9833,6 +9902,8 @@ function loadRecord(rec){
   openView(start.id); renderTree();
   setSaveState(store.ok ? 'saved' : 'mem'); lsSet('kot.last', proj.id);
   YD.conflict = false; YD.lastKey = null; clearTimeout(YD.timer); setTimeout(ydCheck, 900);
+  if (YD.lock && YD.lock.pid !== rec.id){ const o = YD.lock; YD.lock = null; ydLockRelease(o); }
+  FDIRTY.file = FDIRTY.copy = false; AUTODIR = null;
 }
 async function openProject(id){
   if (proj.id && proj.id !== id) await persist();
@@ -9888,8 +9959,10 @@ async function saveBlob(base, ext, blob, mime, desc){
 }
 async function saveNow(){
   const ok = await persist(); if (ydLink()) ydPush(true);
+  // the file this project was saved to / opened from on this computer (remembered between sessions; the browser asks once)
+  if (!fileHandle && !ydLink()){ const h = await handleGet('file:' + proj.id); if (h){ try { if ((await h.queryPermission({ mode:'readwrite' })) === 'granted' || (await h.requestPermission({ mode:'readwrite' })) === 'granted') fileHandle = h; } catch (e){} } }
   if (fileHandle){
-    try { const w = await fileHandle.createWritable(); await w.write(fileJSON(record())); await w.close(); toast(`Сохранено в «Мои проекты» и в файл «${fileHandle.name}»`); return; }
+    try { const w = await fileHandle.createWritable(); await w.write(fileJSON(record())); await w.close(); FDIRTY.file = false; toast(`Сохранено в «Мои проекты» и в файл «${fileHandle.name}»`); autoDirAsk(); return; }
     catch(e){ fileHandle = null; }
   }
   toast(ok ? 'Сохранено в «Мои проекты»' : 'Это устройство не даёт хранить проекты. Сохраните файлом .kot');
@@ -9898,7 +9971,8 @@ async function saveAsFile(rec){
   const own = !rec;
   if (own){ await persist(); rec = record(); }
   const r = await saveBlob(safeName(rec.name), 'kot', new Blob([fileJSON(rec)], { type:'application/json' }), 'application/json', 'Проект Kot project');
-  if (own && r.handle) fileHandle = r.handle;
+  if (own && r.ok) FDIRTY.file = false;
+  if (own && r.handle){ fileHandle = r.handle; handlePut('file:' + proj.id, r.handle); autoDirAsk(true); }
 }
 async function openFileDialog(){
   if (window.showOpenFilePicker && !inFrame){
@@ -9922,7 +9996,7 @@ async function importFile(f, handle){
   if (same && (Number(data.updated) || 0) > (same.updated || 0)){ rec = { ...same, ...body, name, updated:Date.now() }; msg = `«${name}» обновлён из файла`; }
   else if (same){ rec = { id:uid(), name:nextName(list, name + ' (из файла)'), created:Date.now(), ...body }; msg = `Открыт как копия: «${rec.name}»`; }
   else { rec = { id:data.id || uid(), name, created:Number(data.created) || Date.now(), ...body }; msg = `Открыт «${name}»`; }
-  loadRecord(rec); fileHandle = handle || null;
+  loadRecord(rec); fileHandle = handle || null; FDIRTY.file = false; if (handle){ handlePut('file:' + proj.id, handle); autoDirAsk(true); }
   await persist(); closeLib(); toast(msg);
 }
 /* ---------- Яндекс Диск: the project file (.kot) lives in the user's own folder on the Disk and is synced from any device ----------
@@ -9938,8 +10012,9 @@ function ydShowState(s){
   const el = $('#ydState'); if (!el) return; const L = proj.id && ydLink();
   el.hidden = !L; if (!L) return;
   const nm = L.path.replace(/^disk:\//, '');
+  if (!s && YD.lock && YD.lock.ro && YD.lock.pid === proj.id) s = 'ro';
   el.dataset.s = s || (YD.conflict ? 'conflict' : 'ok');
-  el.textContent = { saving:'☁ сохраняю на Диск…', err:'☁ нет связи с Диском', conflict:'☁ файл изменён на другом устройстве' }[s || (YD.conflict ? 'conflict' : '')] || '☁ Яндекс Диск';
+  el.textContent = { saving:'☁ сохраняю на Диск…', err:'☁ нет связи с Диском', conflict:'☁ файл изменён на другом устройстве', ro:'☁ только просмотр — файл открыт на другом устройстве' }[s || (YD.conflict ? 'conflict' : '')] || '☁ Яндекс Диск';
   el.title = 'Файл проекта: Яндекс Диск / ' + nm + (s === 'err' ? '. Изменения сохранятся, когда появится интернет' : '');
 }
 async function ydApi(path, opt = {}){
@@ -9958,7 +10033,7 @@ async function ydUpload(p, text){
   const r = await fetch(href, { method:'PUT', body:new Blob([text], { type:'application/json' }) }); if (!r.ok && r.status !== 201 && r.status !== 202) throw new Error('Яндекс Диск не принял файл');
 }
 function ydCloseBtn(d){ const h = d.querySelector('[data-head]'); if (h && !h.querySelector('[data-x]')){ h.innerHTML = '<button class="btn sm" data-x>Закрыть</button>'; h.querySelector('[data-x]').onclick = () => { d.hidden = true; }; } }
-$('#ydState').onclick = () => { if (YD.conflict){ ydConflict(); return; } const L = ydLink(); if (L){ toast('Файл проекта: Яндекс Диск / ' + L.path.replace(/^disk:\//, '') + '. Изменения сохраняются туда сами'); ydPush(true); } };
+$('#ydState').onclick = async () => { if (YD.lock && YD.lock.ro && YD.lock.pid === proj.id){ ydRoDlg(await ydLockRead(YD.lock.path)); return; } if (YD.conflict){ ydConflict(); return; } const L = ydLink(); if (L){ toast('Файл проекта: Яндекс Диск / ' + L.path.replace(/^disk:\//, '') + '. Изменения сохраняются туда сами'); ydPush(true); } };
 function ydErr(e){ if (e && e.code === 'auth'){ openYdLogin(); } toast(e && e.message ? e.message : 'Нет связи с Яндекс Диском'); }
 // sign-in window: open Yandex, allow access, copy the token it shows and paste it here
 function openYdLogin(after){
@@ -10013,7 +10088,7 @@ async function openYdBrowser(mode){
   q('#ydSaveHere').onclick = async () => {
     const nm = safeName(q('#ydName').value); const p = cur.replace(/\/$/, '') + '/' + nm + '.kot';
     try { const ex = await ydMeta(p).catch(() => null); if (ex && !confirm(`В папке уже есть «${nm}.kot». Заменить его этим проектом?`)) return;
-      d.hidden = true; await persist(); ydSetLink(proj.id, { path:p, modified:null }); YD.conflict = false; await ydPush(true, true); toast(`Проект сохранён на Яндекс Диск: ${p.replace(/^disk:\//, '')}. Дальше изменения сохраняются туда сами`); }
+      d.hidden = true; await persist(); if (YD.lock){ const o = YD.lock; YD.lock = null; ydLockRelease(o); } ydSetLink(proj.id, { path:p, modified:null }); YD.conflict = false; YD.lock = { path:p, pid:proj.id, ro:false }; await ydLockTake(p); await ydPush(true, true); toast(`Проект сохранён на Яндекс Диск: ${p.replace(/^disk:\//, '')}. Дальше изменения сохраняются туда сами`); }
     catch (e){ ydErr(e); }
   };
   d.hidden = false; show(cur);
@@ -10023,6 +10098,9 @@ async function ydOpenFile(p){
   let text, meta; try { [text, meta] = await Promise.all([ydDownload(p), ydMeta(p)]); } catch (e){ ydErr(e); return; }
   let data = null; try { data = JSON.parse(text); } catch (e){}
   if (!data || data.format !== 'kot-project' || !Array.isArray(data.items)){ toast('Это не файл проекта Kot project'); return; }
+  // in use on another device?
+  const lk = await ydLockRead(p); let ro = false;
+  if (lockByOther(lk)){ const c = await ydLockAsk(lk, meta.name); if (c === 'cancel') return; ro = c === 'ro'; }
   if (proj.id) await persist();
   const local = data.id ? await store.get(data.id) : null;
   const body = { items:data.items, nextId:data.nextId, settings:data.settings, types:data.types, views:data.views, viewId:data.viewId, levels:data.levels, std:data.std, fams:data.fams, tpls:data.tpls, mats:data.mats };
@@ -10030,10 +10108,13 @@ async function ydOpenFile(p){
   if (local && (local.updated || 0) > (Number(data.updated) || 0) + 2000)
     keepLocal = !confirm(`На этом устройстве есть более новая версия «${local.name}» (${new Date(local.updated).toLocaleString('ru-RU')}), чем файл на Диске (${new Date(Number(data.updated) || 0).toLocaleString('ru-RU')}).\n\nОК — открыть файл с Диска (версия устройства заменится).\nОтмена — оставить версию устройства и записать её на Диск.`);
   const id = data.id || uid();
+  if (YD.lock && YD.lock.path !== p){ const o = YD.lock; YD.lock = null; ydLockRelease(o); }
+  YD.lock = { path:p, pid:id, ro };
   ydSetLink(id, { path:p, modified:meta.modified }); YD.conflict = false;
   if (keepLocal){ loadRecord(local); await persist(); await ydPush(true, true); }
   else { loadRecord({ ...(local || {}), id, name:String(data.name || meta.name.replace(/(\.kot)?(\.json)?$/i, '')).slice(0, 80), created:Number(data.created) || Date.now(), ...body }); await persist(); }
-  closeLib(); ydShowState(); toast(`Открыт с Яндекс Диска: ${p.replace(/^disk:\//, '')}`);
+  if (!ro) await ydLockTake(p);
+  closeLib(); ydShowState(); toast(ro ? 'Открыт только для просмотра: файл работает на другом устройстве' : `Открыт с Яндекс Диска: ${p.replace(/^disk:\//, '')}`);
 }
 // save the open project to its Disk file (after every local save, a few seconds later). If the file was changed on another
 // device since our last save, stop and ask instead of overwriting it
@@ -10043,12 +10124,13 @@ async function ydPush(now, force){
   if (!now){ YD.timer = setTimeout(() => ydPush(true), 4000); return; }
   if (YD.busy){ YD.timer = setTimeout(() => ydPush(true), 1500); return; }
   if (YD.conflict && !force) return;
+  if (YD.lock && YD.lock.ro && YD.lock.pid === proj.id){ ydShowState(); return; } // view only: the file is used on another device
   YD.busy = true; ydShowState('saving'); const pid = proj.id;
   try {
     if (!force && L.modified){ const m = await ydMeta(L.path).catch(e => { if (e.status === 404) return null; throw e; }); if (m && m.modified !== L.modified){ YD.conflict = true; ydShowState(); ydConflict(); return; } }
     const txt = fileJSON(record()), key = txt.replace(/"updated":\d+,?/, '');
-    if (!force && key === YD.lastKey){ ydShowState(); return; }
-    await ydUpload(L.path, txt); YD.lastKey = key;
+    if (!force && key === YD.lastKey){ FDIRTY.file = false; ydShowState(); return; }
+    await ydUpload(L.path, txt); YD.lastKey = key; FDIRTY.file = false;
     const m2 = await ydMeta(L.path); if (proj.id === pid) ydSetLink(pid, { path:L.path, modified:m2.modified }); YD.conflict = false; ydShowState();
   } catch (e){ ydShowState('err'); if (e && e.code === 'auth') ydErr(e); }
   finally { YD.busy = false; }
@@ -10059,17 +10141,235 @@ function ydConflict(){
   d.querySelector('#ydCfT').textContent = `Файл «${L.path.replace(/^disk:\//, '')}» на Яндекс Диске изменили после вашего последнего сохранения (на другом устройстве). Автосохранение на Диск остановлено, чтобы не затереть те изменения. Что сделать?`;
   d.querySelector('#ydCfLoad').onclick = () => { d.hidden = true; ydOpenFile(L.path); };
   d.querySelector('#ydCfMine').onclick = () => { if (!confirm('Изменения, сделанные на другом устройстве, пропадут. Записать вашу версию?')) return; d.hidden = true; ydPush(true, true); };
-  d.querySelector('#ydCfCopy').onclick = () => { d.hidden = true; ydSetLink(proj.id, null); YD.conflict = false; openYdBrowser('save'); };
+  d.querySelector('#ydCfCopy').onclick = () => { d.hidden = true; if (YD.lock){ const o = YD.lock; YD.lock = null; ydLockRelease(o); } ydSetLink(proj.id, null); YD.conflict = false; openYdBrowser('save'); };
   d.hidden = false;
 }
 // when a linked project is opened, look whether its file on the Disk is newer (saved on another device)
 async function ydCheck(){
+  await ydLockOnOpen();
   const L = ydLink(); if (!L || !ydToken() || !L.modified) { ydShowState(); return; }
   try { const m = await ydMeta(L.path); if (m.modified !== L.modified){ YD.conflict = true; ydShowState();
       if (confirm(`На Яндекс Диске более новая версия этого проекта (сохранена ${new Date(m.modified).toLocaleString('ru-RU')}, возможно на другом устройстве). Открыть её?`)) ydOpenFile(L.path); else ydConflict(); }
     else { YD.conflict = false; ydShowState(); } }
   catch (e){ ydShowState(e && e.status === 404 ? undefined : 'err'); }
 }
+/* ---------- «файл открыт на другом устройстве» (like Revit worksharing): a lock file next to the project file on the Disk ----------
+   «<файл>.kot.lock» = { dev, name, at } of the device that works in the file. It is refreshed every 2 minutes and taken down at exit;
+   a lock older than 6 minutes (the device was switched off without closing) does not count. Opening a file locked by another
+   device asks: view only / work anyway (take the lock over) / cancel. A device whose lock was taken over stops writing to the file. */
+const DEV = (() => {
+  let id = lsGet('kot.devId'); if (!id){ id = 'd' + Math.random().toString(36).slice(2, 10); lsSet('kot.devId', id); }
+  const ua = navigator.userAgent, kind = /iPad|Tablet/.test(ua) || (/Android/.test(ua) && !/Mobile/.test(ua)) ? 'Планшет' : /Android|iPhone|Mobile/.test(ua) ? 'Телефон' : 'Компьютер';
+  const os = /Windows/.test(ua) ? 'Windows' : /Android/.test(ua) ? 'Android' : /Mac/.test(ua) ? 'Mac' : /iPhone|iPad/.test(ua) ? 'iOS' : '';
+  return { id, get name(){ return lsGet('kot.devName') || kind + (os ? ' (' + os + ')' : ''); } };
+})();
+const LOCK_FRESH = 6 * 60 * 1000, LOCK_BEAT = 2 * 60 * 1000;
+const lockPathOf = p => p + '.lock';
+async function ydLockRead(p){
+  try { const [txt, m] = await Promise.all([ydDownload(lockPathOf(p)), ydMeta(lockPathOf(p))]); const j = JSON.parse(txt); return { ...j, mod:Date.parse(m.modified) || 0 }; }
+  catch (e){ return null; }
+}
+const lockByOther = l => !!l && l.dev !== DEV.id && Date.now() - Math.max(l.at || 0, l.mod || 0) < LOCK_FRESH;
+async function ydLockTake(p){ try { await ydUpload(lockPathOf(p), JSON.stringify({ dev:DEV.id, name:DEV.name, at:Date.now(), proj:proj.name })); return true; } catch (e){ return false; } }
+async function ydLockRelease(L, keepalive){
+  if (!L || L.ro || !ydToken()) return;
+  try { if (!keepalive){ const l = await ydLockRead(L.path); if (l && l.dev !== DEV.id) return; } await ydApi(`/resources?path=${ydQ(lockPathOf(L.path))}&permanently=true`, { method:'DELETE', ...(keepalive ? { keepalive:true } : {}) }); } catch (e){}
+}
+const lockWhen = l => new Date(Math.max(l.at || 0, l.mod || 0)).toLocaleString('ru-RU', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+// the question when the file is in use on another device: resolves 'ro' | 'take' | 'cancel'
+function ydLockAsk(l, fname, canCancel = true){
+  return new Promise(res => {
+    const d = mkModal('ydLk', 'Файл открыт на другом устройстве', `<p id="ydLkT" style="margin:0 0 12px"></p><div class="row" style="gap:6px;justify-content:flex-end;flex-wrap:wrap"><button class="btn primary" id="ydLkRo">Открыть только для просмотра</button><button class="btn" id="ydLkTake">Работать всё равно</button><button class="btn" id="ydLkNo">Отмена</button></div>`, 560);
+    d.querySelector('#ydLkT').textContent = `Файл «${fname}» сейчас открыт на устройстве «${l.name || 'другое устройство'}» (с ${lockWhen(l)}). Если работать в нём одновременно, изменения одного устройства затрут изменения другого.\n\n«Только для просмотра» — смотреть, а изменения в файл не записывать. «Работать всё равно» — файл перейдёт к этому устройству, а на «${l.name || 'том устройстве'}» запись в файл остановится.`;
+    d.querySelector('#ydLkT').style.whiteSpace = 'pre-line';
+    d.querySelector('#ydLkNo').hidden = !canCancel;
+    const done = v => { d.hidden = true; res(v); };
+    d.querySelector('#ydLkRo').onclick = () => done('ro'); d.querySelector('#ydLkTake').onclick = () => done('take'); d.querySelector('#ydLkNo').onclick = () => done(canCancel ? 'cancel' : 'ro');
+    d.hidden = false;
+  });
+}
+// the project is open only for viewing (or its lock was taken over): what can be done
+function ydRoDlg(l){
+  const L = YD.lock; if (!L) return;
+  const d = mkModal('ydRo', 'Только просмотр', `<p id="ydRoT" style="margin:0 0 12px;white-space:pre-line"></p><div class="row" style="gap:6px;justify-content:flex-end;flex-wrap:wrap"><button class="btn primary" id="ydRoTake">Работать в файле на этом устройстве</button><button class="btn" id="ydRoCopy">Сохранить мою копией…</button><button class="btn" id="ydRoNo">Закрыть</button></div>`, 560);
+  d.querySelector('#ydRoT').textContent = (l ? `Файл открыт на устройстве «${l.name || 'другое устройство'}» (с ${lockWhen(l)}). ` : 'Файл открыт на другом устройстве. ') + 'Ваши изменения сохраняются на этом устройстве, но в файл на Яндекс Диске не записываются.';
+  d.querySelector('#ydRoNo').onclick = () => { d.hidden = true; };
+  d.querySelector('#ydRoCopy').onclick = () => { d.hidden = true; ydSetLink(proj.id, null); YD.lock = null; openYdBrowser('save'); };
+  d.querySelector('#ydRoTake').onclick = async () => { if (!confirm('Файл перейдёт к этому устройству, а на другом запись в файл остановится. Продолжить?')) return; d.hidden = true; L.ro = false; await ydLockTake(L.path); ydShowState(); toast('Теперь в файле работает это устройство'); ydPush(true); };
+  d.hidden = false;
+}
+// opening a linked project (from «Мои проекты», at start): is its file used on another device?
+async function ydLockOnOpen(){
+  const L = ydLink(); if (!L || !ydToken() || navigator.onLine === false) return;
+  if (YD.lock && YD.lock.pid === proj.id) return;
+  const pid = proj.id, l = await ydLockRead(L.path);
+  if (proj.id !== pid) return;
+  let ro = false;
+  if (lockByOther(l)) ro = (await ydLockAsk(l, L.path.replace(/^.*\//, ''), false)) === 'ro';
+  YD.lock = { path:L.path, pid, ro };
+  if (!ro) await ydLockTake(L.path);
+  ydShowState();
+}
+// every 2 minutes: keep our lock fresh; notice when another device took the file over
+setInterval(async () => {
+  const L = YD.lock; if (!L || L.ro || L.pid !== proj.id || !ydToken() || navigator.onLine === false) return;
+  const l = await ydLockRead(L.path);
+  if (l && l.dev !== DEV.id && lockByOther(l)){ L.ro = true; ydShowState(); ydRoDlg(l); return; }
+  ydLockTake(L.path);
+}, LOCK_BEAT);
+addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.lock, true); });
+/* ---------- the installed working program and its updates (.kotupd) ----------
+   Two copies of the program live on the site: the development one (…/kot-project/, updates by itself with every upload) and the
+   working program (…/kot-project/app/, installed once). The working program runs the version kept on the device (caches «kotapp-v-<версия>»,
+   chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
+   An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
+   every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-1302');
+const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
+const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
+async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
+async function appMetaSet(m){ const c = await caches.open(APPV.meta); await c.put(APPV.key, new Response(JSON.stringify(m), { headers:{ 'Content-Type':'application/json' } })); }
+const verCmp = (a, b) => String(a).localeCompare(String(b), 'en', { numeric:true });
+async function readUpdate(file){
+  let buf = new Uint8Array(await file.arrayBuffer());
+  if (buf[0] === 0x1f && buf[1] === 0x8b){ if (!('DecompressionStream' in window)) throw new Error('Этот браузер не умеет распаковывать обновления — обновите Chrome'); try { buf = new Uint8Array(await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()); } catch (e){ throw new Error('Файл обновления повреждён или скачан не до конца — скачайте или скопируйте его заново'); } }
+  const td = new TextDecoder(), magic = td.decode(buf.subarray(0, 8)); if (magic !== 'KOTUPD1\n') throw new Error('Это не файл обновления Kot project');
+  let i = 8; while (i < buf.length && buf[i] !== 10) i++;
+  const head = JSON.parse(td.decode(buf.subarray(8, i))); if (head.format !== 'kot-update' || !head.version || !Array.isArray(head.files)) throw new Error('Файл обновления повреждён');
+  let o = i + 1; const files = head.files.map(f => { const b = buf.subarray(o, o + f.n); o += f.n; return { ...f, b }; });
+  if (o !== buf.length) throw new Error('Файл обновления неполный или повреждён (размер не сходится)');
+  if (!files.some(f => f.u === 'app:index.html')) throw new Error('В файле обновления нет программы');
+  return { head, files };
+}
+async function installUpdate(file){
+  const { head, files } = await readUpdate(file), cur = await appMeta(), now = (cur && cur.version) || APP_VERSION;
+  if (cur && verCmp(head.version, now) === 0 && !confirm(`Версия ${head.version} уже установлена. Установить её заново?`)) return;
+  if (cur && verCmp(head.version, now) < 0 && !confirm(`Файл содержит более старую версию (${head.version}), чем установленная (${now}). Установить её всё равно?`)) return;
+  await persist();
+  const name = APPV.pre + head.version, c = await caches.open(name), base = new URL('./', location.href);
+  for (const f of files){
+    const url = f.u === 'app:index.html' ? new URL('./index.html', base).href : f.u;
+    const resp = new Response(f.b, { headers:{ 'Content-Type':f.t || 'application/octet-stream', 'Access-Control-Allow-Origin':'*' } });
+    await c.put(url, resp.clone()); if (f.u === 'app:index.html') await c.put(base.href, resp);
+  }
+  // the libraries also go to the shared offline cache, so the development copy and voice/render work offline too
+  const lib = await caches.open('kot-lib-1'); for (const f of files) if (f.u !== 'app:index.html' && !(await lib.match(f.u))) await lib.put(f.u, new Response(f.b, { headers:{ 'Content-Type':f.t || 'application/octet-stream' } }));
+  const prev = cur && cur.version !== head.version ? cur.version : (cur && cur.prev) || null;
+  await appMetaSet({ version:head.version, prev, at:Date.now(), built:head.built || null });
+  for (const k of await caches.keys()) if (k.startsWith(APPV.pre) && k !== name && k !== APPV.pre + prev) await caches.delete(k);
+  return head;
+}
+function openUpdate(){
+  if (!IS_APP){ toast('Обновления файлом ставятся в рабочую программу (адрес …/kot-project/app/). Эта копия — для разработки, она обновляется сама'); return; }
+  const d = mkModal('updDlg', 'Обновление программы', `<p id="upT" style="margin:0 0 8px"></p><p class="libnote" style="margin:0 0 10px">Выберите файл обновления (.kotupd): его можно принести на флешке, скачать с Яндекс Диска, получить по почте или через Quick Share. Интернет не нужен. Ваши проекты, настройки и модель голоса не меняются.</p><p id="upMsg" style="margin:0 0 10px;font-weight:600"></p><div class="row" style="justify-content:flex-end;gap:6px;flex-wrap:wrap"><button class="btn primary" id="upPick">Выбрать файл обновления…</button><button class="btn" id="upBack" hidden>Вернуть предыдущую версию</button><button class="btn" id="upNo">Закрыть</button></div><input type="file" id="upFile" accept=".kotupd" hidden>`, 560);
+  const q = s => d.querySelector(s);
+  (async () => { const m = await appMeta(); q('#upT').textContent = `Установлена версия ${(m && m.version) || APP_VERSION}${m && m.at ? ' (с ' + new Date(m.at).toLocaleDateString('ru-RU') + ')' : ''}.`; const pv = m && m.prev && await caches.has(APPV.pre + m.prev); q('#upBack').hidden = !pv; if (pv) q('#upBack').textContent = 'Вернуть версию ' + m.prev; })();
+  q('#upNo').onclick = () => { d.hidden = true; };
+  q('#upPick').onclick = () => { const i = q('#upFile'); i.value = ''; i.click(); };
+  q('#upFile').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    q('#upMsg').textContent = 'Проверяю и распаковываю…'; q('#upPick').disabled = true;
+    try { const h = await installUpdate(f); if (!h){ q('#upMsg').textContent = ''; return; } q('#upMsg').textContent = `Установлена версия ${h.version}. Перезапускаю…`; QUITTING = true; setTimeout(() => location.reload(), 900); }
+    catch (er){ q('#upMsg').textContent = 'Не удалось: ' + (er.message || er); }
+    finally { q('#upPick').disabled = false; }
+  };
+  q('#upBack').onclick = async () => {
+    const m = await appMeta(); if (!m || !m.prev || !(await caches.has(APPV.pre + m.prev))) return;
+    if (!confirm(`Вернуть версию ${m.prev}? Текущая (${m.version}) останется, к ней можно будет вернуться так же.`)) return;
+    await persist(); await appMetaSet({ version:m.prev, prev:m.version, at:Date.now() }); QUITTING = true; location.reload();
+  };
+  d.hidden = false;
+}
+function openAbout(){
+  const d = mkModal('aboutDlg', 'О программе', '<div id="abB" style="line-height:1.6"></div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" id="abNo">Закрыть</button></div>', 480);
+  d.querySelector('#abNo').onclick = () => { d.hidden = true; };
+  (async () => { const m = IS_APP ? await appMeta() : null;
+    d.querySelector('#abB').innerHTML = `<b>Kot project</b><br>Это устройство: <b>${esc(DEV.name)}</b> <button class="btn sm" id="abDev">Переименовать</button><br>${IS_WIN ? 'Установлена на этот компьютер (Windows), работает без интернета и без сайта.<br>' : ''}${IS_APP ? 'Рабочая программа — версия ' + esc((m && m.version) || APP_VERSION) + '<br>Обновляется только файлом: «Файл → Установить обновление…».' : 'Копия для разработки — версия ' + esc(APP_VERSION) + '<br>Обновляется сама при каждой загрузке на сайт. Рабочая программа: <a href="app/" target="_blank" rel="noopener">…/kot-project/app/</a>'}<br>Без интернета: ${navigator.onLine === false ? 'сейчас нет сети — работаю из памяти устройства' : 'всё нужное хранится на устройстве («Файл → Скачать всё для работы без интернета»)'}`;
+    d.querySelector('#abDev').onclick = () => { const n = prompt('Имя этого устройства (его увидят другие устройства, когда проект открыт здесь)', DEV.name); if (n && n.trim()){ lsSet('kot.devName', n.trim().slice(0, 40)); if (YD.lock && !YD.lock.ro) ydLockTake(YD.lock.path); openAbout(); } }; })();
+  d.hidden = false;
+}
+/* ---------- Kot project installed on Windows (installer, no GitHub): the launcher serves the program on localhost:47811 and gives
+   the key of this run in the address (?k=…). A project file opened by a double-click comes as ?open=<token>: it is read through the
+   launcher, and Ctrl+S / the autosave copies write back into that file and next to it (/__save/<token>). ---------- */
+const WINKEY = (() => { let k = null; try { k = new URLSearchParams(location.search).get('k'); if (k) sessionStorage.setItem('kot.wk', k); else k = sessionStorage.getItem('kot.wk'); } catch (e){} return k; })();
+const IS_WIN = !!WINKEY && location.hostname === 'localhost' && location.port === '47811';
+function winWritable(token, sib){
+  const parts = [];
+  return { write:async d => { parts.push(d); }, close:async () => { const r = await fetch('/__save/' + token + (sib ? '?sib=' + encodeURIComponent(sib) : ''), { method:'PUT', headers:{ 'X-Kot-Key':WINKEY }, body:new Blob(parts) }); if (!r.ok) throw new Error('Не удалось записать файл'); } };
+}
+function winHandle(token, name){
+  return { kind:'file', name, kotLocal:true, token,
+    getFile:async () => { const r = await fetch('/__open/' + token, { headers:{ 'X-Kot-Key':WINKEY } }); return new File([await r.blob()], name); },
+    createWritable:async () => winWritable(token), queryPermission:async () => 'granted', requestPermission:async () => 'granted' };
+}
+const winDir = token => ({ kotLocal:true, name:'папка проекта', getFileHandle:async n => ({ createWritable:async () => winWritable(token, n) }) });
+async function winLocalOpen(){
+  if (!IS_WIN) return;
+  const q = new URLSearchParams(location.search), t = q.get('open');
+  if (q.has('k') || t) history.replaceState(null, '', location.pathname); // the key does not stay in the address
+  if (!t || !/^[0-9a-f]{32}$/.test(t)) return;
+  try {
+    const r = await fetch('/__open/' + t, { headers:{ 'X-Kot-Key':WINKEY } }); if (!r.ok) throw new Error('файл не найден');
+    const name = decodeURIComponent(r.headers.get('X-Kot-Name') || 'Проект.kot');
+    await importFile(new File([await r.blob()], name), winHandle(t, name));
+    AUTODIR = winDir(t);
+  } catch (e){ toast('Не удалось открыть файл проекта: ' + (e.message || e)); }
+}
+/* ---------- closing the program and autosave copies ----------
+   Exit («Файл → Выход…»): Сохранить / Не сохранять / Отмена, then the window closes. Closing with the cross: the browser's own
+   «Покинуть сайт?» when the file has unsaved changes (a page may not show its own buttons there). The project itself is always kept
+   on the device (IndexedDB), so nothing is lost either way.
+   Autosave copies: every 10 minutes, when something changed, the project is written into one of two copies next to its file —
+   «<имя>.автокопия1.kot» and «…2.kot», in turn (the older one is replaced). On the Yandex Disk — next to the file there (computer and
+   tablet); for a file on the computer — in its folder (the browser asks once for that folder). */
+const AUTOCOPY_MS = 10 * 60 * 1000;
+let AUTODIR = null; // FileSystemDirectoryHandle of the folder of the project file (computer)
+function idbHandles(){ return new Promise((res, rej) => { const r = indexedDB.open('kot-handles', 1); r.onupgradeneeded = () => r.result.createObjectStore('h'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function handlePut(k, v){ try { const db = await idbHandles(); await new Promise((res, rej) => { const t = db.transaction('h', 'readwrite'); t.objectStore('h').put(v, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (e){} }
+async function handleGet(k){ try { const db = await idbHandles(); return await new Promise(res => { const q = db.transaction('h').objectStore('h').get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch (e){ return null; } }
+// once per project file on the computer: the folder where the autosave copies go (needs a click of the user — called from saving / opening)
+async function autoDirAsk(fresh){
+  if (fileHandle && fileHandle.kotLocal){ AUTODIR = winDir(fileHandle.token); return; } // Windows installation: copies go next to the file through the launcher
+  if (!window.showDirectoryPicker || inFrame || !fileHandle) return;
+  const pid = proj.id;
+  if (!fresh && !AUTODIR){ const h = await handleGet('dir:' + pid); if (h){ try { if ((await h.queryPermission({ mode:'readwrite' })) === 'granted' || (await h.requestPermission({ mode:'readwrite' })) === 'granted'){ AUTODIR = h; return; } } catch (e){} } }
+  if (!fresh || (AUTODIR && !fresh)) return;
+  const d = mkModal('autoDirDlg', 'Автокопии проекта', '<p id="adT" style="margin:0 0 10px"></p><div class="row" style="justify-content:flex-end;gap:6px"><button class="btn primary" id="adOk">Выбрать папку</button><button class="btn" id="adNo">Не сейчас</button></div>', 520);
+  d.querySelector('#adT').textContent = `Каждые 10 минут программа будет сохранять две автокопии проекта по очереди («${safeName(proj.name)}.автокопия1.kot» и «…2.kot») рядом с файлом «${fileHandle.name}». Браузеру нужно разрешение: выберите папку, где лежит этот файл.`;
+  d.querySelector('#adNo').onclick = () => { d.hidden = true; };
+  d.querySelector('#adOk').onclick = async () => { d.hidden = true; try { const h = await window.showDirectoryPicker({ id:'kotproject', mode:'readwrite', startIn:fileHandle }); AUTODIR = h; await handlePut('dir:' + pid, h); toast(`Автокопии будут в папке «${h.name}»`); } catch (e){} };
+  d.hidden = false;
+}
+async function autoCopy(force){
+  if (!proj.id || (!FDIRTY.copy && !force)) return false;
+  const L = ydLink(); if (!L && !AUTODIR) return false;
+  const slot = (Number(lsGet('kot.ac.' + proj.id)) || 0) % 2 + 1, txt = fileJSON(record()), base = safeName(proj.name) + '.автокопия' + slot + '.kot';
+  try {
+    if (L && ydToken()){ if (YD.lock && YD.lock.ro && YD.lock.pid === proj.id) return false; await ydUpload(L.path.replace(/\/[^/]+$/, '') + '/' + base, txt); }
+    else if (AUTODIR){ const fh = await AUTODIR.getFileHandle(base, { create:true }); const w = await fh.createWritable(); await w.write(txt); await w.close(); }
+    else return false;
+    lsSet('kot.ac.' + proj.id, String(slot)); FDIRTY.copy = false; return base;
+  } catch (e){ console.warn('autosave copy', e); return false; }
+}
+setInterval(() => autoCopy(), AUTOCOPY_MS);
+function openExit(){
+  const d = mkModal('exitDlg', 'Выход из программы', '<p id="exT" style="margin:0 0 12px"></p><div class="row" style="justify-content:flex-end;gap:6px;flex-wrap:wrap"><button class="btn primary" id="exSave">Сохранить и выйти</button><button class="btn" id="exNo">Выйти без сохранения</button><button class="btn" id="exCancel">Отменить выход</button></div>', 520);
+  const L = ydLink();
+  d.querySelector('#exT').textContent = FDIRTY.file ? `В проекте «${proj.name}» есть изменения, не сохранённые в файл${fileHandle ? ' «' + fileHandle.name + '»' : L ? ' на Яндекс Диске' : ''}. Сохранить перед выходом?` : `Проект «${proj.name}» сохранён. Выйти из программы?`;
+  d.querySelector('#exSave').textContent = FDIRTY.file ? 'Сохранить и выйти' : 'Выйти';
+  d.querySelector('#exCancel').onclick = () => { d.hidden = true; };
+  const quit = async () => { d.hidden = true; await persist(); FDIRTY.file = false; QUITTING = true; if (YD.lock){ const o = YD.lock; YD.lock = null; await ydLockRelease(o); } window.close(); setTimeout(() => toast('Всё сохранено. Закройте окно крестиком — программа в фоне не остаётся'), 400); };
+  d.querySelector('#exNo').onclick = quit;
+  d.querySelector('#exSave').onclick = async () => {
+    if (!FDIRTY.file) return quit();
+    if (L){ await persist(); await ydPush(true, false); if (FDIRTY.file){ toast('Не удалось записать на Яндекс Диск — проверьте интернет'); return; } return quit(); }
+    if (fileHandle){ await saveNow(); if (FDIRTY.file) return; return quit(); }
+    d.hidden = true; await saveAsFile(); if (!FDIRTY.file) quit();
+  };
+  d.hidden = false; d.querySelector('#exSave').focus();
+}
+let QUITTING = false;
+addEventListener('beforeunload', e => { if (QUITTING || !FDIRTY.file) return; e.preventDefault(); e.returnValue = ''; });
 async function exportPNG(){
   renderer.render(scene, cam());
   cv.toBlob(b => { if (b) saveBlob(safeName(proj.name) + ' — ' + viewNames[S.view].split(':')[0], 'png', b, 'image/png', 'Картинка PNG'); }, 'image/png');
@@ -10160,7 +10460,9 @@ const fileMenu = $('#fileMenu'), fileBtn = $('#fileBtn');
 function openFileMenu(){ const r = fileBtn.getBoundingClientRect(); fileMenu.style.left = r.left + 'px'; fileMenu.style.top = (r.bottom + 2) + 'px'; fileMenu.hidden = false; fileBtn.setAttribute('aria-expanded', 'true'); fileMenu.querySelector('button').focus(); }
 function closeFileMenu(){ if (fileMenu.hidden) return; fileMenu.hidden = true; fileBtn.setAttribute('aria-expanded', 'false'); }
 fileBtn.onclick = () => fileMenu.hidden ? openFileMenu() : closeFileMenu();
-const ACTS = { new:newProject, library:openLib, save:saveNow, saveFile:() => saveAsFile(), openFile:openFileDialog, ydOpen:() => openYdBrowser('open'), ydSave:() => openYdBrowser('save'), ydLogin:() => openYdLogin(), dup:duplicateCurrent, png:exportPNG, print:openPrint, offline:() => openOfflinePack(), install:openInstall };
+const ACTS = { new:newProject, library:openLib, save:saveNow, saveFile:() => saveAsFile(), openFile:openFileDialog, ydOpen:() => openYdBrowser('open'), ydSave:() => openYdBrowser('save'), ydLogin:() => openYdLogin(), dup:duplicateCurrent, png:exportPNG, print:openPrint, offline:() => openOfflinePack(), install:openInstall, exit:() => openExit(), update:() => openUpdate(), about:() => openAbout() };
+if (!IS_APP) fileMenu.querySelectorAll('[data-app]').forEach(b => b.hidden = true);
+if (IS_WIN){ const ib = fileMenu.querySelector('[data-act="install"]'); if (ib) ib.hidden = true; }
 fileMenu.querySelectorAll('[data-act]').forEach(b => b.onclick = () => { closeFileMenu(); ACTS[b.dataset.act](); });
 document.addEventListener('pointerdown', e => { if (!fileMenu.hidden && !fileMenu.contains(e.target) && e.target !== fileBtn) closeFileMenu(); });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && proj.id) persist(); });
@@ -10216,7 +10518,7 @@ function applyLayout(){
     $('#floatLayer').append(el);
   }
   for (const b of [['#rbLeft', ['props', 'browser']], ['#rbRight', ['chat']]]) $(b[0]).setAttribute('aria-pressed', b[1].some(id => LAY.p[id].show));
-  saveLayout();
+  saveLayout(); pnSync();
 }
 function setPanel(id, show){
   LAY.p[id].show = show;
@@ -10238,6 +10540,50 @@ function sideOpen(which){
   if (wide()) return ids.some(id => LAY.p[id].show);
   return ids.some(id => LAY.p[id].show && (LAY.p[id].dock === 'float' || $('#app').classList.contains(LAY.p[id].dock + '-open')));
 }
+// phone: the bottom bar opens one window at a time over the whole screen; «Лента» folds the ribbon
+const PHONE_MQ = matchMedia('(max-width:640px)');
+function pnSync(){
+  const app = $('#app');
+  document.querySelectorAll('#phoneNav [data-pn]').forEach(b => {
+    const k = b.dataset.pn; if (k === 'fit') return;
+    if (k === 'rb'){ b.setAttribute('aria-pressed', !app.classList.contains('rb-fold')); return; }
+    const p = LAY.p[k], on = !!p && p.show && (p.dock === 'float' || app.classList.contains(p.dock + '-open'));
+    b.setAttribute('aria-pressed', on);
+  });
+}
+function pnToggle(k){
+  const app = $('#app');
+  if (k === 'fit'){ fit(); return; }
+  if (k === 'rb'){ app.classList.toggle('rb-fold'); lsSet('kot.rbFold', app.classList.contains('rb-fold') ? '1' : '0'); pnSync(); setTimeout(() => dispatchEvent(new Event('resize')), 30); return; }
+  const p = LAY.p[k]; if (!p) return;
+  const open = p.show && (p.dock === 'float' || app.classList.contains(p.dock + '-open'));
+  if (open){ if (p.dock === 'float') p.show = false; else app.classList.remove(p.dock + '-open'); applyLayout(); pnSync(); return; }
+  // only this window in its column, the other column closed
+  for (const id of PANEL_IDS) if (id !== k && LAY.p[id].dock === p.dock) LAY.p[id].show = false;
+  if (p.dock === 'float') p.dock = k === 'chat' ? 'right' : 'left';
+  setPanel(k, true); pnSync();
+}
+document.querySelectorAll('#phoneNav [data-pn]').forEach(b => b.onclick = () => pnToggle(b.dataset.pn));
+// full screen for the drawing (phone, tablet): the grip at the top — pull up or tap to hide the ribbon, the bars and all windows; pull down or tap to bring them back
+function setUiHide(on){
+  const app = $('#app'); on = on == null ? !app.classList.contains('ui-hide') : !!on;
+  app.classList.toggle('ui-hide', on); $('#uiGrip').setAttribute('aria-pressed', on);
+  $('#uiGrip').title = on ? 'Потяните вниз или коснитесь — вернуть ленту и окна' : 'Потяните вверх или коснитесь — рабочее поле на весь экран';
+  lsSet('kot.uiHide', on ? '1' : '0');
+  setTimeout(() => dispatchEvent(new Event('resize')), 30);
+  return on;
+}
+{
+  const g = $('#uiGrip'); let y0 = null, done = false;
+  g.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); y0 = e.clientY; done = false; try { g.setPointerCapture(e.pointerId); } catch (er){} });
+  g.addEventListener('pointermove', e => { if (y0 == null || done) return; const dy = e.clientY - y0; if (dy < -18){ setUiHide(true); done = true; } else if (dy > 18){ setUiHide(false); done = true; } });
+  g.addEventListener('pointerup', e => { if (y0 != null && !done) setUiHide(); y0 = null; });
+  g.addEventListener('pointercancel', () => { y0 = null; });
+  g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setUiHide(); } });
+  if (lsGet('kot.uiHide') === '1' && matchMedia('(pointer:coarse),(max-width:1180px)').matches) setUiHide(true);
+}
+if (PHONE_MQ.matches && lsGet('kot.rbFold') === '1') $('#app').classList.add('rb-fold');
+PHONE_MQ.addEventListener && PHONE_MQ.addEventListener('change', () => { setTimeout(() => dispatchEvent(new Event('resize')), 50); pnSync(); });
 function dockPanel(id, dock, index){
   const p = LAY.p[id]; p.show = true;
   if (dock === 'float'){ p.dock = 'float'; applyLayout(); return; }
@@ -10787,7 +11133,7 @@ function findEl(spec){
   if (!it) throw new Error(`Нет элемента: ${CAT[type].toLowerCase()} ${m[2].toUpperCase()}`);
   return it;
 }
-const CMD = /нажми|инструмент|выдел|выбер|скрой|спрячь|закреп|откреп|раздел|переименуй|размести|назови|отметк|подними|опусти|скопир|зеркал|изолир|сохран|печат|визуализ|рендер|вкладк|выделени|библиотек|экспликац|яндекс|умеешь|уровен|уровн|отсоедин|присоедин|соедини|крыш|кровл|потол|(?:^|\s)пол(?:\s|$)|перекрыт|колонн|лестниц|разрез|развертк|границ|стади|снес|снос|демонтир|узел|обмер|монтаж|мебел|откр|диспетчер|букв|сдвин|передвин|перемест|отодвин|подвин|смест|стен|перегород|комнат|помещени|двер|окн|объем|блок|шкаф|стол|кроват|диван|крыльц|тумб|куб|вид|план|аксоном|изометр|диметр|3д|перспектив|фасад|отмен|верни|повтор|покажи|очист|лист|удали|замкн|начн|точк|высот[а-я]* стен|толщин|лини|тонир|выбер|выдели|сетк|размер|ос[ия](?:[^а-я]|$)|осей|поверн/;
+const CMD = /устройств|перехват|экран|панели|лент|выход|выйди|автокопи|нажми|инструмент|выдел|выбер|скрой|спрячь|закреп|откреп|раздел|переименуй|размести|назови|отметк|подними|опусти|скопир|зеркал|изолир|сохран|печат|визуализ|рендер|вкладк|выделени|библиотек|экспликац|яндекс|умеешь|уровен|уровн|отсоедин|присоедин|соедини|крыш|кровл|потол|(?:^|\s)пол(?:\s|$)|перекрыт|колонн|лестниц|разрез|развертк|границ|стади|снес|снос|демонтир|узел|обмер|монтаж|мебел|откр|диспетчер|букв|сдвин|передвин|перемест|отодвин|подвин|смест|стен|перегород|комнат|помещени|двер|окн|объем|блок|шкаф|стол|кроват|диван|крыльц|тумб|куб|вид|план|аксоном|изометр|диметр|3д|перспектив|фасад|отмен|верни|повтор|покажи|очист|лист|удали|замкн|начн|точк|высот[а-я]* стен|толщин|лини|тонир|выбер|выдели|сетк|размер|ос[ия](?:[^а-я]|$)|осей|поверн/;
 function splitFrags(s){
   const parts = s.split(/\s*(?:[,;]|\.(?!\d))\s*|\s+(?:и|затем|потом|далее|после этого)\s+/).filter(p => p && p.trim());
   const out = [];
@@ -10884,6 +11230,17 @@ function parseOne(f){
   if (/сним[а-я]* (?:выделени|выбор)|отмени выделени/.test(f)) return { a:'deselect' };
   if (/библиотек[а-я]* мебел/.test(f)) return { a:'opendlg', d:'furnlib' };
   if (/без интернет|офлайн|оффлайн/.test(f) && /скача|загруз|подготов/.test(f)) return { a:'offline' };
+  if (/^(?:выход|выйди|выйти|закрой программ|заверши работ)/.test(f)) return { a:'exit' };
+  if (/автокопи/.test(f)) return { a:'autocopy' };
+  if (/обнов/.test(f) && /программ|установ/.test(f)) return { a:'update' };
+  const m0 = f.match(/(?:назови|имя)\s+(?:это\s+)?устройств[а-я]*\s+(.+)$/); if (m0) return { a:'devname', name:m0[1].trim() };
+  if (/перехват|работать в файле/.test(f)) return { a:'ydtake' };
+  if (/(?:на )?весь экран|полн[а-я]* экран/.test(f)) return { a:'fullscreen', on:!/выйд|выход|верни|убер|отмен/.test(f) };
+  if (/(?:скрой|спрячь|убери)\s+(?:все\s+)?(?:панели|окна|меню)/.test(f)) return { a:'fullscreen', on:true };
+  if (/(?:покажи|верни|открой)\s+(?:все\s+)?(?:панели|окна|меню)/.test(f)) return { a:'fullscreen', on:false };
+  if (/лент/.test(f) && /сверн|скрой|спрячь|убер/.test(f)) return { a:'ribbon', on:false };
+  if (/лент/.test(f) && /разверн|покаж|верни|откр/.test(f)) return { a:'ribbon', on:true };
+  if (/верси[яюи] программ|о программе/.test(f)) return { a:'about' };
   if (/окн[а-я]* уровн|^уровни$/.test(f)) return { a:'opendlg', d:'levels' };
   if (/материал[а-я]*$/.test(f) && /откр|окн|покаж/.test(f)) return { a:'opendlg', d:'mats' };
   if (/экспликаци/.test(f) && S.view === 'sheet') return { a:'expl', on:!/убер|удали|скрой|без/.test(f) };
@@ -11433,6 +11790,14 @@ function execMore(a, ctx){
     case 'ydsave': openYdBrowser('save'); return 'Выберите папку на Яндекс Диске';
     case 'ydopen': openYdBrowser('open'); return 'Выберите файл на Яндекс Диске';
     case 'offline': openOfflinePack(); return 'Окно «Работа без интернета» открыто';
+    case 'exit': openExit(); return null;
+    case 'update': openUpdate(); return null;
+    case 'ydtake': { const L = YD.lock; if (!L || L.pid !== proj.id) throw new Error('Проект не открыт с Яндекс Диска'); if (!L.ro) return 'Файл и так открыт на этом устройстве'; L.ro = false; ydLockTake(L.path).then(() => { ydShowState(); ydPush(true); }); return 'Теперь в файле работает это устройство'; }
+    case 'devname': { const n = String(a.name || '').trim().slice(0, 40); if (!n) throw new Error('Назовите устройство'); lsSet('kot.devName', n); if (YD.lock && !YD.lock.ro) ydLockTake(YD.lock.path); return 'Это устройство теперь называется «' + n + '»'; }
+    case 'fullscreen': return setUiHide(a.on == null ? null : !!a.on) ? 'Рабочее поле на весь экран. Вернуть — ползунок вверху или «покажи панели»' : 'Лента и окна показаны';
+    case 'ribbon': { const f = $('#app').classList.contains('rb-fold'); if (a.on == null || !!a.on === f) pnToggle('rb'); return $('#app').classList.contains('rb-fold') ? 'Лента свёрнута' : 'Лента показана'; }
+    case 'about': openAbout(); return null;
+    case 'autocopy': { autoCopy(true).then(n => addMsg('app', [{ ok:!!n, t:n ? 'Автокопия сохранена: ' + n : 'Автокопии сохраняются рядом с файлом проекта: сохраните проект файлом или на Яндекс Диск' }])); return null; }
     case 'opendlg': { const m = { levels:openLevels, phases:openPhases, mats:openMats, furnlib:openFurnLib, tpl:() => openTpl(curView().tpl), lib:openLib }; if (!m[a.d]) throw new Error('Нет такого окна'); m[a.d](); return null; }
   }
   return undefined;
@@ -11442,7 +11807,7 @@ function outerWalls(){
   const b = bounds(), e = 0.4;
   return walls.filter(w => [w.x1, w.x2].every(x => Math.abs(x - b.min.x) < e + w.t) || [w.x1, w.x2].every(x => Math.abs(x - b.max.x) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.min.z) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.max.z) < e + w.t));
 }
-const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags', 'phase', 'openview', 'newview', 'box3d', 'section', 'ielev', 'press', 'tool', 'help', 'closetab', 'print', 'png', 'render', 'save', 'ydsave', 'ydopen', 'opendlg', 'deselect', 'selectq', 'savecam', 'offline'];
+const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags', 'phase', 'openview', 'newview', 'box3d', 'section', 'ielev', 'press', 'tool', 'help', 'closetab', 'print', 'png', 'render', 'save', 'ydsave', 'ydopen', 'opendlg', 'deselect', 'selectq', 'savecam', 'offline', 'exit', 'autocopy', 'update', 'about', 'ribbon', 'fullscreen', 'devname'];
 function execAll(actions, opt = {}){
   const mutating = actions.some(a => a && !PASSIVE.includes(a.a));
   if (mutating) pushUndo(opt.label);
@@ -11568,7 +11933,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 Помещения: у каждой стадии свои помещения и нумерация (обмер, монтаж); {"a":"roomset","num":"1","name":"Кухня","newnum":"101","hc":2.7,"ph":"montazh"}.
 Уровни: {"a":"levelset","lv":"Этаж 2","elev":3.3,"rename":"2 этаж","pin":true}. Высотная отметка на плане: {"a":"spot","room":"1"} или {"a":"spot","x":0,"z":0}.
 Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetset","sheet":"А101","num":"А102","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений.
-Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
+Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
 Если просят то, что делается мышью (нарисовать произвольный контур, щёлкнуть по месту), включи нужный инструмент действием tool и в reply объясни, куда щёлкнуть.`;
 function commandPrompt(text){
   return `Ты переводишь команду пользователя для программы архитектурного черчения «Kot project» в список действий JSON.
@@ -11898,6 +12263,7 @@ async function boot(){
   const rec = list.find(p => p.id === last) || list.sort((a, b) => (b.updated || 0) - (a.updated || 0))[0];
   loadRecord(rec);
   if (!store.ok) toast('Это устройство не даёт хранить проекты. Сохраняйте их файлом .kot');
+  await winLocalOpen();
 }
 /* ---------- «Цвет»: Revit-like colour picker for every <input type="color"> ----------
    basic colours, standard colours, recent colours, a saturation/brightness field with a hue bar, the code and R/G/B sliders */

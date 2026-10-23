@@ -1,6 +1,6 @@
 {
-  "name": "Kot project",
-  "short_name": "Kot project",
+  "name": "Kot project (разработка)",
+  "short_name": "Kot dev",
   "description": "Черчение стен, дверей и окон, многослойные стены, размеры, 3D-модель и аксонометрия. Мышью, стилусом и голосом.",
   "lang": "ru",
   "id": "./",
