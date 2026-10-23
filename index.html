@@ -957,7 +957,8 @@ details.more summary::-webkit-details-marker{display:none}
         <button id="vbStyle" title="Визуальный стиль">Стиль: тонированный</button><span class="sep"></span>
         <label for="vbPhase" style="padding:0 2px">Стадия</label><select id="vbPhase" style="font-size:12px;padding:1px 4px"><option value="obmer">Обмер</option><option value="demontazh">Демонтаж</option><option value="montazh">Монтаж</option><option value="mebel">Мебель</option><option value="all">Показать все</option></select><span class="sep"></span>
         <button id="vbWeights" aria-pressed="true" title="Вес линий: включён — линии разной толщины по своему весу; выключен — все линии тонкие (TL)">Вес линий: вкл</button><span class="sep"></span>
-        <button id="vbReveal" aria-pressed="false" title="Показать скрытые элементы (RH)"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" style="width:15px;height:15px;vertical-align:-3px"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg> Скрытые</button>
+        <button id="vbReveal" aria-pressed="false" title="Показать скрытые элементы (RH)"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" style="width:15px;height:15px;vertical-align:-3px"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg> Скрытые</button><span class="sep"></span>
+        <button id="vbPaper" aria-pressed="true" title="Фон рабочего поля: мятая бумага или ровный цвет">Бумага: вкл</button>
       </div>
       <div id="sheetWrap" hidden><canvas id="sheetCv"></canvas></div>
       <button class="btn primary" id="finishBtn" hidden>Завершить стену</button>
@@ -1402,9 +1403,51 @@ function readColors(){
 }
 
 /* ---------- three.js setup ---------- */
-const renderer = new THREE.WebGLRenderer({ antialias:true, stencil:true });
+// alpha: the images of views for sheets are drawn on a transparent background (only the geometry covers the sheet)
+const renderer = new THREE.WebGLRenderer({ antialias:true, stencil:true, alpha:true });
 renderer.localClippingEnabled = true;
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+/* ---------- «Бумага»: the background of the working field like crumpled drawing paper ----------
+   The texture is drawn by the program itself (no files, works offline): a seamless 512 px tile of creases (ridged noise) and
+   paper grain, lit from the top left. It is only light and shade over the colour --sheet, so it suits the light and dark theme.
+   With PAPER.on the 3D scene has no background (the canvas is transparent) and the tile lies under it as the CSS background of #viewport. */
+const PAPER = { on:(() => { try { return localStorage.getItem('kot.paper') !== '0'; } catch (e){ return true; } })(), url:null };
+function paperTex(){
+  if (PAPER.url) return PAPER.url;
+  const N = 512, H = new Float32Array(N * N);
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  // seamless value noise: n×n random values, smooth interpolation, wrapping at the edges
+  const layer = (n, w, ridged) => {
+    const g = new Float32Array(n * n).map(() => rnd()), c = N / n, sm = t => t * t * (3 - 2 * t);
+    for (let y = 0; y < N; y++){ const gy = y / c, y0 = Math.floor(gy), ty = sm(gy - y0), r0 = (y0 % n) * n, r1 = ((y0 + 1) % n) * n;
+      for (let x = 0; x < N; x++){ const gx = x / c, x0 = Math.floor(gx), tx = sm(gx - x0), a = x0 % n, b = (x0 + 1) % n;
+        let v = (g[r0 + a] * (1 - tx) + g[r0 + b] * tx) * (1 - ty) + (g[r1 + a] * (1 - tx) + g[r1 + b] * tx) * ty;
+        if (ridged) v = 1 - Math.abs(2 * v - 1); H[y * N + x] += v * w; } }
+  };
+  // soft creases of crumpled paper + fine grain like watercolour paper
+  layer(4, 0.3, true); layer(8, 0.16, true); layer(16, 0.07, true); layer(64, 0.05, false); layer(128, 0.055, false); layer(256, 0.045, false);
+  for (let i = 0; i < N * N; i++) H[i] += rnd() * 0.03;
+  const sh = document.createElement('canvas'); sh.width = sh.height = N; const gs = sh.getContext('2d'), im = gs.createImageData(N, N), d = im.data;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
+    const p = H[((y + N - 1) % N) * N + (x + N - 1) % N], q = H[((y + 1) % N) * N + (x + 1) % N], s = (p - q) * 8, k = (y * N + x) * 4;
+    const a = Math.min(0.2, Math.abs(s) * 0.5);
+    if (s > 0){ d[k] = d[k + 1] = d[k + 2] = 255; } else { d[k] = 80; d[k + 1] = 72; d[k + 2] = 62; }
+    d[k + 3] = Math.round(a * 255);
+  }
+  gs.putImageData(im, 0, 0);
+  // a light warm grey tone under the relief: the paper is not pure white
+  const cv = document.createElement('canvas'); cv.width = cv.height = N; const g = cv.getContext('2d');
+  g.fillStyle = 'rgba(120,110,92,0.08)'; g.fillRect(0, 0, N, N); g.drawImage(sh, 0, 0);
+  return PAPER.url = cv.toDataURL('image/png');
+}
+function paperBg(){
+  const vp = document.getElementById('viewport'), b = document.getElementById('vbPaper');
+  if (PAPER.on){ scene.background = null; if (vp){ vp.style.backgroundImage = `url(${paperTex()})`; vp.style.backgroundSize = '512px 512px'; } }
+  else { scene.background = new THREE.Color(C.sheet); if (vp) vp.style.backgroundImage = ''; }
+  if (b){ b.setAttribute('aria-pressed', PAPER.on ? 'true' : 'false'); b.textContent = 'Бумага: ' + (PAPER.on ? 'вкл' : 'выкл'); }
+}
+function setPaper(on){ PAPER.on = !!on; try { localStorage.setItem('kot.paper', on ? '1' : '0'); } catch (e){} paperBg(); }
+document.getElementById('vbPaper').onclick = () => setPaper(!PAPER.on);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.domElement.className = 'main';
@@ -7134,6 +7177,18 @@ function showSheet(v){
 }
 function hideSheet(){ $('#sheetWrap').hidden = true; cv.style.visibility = ''; }
 let vpBusy = false;
+// where the geometry is in a view image (its background is transparent): the box of the non-transparent pixels, as parts 0…1
+function alphaBox(img){
+  try {
+    const W = img.naturalWidth, H = img.naturalHeight; if (!W || !H) return null;
+    const k = Math.min(1, 480 / Math.max(W, H)), w = Math.max(1, Math.round(W * k)), h = Math.max(1, Math.round(H * k));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.drawImage(img, 0, 0, w, h);
+    const d = g.getImageData(0, 0, w, h).data; let x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 10){ if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return null;
+    return { l:Math.max(0, (x0 - 1) / w), t:Math.max(0, (y0 - 1) / h), r:Math.min(1, (x1 + 2) / w), b:Math.min(1, (y1 + 2) / h) };
+  } catch (e){ return null; }
+}
 async function ensureVpImages(v, force){
   if (vpBusy) return; vpBusy = true;
   try {
@@ -7146,7 +7201,7 @@ async function ensureVpImages(v, force){
       if (curView() !== v) break;
       const res = renderViewImage(view, vp), img = new Image();
       await new Promise(r => { img.onload = r; img.onerror = r; img.src = res.url; });
-      vpImgs.set(vp.id, { img, key, wmm:res.wmm, hmm:res.hmm, reg:res.reg });
+      vpImgs.set(vp.id, { img, key, wmm:res.wmm, hmm:res.hmm, reg:res.reg, cb:alphaBox(img) });
       drawSheet();
     }
   } finally { vpBusy = false; }
@@ -7155,7 +7210,7 @@ function renderViewImage(v, vp){
   const mode = KIND_MODE[v.kind];
   const keep = { view:S.view, phase:S.phase, sel:[...sel], selId, axes:axesG.visible, grid:grids.visible, C, bg:scene.background, tool:S.tool, dims:S.dims };
   S.view = mode; S.phase = v.phase || 'all'; clearSel(); S.tool = 'select'; S.dims = false; RV = v; const keepSV = S.selView; S.selView = null;
-  C = { ...C, ...LIGHT }; makeMaterials(); scene.background = new THREE.Color('#ffffff');
+  C = { ...C, ...LIGHT }; makeMaterials(); scene.background = null; const keepCC = renderer.getClearColor(new THREE.Color()).getHex(), keepCA = renderer.getClearAlpha(); renderer.setClearColor(0xffffff, 0); const keepShadow = shadowGround.visible;
   axesG.visible = false; grids.visible = false; preview.visible = false; boxG.visible = false;
   rebuild(true);
   const PX = 6; let camR, wmm, hmm, reg = null;
@@ -7188,7 +7243,7 @@ function renderViewImage(v, vp){
   const can = document.createElement('canvas'); can.width = w; can.height = h; const g = can.getContext('2d');
   g.drawImage(cv, 0, 0, w, h);
   if (mode === 'plan' || mode === 'sect') drawImageLabels(g, PX);
-  RENDER = null; RV = null; S.selView = keepSV; boxG.visible = true;
+  RENDER = null; RV = null; S.selView = keepSV; boxG.visible = true; renderer.setClearColor(keepCC, keepCA); shadowGround.visible = keepShadow;
   C = keep.C; makeMaterials(); scene.background = keep.bg; axesG.visible = keep.axes; grids.visible = keep.grid; preview.visible = true;
   S.view = keep.view; S.phase = keep.phase; S.tool = keep.tool; S.dims = keep.dims; setSel(keep.sel, keep.selId);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); resize(); if (S.view !== 'sheet') rebuild(true); annoDirty = true;
@@ -7311,13 +7366,14 @@ function paintSheet(g, v){
     vp._w = w; vp._h = h;
     if (im && im.img.complete && im.img.naturalWidth) g.drawImage(im.img, vp.x, vp.y, w, h);
     else { g.fillStyle = '#f1f3f4'; g.fillRect(vp.x, vp.y, w, h); g.fillStyle = '#777'; g.font = '4px "Golos Text", Arial'; g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillText('Рисую вид…', vp.x + 4, vp.y + 8); }
-    const cy = vp.y + h + 6, title = view ? view.name : 'вид удалён';
-    g.strokeStyle = '#111'; g.lineWidth = 0.3; g.beginPath(); g.arc(vp.x + 4, cy, 3.4, 0, Math.PI * 2); g.stroke();
-    g.fillStyle = '#111'; g.font = '600 3.4px "Golos Text", Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(i + 1), vp.x + 4, cy + 0.1);
-    g.textAlign = 'left'; g.font = '600 3.6px "Golos Text", Arial'; g.fillText(title, vp.x + 10, cy - 1.3);
+    // the title right under the geometry (the margins of the image are transparent)
+    const cbx = im && im.cb, tx = vp.x + (cbx ? w * cbx.l : 0), cy = vp.y + (cbx ? h * cbx.b : h) + 6, title = view ? view.name : 'вид удалён';
+    g.strokeStyle = '#111'; g.lineWidth = 0.3; g.beginPath(); g.arc(tx + 4, cy, 3.4, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = '#111'; g.font = '600 3.4px "Golos Text", Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(i + 1), tx + 4, cy + 0.1);
+    g.textAlign = 'left'; g.font = '600 3.6px "Golos Text", Arial'; g.fillText(title, tx + 10, cy - 1.3);
     const tw = g.measureText(title).width;
-    g.font = '2.8px "Golos Text", Arial'; g.fillText(view ? (SCALED(view) || view.kind === 'elev' ? 'М 1:' + vp.scale : KIND_NAME[view.kind]) + (view.phase && view.phase !== 'all' ? ' · ' + phName(view.phase) : '') : '', vp.x + 10, cy + 2.7);
-    g.lineWidth = 0.5; g.beginPath(); g.moveTo(vp.x + 8, cy + 0.6); g.lineTo(vp.x + 12 + Math.max(36, tw), cy + 0.6); g.stroke();
+    g.font = '2.8px "Golos Text", Arial'; g.fillText(view ? (SCALED(view) || view.kind === 'elev' ? 'М 1:' + vp.scale : KIND_NAME[view.kind]) + (view.phase && view.phase !== 'all' ? ' · ' + phName(view.phase) : '') : '', tx + 10, cy + 2.7);
+    g.lineWidth = 0.5; g.beginPath(); g.moveTo(tx + 8, cy + 0.6); g.lineTo(tx + 12 + Math.max(36, tw), cy + 0.6); g.stroke();
     if (SHEET.sel === vp.id){
       g.strokeStyle = '#1a73e8'; g.lineWidth = 0.6; g.setLineDash([2, 1.2]); g.strokeRect(vp.x - 1.5, vp.y - 1.5, w + 3, h + 3); g.setLineDash([]);
       // Revit: the crop region of a selected viewport is edited right on the sheet
@@ -7531,40 +7587,57 @@ function sheetAreaDefault(v){
   return { x:L, y:T, w:Math.max(60, right - L), h:Math.max(60, bottom - T) };
 }
 const sheetArea = v => v.area && v.area.w > 10 && v.area.h > 10 ? v.area : sheetAreaDefault(v);
-async function layoutSheet(v, quiet){
+async function layoutSheet(v, quiet, again){
   if (!v || v.kind !== 'sheet' || !v.vps.length) return false;
   for (let i = 0; i < 80 && vpBusy; i++) await new Promise(r => setTimeout(r, 100));
   await ensureVpImages(v); for (let i = 0; i < 80 && vpBusy; i++) await new Promise(r => setTimeout(r, 100));
   const A = sheetArea(v);
   const L = v.vps.map(vp => {
     const view = views.find(x => x.id === vp.view), im = vpImgs.get(vp.id), sc = !!view && SCALED(view) && !!im;
-    return { vp, sc, w1:sc ? im.wmm * vp.scale : 0, h1:sc ? im.hmm * vp.scale : 0, s0:vp.pref || vp.scale, w0:vp.pw || vp.w || 150, ratio:im ? im.hmm / im.wmm : (vp.h || 110) / (vp.w || 150), name:view ? view.name : '' };
+    // only the geometry is packed (the transparent margins of the images may overlap): cb — the part of the image with geometry
+    const cb = (im && im.cb) || { l:0, t:0, r:1, b:1 };
+    return { vp, sc, cb, w1:sc ? im.wmm * vp.scale : 0, h1:sc ? im.hmm * vp.scale : 0, s0:vp.pref || vp.scale, w0:vp.pw || vp.w || 150, ratio:im ? im.hmm / im.wmm : (vp.h || 110) / (vp.w || 150), name:view ? view.name : '' };
   });
   const nextScale = (s0, k) => VP_SCALES.find(s => s >= s0 / k - 1e-9) || VP_SCALES[VP_SCALES.length - 1];
   // the scale of plans is kept as long as possible: first the 3D views get smaller (down to 45 %), only then the plans get a smaller scale
-  const tries = []; for (let i = 0, kp = 1; i < 12; i++, kp *= 0.86) for (const kn of [1, 0.9, 0.8, 0.7, 0.6, 0.52, 0.45]) tries.push([kp, kn]);
+  const tries = []; for (let i = 0, kp = 1; i < 12; i++, kp *= 0.86) for (const kn of [1, 0.9, 0.8, 0.7, 0.6, 0.52, 0.45, 0.38, 0.32, 0.26]) tries.push([kp, kn]);
+  // the first arrangement remembers the width of the 3D views (vp.pw), so arranging again does not make them smaller and smaller
+  for (const q of L) if (!q.sc && !q.vp.pw) q.vp.pw = q.w0 = Math.min(q.w0, A.w);
+  // photos on the sheet stay where they are; the views go round them (in the coordinates of the area)
+  const obst = (v.pics || []).map(p => ({ l:p.x - A.x - VP_GAP / 2, t:p.y - A.y - VP_GAP / 2, r:p.x + p.w - A.x + VP_GAP / 2, b:p.y + p.h - A.y + VP_GAP / 2 })).filter(o => o.r > 0 && o.b > 0 && o.l < A.w && o.t < A.h);
   for (const [kp, kn] of tries){
-    const B = L.map(q => { if (q.sc){ const s = nextScale(q.s0, kp); return { q, s, w:q.w1 / s, h:q.h1 / s }; } const w = Math.max(40, Math.min(q.w0 * kn, A.w)); return { q, w, h:w * q.ratio }; })
-      .map(b => ({ ...b, bw:Math.max(b.w, 50), bh:b.h + VP_TITLE }));
+    const B = L.map(q => { if (q.sc){ const s = nextScale(q.s0, kp); return { q, s, w:q.w1 / s, h:q.h1 / s }; } const w = Math.max(30, Math.min(q.w0 * kn, A.w)); return { q, w, h:w * q.ratio }; })
+      // gw/gh — the geometry inside the image, ox/oy — where it starts in the image; the title goes under the geometry
+      .map(b => { const c = b.q.cb, gw = b.w * (c.r - c.l), gh = b.h * (c.b - c.t); return { ...b, gw, gh, ox:b.w * c.l, oy:b.h * c.t, bw:Math.max(gw, 50), bh:gh + VP_TITLE }; });
     // shelves: the tallest first; each row as high as its tallest view
     const order = [...B].sort((a, b) => (b.bh * b.bw) - (a.bh * a.bw));
     let x = 0, y = 0, rowH = 0, ok = true; const rows = [[]];
+    const hitOb = (x, y, w, h) => obst.find(o => x < o.r && o.l < x + w && y < o.b && o.t < y + h);
     for (const b of order){
       if (b.bw > A.w + 0.01){ ok = false; break; }
-      if (x > 0 && x + b.bw > A.w + 0.01){ y += rowH + VP_GAP; x = 0; rowH = 0; rows.push([]); }
+      for (let k = 0; k < 40; k++){
+        if (x > 0 && x + b.bw > A.w + 0.01){ y += (rowH || VP_GAP) + VP_GAP; x = 0; rowH = 0; rows.push([]); }
+        const o = hitOb(x, y, b.bw, b.bh); if (!o) break;
+        // a photo of the sheet is in the way: go on to the right of it (or under it, when the row is empty and nothing fits there)
+        rows[rows.length - 1].fixed = true;
+        if (o.r + VP_GAP + b.bw <= A.w + 0.01) x = o.r + VP_GAP; else { x = A.w; if (!rowH) rowH = Math.max(0, o.b - y); }
+      }
       b.x = x; b.y = y; x += b.bw + VP_GAP; rowH = Math.max(rowH, b.bh); rows[rows.length - 1].push(b);
-      if (y + rowH > A.h + 0.01){ ok = false; break; }
+      if (y + rowH > A.h + 0.01 || hitOb(b.x, b.y, b.bw, b.bh)){ ok = false; break; }
     }
     if (!ok) continue;
-    // spread every row over the width of the area, the whole block in the middle of its height
-    const total = y + rowH, dy = Math.max(0, (A.h - total) / 2);
-    for (const row of rows){ const used = row.reduce((s, b) => s + b.bw, 0), gap = row.length > 1 ? Math.min(30, (A.w - used) / (row.length - 1)) : 0, off = row.length > 1 ? (A.w - used - gap * (row.length - 1)) / 2 : (A.w - used) / 2; let cx = off; for (const b of row){ b.x = cx; cx += b.bw + gap; } }
-    pushUndo('Разместить виды на листе');
-    for (const b of B){ const vp = b.q.vp; vp.x = Math.round((A.x + b.x + (b.bw - b.w) / 2) * 10) / 10; vp.y = Math.round((A.y + dy + b.y) * 10) / 10; if (b.q.sc) vp.scale = b.s; else { vp.w = Math.round(b.w); vp.h = Math.round(b.h); } }
+    // spread every row over the width of the area, the whole block in the middle of its height (not when photos are on the sheet)
+    const total = y + rowH, dy = obst.length ? 0 : Math.max(0, (A.h - total) / 2);
+    for (const row of rows){ if (row.fixed || obst.length && row.some(b => obst.some(o => b.y < o.b && o.t < b.y + b.bh))) continue; const used = row.reduce((s, b) => s + b.bw, 0), gap = row.length > 1 ? Math.min(30, (A.w - used) / (row.length - 1)) : 0, off = row.length > 1 ? (A.w - used - gap * (row.length - 1)) / 2 : (A.w - used) / 2; let cx = off; for (const b of row){ b.x = cx; cx += b.bw + gap; } }
+    if (!again) pushUndo('Разместить виды на листе');
+    for (const b of B){ const vp = b.q.vp; vp.x = Math.round((A.x + b.x + (b.bw - b.gw) / 2 - b.ox) * 10) / 10; vp.y = Math.round((A.y + dy + b.y - b.oy) * 10) / 10; if (b.q.sc) vp.scale = b.s; else { vp.w = Math.round(b.w); vp.h = Math.round(b.h); } }
     drawSheet(); scheduleSave(); renderOptbar();
     const changed = B.filter(b => b.q.sc && b.s !== b.q.s0);
     if (!quiet) toast(`Виды размещены: ${B.length}` + (changed.length ? '. Масштаб изменён: ' + changed.map(b => `«${b.q.name}» 1:${b.s}`).join(', ') : ''));
-    (async () => { for (let i = 0; i < 80 && vpBusy; i++) await new Promise(r => setTimeout(r, 100)); ensureVpImages(v); })();
+    // the images are drawn again at the new scales; when their geometry boxes changed, arrange once more with the fresh boxes
+    if (!again) (async () => { for (let i = 0; i < 80 && vpBusy; i++) await new Promise(r => setTimeout(r, 100)); await ensureVpImages(v); for (let i = 0; i < 80 && vpBusy; i++) await new Promise(r => setTimeout(r, 100));
+      const moved = v.vps.some((vp, i) => { const im = vpImgs.get(vp.id), o = L[i].cb, c = im && im.cb; return c && (Math.abs(c.l - o.l) + Math.abs(c.r - o.r) + Math.abs(c.t - o.t) + Math.abs(c.b - o.b)) > 0.02; });
+      if (moved && curView() === v) layoutSheet(v, true, true); })();
     return true;
   }
   if (!quiet) toast('Виды не помещаются в область размещения даже в мелком масштабе — увеличьте область, формат листа или уберите вид');
@@ -7645,7 +7718,9 @@ function drawSheet(){
 }
 function sheetHit(e){
   const v = curView(), r = $('#sheetCv').getBoundingClientRect(), x = (e.clientX - r.left) / SHEET.k, y = (e.clientY - r.top) / SHEET.k;
-  const vp = [...v.vps].reverse().find(p => x >= p.x - 2 && x <= p.x + (p._w || 0) + 2 && y >= p.y - 2 && y <= p.y + (p._h || 0) + 12);
+  // a view is picked by its geometry and title, not by the transparent margins of its image (they may overlap other views)
+  const inside = p => { const c = (vpImgs.get(p.id) || {}).cb || { l:0, t:0, r:1, b:1 }, W = p._w || 0, H = p._h || 0; return x >= p.x + W * c.l - 2 && x <= p.x + W * c.r + 2 && y >= p.y + H * c.t - 2 && y <= p.y + H * c.b + 12; };
+  const vp = [...v.vps].reverse().find(inside) || [...v.vps].reverse().find(p => x >= p.x - 2 && x <= p.x + (p._w || 0) + 2 && y >= p.y - 2 && y <= p.y + (p._h || 0) + 12);
   return { v, vp, x, y };
 }
 /* view boundaries on a sheet (Revit «Обрезать вид» on a viewport): the handles of the selected viewport move its edges.
@@ -11240,7 +11315,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2036');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2053');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -12246,7 +12321,7 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { if (e.key === 'Shift' && mouse.inside){ mouse.shift = false; if (drag) doDrag(mouse.x, mouse.y); else hover(mouse.x, mouse.y, false); } });
 
-function applyTheme(){ readColors(); scene.background = new THREE.Color(C.sheet); buildGrid(); makeMaterials(); buildAxes(); rebuild(); updatePreview(); }
+function applyTheme(){ readColors(); paperBg(); buildGrid(); makeMaterials(); buildAxes(); rebuild(); updatePreview(); }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
 
@@ -12507,6 +12582,8 @@ function parseOne(f){
   if (/обнов/.test(f) && /программ|установ/.test(f)) return { a:'update' };
   const m0 = f.match(/(?:назови|имя)\s+(?:это\s+)?устройств[а-я]*\s+(.+)$/); if (m0) return { a:'devname', name:m0[1].trim() };
   if (/перехват|работать в файле/.test(f)) return { a:'ydtake' };
+  if (/бумаг/.test(f) && /(?:фон|поле|сделай|включи|выключи|убери|верни|мят|скомкан|без)/.test(f)) return { a:'paper', on:!/(?:выключ|убер|без|ровн|отключ|не надо)/.test(f) };
+  if (/(?:ровный|обычный|простой)\s+фон/.test(f)) return { a:'paper', on:false };
   if (/(?:на )?весь экран|полн[а-я]* экран/.test(f)) return { a:'fullscreen', on:!/выйд|выход|верни|убер|отмен/.test(f) };
   if (/(?:скрой|спрячь|убери)\s+(?:все\s+)?(?:панели|окна|меню)/.test(f)) return { a:'fullscreen', on:true };
   if (/(?:покажи|верни|открой)\s+(?:все\s+)?(?:панели|окна|меню)/.test(f)) return { a:'fullscreen', on:false };
@@ -13208,6 +13285,7 @@ function execMore(a, ctx){
     case 'update': openUpdate(); return null;
     case 'ydtake': { const L = YD.lock; if (!L || L.pid !== proj.id) throw new Error('Проект не открыт с Яндекс Диска'); if (!L.ro) return 'Файл и так открыт на этом устройстве'; L.ro = false; ydLockTake(L.path).then(() => { ydShowState(); ydPush(true); }); return 'Теперь в файле работает это устройство'; }
     case 'devname': { const n = String(a.name || '').trim().slice(0, 40); if (!n) throw new Error('Назовите устройство'); lsSet('kot.devName', n); if (YD.lock && !YD.lock.ro) ydLockTake(YD.lock.path); return 'Это устройство теперь называется «' + n + '»'; }
+    case 'paper': setPaper(a.on == null ? !PAPER.on : !!a.on); return PAPER.on ? 'Фон рабочего поля — мятая бумага' : 'Фон рабочего поля — ровный цвет';
     case 'fullscreen': return setUiHide(a.on == null ? null : !!a.on) ? 'Рабочее поле на весь экран. Вернуть — ползунок вверху или «покажи панели»' : 'Лента и окна показаны';
     case 'ribbon': { const f = $('#app').classList.contains('rb-fold'); if (a.on == null || !!a.on === f) pnToggle('rb'); return $('#app').classList.contains('rb-fold') ? 'Лента свёрнута' : 'Лента показана'; }
     case 'about': openAbout(); return null;
@@ -13221,7 +13299,7 @@ function outerWalls(){
   const b = bounds(), e = 0.4;
   return walls.filter(w => [w.x1, w.x2].every(x => Math.abs(x - b.min.x) < e + w.t) || [w.x1, w.x2].every(x => Math.abs(x - b.max.x) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.min.z) < e + w.t) || [w.z1, w.z2].every(z => Math.abs(z - b.max.z) < e + w.t));
 }
-const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags', 'phase', 'openview', 'newview', 'box3d', 'section', 'ielev', 'press', 'tool', 'help', 'closetab', 'print', 'png', 'render', 'save', 'ydsave', 'ydopen', 'opendlg', 'deselect', 'selectq', 'savecam', 'offline', 'exit', 'autocopy', 'update', 'about', 'ribbon', 'fullscreen', 'devname'];
+const PASSIVE = ['undo', 'redo', 'view', 'style', 'fit', 'grid', 'select', 'facade', 'tags', 'phase', 'openview', 'newview', 'box3d', 'section', 'ielev', 'press', 'tool', 'help', 'closetab', 'print', 'png', 'render', 'save', 'ydsave', 'ydopen', 'opendlg', 'deselect', 'selectq', 'savecam', 'offline', 'exit', 'autocopy', 'update', 'about', 'ribbon', 'fullscreen', 'devname', 'paper'];
 function execAll(actions, opt = {}){
   const mutating = actions.some(a => a && !PASSIVE.includes(a.a));
   if (mutating) pushUndo(opt.label);
@@ -13356,7 +13434,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 Уровни: {"a":"levelset","lv":"Этаж 2","elev":3.3,"rename":"2 этаж","pin":true}. Высотная отметка на плане: {"a":"spot","room":"1"} или {"a":"spot","x":0,"z":0}.
 Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetnew","sec":"obmer","name":"Обмерный план 2"} — новый лист в разделе (cover — обложка без номера, gen — общие данные 1-…, obmer — обмер 2-…, dem — демонтаж 3-…, mont — монтаж 4-…; или название раздела); номера листов ставятся сами; {"a":"sheetmove","sheet":"2-3","dir":"up"} — сдвинуть лист в своём разделе; {"a":"sheetset","sheet":"2-1","sec":"mont","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений. {"a":"frame","sheet":"А101","l":20,"t":5,"r":5,"b":5,"lw":0.6,"all":true} — рамка листа (all — для всех листов; reset:true — по ГОСТ; open:true — окно); {"a":"explcfg","sheet":"А101", "addcol":{"k":"num|name|area|perim|h|txt","n":"Примечание","w":30}, "delcol":"Примечание", "colw":{"col":"Наименование","w":50}, "colname":{"col":"№","n":"Поз."}, "rh":8, "hh":15, "fs":2.8, "ttl":"…"|false, "tot":true, "addrow":{"cells":{"Наименование":"Балкон","Площадь":"3,20"}}, "delrow":"last", "cell":{"room":"3","col":"Наименование","text":"Кухня-гостиная"}, "reset":true, "open":true} — настройка экспликации (любые поля вместе); {"a":"stampcell","op":"rowAbove|rowBelow|rowDel|colLeft|colRight|colDel|splitH|splitV|text","x":30,"y":12,"size":5,"text":"…"} — строки/столбцы/текст штампа листа по ячейке в точке x, y мм от левого верхнего угла штампа (open:true — редактор); {"a":"sheetaxo","sheet":"2-1"} — поставить на лист обмерного плана две аксонометрии обмера (создаются, если нет); {"a":"sheetpic","sheet":"А101"} — добавить фото на лист (откроется выбор файла; del:true — убрать последнее фото); {"a":"sheetlayout","sheet":"А101","auto":true} — разложить виды листа в области размещения (если не помещаются — мельче масштаб; auto — делать это само при добавлении видов); {"a":"sheetarea","sheet":"А101","x":25,"y":10,"w":230,"h":220} — область размещения видов в мм от левого верхнего угла листа (reset:true — по умолчанию).
 Экспорт: {"a":"export","f":"ifc"} — для Revit (IFC: стены с проёмами, двери, окна, перекрытия, крыши, колонны, лестницы, мебель, помещения, уровни), "obj" — для 3ds Max (ZIP с OBJ, MTL и текстурами), "glb" — glTF.
-Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
+Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"paper","on":true} — фон рабочего поля «мятая бумага» (false — ровный цвет);{"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
 Если просят то, что делается мышью (нарисовать произвольный контур, щёлкнуть по месту), включи нужный инструмент действием tool и в reply объясни, куда щёлкнуть.`;
 function commandPrompt(text){
   return `Ты переводишь команду пользователя для программы архитектурного черчения «Kot project» в список действий JSON.
@@ -13474,7 +13552,7 @@ const LLM_CMDS = `комната 5 на 4 | стена 3 метра вправо
 раздели стену Б посередине | массив 4 шагом 1200 вправо | новый тип стены газобетон 300 | присоедини стену Л | отсоедини начало стены Н
 покажи план | покажи 3д | покажи аксонометрию | покажи южный фасад | разрез | разрез от 0 2 до 8 2 | развёртки помещения 1 | камера из 1 5 на 4 1 | узел от 1 1 до 2 2
 стадия демонтаж (обмер, монтаж, мебель, все) | снеси стену Б | открой план демонтажа | новый лист | размести виды | экспликация помещений | рамка листа
-скрой буквы | покажи буквы | скрытые линии | тонированный | на весь экран | покажи панели | отмени | верни | сохрани | распечатай | визуализация | что умеешь
+скрой буквы | покажи буквы | скрытые линии | тонированный | на весь экран | покажи панели | фон бумага | ровный фон | отмени | верни | сохрани | распечатай | визуализация | что умеешь
 экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
 выбери все экземпляры | выбери предыдущий | скрой категорию | графика элемента | полутона для выбранного | сдвинь выбранное вправо на 100 | поверни выбранное на 90 | скопируй выбранное вправо на 1000 | скрой выбранное
 открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы
@@ -13536,7 +13614,7 @@ const LEARN_BUILTIN = [
   ['покажи сверху', 'покажи план'], ['давай в объёме', 'покажи 3д'], ['в три дэ', 'покажи 3д'], ['аксонометрию покажи', 'покажи аксонометрию'], ['фасад с юга', 'покажи южный фасад'], ['сделай разрез', 'разрез'], ['развёртку первой комнаты', 'развёртки помещения 1'],
   ['включи демонтаж', 'стадия демонтаж'], ['перейди на обмер', 'стадия обмер'], ['покажи все стадии', 'стадия все'], ['снеси стену бэ', 'снеси стену Б'], ['открой план демонтажа', 'открой план демонтажа'],
   ['новый лист', 'новый лист'], ['разложи виды на листе', 'размести виды'], ['таблицу помещений на лист', 'экспликация помещений'], ['поля листа', 'рамка листа'],
-  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['рабочее поле на весь экран', 'на весь экран'], ['верни панели', 'покажи панели'],
+  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['рабочее поле на весь экран', 'на весь экран'], ['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
   ['отмени последнее', 'отмени'], ['верни как было', 'верни'], ['сохрани проект', 'сохрани'], ['напечатай', 'распечатай'], ['сделай красивую картинку', 'визуализация'], ['что ты умеешь', 'что умеешь'],
   ['сделай нормальную спальню', 'комната 3500 на 4'], ['нужна детская', 'комната 3 на 3500'], ['гостиную побольше', 'комната 5 на 4'], ['маленькую кухню', 'комната 3 на 3'], ['кухню гостиную', 'комната 6 на 4'],
   ['совмещённый санузел', 'комната 2 на 1700'], ['ванную комнату', 'комната 2 на 1700'], ['прихожую', 'комната 2500 на 1500'], ['кладовку', 'комната 1500 на 1200'], ['гардеробную', 'комната 2 на 1500'],
@@ -14271,7 +14349,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async p => { for (co
 
 /* ---------- start ---------- */
 loadSample();
-readColors(); scene.background = new THREE.Color(C.sheet); buildGrid(); makeMaterials(); buildAxes();
+readColors(); paperBg(); buildGrid(); makeMaterials(); buildAxes();
 resize();
 if (lsGet('kot.penOnly') === '1') setPenOnly(true, false);
 if (lsGet('kot.tags') === '0'){ S.tags = false; $('#cTags').checked = false; }
