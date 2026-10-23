@@ -1912,6 +1912,7 @@ function xLines(p, d, q, e){
    so every layer meets its neighbour exactly. Tee (an end touches another wall's side): the end stops at that wall's face.
    Free end and straight continuation: a square end at the end point. */
 let CUTS = new Map();
+const JOIN_GAP = 0.03; // a wall end up to 30 mm short of another wall joins it by itself
 function computeCuts(){
   const res = new Map(), walls = items.filter(w => w.type === 'wall' && shown(w));
   const F = new Map(walls.map(w => [w.id, wallFrame(w)]));
@@ -1943,7 +1944,10 @@ function computeCuts(){
           break;
         }
         const v = P.clone().sub(oa), s = v.dot(fo.dir), dz = v.dot(fo.nrm);
-        if (s > 0.02 && s < fo.L - 0.02 && Math.abs(dz) < o.t / 2 + 2e-3){
+        // Revit: an end that stops a little short of another wall (up to JOIN_GAP) still joins it — the wall reaches the face
+        const bodyP = end ? f.p1 : new V3(w.x2, 0, w.z2), bdz = bodyP.clone().sub(oa).dot(fo.nrm);
+        const gapJoin = Math.abs(dz) >= o.t / 2 + 2e-3 && Math.abs(dz) < o.t / 2 + JOIN_GAP && Math.sign(bdz) === Math.sign(dz) && Math.abs(bdz) > Math.abs(dz) && Math.abs(f.dir.dot(fo.nrm)) > 0.5;
+        if (s > 0.02 && s < fo.L - 0.02 && (Math.abs(dz) < o.t / 2 + 2e-3 || gapJoin)){
           const body = end ? f.p1 : new V3(w.x2, 0, w.z2);
           const side = Math.sign(body.clone().sub(oa).dot(fo.nrm)) || 1;
           const F0 = oa.clone().addScaledVector(fo.nrm, side * o.t / 2);
@@ -4181,7 +4185,8 @@ function phStatus(it){
 }
 // 'normal' — drawn as usual; 'exist' / 'demo' — the overridden existing / demolished look; 'new' / 'temp' — overridden new / temporary; 'hide'
 function visState(it){
-  if (it && it.type === 'room') return S.phase === 'all' || roomPh(it) === roomPhaseFor(lvOf(it), S.phase) ? 'normal' : 'hide';
+  // a demolition plan has no rooms at all: no zones, no tags, nothing to pick (the user's rule)
+  if (it && it.type === 'room') return S.phase === 'demontazh' ? 'hide' : S.phase === 'all' || roomPh(it) === roomPhaseFor(lvOf(it), S.phase) ? 'normal' : 'hide';
   if (!it || !PHASED.includes(it.type)) return 'normal';
   let host = 'normal';
   if (isOp(it)){ host = visState(byId(it.wall)); if (host === 'hide') return 'hide'; }
@@ -4423,15 +4428,20 @@ function joinEnd(w, end){
     const s = p.clone().sub(fo.p1).dot(fo.dir); if (s < -0.6 || s > fo.L + 0.6) continue;
     const sw = p.clone().sub(f.p1).dot(f.dir); if (end ? sw < 0.1 : sw > f.L - 0.1) continue;
     const d = p.distanceTo(P); if (d > 2.5) continue;
-    // ends close to another wall's end make a corner; otherwise a tee on the other wall's axis
+    // a corner only when an end of the other wall really is at the meeting point (within the thicknesses) and is free;
+    // otherwise a tee: this wall reaches the near FACE of the other one, and the other wall is not touched
     const oe = [new V3(o.x1, 0, o.z1), new V3(o.x2, 0, o.z2)].map((q, i) => ({ i, d:q.distanceTo(p) })).sort((a, b) => a.d - b.d)[0];
-    if (!best || d < best.d) best = { o, p, d, oe:oe.d < Math.max(0.6, o.t * 2) ? oe.i : null };
+    const oeFree = oe && !((CUTS.get(o.id) || [])[oe.i] && (CUTS.get(o.id) || [])[oe.i].kind !== 'free');
+    const corner = oe && oe.d <= (o.t + w.t) / 2 + 0.05 && oeFree;
+    const body = end ? f.p1 : new V3(w.x2, 0, w.z2), side = Math.sign(body.clone().sub(fo.p1).dot(fo.nrm)) || 1;
+    const face = corner ? p : xLines(f.p1, f.dir, fo.p1.clone().addScaledVector(fo.nrm, side * o.t / 2), fo.dir) || p;
+    if (!best || d < best.d) best = { o, p:face, d, oe:corner ? oe.i : null };
   }
   if (!best) return 'Рядом нет стены, к которой можно присоединить (до 2,5 м по направлению стены)';
   const q = { x:r4(best.p.x), z:r4(best.p.z) };
-  if (end){ w.x2 = q.x; w.z2 = q.z; } else { w.x1 = q.x; w.z1 = q.z; }
-  if (best.oe != null){ const k = best.oe ? 2 : 1; best.o['x' + k] = q.x; best.o['z' + k] = q.z; if (best.o.dj) best.o.dj[best.oe] = false; }
-  return `Присоединено к стене ${best.o.tag || '№' + best.o.id}` + (best.oe != null ? ' (угол)' : ' (примыкание)');
+  setWallEnd(w, end ? 2 : 1, q.x, q.z);
+  if (best.oe != null){ const k = best.oe ? 2 : 1; setWallEnd(best.o, k, q.x, q.z); if (best.o.dj) best.o.dj[best.oe] = false; }
+  return `Присоединено к стене ${best.o.tag || '№' + best.o.id}` + (best.oe != null ? ' (угол)' : ' (примыкание к грани)');
 }
 function toggleJoin(w, end, want){
   CUTS = computeCuts();
@@ -4635,8 +4645,23 @@ function nudgeSel(sx, sy, kind, mmOver){
   let wx = (sx * by - sy * bx) / det, wz = (ax * sy - ay * sx) / det; const L = Math.hypot(wx, wz) || 1;
   wx /= L; wz /= L; if (Math.abs(wx) < 1e-6) wx = 0; if (Math.abs(wz) < 1e-6) wz = 0;
   const mmv = mmOver || NUDGE_MM[kind], st = mmv / 1000, dx = r4(wx * st), dz = r4(wz * st);
+  // windows and doors live in their wall: they slide along it by the part of the arrow that runs along the wall
+  // (and do not go into joints with other walls); an opening whose wall moves too goes with the wall
+  const opIds = ids.filter(id => isOp(byId(id)) && !ids.includes(byId(id).wall)), rest = ids.filter(id => !opIds.includes(id));
+  const opMoves = [];
+  for (const id of opIds){
+    const o = byId(id), w = byId(o.wall); if (!w) continue;
+    const f = wallFrame(w), along = dx * f.dir.x + dz * f.dir.z; if (Math.abs(along) < 1e-6){ opMoves.push({ o, across:true }); continue; }
+    // a step, not a jump: a free target — go; blocked — stay (unless it already stands badly: then steps are allowed, to bring it out)
+    const J = wallJoints(w), ok = p => !opInJoint(J, p, o.w) && !overlaps(w.id, p, o.w, o.id), tgt = r4(clamp(o.pos + along, o.w / 2, f.L - o.w / 2));
+    const q = Math.abs(tgt - o.pos) < 1e-6 ? null : ok(tgt) || !ok(o.pos) ? tgt : null;
+    opMoves.push({ o, q, stuck:q == null });
+  }
+  if (!rest.length && opMoves.length && opMoves.every(m => m.across)){ if (fresh) toast(`${tagName(opMoves[0].o)} двигается только вдоль своей стены — стрелками вдоль неё`); NUDGE.t = Date.now(); return true; }
   if (fresh){ pushUndo('Сдвиг стрелками'); NUDGE.h = NUDGE.v = 0; }
-  moveItemsJoined(ids, dx, dz); for (const id of ids){ const it = byId(id); if (it.type === 'fam') famFitWalls(it); }
+  for (const m of opMoves) if (!m.across && m.q != null) m.o.pos = m.q;
+  if (rest.length) moveItemsJoined(rest, dx, dz); for (const id of rest){ const it = byId(id); if (it.type === 'fam') famFitWalls(it); }
+  if (opMoves.length && opMoves.every(m => m.across || m.stuck) && !rest.length){ toast(`${tagName(opMoves[0].o)}: дальше нельзя — конец стены, стык с другой стеной или соседний проём`); NUDGE.t = Date.now(); rebuild(); return true; }
   NUDGE.h += sx * mmv; NUDGE.v -= sy * mmv; NUDGE.t = Date.now();
   rebuild(); updatePanel(); scheduleSave();
   const part = (n, a, b) => n ? `${n > 0 ? a : b} ${Math.abs(n)} мм` : '';
@@ -11172,7 +11197,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-1929');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2028');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
