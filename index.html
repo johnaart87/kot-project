@@ -1820,7 +1820,9 @@ function makeMaterials(){
   M.secMarkSel = new THREE.MeshBasicMaterial({ color:C.sel, depthTest:false, side:THREE.DoubleSide });
   M.level = new THREE.LineBasicMaterial({ color:C.datum, depthTest:false, transparent:true });
   M.lvlDash = new THREE.LineDashedMaterial({ color:C.datum, dashSize:0.6, gapSize:0.15, depthTest:false, transparent:true });
-  M.boxEdge = new THREE.LineBasicMaterial({ color:C.sel, transparent:true, opacity:0.8 });
+  // the boundary of a 3D view / axonometry: dashed like Revit — grey, blue when it is selected (then its handles show)
+  M.boxEdge = new THREE.LineDashedMaterial({ color:'#6d7a82', dashSize:0.22, gapSize:0.14, transparent:true, opacity:0.9 });
+  M.boxEdgeSel = new THREE.LineDashedMaterial({ color:C.sel, dashSize:0.22, gapSize:0.14 });
   M.hov = new THREE.MeshBasicMaterial({ color:C.sel, transparent:true, opacity:0.32, depthTest:false, depthWrite:false, side:THREE.DoubleSide });
   M.revealM = new THREE.MeshBasicMaterial({ color:'#d63fa8', transparent:true, opacity:0.55, depthWrite:false }); M.revealL = new THREE.LineBasicMaterial({ color:'#b0207f' });
   for (const k of MODEL_MATS) if (M[k]) M[k].clippingPlanes = CLIP;
@@ -3204,7 +3206,7 @@ function clipPlanesFor(v){
   if (!v) return [];
   const mode = KIND_MODE[v.kind];
   const pl = (n, p) => new THREE.Plane().setFromNormalAndCoplanarPoint(n.clone().normalize(), p);
-  if ((mode === 'd3' || mode === 'axo') && v.box && v.box.on){
+  if ((mode === 'd3' || mode === 'axo') && v.box && v.box.on && S.boxSel){
     const b = v.box;
     return [pl(new V3(1, 0, 0), new V3(b.x0, 0, 0)), pl(new V3(-1, 0, 0), new V3(b.x1, 0, 0)), pl(new V3(0, 1, 0), new V3(0, b.y0, 0)), pl(new V3(0, -1, 0), new V3(0, b.y1, 0)), pl(new V3(0, 0, 1), new V3(0, 0, b.z0)), pl(new V3(0, 0, -1), new V3(0, 0, b.z1))];
   }
@@ -5953,6 +5955,9 @@ cv.addEventListener('pointerdown', e => {
   down = { x, y, b:e.button, type:e.pointerType, hadStart:!!D.start, moved:false, ctrl };
   if (drawing() || placing() || S.tool === 'dim') hover(x, y, e.shiftKey);
   if (S.tool === 'select' && e.button === 0){
+    // the boundary of a 3D view: a click on its edge selects it (its handles show), a click elsewhere drops it
+    if (boxEdgeHit(x, y)){ setBoxSel(true); down = null; return; }
+    if (S.boxSel) setBoxSel(false);
     // the highlighted candidate (Tab cycles them) is what gets selected
     if (Math.hypot(x - HOV.x, y - HOV.y) > 4 || !HOV.list.length){ HOV.x = HOV.y = -99; hovUpdate(x, y, e.altKey); }
     const cand = HOV.list[HOV.i], id = cand ? cand.ids[0] : null;
@@ -6613,6 +6618,7 @@ function toggleBox(force){
   if (KIND_MODE[v.kind] !== 'd3' && KIND_MODE[v.kind] !== 'axo'){ const t = views.find(x => x.kind === 'd3') || views.find(x => x.kind === 'axo'); if (!t) return; openView(t.id); v = curView(); }
   const on = force != null ? force : !(v.box && v.box.on);
   if (on && !v.box) v.box = defaultBox(); else if (v.box) v.box.on = on;
+  S.boxSel = !!on; boxKey = ''; // just switched on — selected, so its handles show at once
   if (on && v.box && v.box.x1 - v.box.x0 < 0.1) v.box = defaultBox();
   rebuild(); toast(on ? 'Границы 3D-вида включены: тяните синие ручки, чтобы обрезать модель' : 'Границы 3D-вида выключены');
   $('#propsBody').dataset.id = 'x'; updatePanel(); scheduleSave();
@@ -6645,6 +6651,7 @@ function sanitizeViews(arr){
     if (Array.isArray(v.hid)){ const h = v.hid.map(Number).filter(Number.isFinite); if (h.length) o.hid = h; }
     if (v.noGrid) o.noGrid = true;
     if (typeof v.dimT === 'string' && v.dimT) o.dimT = v.dimT.slice(0, 24);
+    if (typeof v.forPlan === 'string' && v.forPlan) o.forPlan = v.forPlan.slice(0, 40);
     if (v.cam && Array.isArray(v.cam.p) && Array.isArray(v.cam.t)) o.cam = { p:v.cam.p.map(Number), t:v.cam.t.map(Number), z:Number(v.cam.z) || 1 };
     if (v.kind === 'elev') o.side = ELEV_DIR[v.side] ? v.side : 'S';
     const N = x => Number.isFinite(+x) && x !== null && x !== '';
@@ -6679,7 +6686,7 @@ function sanitizeViews(arr){
       if (v.expl === false) o.expl = false; else if (v.expl && N(v.expl.x) && N(v.expl.y)) o.expl = { x:+v.expl.x, y:+v.expl.y, ...(typeof v.expl.view === 'string' ? { view:v.expl.view.slice(0, 40) } : {}), ...(v.expl.manual ? { manual:true } : {}), ...sanExplCfg(v.expl) };
       { const fr = sanFrame(v.frame); if (fr) o.frame = fr; }
       if (typeof v.sec === 'string') o.sec = v.sec.slice(0, 24); if (Number.isFinite(+v.ord)) o.ord = +v.ord;
-      if (v.pool) o.pool = true; if (typeof v.autoFor === 'string') o.autoFor = v.autoFor.slice(0, 40);
+      if (v.pool) o.pool = true; if (typeof v.autoFor === 'string') o.autoFor = v.autoFor.slice(0, 40); if (v.axoDone) o.axoDone = true;
       if (v.f && typeof v.f === 'object'){ const f = {}; for (const [k] of STAMP_FIELDS) if (typeof v.f[k] === 'string') f[k] = v.f[k].slice(0, 120); if (Object.keys(f).length) o.f = f; }
       o.vps = (Array.isArray(v.vps) ? v.vps : []).filter(p => p && typeof p.view === 'string').map(p => ({ id:String(p.id || vid('vp')), view:p.view, x:+p.x || 25, y:+p.y || 10, scale:VP_SCALES.includes(+p.scale) ? +p.scale : 100, w:+p.w || 150, h:+p.h || 110, ...(VP_SCALES.includes(+p.pref) ? { pref:+p.pref } : {}), ...(+p.pw > 0 ? { pw:+p.pw } : {}) }));
       if (Array.isArray(v.pics)){ const pics = v.pics.filter(p => p && typeof p.src === 'string' && /^data:image\//.test(p.src) && +p.w > 0 && +p.h > 0).map(p => ({ id:String(p.id || vid('pic')).slice(0, 40), src:p.src, x:+p.x || 0, y:+p.y || 0, w:+p.w, h:+p.h, ...(typeof p.cap === 'string' && p.cap ? { cap:p.cap.slice(0, 120) } : {}), ...(p.fr ? { fr:true } : {}) })); if (pics.length) o.pics = pics; }
@@ -6825,7 +6832,7 @@ function handleSpecs(){
   if (!v || S.view === 'sheet' || RENDER || S.tool !== 'select') return out;
   const mode = KIND_MODE[v.kind];
   const ax = (key, pos, axis, tgt, apply, title, crop) => out.push({ key, pos, axis, tgt, apply, title, ...(crop ? { fine:true, cls:'crop' } : {}) });
-  if ((mode === 'd3' || mode === 'axo') && v.box && v.box.on){
+  if ((mode === 'd3' || mode === 'axo') && v.box && v.box.on && S.boxSel){
     const b = v.box, cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2, cz = (b.z0 + b.z1) / 2;
     const mn = 0.2;
     ax('x0', new V3(b.x0, cy, cz), new V3(-1, 0, 0), b, (s, t) => { b.x0 = r4(Math.min(s.x0 - t, b.x1 - mn)); }, 'Запад', true);
@@ -6935,13 +6942,27 @@ const boxG = new THREE.Group(); scene.add(boxG);
 let boxKey = '';
 function updateBoxLines(){
   const v = curView(), on = v && (S.view === 'd3' || S.view === 'axo') && v.box && v.box.on && !RENDER;
-  const key = on ? JSON.stringify(v.box) : '';
+  const key = on ? JSON.stringify(v.box) + (S.boxSel ? '|sel' : '') : '';
   if (key === boxKey) return; boxKey = key; disposeGroup(boxG); if (!on) return;
   const b = v.box, P = (x, y, z) => new V3(x, y, z), c = [];
   for (const y of [b.y0, b.y1]) c.push(P(b.x0, y, b.z0), P(b.x1, y, b.z0), P(b.x1, y, b.z0), P(b.x1, y, b.z1), P(b.x1, y, b.z1), P(b.x0, y, b.z1), P(b.x0, y, b.z1), P(b.x0, y, b.z0));
   for (const x of [b.x0, b.x1]) for (const z of [b.z0, b.z1]) c.push(P(x, b.y0, z), P(x, b.y1, z));
-  boxG.add(lineOf(c, M.boxEdge, true));
+  const ln = lineOf(c, S.boxSel ? M.boxEdgeSel : M.boxEdge, true); if (ln.computeLineDistances) ln.computeLineDistances(); boxG.add(ln);
 }
+// a click near an edge of the 3D-view boundary (screen pixels): selects the boundary, its handles show
+function boxEdgeHit(x, y){
+  const v = curView(); if (!v || !(S.view === 'd3' || S.view === 'axo') || !v.box || !v.box.on) return false;
+  const b = v.box, P = [], E = [];
+  for (const yy of [b.y0, b.y1]) for (const [ax, az, bx, bz] of [[b.x0, b.z0, b.x1, b.z0], [b.x1, b.z0, b.x1, b.z1], [b.x1, b.z1, b.x0, b.z1], [b.x0, b.z1, b.x0, b.z0]]) E.push([[ax, yy, az], [bx, yy, bz]]);
+  for (const xx of [b.x0, b.x1]) for (const zz of [b.z0, b.z1]) E.push([[xx, b.y0, zz], [xx, b.y1, zz]]);
+  for (const [p, q] of E){
+    const a = toScreen(...p), c = toScreen(...q); if (!a.ok && !c.ok) continue;
+    const dx = c.x - a.x, dy = c.y - a.y, L2 = dx * dx + dy * dy || 1e-9, t = clamp(((x - a.x) * dx + (y - a.y) * dy) / L2, 0, 1);
+    if (Math.hypot(a.x + dx * t - x, a.y + dy * t - y) < 6) return true;
+  }
+  return false;
+}
+function setBoxSel(on){ if (!!S.boxSel === !!on) return; S.boxSel = !!on; boxKey = ''; updateBoxLines(); if (on) toast('Граница вида выбрана: тяните ручки, чтобы изменить. Esc — снять выбор'); }
 function makeCallout(a, b){
   const r = { x0:r4(Math.min(a.x, b.x)), x1:r4(Math.max(a.x, b.x)), z0:r4(Math.min(a.z, b.z)), z1:r4(Math.max(a.z, b.z)) };
   if (r.x1 - r.x0 < 0.2 || r.z1 - r.z0 < 0.2){ toast('Узел слишком маленький'); return; }
@@ -7039,10 +7060,31 @@ function openSheetSecs(){
 }
 // a new floor plan gets its own sheet (named after the plan, the plan placed on it); the sheet waits outside «Листы (все)»
 // until it is added from the list next to that heading
+/* the sheet of the survey plan gets two axonometries of the survey stage (from the south-west and the north-east), once:
+   the views are taken (or made: «Аксонометрия 1 обмер», «…2 обмер», v.forPlan) and placed, then the sheet is laid out.
+   s.axoDone — done (a view taken off the sheet by hand does not come back) */
+function surveyAxos(s, force){
+  if (!s || s.kind !== 'sheet' || (s.axoDone && !force)) return 0;
+  const pl = s.vps.map(p => views.find(x => x.id === p.view)).find(x => x && x.kind === 'plan' && x.phase === 'obmer'); if (!pl) return 0;
+  const mine = views.filter(x => x.kind === 'axo' && x.phase === 'obmer' && (x.forPlan === pl.id || /обмер/i.test(x.name)));
+  const b = bounds(), c = b.getCenter(new V3());
+  for (const az of [225, 45]){
+    if (mine.length >= 2) break;
+    const a = az * Math.PI / 180, el = 30 * Math.PI / 180, d = new V3(Math.cos(el) * Math.sin(a), Math.sin(el), Math.cos(el) * Math.cos(a));
+    let n = mine.length + 1; while (views.some(x => x.name === `Аксонометрия ${n} обмер`)) n++;
+    const v = { id:vid('v'), kind:'axo', name:`Аксонометрия ${n} обмер`, phase:'obmer', forPlan:pl.id, cam:{ p:c.clone().addScaledVector(d, 200).toArray().map(r4), t:c.toArray().map(r4), z:1 }, ...(pl.folder ? { folder:pl.folder } : {}) };
+    views.push(v); mine.push(v);
+  }
+  let added = 0;
+  for (const v of mine.slice(0, 2)) if (!s.vps.some(p => p.view === v.id)){ s.vps.push({ id:vid('vp'), view:v.id, x:25, y:12, scale:100, w:140, h:105 }); added++; }
+  s.axoDone = true;
+  if (added){ renderTree(); scheduleSave(); setTimeout(() => { layoutSheet(s, true); if (curView() === s) ensureVpImages(s); }, 50); }
+  return added;
+}
 function autoSheetFor(v){
   const sec = { obmer:'obmer', demontazh:'dem', montazh:'mont', mebel:'mont' }[v.phase] || 'gen';
   const s = { id:vid('v'), kind:'sheet', num:'', sec, ord:1e5, name:v.name, size:'A3', author:'', checker:'', stage:'П', vps:[{ id:vid('vp'), view:v.id, x:25, y:12, scale:100, w:150, h:110 }], pool:true, autoFor:v.id };
-  views.push(s); syncSheetNums(); return s;
+  views.push(s); syncSheetNums(); if (v.phase === 'obmer') surveyAxos(s); return s;
 }
 function newView(kind){
   if (kind === 'detail'){ setTool('callout'); return; }
@@ -7594,6 +7636,7 @@ function paintStamp(g, v, Wm, Hm){
 }
 function drawSheet(){
   const v = curView(); if (!v || v.kind !== 'sheet') return;
+  if (!v.axoDone && v.vps.some(p => { const x = views.find(y => y.id === p.view); return x && x.kind === 'plan' && x.phase === 'obmer'; })) surveyAxos(v);
   const [Wm, Hm] = SHEET_SIZES[v.size] || SHEET_SIZES.A3, wrap = $('#sheetWrap');
   const k = Math.min(Math.max(200, wrap.clientWidth - 32) / Wm, Math.max(150, wrap.clientHeight - 32) / Hm) * SHEET.zoom; SHEET.k = k;
   const can = $('#sheetCv'), dpr = Math.min(devicePixelRatio, 2);
@@ -11197,7 +11240,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2028');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2036');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -12190,6 +12233,7 @@ addEventListener('keydown', e => {
     return;
   }
   if (e.key === 'Escape' && endFreeDrag(true)){ toast('Конец стены возвращён'); return; }
+  if (e.key === 'Escape' && S.boxSel){ setBoxSel(false); return; }
   if (e.key === 'Escape'){ if (editTool() && (E.step || E.ref || E.pts.length)){ endDraw(); return; } if (D.start || DD.refs.length) endDraw(); else if (S.tool !== 'select') setTool('select'); else if (sel.size){ clearSel(); rebuild(); } return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && S.view === 'sheet' && String(SHEET.sel || '').startsWith('pic:')){ e.preventDefault(); delSheetPic(curView(), SHEET.sel.slice(4)); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && !sel.size && S.selView){ e.preventDefault(); const id = S.selView; S.selView = null; deleteView(id); annoDirty = true; rebuild(); updatePanel(); return; }
@@ -12492,6 +12536,7 @@ function parseOne(f){
   if (/график[а-яё]*\s+элемент/.test(f) || /переопредел[а-яё]*\s+графи/.test(f)) return { a:'elemgfx', open:true };
   if (/полутон/.test(f) && /выбран|элемент|эт[оиу]/.test(f)) return { a:'elemgfx', half:!/убер|сним|выключ|без/.test(f) };
   if (/(?:при|от)соедин/.test(f) && /стен|конец|начало|концы/.test(f)){ const m = f.match(/стен[а-яё]*\s+([а-яёa-z])(?:\s|$)/i); return { a:'wjoin', ...(m ? { wall:m[1] } : {}), end:/начал/.test(f) ? 0 : /конец|конца/.test(f) && !/концы|оба/.test(f) ? 1 : 'both', on:!/отсоедин/.test(f) }; }
+  if (/аксонометри/.test(f) && /(?:на\s+лист|лист[а-яё]*\s+обмер)/.test(f) && /(?:добав|постав|размест|встав)/.test(f)) return { a:'sheetaxo' };
   if (/(?:добав|встав|загруз|размест|полож)[а-яё]*\s+(?:\S+\s+)?(?:фото|фотограф|картинк|изображени|снимк)/.test(f)) return { a:'sheetpic' };
   if (/(?:размести|расставь|разложи|упорядочь)[а-я]*\s+(?:все\s+)?вид/.test(f) && !/на лист\s+[a-zа-я]?\d/.test(f)) return { a:'sheetlayout' };
   if (/(?:сохрани|запомни)[а-я]* ракурс|камер[а-я]* из вида/.test(f)) return { a:'savecam' };
@@ -13057,7 +13102,8 @@ function execMore(a, ctx){
       if (!LAY.p.calc.show) setPanel('calc', true);
       if (a.expr){ $('#calcIn').value = String(a.expr); const v = calcRun(String(a.expr)); if (v == null) throw new Error('Не могу посчитать: ' + a.expr); return `${a.expr} = ${calcFmt(v)}`; }
       if (a.task){ $('#calcAsk').value = String(a.task); setTimeout(() => calcAsk(String(a.task)), 0); return 'Считаю задачу в калькуляторе…'; }
-      return 'Калькулятор открыт'; }    case 'dimtype': { const T = dimTypes(), col = x => /^#[0-9a-f]{6}$/i.test(x) ? x : null, find = n => { const q = String(n || '').toLowerCase(); return T.find(t => t.id === n) || T.find(t => t.n.toLowerCase() === q) || T.find(t => t.n.toLowerCase().includes(q)) || T.find(t => t.ph && PHASES.some(p => p.k === t.ph && p.n.toLowerCase().startsWith(q))); };
+      return 'Калькулятор открыт'; }    case 'sheetaxo': { const sh = viewBy(a.sheet || 'current'); if (!sh || sh.kind !== 'sheet') throw new Error('Откройте или назовите лист'); const n = surveyAxos(sh, true); if (S.viewId === sh.id) drawSheet(); return n ? `На лист добавлено аксонометрий обмера: ${n}` : 'Аксонометрии обмера уже на листе (или на листе нет обмерного плана)'; }
+    case 'dimtype': { const T = dimTypes(), col = x => /^#[0-9a-f]{6}$/i.test(x) ? x : null, find = n => { const q = String(n || '').toLowerCase(); return T.find(t => t.id === n) || T.find(t => t.n.toLowerCase() === q) || T.find(t => t.n.toLowerCase().includes(q)) || T.find(t => t.ph && PHASES.some(p => p.k === t.ph && p.n.toLowerCase().startsWith(q))); };
       if (a.open){ openDimTypes(); return 'Открыто окно «Типы размеров»'; }
       if (a.add){ const t = { id:vid('dt'), n:String(a.add).slice(0, 60), ph:'', c:col(a.c) || '', tc:col(a.tc) || '' }; T.push(t); scheduleSave(); return 'Тип размера «' + t.n + '» создан'; }
       const t = a.type ? find(a.type) : null; if (a.type && !t) throw new Error('Нет типа размера «' + a.type + '»');
@@ -13308,7 +13354,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 Мебель: {"a":"furn","k":"<ключ или часть названия из списка мебели>","room":"1","x":0,"z":0,"rot":90,"w":3.2,"d":1.6,"h":0.68,"bo":0} — поставить модель (в центр помещения или в точку; в стены не встанет); w/d/h меняют размер модели для всех её экземпляров; {"a":"famplace","name":"Стол","x":0,"z":0}.
 Помещения: у каждой стадии свои помещения и нумерация (обмер, монтаж); {"a":"roomset","num":"1","name":"Кухня","newnum":"101","hc":2.7,"ph":"montazh"}.
 Уровни: {"a":"levelset","lv":"Этаж 2","elev":3.3,"rename":"2 этаж","pin":true}. Высотная отметка на плане: {"a":"spot","room":"1"} или {"a":"spot","x":0,"z":0}.
-Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetnew","sec":"obmer","name":"Обмерный план 2"} — новый лист в разделе (cover — обложка без номера, gen — общие данные 1-…, obmer — обмер 2-…, dem — демонтаж 3-…, mont — монтаж 4-…; или название раздела); номера листов ставятся сами; {"a":"sheetmove","sheet":"2-3","dir":"up"} — сдвинуть лист в своём разделе; {"a":"sheetset","sheet":"2-1","sec":"mont","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений. {"a":"frame","sheet":"А101","l":20,"t":5,"r":5,"b":5,"lw":0.6,"all":true} — рамка листа (all — для всех листов; reset:true — по ГОСТ; open:true — окно); {"a":"explcfg","sheet":"А101", "addcol":{"k":"num|name|area|perim|h|txt","n":"Примечание","w":30}, "delcol":"Примечание", "colw":{"col":"Наименование","w":50}, "colname":{"col":"№","n":"Поз."}, "rh":8, "hh":15, "fs":2.8, "ttl":"…"|false, "tot":true, "addrow":{"cells":{"Наименование":"Балкон","Площадь":"3,20"}}, "delrow":"last", "cell":{"room":"3","col":"Наименование","text":"Кухня-гостиная"}, "reset":true, "open":true} — настройка экспликации (любые поля вместе); {"a":"stampcell","op":"rowAbove|rowBelow|rowDel|colLeft|colRight|colDel|splitH|splitV|text","x":30,"y":12,"size":5,"text":"…"} — строки/столбцы/текст штампа листа по ячейке в точке x, y мм от левого верхнего угла штампа (open:true — редактор); {"a":"sheetpic","sheet":"А101"} — добавить фото на лист (откроется выбор файла; del:true — убрать последнее фото); {"a":"sheetlayout","sheet":"А101","auto":true} — разложить виды листа в области размещения (если не помещаются — мельче масштаб; auto — делать это само при добавлении видов); {"a":"sheetarea","sheet":"А101","x":25,"y":10,"w":230,"h":220} — область размещения видов в мм от левого верхнего угла листа (reset:true — по умолчанию).
+Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetnew","sec":"obmer","name":"Обмерный план 2"} — новый лист в разделе (cover — обложка без номера, gen — общие данные 1-…, obmer — обмер 2-…, dem — демонтаж 3-…, mont — монтаж 4-…; или название раздела); номера листов ставятся сами; {"a":"sheetmove","sheet":"2-3","dir":"up"} — сдвинуть лист в своём разделе; {"a":"sheetset","sheet":"2-1","sec":"mont","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений. {"a":"frame","sheet":"А101","l":20,"t":5,"r":5,"b":5,"lw":0.6,"all":true} — рамка листа (all — для всех листов; reset:true — по ГОСТ; open:true — окно); {"a":"explcfg","sheet":"А101", "addcol":{"k":"num|name|area|perim|h|txt","n":"Примечание","w":30}, "delcol":"Примечание", "colw":{"col":"Наименование","w":50}, "colname":{"col":"№","n":"Поз."}, "rh":8, "hh":15, "fs":2.8, "ttl":"…"|false, "tot":true, "addrow":{"cells":{"Наименование":"Балкон","Площадь":"3,20"}}, "delrow":"last", "cell":{"room":"3","col":"Наименование","text":"Кухня-гостиная"}, "reset":true, "open":true} — настройка экспликации (любые поля вместе); {"a":"stampcell","op":"rowAbove|rowBelow|rowDel|colLeft|colRight|colDel|splitH|splitV|text","x":30,"y":12,"size":5,"text":"…"} — строки/столбцы/текст штампа листа по ячейке в точке x, y мм от левого верхнего угла штампа (open:true — редактор); {"a":"sheetaxo","sheet":"2-1"} — поставить на лист обмерного плана две аксонометрии обмера (создаются, если нет); {"a":"sheetpic","sheet":"А101"} — добавить фото на лист (откроется выбор файла; del:true — убрать последнее фото); {"a":"sheetlayout","sheet":"А101","auto":true} — разложить виды листа в области размещения (если не помещаются — мельче масштаб; auto — делать это само при добавлении видов); {"a":"sheetarea","sheet":"А101","x":25,"y":10,"w":230,"h":220} — область размещения видов в мм от левого верхнего угла листа (reset:true — по умолчанию).
 Экспорт: {"a":"export","f":"ifc"} — для Revit (IFC: стены с проёмами, двери, окна, перекрытия, крыши, колонны, лестницы, мебель, помещения, уровни), "obj" — для 3ds Max (ZIP с OBJ, MTL и текстурами), "glb" — glTF.
 Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
 Если просят то, что делается мышью (нарисовать произвольный контур, щёлкнуть по месту), включи нужный инструмент действием tool и в reply объясни, куда щёлкнуть.`;
@@ -13432,7 +13478,7 @@ const LLM_CMDS = `комната 5 на 4 | стена 3 метра вправо
 экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
 выбери все экземпляры | выбери предыдущий | скрой категорию | графика элемента | полутона для выбранного | сдвинь выбранное вправо на 100 | поверни выбранное на 90 | скопируй выбранное вправо на 1000 | скрой выбранное
 открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы
-посчитай объём всех стен | посчитай площадь всех помещений | калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
+посчитай объём всех стен | посчитай площадь всех помещений | добавь аксонометрии на лист | калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
 // what a good architect and interior designer knows (Russian norms SP 54 / GOST and practice): used when the user does not say a size
 const ARCH_RULES = 'Если размер не назван — выбирай грамотный, как архитектор, по нормам и практике: '
   + 'спальня 3500 на 4 (от 10 м²), детская 3 на 3500, гостиная 5 на 4, кабинет 3 на 3, кухня 3 на 3 (от 8 м²), кухня-гостиная 6 на 4, '
@@ -13513,6 +13559,7 @@ const LEARN_BUILTIN = [
   ['дверь пошире на запад', 'дверь 1000 в западной стене'], ['окна побольше на юг', 'окно 1800 в южной стене'], ['покажи всё в трёхмерном виде', 'покажи 3д'], ['размерчики проставь', 'проставь размеры'],
   ['экспортируй в ревит', 'экспорт в ревит'], ['сохрани для макса', 'экспорт в 3д макс'],
   ['какой объём всех стен', 'посчитай объём всех стен'], ['сколько площадь всех комнат', 'посчитай площадь всех помещений'], ['площадь стен без окон и дверей', 'посчитай площадь всех стен за вычетом проёмов'],
+  ['поставь на лист обмера две аксонометрии', 'добавь аксонометрии на лист'], ['аксонометрии на обмерный лист', 'добавь аксонометрии на лист'],
   ['открой калькулятор', 'калькулятор'], ['покажи калькулятор', 'калькулятор'], ['убери калькулятор', 'закрой калькулятор'], ['перемножь 3,5 и 4,2', 'посчитай 3,5 * 4,2'], ['сколько это будет три на четыре', 'посчитай 3 * 4'],
   ['посчитай площадь пола 3 на 4', 'посчитай 3 * 4'], ['сколько плитки надо на кухню 3 на 4 с запасом', 'посчитай сколько плитки на пол 3 на 4 с запасом 10%'],
   ['типы размеров открой', 'типы размеров'], ['размеры обмера красным', 'цвет размеров обмер красный'], ['камера из точки один пять смотрит на четыре один', 'камера из 1 5 на 4 1']
