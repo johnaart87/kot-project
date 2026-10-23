@@ -246,6 +246,23 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .hnd.we{width:13px;height:13px;margin:-6.5px 0 0 -6.5px}
 .hnd.we.dj{background:var(--sheet);border:2.5px solid var(--sel)}
 .ctxm{min-width:230px}
+.calcw{padding:8px;display:flex;flex-direction:column;gap:6px}
+.calcin{width:100%;font:600 15px/1.3 ui-monospace,Consolas,monospace;padding:6px 8px;text-align:right}
+.calcres{font:700 22px/1.2 ui-monospace,Consolas,monospace;text-align:right;color:var(--ink);min-height:28px;word-break:break-all}
+.calcres.bad{color:var(--bad);font-size:13px;font-weight:500}
+.calckeys{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.calckeys button{height:34px;border:1px solid var(--line);border-radius:4px;background:var(--panel,#fff);font:600 15px/1 inherit;cursor:pointer;color:var(--ink)}
+.calckeys button:hover{background:var(--accent-soft)}
+.calckeys button.op{color:var(--accent)}
+.calckeys button.eq{background:var(--accent);color:#fff;border-color:var(--accent)}
+.calcai{display:flex;gap:4px}
+.calcai input{flex:1;min-width:0}
+.calcnote{font-size:12px;color:var(--muted)}
+.calcnote code{background:var(--accent-soft);padding:0 3px;border-radius:3px}
+.calchist{display:flex;flex-direction:column;gap:2px}
+.calchist button[data-h]{display:grid;grid-template-columns:1fr auto;gap:0 8px;text-align:left;border:0;background:transparent;padding:3px 2px;border-bottom:1px solid var(--line);cursor:pointer;color:var(--ink);font-size:12px}
+.calchist button[data-h] i{grid-column:1/-1;color:var(--muted);font-style:normal;font-size:11px}
+.calchist button[data-h] b{font-family:ui-monospace,Consolas,monospace}
 .egsec{border:1px solid var(--line);border-radius:4px;margin:0 0 6px;padding:0 8px}
 .egsec>summary{cursor:pointer;padding:5px 0;font-weight:600;font-size:12px}
 .egin{padding:2px 0 8px}
@@ -892,7 +909,14 @@ details.more summary::-webkit-details-marker{display:none}
         <button class="rbtn" id="rbFit" title="Показать всё (ZA)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/><rect x="7" y="7" width="6" height="6"/></svg>Показать<br>всё</button>
         <button class="rbtn" id="rbLeft" title="Свойства и диспетчер проекта"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="1.5"/><path d="M7.5 3.5v13"/></svg>Свойства</button>
         <button class="rbtn" id="rbRight" title="Чат команд"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 4h14v9H8l-4 3v-3H3z"/></svg>Чат</button>
+        <button class="rbtn" id="rbCalc" title="Калькулятор: обычный и с ИИ"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="4" y="2.5" width="12" height="15" rx="1.5"/><rect x="6" y="4.5" width="8" height="3" fill="#cfe3f8"/><path d="M7 10.5h.01M10 10.5h.01M13 10.5h.01M7 13.5h.01M10 13.5h.01M13 13.5h.01" stroke-width="2.2" stroke-linecap="round" stroke="#1a73e8"/></svg>Калькулятор</button>
       </div><div class="grp-label">Окна</div></div>
+      <div class="grp"><div class="grp-items rstack" id="winChecks">
+        <label><input type="checkbox" data-win="props"> Свойства</label>
+        <label><input type="checkbox" data-win="browser"> Диспетчер проекта</label>
+        <label><input type="checkbox" data-win="chat"> Чат команд</label>
+        <label><input type="checkbox" data-win="calc"> Калькулятор</label>
+      </div><div class="grp-label">Показывать окна</div></div>
     </div>
   </header>
 
@@ -935,6 +959,18 @@ details.more summary::-webkit-details-marker{display:none}
     </div>
 
     <aside class="side dock" id="right" aria-label="Правая панель окон">
+    <section class="panel" id="calc" aria-label="Калькулятор">
+      <div class="side-h"><span class="ptl">Калькулятор</span><div class="row"><button id="calcClose" aria-label="Скрыть калькулятор" title="Скрыть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div></div>
+      <div class="scroll calcw">
+        <input id="calcIn" class="calcin" autocomplete="off" spellcheck="false" placeholder="Например: 3,2 * 4,5 + 12%" aria-label="Выражение">
+        <div class="calcres" id="calcRes" aria-live="polite">0</div>
+        <div class="calckeys" id="calcKeys"></div>
+        <div class="row" style="gap:6px;margin:6px 0;flex-wrap:wrap"><button class="btn sm" id="calcModel" title="Длина, площадь или объём выбранного элемента в выражение">Из модели</button><button class="btn sm" id="calcCopy" title="Скопировать результат">Копировать</button><button class="btn sm" id="calcToChat" title="Вставить результат в поле чата">В чат</button></div>
+        <div class="calcai"><input id="calcAsk" autocomplete="off" placeholder="Задача словами: сколько плитки на пол 3 на 4 с запасом 10%" aria-label="Задача для ИИ"><button class="btn sm primary" id="calcAskBtn" title="ИИ составит выражение, программа посчитает (без интернета — встроенный ИИ)">ИИ</button></div>
+        <div class="calcnote" id="calcNote"></div>
+        <div class="calchist" id="calcHist"></div>
+      </div>
+    </section>
     <section class="panel" id="chat" aria-label="Чат команд">
       <div class="side-h"><span class="ptl">Чат команд</span>
         <div class="row">
@@ -3347,6 +3383,7 @@ function tempDims(){
     return [{ refs:[{ k:'w', id:w.id, end:0, side:0 }, { k:'o', id:it.id, edge:0, side:0 }, { k:'o', id:it.id, edge:1, side:0 }, { k:'w', id:w.id, end:1, side:0 }],
       off:-(w.t / 2 + 0.6), dir:{ x:f.dir.x, z:f.dir.z },
       edit:(i, v) => {
+        if (it.pin && i !== 1){ toast(`${tagName(it)}: замок закрыт — положение не меняется. Откройте замок, чтобы сдвинуть`); return; }
         if (i === 0) it.pos = r4(clamp(v + it.w / 2, it.w / 2, f.L - it.w / 2));
         else if (i === 1){ it.pos = r4(it.pos - it.w / 2 + v / 2); it.w = v; }
         else it.pos = r4(clamp(f.L - v - it.w / 2, it.w / 2, f.L - it.w / 2));
@@ -4658,6 +4695,8 @@ function copyItems(ids, dx, dz){
   return made;
 }
 function deleteSel(){
+  // a selected view mark on the plan (section, camera, elevation, callout): «Удалить» deletes that view
+  if (!sel.size && S.selView){ const id = S.selView, v = views.find(x => x.id === id); if (v && !confirm(`Удалить ${KIND_NAME[v.kind] ? KIND_NAME[v.kind].toLowerCase() + ' ' : ''}«${v.name}»? Он пропадёт и со всех листов.`)) return; S.selView = null; deleteView(id); annoDirty = true; rebuild(); updatePanel(); return; }
   if (!sel.size) return;
   const pinned = [...sel].filter(id => byId(id)?.pin); if (pinned.length){ toast(`Закреплённые элементы не удаляются: ${pinned.length}. Сначала открепите их (UP)`); setSel([...sel].filter(id => !byId(id)?.pin)); if (!sel.size){ rebuild(); return; } }
   const ids = new Set(sel), walls = [...ids].filter(id => byId(id)?.type === 'wall').length;
@@ -5812,6 +5851,7 @@ function editHover(px, py, shift){
 let drag = null;
 function startDrag(id, px, py){
   const it = byId(id); if (!it) return;
+  if (isOp(it) && sel.size === 1 && it.pin){ toast(`${tagName(it)}: замок закрыт — элемент нельзя сдвинуть. Откройте замок (щелчок по 🔒 или UP)`); return; }
   if (isOp(it) && sel.size === 1){ const w = byId(it.wall); const s = w && alongWall(w, px, py); if (s == null) return; drag = { id, s0:s, orig:{ ...it }, pushed:false }; return; }
   const g = groundAt(px, py); if (!g) return;
   const ids = [...sel].filter(i => movable(byId(i)) && !byId(i).pin); if (!ids.length){ if ([...sel].some(i => byId(i)?.pin)) toast('Элемент закреплён: сначала открепите его (UP)'); return; }
@@ -5873,6 +5913,8 @@ cv.addEventListener('pointerdown', e => {
   closeFileMenu();
   if (e.pointerType === 'pen' && !penSeen){ penSeen = true; if (!S.penOnly && lsGet('kot.penOnly') !== '0') setPenOnly(true, true); }
   if (fingerIgnored(e)) return;
+  // a click on the drawing takes the keyboard back from a field (chat, properties): Delete, arrows and shortcuts work on the drawing again
+  { const ae = document.activeElement; if (ae && ae !== document.body && ae.matches && ae.matches('input, textarea, select, [contenteditable="true"]')) ae.blur(); }
   ptrs.add(e.pointerId);
   if (ptrs.size > 1){ down = null; drag = null; box = null; $('#selbox').hidden = true; clearTimeout(lpT); return; }
   const { x, y } = local(e);
@@ -5883,7 +5925,7 @@ cv.addEventListener('pointerdown', e => {
     // the highlighted candidate (Tab cycles them) is what gets selected
     if (Math.hypot(x - HOV.x, y - HOV.y) > 4 || !HOV.list.length){ HOV.x = HOV.y = -99; hovUpdate(x, y, e.altKey); }
     const cand = HOV.list[HOV.i], id = cand ? cand.ids[0] : null;
-    if (cand && cand.view){ S.selView = cand.view; clearSel(); rebuild(); down = null; return; }
+    if (cand && cand.view){ S.selView = cand.view; clearSel(); rebuild(); updatePanel(); down = null; return; }
     if (S.selView){ S.selView = null; annoDirty = true; $('#propsBody').dataset.id = 'x'; updatePanel(); }
     if (id){
       const ids = cand.ids, all = ids.every(i => isSel(i));
@@ -5990,7 +6032,7 @@ function openCtxMenu(e){
   if (Date.now() - NO_CTX < 400) return;
   const { x, y } = local(e);
   // nothing selected: right-click selects what is under the cursor
-  if (!sel.size){ hovUpdate(x, y, false); const c = HOV.list[HOV.i]; if (c && c.ids && c.ids.length){ setSel(c.ids, c.ids[0]); rebuild(); updatePanel(); } }
+  if (!sel.size){ hovUpdate(x, y, false); const c = HOV.list[HOV.i]; if (c && c.view){ S.selView = c.view; rebuild(); } else if (c && c.ids && c.ids.length){ setSel(c.ids, c.ids[0]); rebuild(); updatePanel(); } }
   const one = sel.size === 1, any = sel.size > 0, it = selId != null ? byId(selId) : null, plain = S.view !== 'sheet';
   const tn = t => (TOOL_NAMES[t] || t || '—').replace(/^Изменить \| /, '');
   const recent = (S.recent || []).filter(t => t !== 'select').map(t => [tn(t), '', () => setTool(t), true]);
@@ -6014,7 +6056,7 @@ function openCtxMenu(e){
     ['Редактировать семейство', '', () => openFamEditor(it.f), one && it && it.type === 'fam' && !!famById(it.f)],
     ['Выбрать предыдущий', '', selectPrevious, PREV_SEL.some(id => byId(id))],
     ['Выбрать все экземпляры', '', null, one, [['Видимые в виде', '', () => selectAllInstances(it, 'view'), one], ['Во всём проекте', '', () => selectAllInstances(it, 'project'), one]]],
-    ['Удалить', 'DE', deleteSel, any],
+    ['Удалить', 'DE', deleteSel, any || !!S.selView],
     null,
     ['Переместить', 'MV', () => setTool('move'), any], ['Копировать', 'CO', () => setTool('copy'), any], ['Повернуть на 90°', '', rotateSel, any],
     ['Временное скрытие/изоляция', '', null, true, [['Скрыть элемент', 'HH', () => tempHide('hide'), any], ['Изолировать элемент', 'HI', () => tempHide('iso'), any], ['Сбросить временное скрытие', 'HR', () => tempHide('reset'), !!S.tmp]]],
@@ -10034,7 +10076,8 @@ function multiSame(){
 // Revit: selecting elements brings up the «Изменить» tab; clearing the selection returns to the tab that was open
 const SEL_TAB = { had:false, back:null };
 function syncSelTab(){
-  const has = sel.size > 0 && S.tool === 'select', cur = (document.querySelector('.tabs [role=tab][aria-selected="true"]') || {}).dataset?.tab;
+  // a selected element — or a selected view mark on the plan (section, camera, callout): «Изменить» with «Удалить»
+  const has = (sel.size > 0 || !!S.selView) && S.tool === 'select', cur = (document.querySelector('.tabs [role=tab][aria-selected="true"]') || {}).dataset?.tab;
   if (has && !SEL_TAB.had){ if (cur && cur !== 'rbModify'){ SEL_TAB.back = cur; showTab('rbModify'); } else SEL_TAB.back = null; }
   else if (!has && SEL_TAB.had){ if (SEL_TAB.back && cur === 'rbModify') showTab(SEL_TAB.back); SEL_TAB.back = null; }
   SEL_TAB.had = has;
@@ -10335,7 +10378,7 @@ function renderPanel(_el, _it){
     for (const e of [0, 1]){ const b = q('sJ' + e); if (b) b.onclick = () => toggleJoin(it, e); }
   } else if (isOp(it)){
     bind('sOW', v => { it.pos = r4(it.pos - it.w / 2 + v / 2); it.w = v; });
-    bind('sOH', v => it.h = v); bind('sOS', v => it.sill = v); bind('sOA', v => it.pos = r4(v + it.w / 2), true);
+    bind('sOH', v => it.h = v); bind('sOS', v => it.sill = v); bind('sOA', v => { if (it.pin){ toast(`${tagName(it)}: замок закрыт — положение не меняется`); return; } it.pos = r4(v + it.w / 2); }, true);
     const tg = (id, key) => { const b = q(id); if (b) b.onclick = () => { pushUndo(); markEdited(); it[key] = !it[key]; el.dataset.id = 'x'; rebuild(); }; };
     tg('sFlip', 'flip'); tg('sHand', 'hand');
     if (q('sDOp')) q('sDOp').onchange = e => { pushUndo(); markEdited(); delete it.op; delete it.gl; if (e.target.value === '1') it.op = true; else if (e.target.value === 'gl') it.gl = true; el.dataset.id = 'x'; rebuild(); };
@@ -11123,7 +11166,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-1850');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-1907');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -11556,10 +11599,10 @@ const wide = () => innerWidth >= 1180;
 /* ---------- dockable windows: «Свойства», «Диспетчер проекта», «Чат команд» ----------
    Like Revit: each window docks in the left or right column (stacked, heights split by dragging the border),
    or floats anywhere on the screen. Drag a window by its title bar; drag the column edge to change its width. */
-const PANEL_NAMES = { props:'Свойства', browser:'Диспетчер проекта', chat:'Чат команд' };
+const PANEL_NAMES = { props:'Свойства', browser:'Диспетчер проекта', chat:'Чат команд', calc:'Калькулятор' };
 const PANEL_IDS = Object.keys(PANEL_NAMES);
 const PEL = Object.fromEntries(PANEL_IDS.map(id => [id, document.getElementById(id)]));
-const LAY_DEF = () => ({ lw:270, rw:330, p:{ props:{ dock:'left', ord:0, size:3, show:true }, browser:{ dock:'left', ord:1, size:2, show:true }, chat:{ dock:'right', ord:0, size:1, show:true } } });
+const LAY_DEF = () => ({ lw:270, rw:330, p:{ props:{ dock:'left', ord:0, size:3, show:true }, browser:{ dock:'left', ord:1, size:2, show:true }, chat:{ dock:'right', ord:0, size:1, show:true }, calc:{ dock:'right', ord:1, size:1, show:false } } });
 function loadLayout(){
   const d = LAY_DEF(); let o = null; try { o = JSON.parse(lsGet('kot.layout') || 'null'); } catch(e){}
   if (!o || !o.p) return d;
@@ -11601,7 +11644,8 @@ function applyLayout(){
     el.classList.add('float'); el.style.cssText = `left:${p.x}px;top:${p.y}px;width:${w}px;height:${h}px`;
     $('#floatLayer').append(el);
   }
-  for (const b of [['#rbLeft', ['props', 'browser']], ['#rbRight', ['chat']]]) $(b[0]).setAttribute('aria-pressed', b[1].some(id => LAY.p[id].show));
+  for (const b of [['#rbLeft', ['props', 'browser']], ['#rbRight', ['chat']], ['#rbCalc', ['calc']]]) $(b[0]).setAttribute('aria-pressed', b[1].some(id => LAY.p[id].show));
+  document.querySelectorAll('#winChecks [data-win]').forEach(c => { c.checked = !!(LAY.p[c.dataset.win] && LAY.p[c.dataset.win].show); });
   saveLayout(); pnSync();
 }
 function setPanel(id, show){
@@ -11705,6 +11749,9 @@ for (const id of PANEL_IDS){
 $('#leftClose').onclick = () => setPanel('props', false);
 $('#browserClose').onclick = () => setPanel('browser', false);
 $('#rightClose').onclick = () => setPanel('chat', false);
+$('#calcClose').onclick = () => setPanel('calc', false);
+$('#rbCalc').onclick = () => setPanel('calc', !LAY.p.calc.show);
+document.querySelectorAll('#winChecks [data-win]').forEach(c => c.onchange = () => setPanel(c.dataset.win, c.checked));
 $('#rbLeft').onclick = () => setSide('left', !sideOpen('left'));
 $('#rbRight').onclick = () => setSide('right', !sideOpen('right'));
 // drag a window by its title bar; drop it on a side to dock it, anywhere else to leave it floating
@@ -11981,7 +12028,7 @@ const RB_LAYOUT = [
     ['Создание', { b:[['[data-view="d3"]', 'd3', '3D-вид'], ['[data-tool="section"]', 'section', 'Разрез'], ['[data-tool="callout"]', 'callout', 'Узел']],
       t:[['[data-view="plan"]', 'plan', 'План'], ['[data-view="axo"]', 'axo', 'Аксонометрия'], ['[data-tool="camera"]', 'camera', 'Камера']], t2:[['#rbSaveCam', 'rbSaveCam', 'Сохранить ракурс'], ['[data-tool="ielev"]', 'ielev', 'Развёртка']] }],
     ['Компоновка листа', { b:[['#rbSheet', 'rbSheet', 'Лист']] }],
-    ['Окна', { t:[['#rbFit', 'rbFit', 'Показать всё'], ['#rbLeft', 'rbLeft', 'Свойства'], ['#rbRight', 'rbRight', 'Чат команд']] }]
+    ['Окна', { t:[['#rbFit', 'rbFit', 'Показать всё'], ['#rbLeft', 'rbLeft', 'Свойства'], ['#rbRight', 'rbRight', 'Чат команд'], ['#rbCalc', 'rbCalc', 'Калькулятор']] }]
   ]],
   ['rbManage', [
     ['Параметры', { b:[['#rbMats', 'rbMats', 'Материалы']], t:[['[data-std="styles"]', 'styles', 'Стили линий'], ['[data-std="weights"]', 'weights', 'Вес линий'], ['[data-std="patterns"]', 'patterns', 'Образцы линий']],
@@ -12114,7 +12161,7 @@ addEventListener('keydown', e => {
   if (e.key === 'Escape' && endFreeDrag(true)){ toast('Конец стены возвращён'); return; }
   if (e.key === 'Escape'){ if (editTool() && (E.step || E.ref || E.pts.length)){ endDraw(); return; } if (D.start || DD.refs.length) endDraw(); else if (S.tool !== 'select') setTool('select'); else if (sel.size){ clearSel(); rebuild(); } return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && S.view === 'sheet' && String(SHEET.sel || '').startsWith('pic:')){ e.preventDefault(); delSheetPic(curView(), SHEET.sel.slice(4)); return; }
-  if ((e.key === 'Delete' || e.key === 'Backspace') && !sel.size && S.selView){ e.preventDefault(); const id = S.selView; S.selView = null; deleteView(id); annoDirty = true; return; }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && !sel.size && S.selView){ e.preventDefault(); const id = S.selView; S.selView = null; deleteView(id); annoDirty = true; rebuild(); updatePanel(); return; }
   if (e.key === 'Escape' && S.selView){ S.selView = null; annoDirty = true; $('#propsBody').dataset.id = 'x'; updatePanel(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && sel.size){ e.preventDefault(); deleteSel(); return; }
   if (!D.start && ['1','2','3'].includes(e.key)){ setView({ 1:'plan', 2:'d3', 3:'axo' }[e.key]); return; }
@@ -12313,6 +12360,9 @@ function offlineMore(f){
   if (/забудь\s+(?:все\s+)?(?:выучен|запомнен)/.test(f)) return { a:'llm', forget:true };
   if (/(?:обучени|обучи|научи|выученн)[а-яё]*\s*(?:ии|нейросет|чат|программ)?/.test(f) && !/запомни/.test(f)) return { a:'llm', open:true };
   { const m = f.match(/^запомни[,:]?\s+(?:что\s+)?(.+?)\s+(?:это|значит|означает)\s+(.+)$/); if (m) return { a:'learn', p:m[1], c:m[2] }; }
+  // the calculator: «посчитай 3,5 на 4,2», «сколько будет 12 + 15%», «калькулятор», a task in words
+  if (/калькулятор/.test(f)) return { a:'calc', ...(/(?:закрой|скрой|убери|спрячь)/.test(f) ? { close:true } : {}) };
+  { const m = f.match(/^(?:посчитай|вычисли|сосчитай|рассчитай|сколько будет)\s+(.+)$/); if (m){ const e = m[1].replace(/\s+на\s+(?=\d)/g, '*').replace(/\s+умножить на\s+/g, '*').replace(/\s+разделить на\s+/g, '/').replace(/\s+плюс\s+/g, '+').replace(/\s+минус\s+/g, '-').replace(/\s+в квадрате/g, '^2').replace(/процент\S*/g, '%'); return /^[\d\s.,+\-*/×÷:^()%√]+$/.test(e.trim()) ? { a:'calc', expr:e.trim() } : { a:'calc', task:m[1] }; } }
   // dimensions: «удали все размеры (на плане)», «… и построй заново», «обнови обмерные размеры»
   if (/размер/.test(f) && /(?:заново|занова|перестро|обнови|пересоздай|сначала)/.test(f)) return { a:'redims' };
   if (/(?:удали|убери|сотри)[а-яё]*\s+(?:все\s+)?размер/.test(f)) return { a:'deldims', what:/во\s+всём|во\s+всем|проект/.test(f) ? 'all' : 'view' };
@@ -12723,6 +12773,7 @@ function execOne(a, ctx){
     }
     case 'moveop': {
       const it = findEl(a.el); if (!isOp(it)) throw new Error('Это не окно и не дверь');
+      if (it.pin) throw new Error(`${tagName(it)}: замок закрыт — сначала откройте замок`);
       const w = byId(it.wall), f = wallFrame(w), d = okNum(a.by, 0.001, 100); if (!d) throw new Error('Назовите расстояние');
       let sg = 1;
       if (a.angle != null && Number.isFinite(Number(a.angle))){ const r = Number(a.angle) * Math.PI / 180; sg = Math.sign(Math.cos(r) * f.dir.x - Math.sin(r) * f.dir.z) || 1; }
@@ -12970,7 +13021,12 @@ function execMore(a, ctx){
     case 'learn': { const ph = String(a.p || '').trim(), cm = String(a.c || '').trim(); if (!ph || !cm) throw new Error('Нужно: фраза и команды'); const lines = cm.split(/;|\n/).map(x => x.trim()).filter(Boolean); if (!llmParse(lines)) throw new Error('Эти команды программа не понимает: «' + cm + '»'); learnSave(ph, lines.join('\n')); return `Запомнил: «${ph}» → ${lines.join('; ')}`; }    case 'wiki': { const q = String(a.q || '').trim(); if (!q) throw new Error('Что найти?'); setTimeout(() => wikiAnswer(q), 0); return pplxKey() ? 'Ищу в Perplexity…' : 'Ищу в Википедии…'; }
     case 'pplx': { if (a.site){ window.open(pplxUrl(String(a.q || '')), '_blank', 'noopener'); return 'Открываю Perplexity'; } openPplx(); return 'Открыто окно «Perplexity»'; }
     case 'wake': setWake(a.on !== false); return a.on !== false ? 'Слушаю всё время: начинайте фразу со слова «Кот»' : 'Режим «Слушать всегда» выключен';
-    case 'dimtype': { const T = dimTypes(), col = x => /^#[0-9a-f]{6}$/i.test(x) ? x : null, find = n => { const q = String(n || '').toLowerCase(); return T.find(t => t.id === n) || T.find(t => t.n.toLowerCase() === q) || T.find(t => t.n.toLowerCase().includes(q)) || T.find(t => t.ph && PHASES.some(p => p.k === t.ph && p.n.toLowerCase().startsWith(q))); };
+    case 'calc': {
+      if (a.close){ setPanel('calc', false); return 'Калькулятор скрыт'; }
+      if (!LAY.p.calc.show) setPanel('calc', true);
+      if (a.expr){ $('#calcIn').value = String(a.expr); const v = calcRun(String(a.expr)); if (v == null) throw new Error('Не могу посчитать: ' + a.expr); return `${a.expr} = ${calcFmt(v)}`; }
+      if (a.task){ $('#calcAsk').value = String(a.task); setTimeout(() => calcAsk(String(a.task)), 0); return 'Считаю задачу в калькуляторе…'; }
+      return 'Калькулятор открыт'; }    case 'dimtype': { const T = dimTypes(), col = x => /^#[0-9a-f]{6}$/i.test(x) ? x : null, find = n => { const q = String(n || '').toLowerCase(); return T.find(t => t.id === n) || T.find(t => t.n.toLowerCase() === q) || T.find(t => t.n.toLowerCase().includes(q)) || T.find(t => t.ph && PHASES.some(p => p.k === t.ph && p.n.toLowerCase().startsWith(q))); };
       if (a.open){ openDimTypes(); return 'Открыто окно «Типы размеров»'; }
       if (a.add){ const t = { id:vid('dt'), n:String(a.add).slice(0, 60), ph:'', c:col(a.c) || '', tc:col(a.tc) || '' }; T.push(t); scheduleSave(); return 'Тип размера «' + t.n + '» создан'; }
       const t = a.type ? find(a.type) : null; if (a.type && !t) throw new Error('Нет типа размера «' + a.type + '»');
@@ -13214,7 +13270,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 Элементы: "@Д" (стена Д), "@door:Б", "@window:А", "@box:В", "@floor:А", "@ceiling:А", "@roof:А", "@column:А", "@stair:А", число — id элемента, "room:3" — помещение 3, "selected" — выбранные.
 {"a":"selectq","type":["window"],"wall":"@Д","room":"2","phase":"montazh","letter":"А","dem":true} — выбрать по описанию (любые поля по желанию); {"a":"deselect"}.
 {"a":"prop","el":"selected","set":{"h":3,"bo":0.4}} — изменить свойства: h высота, t толщина, w ширина, d глубина, sill подоконник, bo смещение/высота от уровня (мебель ±), to смещение сверху, rot поворот°, m материал, wt тип стены, name, num, tag буква, ph стадия создания, dem стадия сноса (\"\" — не сносить), dph стадия показа размера (\"all\" — во всех), loc линия привязки, nrb не граница помещения, mir зеркально, pin замок, flip/hand открывание двери, op проём без полотна, gl балконная остеклённая дверь, hc высота потолка помещения, left полка отметки влево.
-{"a":"move","dx":1,"dz":0,"copy":false} — сдвинуть (или скопировать) выбранное; {"a":"dimtype","type":"Обмер","c":"#d32f2f","tc":"#d32f2f","n":"…","ph":"obmer"} — тип размеров (цвет линий c и текста tc; "" — по умолчанию); {"a":"dimtype","type":"Монтаж","view":true} — тип размеров открытого вида (без type — по стадии); {"a":"dimtype","type":"…","sel":true} — тип выбранных размеров; {"a":"dimtype","add":"Имя"} — новый тип; {"a":"dimtype","open":true} — окно «Типы размеров»; {"a":"wake","on":true} — «Слушать всегда»: микрофон включён, выполняются фразы, начинающиеся со слова «Кот» (on:false — выключить); {"a":"wiki","q":"что такое несущая стена"} — найти ответ в интернете (Perplexity с ключом пользователя, иначе Википедия; нужен интернет); {"a":"pplx"} — окно ключа Perplexity ({"site":true,"q":"…"} — открыть сайт Perplexity с вопросом); {"a":"llm"} — скачать ИИ без интернета (forget:true — забыть выученные фразы; open:true — окно «Обучение ИИ»); {"a":"learn","p":"фраза пользователя","c":"команда; команда"} — запомнить, как понимать фразу; {"a":"deldims","what":"view"|"all"} — удалить размеры этого вида (all — во всём проекте); {"a":"redims"} — построить обмерные размеры заново (на плане «Обмер»); {"a":"clear"} — удалить ВСЮ модель (только если пользователь прямо просит очистить всё; спросит подтверждение); {"a":"selinst","where":"view"|"project"} — выбрать все экземпляры типа выбранного; {"a":"selprev"} — выбрать предыдущий набор; {"a":"hidecat"} — скрыть в виде категорию выбранного; {"a":"elemgfx","c":"#ff0000","w":5,"cc":"#…","cw":8,"half":true,"tr":50,"vis":false,"reset":true,"open":true} — графика выбранных элементов только в этом виде (как Revit «Переопределить графику на виде → Для элемента»); {"a":"wjoin","wall":"Л","end":0|1|"both","on":true} — присоединить (on:false — отсоединить) начало/конец стены по букве (без wall — выбранная стена); {"a":"nudge","sx":1,"sy":0,"mm":50} — сдвинуть выбранное как стрелками на клавиатуре: по экрану (sx 1 — вправо, -1 — влево; sy -1 — вверх, 1 — вниз), на листе — выбранный вид/фото/экспликацию; {"a":"rotsel","deg":45,"copy":false}; {"a":"mirror","axis":"x","copy":true} — зеркально (x — слева-направо, z — сверху-вниз); {"a":"hide","on":true} скрыть выбранное в виде (on:false — показать), {"a":"hide","mode":"temp"|"isolate"|"reset"}.
+{"a":"move","dx":1,"dz":0,"copy":false} — сдвинуть (или скопировать) выбранное; {"a":"dimtype","type":"Обмер","c":"#d32f2f","tc":"#d32f2f","n":"…","ph":"obmer"} — тип размеров (цвет линий c и текста tc; "" — по умолчанию); {"a":"dimtype","type":"Монтаж","view":true} — тип размеров открытого вида (без type — по стадии); {"a":"dimtype","type":"…","sel":true} — тип выбранных размеров; {"a":"dimtype","add":"Имя"} — новый тип; {"a":"dimtype","open":true} — окно «Типы размеров»; {"a":"wake","on":true} — «Слушать всегда»: микрофон включён, выполняются фразы, начинающиеся со слова «Кот» (on:false — выключить); {"a":"calc","expr":"3,5*4,2 + 10%"} — посчитать в калькуляторе; {"a":"calc","task":"сколько плитки на пол 3 на 4 с запасом 10%"} — задача словами (ИИ без интернета составит выражение); {"a":"calc"} — открыть калькулятор, close:true — скрыть; {"a":"wiki","q":"что такое несущая стена"} — найти ответ в интернете (Perplexity с ключом пользователя, иначе Википедия; нужен интернет); {"a":"pplx"} — окно ключа Perplexity ({"site":true,"q":"…"} — открыть сайт Perplexity с вопросом); {"a":"llm"} — скачать ИИ без интернета (forget:true — забыть выученные фразы; open:true — окно «Обучение ИИ»); {"a":"learn","p":"фраза пользователя","c":"команда; команда"} — запомнить, как понимать фразу; {"a":"deldims","what":"view"|"all"} — удалить размеры этого вида (all — во всём проекте); {"a":"redims"} — построить обмерные размеры заново (на плане «Обмер»); {"a":"clear"} — удалить ВСЮ модель (только если пользователь прямо просит очистить всё; спросит подтверждение); {"a":"selinst","where":"view"|"project"} — выбрать все экземпляры типа выбранного; {"a":"selprev"} — выбрать предыдущий набор; {"a":"hidecat"} — скрыть в виде категорию выбранного; {"a":"elemgfx","c":"#ff0000","w":5,"cc":"#…","cw":8,"half":true,"tr":50,"vis":false,"reset":true,"open":true} — графика выбранных элементов только в этом виде (как Revit «Переопределить графику на виде → Для элемента»); {"a":"wjoin","wall":"Л","end":0|1|"both","on":true} — присоединить (on:false — отсоединить) начало/конец стены по букве (без wall — выбранная стена); {"a":"nudge","sx":1,"sy":0,"mm":50} — сдвинуть выбранное как стрелками на клавиатуре: по экрану (sx 1 — вправо, -1 — влево; sy -1 — вверх, 1 — вниз), на листе — выбранный вид/фото/экспликацию; {"a":"rotsel","deg":45,"copy":false}; {"a":"mirror","axis":"x","copy":true} — зеркально (x — слева-направо, z — сверху-вниз); {"a":"hide","on":true} скрыть выбранное в виде (on:false — показать), {"a":"hide","mode":"temp"|"isolate"|"reset"}.
 Виды: {"a":"openview","name":"План демонтажа"} (имя, часть имени или номер листа); {"a":"newview","kind":"plan","name":"План монтажа","phase":"montazh","lv":"Этаж 1","folder":"04_План монтажа"} — kind: plan, d3, axo, sheet, detail, section, ielev, camera, elev:S/N/E/W; {"a":"renameview","view":"…","name":"…"}; {"a":"delview","view":"…"}; {"a":"viewset","view":"current","phase":"demontazh","tpl":"Обмерный план","scale":50,"folder":"03_План демонтажа","lv":"Этаж 1"}; {"a":"closetab","name":"…"} — закрыть вкладку вида.
 Разделы диспетчера: {"a":"folder","name":"02_Обмерный план","views":["Обмерный план"]} — создать раздел и положить в него виды; {"a":"delfolder","name":"…"}.
 Видимость/графика вида: {"a":"vg","view":"current","cat":"door","vis":false,"half":false} — категории: wall, door, window, floor, ceiling, roof, column, stair, box, room, fam, grid, dim, line, text, spot, ceilh (высоты потолков), winh (высоты окон).
@@ -13342,7 +13398,8 @@ const LLM_CMDS = `комната 5 на 4 | стена 3 метра вправо
 скрой буквы | покажи буквы | скрытые линии | тонированный | на весь экран | покажи панели | отмени | верни | сохрани | распечатай | визуализация | что умеешь
 экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
 выбери все экземпляры | выбери предыдущий | скрой категорию | графика элемента | полутона для выбранного | сдвинь выбранное вправо на 100 | поверни выбранное на 90 | скопируй выбранное вправо на 1000 | скрой выбранное
-открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы`;
+открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы
+калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
 // what a good architect and interior designer knows (Russian norms SP 54 / GOST and practice): used when the user does not say a size
 const ARCH_RULES = 'Если размер не назван — выбирай грамотный, как архитектор, по нормам и практике: '
   + 'спальня 3500 на 4 (от 10 м²), детская 3 на 3500, гостиная 5 на 4, кабинет 3 на 3, кухня 3 на 3 (от 8 м²), кухня-гостиная 6 на 4, '
@@ -13422,6 +13479,8 @@ const LEARN_BUILTIN = [
   ['удали все двери', 'выдели все двери\nудали выбранное'], ['убери все окна', 'выдели все окна\nудали выбранное'], ['удали двери вообще все', 'выдели все двери\nудали выбранное'],
   ['дверь пошире на запад', 'дверь 1000 в западной стене'], ['окна побольше на юг', 'окно 1800 в южной стене'], ['покажи всё в трёхмерном виде', 'покажи 3д'], ['размерчики проставь', 'проставь размеры'],
   ['экспортируй в ревит', 'экспорт в ревит'], ['сохрани для макса', 'экспорт в 3д макс'],
+  ['открой калькулятор', 'калькулятор'], ['покажи калькулятор', 'калькулятор'], ['убери калькулятор', 'закрой калькулятор'], ['перемножь 3,5 и 4,2', 'посчитай 3,5 * 4,2'], ['сколько это будет три на четыре', 'посчитай 3 * 4'],
+  ['посчитай площадь пола 3 на 4', 'посчитай 3 * 4'], ['сколько плитки надо на кухню 3 на 4 с запасом', 'посчитай сколько плитки на пол 3 на 4 с запасом 10%'],
   ['типы размеров открой', 'типы размеров'], ['размеры обмера красным', 'цвет размеров обмер красный'], ['камера из точки один пять смотрит на четыре один', 'камера из 1 5 на 4 1']
 ];
 let LB_N = null;
@@ -13536,6 +13595,138 @@ function teachPhrase(text){
   learnSave(text, c.split(';').map(s => s.trim()).filter(Boolean).join('\n'));
   const res = execAll(acts, { label:text }); addMsg('app', [{ ok:true, t:`Запомнил: «${text}» → ${c.trim()}` }, ...res]);
 }
+/* ---------- «Калькулятор»: a window like «Свойства» and «Чат» (dock left / right / float, the checkbox «Вид → Показывать окна»).
+   calcEval — its own parser (no eval): + − × ÷ ^ ( ), decimal comma, %, √ / sqrt, π, sin cos tan (degrees), round, abs, min, max.
+   «Из модели» puts the length / area / volume of the selected element. The AI (on the device, offline) only turns a task in words
+   into an expression; the program computes it — the arithmetic is always exact. ---------- */
+function calcEval(src){
+  let s = String(src || '').toLowerCase().replace(/\s+/g, '').replace(/,/g, '.').replace(/[×х*]/g, '*').replace(/[÷:]/g, '/').replace(/−|–/g, '-').replace(/π|пи/g, 'pi').replace(/√/g, 'sqrt').replace(/корень/g, 'sqrt');
+  if (!s) return null;
+  let i = 0;
+  const num = () => { const m = /^(\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?/.exec(s.slice(i)); if (!m) throw new Error('Ожидаю число'); i += m[0].length; return +m[0]; };
+  const FN = { sqrt:Math.sqrt, sin:x => Math.sin(x * Math.PI / 180), cos:x => Math.cos(x * Math.PI / 180), tan:x => Math.tan(x * Math.PI / 180), abs:Math.abs, round:Math.round, ln:Math.log, lg:Math.log10, ceil:Math.ceil, floor:Math.floor };
+  const FN2 = { min:Math.min, max:Math.max };
+  function prim(){
+    if (s[i] === '-'){ i++; return -prim(); } if (s[i] === '+'){ i++; return prim(); }
+    if (s[i] === '('){ i++; const v = expr(); if (s[i] !== ')') throw new Error('Не хватает «)»'); i++; return post(v); }
+    const w = /^[a-z]+/.exec(s.slice(i));
+    if (w){ const n = w[0]; i += n.length;
+      if (n === 'pi') return post(Math.PI);
+      if (FN[n] || FN2[n]){ let v; if (s[i] === '('){ i++; const a = [expr()]; while (s[i] === ';' || s[i] === '|'){ i++; a.push(expr()); } if (s[i] !== ')') throw new Error('Не хватает «)»'); i++; v = FN2[n] ? FN2[n](...a) : FN[n](a[0]); } else v = FN[n](prim()); return post(v); }
+      throw new Error('Неизвестно: ' + n); }
+    return post(num());
+  }
+  const post = v => { while (s[i] === '!' ) { i++; let f = 1; for (let k = 2; k <= v; k++) f *= k; v = f; } return v; };
+  function pow(){ let v = prim(); if (s[i] === '^'){ i++; v = Math.pow(v, unary()); } return v; }
+  function unary(){ if (s[i] === '-'){ i++; return -pow(); } return pow(); }
+  function term(){ let v = unary(); for (;;){ if (s[i] === '*'){ i++; v *= unary(); } else if (s[i] === '/'){ i++; const d = unary(); if (d === 0) throw new Error('Деление на ноль'); v /= d; } else if (s[i] === '('){ v *= unary(); } else return v; } }
+  // «a + 10%» = a·1,1; «a − 10%» = a·0,9; «a × 10%» = a·0,1; lone «10%» = 0,1
+  function expr(){
+    let v = term();
+    for (;;){
+      if (s[i] === '+' || s[i] === '-'){ const op = s[i++]; let t = term(); if (s[i] === '%'){ i++; t = v * t / 100; } v = op === '+' ? v + t : v - t; }
+      else if (s[i] === '%'){ i++; v = v / 100; }
+      else return v;
+    }
+  }
+  const v = expr(); if (i < s.length) throw new Error('Лишнее: «' + s.slice(i, i + 8) + '»');
+  if (!Number.isFinite(v)) throw new Error('Не число');
+  return v;
+}
+const calcFmt = v => { const a = Math.abs(v), r = a >= 1e6 || a === 0 ? +v.toFixed(2) : a >= 1 ? +v.toFixed(4) : +v.toPrecision(6); return String(r).replace('.', ','); };
+const CALC = { hist:(() => { try { return JSON.parse(lsGet('kot.calc.hist') || '[]').slice(0, 30); } catch (e){ return []; } })(), last:0 };
+function calcRun(expr, note){
+  const res = $('#calcRes');
+  try { const v = calcEval(expr); CALC.last = v; res.textContent = calcFmt(v); res.classList.remove('bad');
+    CALC.hist = [{ e:String(expr).trim(), v, n:note || '' }, ...CALC.hist.filter(h => h.e !== String(expr).trim())].slice(0, 30); lsSet('kot.calc.hist', JSON.stringify(CALC.hist)); calcHistDraw(); return v; }
+  catch (e){ res.textContent = e.message; res.classList.add('bad'); return null; }
+}
+function calcHistDraw(){
+  const H = $('#calcHist'); if (!H) return;
+  H.innerHTML = CALC.hist.map((h, k) => `<button data-h="${k}" title="Вставить в выражение">${h.n ? `<i>${esc(h.n)}</i>` : ''}<span>${esc(h.e)}</span><b>= ${esc(calcFmt(h.v))}</b></button>`).join('') + (CALC.hist.length ? '<button class="btn sm" id="calcHistClr" style="margin-top:4px">Очистить историю</button>' : '');
+  H.querySelectorAll('[data-h]').forEach(b => b.onclick = () => { const h = CALC.hist[+b.dataset.h]; $('#calcIn').value = h.e; calcRun(h.e); });
+  const c = H.querySelector('#calcHistClr'); if (c) c.onclick = () => { CALC.hist = []; lsSet('kot.calc.hist', '[]'); calcHistDraw(); };
+}
+// the size of the selected element for the calculator (metres, m², m³)
+function calcFromModel(){
+  const it = selId != null ? byId(selId) : null; if (!it){ toast('Выберите элемент: стену, помещение, пол…'); return null; }
+  if (it.type === 'wall'){ const L = wallFrame(it).L; return { v:L, n:`длина стены ${it.tag || ''}, м`, alt:[[L * it.h, 'площадь стены, м²'], [L * it.h * it.t, 'объём стены, м³']] }; }
+  if (it.type === 'room'){ const d = roomData(it); return d.open ? null : { v:d.area, n:`площадь помещения ${it.num}, м²`, alt:[[d.perim, 'периметр, м'], [d.area * (roomCeil(it) || 2.7), 'объём, м³']] }; }
+  if (it.pts){ const a = Math.abs(polyArea(it.pts)); return { v:a, n:`площадь ${TYPE_RU[it.type] || ''}, м²`, alt:it.t ? [[a * it.t, 'объём, м³']] : [] }; }
+  if (isOp(it)) return { v:it.w * it.h, n:`площадь проёма ${it.tag || ''}, м²`, alt:[[it.w, 'ширина, м']] };
+  if (it.type === 'box' || it.type === 'column') return { v:it.w * (it.d || it.w), n:'площадь основания, м²', alt:[[it.w * (it.d || it.w) * (it.h || 0), 'объём, м³']] };
+  toast('У этого элемента нет размеров для калькулятора'); return null;
+}
+/* building tasks by rules (exact, no model): the sizes, the area, the layer / thickness, the reserve, the bag, the coats and the rate
+   are found in the words; the norms of consumption are those of FOREMAN_TOPICS («Расход»). Returns { expr, what } or null. */
+function calcRules(task){
+  const t = normalize(task).replace(/ё/g, 'е'), n = x => String(+String(x).replace(',', '.'));
+  const two = t.match(/(\d+(?:[.,]\d+)?)\s*(?:м(?:етр\S*)?\s*)?(?:на|x|х|×|\*)\s*(\d+(?:[.,]\d+)?)/), sq = t.match(/(\d+(?:[.,]\d+)?)\s*(?:м2|м²|кв\S*\s*м\S*|квадрат\S*|кв(?=\s|$|\.))/);
+  const A = two ? `${n(two[1])}*${n(two[2])}` : sq ? n(sq[1]) : null; if (!A) return null;
+  const thk = t.match(/(?:толщин\S*|слоем|слой)\s*(?:в\s*)?(\d+(?:[.,]\d+)?)\s*(мм|см|м(?=\s|$))?/);
+  const thM = thk ? (thk[2] === 'мм' ? +n(thk[1]) / 1000 : thk[2] === 'м' ? +n(thk[1]) : +n(thk[1]) / 100) : null; // without a unit — centimetres
+  const thCm = thM != null ? Math.round(thM * 1000) / 10 : null;
+  const res = /запас/.test(t) ? (t.match(/запас\S*\s*(?:в\s*)?(\d+(?:[.,]\d+)?)\s*%/) || [0, '10'])[1] : null;
+  const bag = (t.match(/(?:мешк\S*|меш\S*)\s*(?:по\s*)?(\d+)\s*кг/) || t.match(/по\s*(\d+)\s*кг/) || [])[1];
+  const coats = +((t.match(/(?:в\s*)?(\d+)\s*сло(?:я|ев|й)(?!ем)/) || [])[1] || 0);
+  const rate = (t.match(/расход\S*\s*(\d+(?:[.,]\d+)?)/) || [])[1];
+  const R = e => res ? `${e} + ${n(res)}%` : e, B = (e, kg) => bag ? `${e}/${bag}` : e;
+  if (/штукатур/.test(t) && thCm){ const k = /цемент/.test(t) ? 17 : 9; return { expr:B(`${A}*${thCm}*${k}`), what:bag ? `мешков по ${bag} кг (расход ${k} кг/м² на 1 см)` : `кг смеси (расход ${k} кг/м² на 1 см)` }; }
+  if (/(?:стяжк|бетон|раствор|цементно)/.test(t) && thM != null){ if (bag) return { expr:B(`${A}*${thCm}*20`), what:`мешков по ${bag} кг (около 20 кг/м² на 1 см)` }; return { expr:`${A}*${n(thM)}`, what:'объём, м³' }; }
+  if (/шпакл/.test(t)){ const mm = thM != null ? Math.round(thM * 10000) / 10 : 1; return { expr:B(`${A}*${mm}*1`), what:bag ? `мешков по ${bag} кг (1 кг/м² на 1 мм)` : 'кг шпаклёвки (1 кг/м² на 1 мм)' }; }
+  if (/клей/.test(t) && /плит/.test(t)) return { expr:B(`${A}*4`), what:bag ? `мешков клея по ${bag} кг (около 4 кг/м²)` : 'кг плиточного клея (около 4 кг/м²)' };
+  if (/краск|покрас/.test(t)) return { expr:`${A}*${coats || 2}*${rate ? n(rate) : 0.15}`, what:`краска, л (${coats || 2} слоя, ${rate ? n(rate) : '0,15'} л/м²)` };
+  if (/грунт/.test(t)) return { expr:`${A}*${rate ? n(rate) : 0.15}`, what:'грунтовка, л (0,15 л/м²)' };
+  if (/(?:плитк|кафел|керамогран|ламинат|линолеум|паркет|обо[ея]|гипсокартон|гкл|покрыт)/.test(t)) return { expr:R(A), what:'материал, м²' + (res ? ` с запасом ${n(res)} %` : '') };
+  if (/объем/.test(t) && thM != null) return { expr:`${A}*${n(thM)}`, what:'объём, м³' };
+  if (/площад|сколько\s+(?:квадрат|м2|метров)/.test(t)) return { expr:R(A), what:'площадь, м²' };
+  return null;
+}
+// the AI on the device: a task in words → one arithmetic expression (the program computes it)
+async function calcAsk(task){
+  const note = $('#calcNote');
+  if (!task.trim()) return;
+  if (/^[\d\s.,+\-*/×÷:^()%√]+$/.test(task.trim())){ $('#calcIn').value = task; calcRun(task); return; }
+  { const R = calcRules(task); if (R){ let v = null; try { v = calcEval(R.expr); } catch (e){} if (v != null){ $('#calcIn').value = R.expr.replace(/\./g, ','); calcRun(R.expr, task.slice(0, 60)); note.innerHTML = `Расчёт: <code>${esc(R.expr.replace(/\./g, ','))}</code> — ${esc(R.what)}. Нормы расхода примерные — уточните по упаковке материала.`; return; } } }
+  if (!llmReady()){ note.innerHTML = 'Чтобы считать задачи словами без интернета, скачайте встроенный ИИ: «Обучение ИИ…» → «Скачать». Обычные выражения считаются и так.'; return; }
+  note.textContent = 'Думаю (ИИ без интернета)…'; busy = true;
+  try {
+    const gen = await llmLoad(), kn = foremanKnow(task);
+    const sys = 'Ты прораб и инженер. Переведи задачу в ОДНО арифметическое выражение и короткое пояснение. Формат строго: первая строка — выражение из цифр и знаков + - * / ^ ( ) % (десятичная точка), вторая строка — что получится и в каких единицах. Ничего не вычисляй сам. Запас пиши как «+ 10%».' + (kn ? ' Знания: ' + kn : '');
+    const shots = [['площадь комнаты 3,5 на 4,2', '3.5*4.2\nплощадь пола, м²'], ['сколько плитки на пол 3 на 4 с запасом 10%', '3*4 + 10%\nплитка, м²'], ['сколько мешков штукатурки по 30 кг на стену 5 на 2,7 слоем 2 см', '5*2.7*2*9/30\nмешков по 30 кг (расход 9 кг/м² на 1 см)'], ['объём стяжки 20 м2 толщиной 5 см', '20*0.05\nобъём, м³'], ['сколько краски на 40 м2 в два слоя при расходе 0,15 л', '40*2*0.15\nкраска, л']];
+    const msgs = [{ role:'system', content:sys }]; for (const [q, a] of shots) msgs.push({ role:'user', content:q }, { role:'assistant', content:a }); msgs.push({ role:'user', content:task });
+    const out = await gen(msgs, { max_new_tokens:60, do_sample:false });
+    const g = out && out[0] && out[0].generated_text, ans = String((Array.isArray(g) ? (g[g.length - 1] || {}).content : g) || '').trim();
+    const lines = ans.split('\n').map(x => x.replace(/^[`*\s]+|[`*\s]+$/g, '')).filter(Boolean), ex = (lines[0] || '').replace(/[=≈].*$/, '').trim(), what = lines[1] || '';
+    let v = null; try { v = calcEval(ex); } catch (e){}
+    if (v == null){ note.textContent = 'ИИ не смог составить выражение. Напишите задачу проще или выражение сами.' + (ans ? ' (Он ответил: ' + ans.slice(0, 80) + ')' : ''); return; }
+    $('#calcIn').value = ex; calcRun(ex, task.slice(0, 60));
+    note.innerHTML = `ИИ: <code>${esc(ex)}</code> — ${esc(what || 'результат')}. Проверьте выражение: считает программа, а нормы расхода — примерные.`;
+  } catch (e){ note.textContent = 'ИИ без интернета не запустился: ' + (e.message || e); }
+  finally { busy = false; }
+}
+function calcInit(){
+  const keys = [['C', 'c'], ['(', '('], [')', ')'], ['⌫', 'bs'], ['7'], ['8'], ['9'], ['÷', '/'], ['4'], ['5'], ['6'], ['×', '*'], ['1'], ['2'], ['3'], ['−', '-'], ['0'], [',', ','], ['%'], ['+'], ['√', '√('], ['x²', '^2'], ['π', 'π'], ['=', '=']];
+  const K = $('#calcKeys'), inp = $('#calcIn');
+  K.innerHTML = keys.map(([t, v]) => `<button type="button" data-k="${esc(v || t)}"${t === '=' ? ' class="eq"' : /[÷×−+]/.test(t) ? ' class="op"' : ''}>${esc(t)}</button>`).join('');
+  K.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
+    const k = b.dataset.k;
+    if (k === 'c'){ inp.value = ''; $('#calcRes').textContent = '0'; $('#calcRes').classList.remove('bad'); }
+    else if (k === 'bs') inp.value = inp.value.slice(0, -1);
+    else if (k === '=') calcRun(inp.value);
+    else { const a = inp.selectionStart ?? inp.value.length, z = inp.selectionEnd ?? a; inp.value = inp.value.slice(0, a) + k + inp.value.slice(z); const c = a + k.length; inp.setSelectionRange(c, c); }
+    if (k !== '=' && k !== 'c'){ try { const v = calcEval(inp.value); $('#calcRes').textContent = '= ' + calcFmt(v); $('#calcRes').classList.remove('bad'); } catch (e){} }
+  });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); calcRun(inp.value); } e.stopPropagation(); });
+  inp.addEventListener('input', () => { try { const v = calcEval(inp.value); $('#calcRes').textContent = '= ' + calcFmt(v); $('#calcRes').classList.remove('bad'); } catch (e){} });
+  $('#calcAsk').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); calcAsk($('#calcAsk').value); } e.stopPropagation(); });
+  $('#calcAskBtn').onclick = () => calcAsk($('#calcAsk').value);
+  $('#calcModel').onclick = () => { const m = calcFromModel(); if (!m) return; const opts = [[m.v, m.n], ...(m.alt || [])]; const pick = opts.length > 1 ? prompt('Что взять из модели?\n' + opts.map((o, k) => `${k + 1}) ${o[1]}: ${calcFmt(o[0])}`).join('\n'), '1') : '1'; const o = opts[(+pick || 1) - 1]; if (!o) return; inp.value += (inp.value && !/[+\-*/(^]$/.test(inp.value) ? '*' : '') + String(Math.round(o[0] * 1e4) / 1e4).replace('.', ','); inp.dispatchEvent(new Event('input')); toast('Из модели: ' + o[1]); };
+  $('#calcCopy').onclick = () => { try { navigator.clipboard.writeText(calcFmt(CALC.last)); toast('Скопировано: ' + calcFmt(CALC.last)); } catch (e){} };
+  $('#calcToChat').onclick = () => { cmdEl.value = (cmdEl.value ? cmdEl.value + ' ' : '') + calcFmt(CALC.last); cmdEl.focus(); };
+  calcHistDraw();
+}
+calcInit();
 /* ---------- Search in Wikipedia (when there is internet; free, no keys, no tokens) ----------
    A question (not a command) → ru.wikipedia.org search → the beginning of the best article; the AI on the device
    retells it in 2–4 sentences (without the AI the article text is shown). The source link is always given. */
