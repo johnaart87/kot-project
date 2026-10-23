@@ -345,16 +345,16 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .tree button[aria-current="true"]{background:transparent;color:var(--ink);font-weight:700}
 .tree button[aria-current="true"] .tl{background:color-mix(in srgb,var(--accent) 16%,var(--sheet));outline:1px dotted var(--ink);outline-offset:0}
 .tree .tl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-:is(.tree,#vtabs) .vic{width:14px;height:14px;flex:none;background:no-repeat center/14px 14px}
+:is(.tree,#vtabs,.ydrow) .vic{width:14px;height:14px;flex:none;background:no-repeat center/14px 14px}
 .tree .node.fd{font-weight:600}
 .tree .fdic{display:inline-block;width:14px;height:12px;margin-right:4px;vertical-align:-1px;flex:none;background:no-repeat center/14px 12px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 12'%3E%3Cpath d='M.5 1.5h4.5l1.2 1.5h7.3v8.5H.5z' fill='%23f3d27a' stroke='%23a07a1c'/%3E%3C/svg%3E")}
 .tree .node.dropon{outline:2px dashed var(--accent);outline-offset:-1px;background:var(--accent-soft)}
-:is(.tree,#vtabs) .vic.k-plan,:is(.tree,#vtabs) .vic.k-detail{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='1.5' width='11' height='11' fill='%233d8fe0' stroke='%231c4f8f' stroke-dasharray='2 1'/%3E%3Cpath d='M3.5 3.5h7v7h-7z' fill='none' stroke='%23fff' stroke-width='.8'/%3E%3C/svg%3E")}
-:is(.tree,#vtabs) .vic.k-d3,:is(.tree,#vtabs) .vic.k-axo{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M7 1.5l5 2.8v5.4L7 12.5 2 9.7V4.3z' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Cpath d='M2 4.3L7 7l5-2.7M7 7v5.5' fill='none' stroke='%231c4f8f'/%3E%3C/svg%3E")}
-:is(.tree,#vtabs) .vic.k-camera{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='4' width='8' height='6.5' rx='1' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Cpath d='M9.5 6l3-1.5v5L9.5 8z' fill='%233d8fe0' stroke='%231c4f8f'/%3E%3C/svg%3E")}
-:is(.tree,#vtabs) .vic.k-section,:is(.tree,#vtabs) .vic.k-ielev{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='3' width='11' height='8' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Cpath d='M1.5 7h11' stroke='%23d6332a' stroke-dasharray='2 1'/%3E%3C/svg%3E")}
-:is(.tree,#vtabs) .vic.k-elev{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 12.5V6l5-4 5 4v6.5z' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Crect x='5.5' y='8.5' width='3' height='4' fill='%233d8fe0'/%3E%3C/svg%3E")}
-:is(.tree,#vtabs) .vic.k-sheet{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='2.5' width='11' height='9' fill='%23fff' stroke='%23555'/%3E%3Crect x='8' y='8.5' width='4' height='2.5' fill='%23e8a317'/%3E%3Crect x='3' y='4' width='4' height='3.5' fill='%233d8fe0'/%3E%3C/svg%3E")}
+:is(.tree,#vtabs,.ydrow) .vic.k-plan,:is(.tree,#vtabs,.ydrow) .vic.k-detail{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='1.5' width='11' height='11' fill='%233d8fe0' stroke='%231c4f8f' stroke-dasharray='2 1'/%3E%3Cpath d='M3.5 3.5h7v7h-7z' fill='none' stroke='%23fff' stroke-width='.8'/%3E%3C/svg%3E")}
+:is(.tree,#vtabs,.ydrow) .vic.k-d3,:is(.tree,#vtabs,.ydrow) .vic.k-axo{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M7 1.5l5 2.8v5.4L7 12.5 2 9.7V4.3z' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Cpath d='M2 4.3L7 7l5-2.7M7 7v5.5' fill='none' stroke='%231c4f8f'/%3E%3C/svg%3E")}
+:is(.tree,#vtabs,.ydrow) .vic.k-camera{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='4' width='8' height='6.5' rx='1' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Cpath d='M9.5 6l3-1.5v5L9.5 8z' fill='%233d8fe0' stroke='%231c4f8f'/%3E%3C/svg%3E")}
+:is(.tree,#vtabs,.ydrow) .vic.k-section,:is(.tree,#vtabs,.ydrow) .vic.k-ielev{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='3' width='11' height='8' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Cpath d='M1.5 7h11' stroke='%23d6332a' stroke-dasharray='2 1'/%3E%3C/svg%3E")}
+:is(.tree,#vtabs,.ydrow) .vic.k-elev{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 12.5V6l5-4 5 4v6.5z' fill='%23cfe2f6' stroke='%231c4f8f'/%3E%3Crect x='5.5' y='8.5' width='3' height='4' fill='%233d8fe0'/%3E%3C/svg%3E")}
+:is(.tree,#vtabs,.ydrow) .vic.k-sheet{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1.5' y='2.5' width='11' height='9' fill='%23fff' stroke='%23555'/%3E%3Crect x='8' y='8.5' width='4' height='2.5' fill='%23e8a317'/%3E%3Crect x='3' y='4' width='4' height='3.5' fill='%233d8fe0'/%3E%3C/svg%3E")}
 .tree.searching li.nohit{display:none}
 .tree.searching li.hit>ul{display:block!important}
 #selbox{position:absolute;border:1px solid var(--sel);background:color-mix(in srgb,var(--sel) 10%,transparent);pointer-events:none}
@@ -371,6 +371,13 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .vbar .sep{width:1px;height:14px;background:var(--line);margin:0 3px}
 .vbar .scale{font-family:var(--font-num);color:var(--ink);padding:0 4px}
 .viewtag{position:absolute;left:10px;top:8px;font-size:12px;color:var(--muted);pointer-events:none}
+.ydstate{margin-left:6px;border:none;background:transparent;font-size:12px;color:var(--muted);cursor:pointer;padding:0 4px;border-radius:3px;white-space:nowrap}
+.ydstate:hover{background:var(--accent-soft)}
+.ydstate[data-s=conflict]{color:var(--bad);font-weight:600}.ydstate[data-s=err]{color:#b26a00}
+.ydrow{display:flex;align-items:center;gap:6px;width:100%;padding:5px 8px;border:none;border-bottom:1px solid var(--line);background:transparent;text-align:left;font-size:13px;cursor:pointer;color:var(--ink)}
+.ydrow:hover{background:var(--accent-soft)}.ydrow small{margin-left:auto;color:var(--muted);font-size:11px}
+.ydrow .fdic{display:inline-block;width:14px;height:12px;flex:none;background:no-repeat center/14px 12px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 12'%3E%3Cpath d='M.5 1.5h4.5l1.2 1.5h7.3v8.5H.5z' fill='%23f3d27a' stroke='%23a07a1c'/%3E%3C/svg%3E")}
+.ydrow .vic{width:14px;height:14px;flex:none}
 /* Revit: tabs of the open views above the drawing area — click to switch, × (or the middle button) to close */
 #vtabs{position:absolute;left:0;right:0;top:0;height:27px;z-index:7;display:flex;align-items:flex-end;gap:1px;padding:0 4px;background:var(--chrome);border-bottom:1px solid var(--line);overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
 #vtabs:empty{display:none}
@@ -685,7 +692,7 @@ details.more summary::-webkit-details-marker{display:none}
       <div class="ptitle"><b>Kot project</b> —
         <button class="projname" id="projName" title="Переименовать проект">Проект</button>
         <input id="projNameInput" type="text" hidden aria-label="Название проекта" maxlength="80">
-        <span class="savestate" id="saveState" aria-live="polite"></span>
+        <span class="savestate" id="saveState" aria-live="polite"></span><button class="ydstate" id="ydState" hidden title="Яндекс Диск"></button>
       </div>
     </div>
     <div class="rb-panel" id="rbArch" role="tabpanel">
@@ -903,6 +910,10 @@ details.more summary::-webkit-details-marker{display:none}
   <button data-act="save">Сохранить <span class="k">Ctrl+S</span></button>
   <button data-act="saveFile">Сохранить файлом .kot… <span class="k">Ctrl+Shift+S</span></button>
   <button data-act="openFile">Открыть файл .kot…</button>
+  <hr>
+  <button data-act="ydOpen">Открыть с Яндекс Диска…</button>
+  <button data-act="ydSave">Сохранить на Яндекс Диск…</button>
+  <button data-act="ydLogin">Яндекс Диск: вход и выход…</button>
   <button data-act="dup">Сохранить копию проекта</button>
   <hr>
   <button data-act="png">Картинка вида (PNG)</button>
@@ -9644,6 +9655,7 @@ async function persist(){
   const rec = record(); proj.thumb = rec.thumb;
   const ok = await store.put(rec);
   setSaveState(ok ? 'saved' : 'mem'); lsSet('kot.last', proj.id);
+  if (ydLink()) ydPush();
   return ok;
 }
 function showName(){ $('#projName').textContent = proj.name || 'Без названия'; document.title = (proj.name ? proj.name + ' — ' : '') + 'Kot project'; }
@@ -9672,6 +9684,7 @@ function loadRecord(rec){
   const start = views.find(v => v.id === rec.viewId) || views.find(v => v.kind === 'plan');
   openView(start.id); renderTree();
   setSaveState(store.ok ? 'saved' : 'mem'); lsSet('kot.last', proj.id);
+  YD.conflict = false; YD.lastKey = null; clearTimeout(YD.timer); setTimeout(ydCheck, 900);
 }
 async function openProject(id){
   if (proj.id && proj.id !== id) await persist();
@@ -9726,7 +9739,7 @@ async function saveBlob(base, ext, blob, mime, desc){
   toast(`Файл «${fname}» сохранён в «Загрузки»`); return { ok:true };
 }
 async function saveNow(){
-  const ok = await persist();
+  const ok = await persist(); if (ydLink()) ydPush(true);
   if (fileHandle){
     try { const w = await fileHandle.createWritable(); await w.write(fileJSON(record())); await w.close(); toast(`Сохранено в «Мои проекты» и в файл «${fileHandle.name}»`); return; }
     catch(e){ fileHandle = null; }
@@ -9763,6 +9776,151 @@ async function importFile(f, handle){
   else { rec = { id:data.id || uid(), name, created:Number(data.created) || Date.now(), ...body }; msg = `Открыт «${name}»`; }
   loadRecord(rec); fileHandle = handle || null;
   await persist(); closeLib(); toast(msg);
+}
+/* ---------- Яндекс Диск: the project file (.kot) lives in the user's own folder on the Disk and is synced from any device ----------
+   Sign-in: Yandex OAuth (token flow; the app «Kot project», ClientID below; redirect = oauth.yandex.ru/verification_code shows the token,
+   the user pastes it once per device). The token stays only on this device (localStorage). Each project remembers its file:
+   localStorage «kot.yd.link.<project id>» = { path, modified } — modified is the Disk's time of our last save, to spot changes made elsewhere. */
+const YD_ID = 'f5f29d16ff264cb9879623efdc795eb0', YD_API = 'https://cloud-api.yandex.net/v1/disk';
+const YD = { busy:false, timer:null, user:null, conflict:false };
+const ydToken = () => lsGet('kot.yd.token') || '';
+const ydLink = id => { try { return JSON.parse(lsGet('kot.yd.link.' + (id || proj.id)) || 'null'); } catch (e){ return null; } };
+const ydSetLink = (id, v) => { try { if (v) localStorage.setItem('kot.yd.link.' + id, JSON.stringify(v)); else localStorage.removeItem('kot.yd.link.' + id); } catch (e){} ydShowState(); };
+function ydShowState(s){
+  const el = $('#ydState'); if (!el) return; const L = proj.id && ydLink();
+  el.hidden = !L; if (!L) return;
+  const nm = L.path.replace(/^disk:\//, '');
+  el.dataset.s = s || (YD.conflict ? 'conflict' : 'ok');
+  el.textContent = { saving:'☁ сохраняю на Диск…', err:'☁ нет связи с Диском', conflict:'☁ файл изменён на другом устройстве' }[s || (YD.conflict ? 'conflict' : '')] || '☁ Яндекс Диск';
+  el.title = 'Файл проекта: Яндекс Диск / ' + nm + (s === 'err' ? '. Изменения сохранятся, когда появится интернет' : '');
+}
+async function ydApi(path, opt = {}){
+  const t = ydToken(); if (!t) throw Object.assign(new Error('Нужно войти в Яндекс Диск'), { code:'auth' });
+  const r = await fetch(YD_API + path, { ...opt, headers:{ Authorization:'OAuth ' + t, Accept:'application/json', ...(opt.headers || {}) } });
+  if (r.status === 401){ throw Object.assign(new Error('Вход в Яндекс Диск устарел — войдите снова'), { code:'auth' }); }
+  if (!r.ok && r.status !== 201 && r.status !== 202){ let m = ''; try { m = (await r.json()).message || ''; } catch (e){} throw Object.assign(new Error(m || ('Яндекс Диск: ошибка ' + r.status)), { status:r.status }); }
+  return r.status === 204 ? null : r.json().catch(() => null);
+}
+const ydQ = p => encodeURIComponent(p);
+const ydMeta = p => ydApi(`/resources?path=${ydQ(p)}&fields=name,path,modified,size,type`);
+const ydList = p => ydApi(`/resources?path=${ydQ(p)}&limit=1000&sort=name&fields=path,name,_embedded.items.name,_embedded.items.path,_embedded.items.type,_embedded.items.modified,_embedded.items.size`);
+async function ydDownload(p){ const { href } = await ydApi(`/resources/download?path=${ydQ(p)}`); const r = await fetch(href); if (!r.ok) throw new Error('Яндекс Диск не отдал файл'); return r.text(); }
+async function ydUpload(p, text){
+  const { href } = await ydApi(`/resources/upload?path=${ydQ(p)}&overwrite=true`);
+  const r = await fetch(href, { method:'PUT', body:new Blob([text], { type:'application/json' }) }); if (!r.ok && r.status !== 201 && r.status !== 202) throw new Error('Яндекс Диск не принял файл');
+}
+function ydCloseBtn(d){ const h = d.querySelector('[data-head]'); if (h && !h.querySelector('[data-x]')){ h.innerHTML = '<button class="btn sm" data-x>Закрыть</button>'; h.querySelector('[data-x]').onclick = () => { d.hidden = true; }; } }
+$('#ydState').onclick = () => { if (YD.conflict){ ydConflict(); return; } const L = ydLink(); if (L){ toast('Файл проекта: Яндекс Диск / ' + L.path.replace(/^disk:\//, '') + '. Изменения сохраняются туда сами'); ydPush(true); } };
+function ydErr(e){ if (e && e.code === 'auth'){ openYdLogin(); } toast(e && e.message ? e.message : 'Нет связи с Яндекс Диском'); }
+// sign-in window: open Yandex, allow access, copy the token it shows and paste it here
+function openYdLogin(after){
+  const d = mkModal('ydLogin', 'Яндекс Диск — вход', `<div id="ydLB"></div>`, 520);
+  const B = d.querySelector('#ydLB'); ydCloseBtn(d);
+  const draw = async () => {
+    const t = ydToken();
+    B.innerHTML = t ? `<p>Вход выполнен${YD.user ? ': <b>' + esc(YD.user) + '</b>' : ''}. Токен хранится только на этом устройстве.</p><div class="row" style="gap:6px;justify-content:flex-end"><button class="btn danger" id="ydOut">Выйти</button><button class="btn primary" id="ydOk">Готово</button></div>`
+      : `<ol style="margin:0 0 10px;padding-left:20px;line-height:1.5"><li>Нажмите «Открыть Яндекс» и разрешите доступ приложению Kot project (пароль вводите только на странице Яндекса).</li><li>Яндекс покажет код доступа (токен) — скопируйте его.</li><li>Вставьте его сюда и нажмите «Войти».</li></ol>
+        <div class="row" style="gap:6px;margin-bottom:8px"><button class="btn" id="ydOpenY">Открыть Яндекс</button></div>
+        <div class="row" style="gap:6px"><input id="ydTok" placeholder="Вставьте токен" style="flex:1;min-width:0" autocomplete="off" spellcheck="false"><button class="btn primary" id="ydIn">Войти</button></div><p class="libnote" id="ydMsg" style="margin:6px 0 0"></p>`;
+    const q = s => B.querySelector(s);
+    if (q('#ydOpenY')) q('#ydOpenY').onclick = () => window.open(`https://oauth.yandex.ru/authorize?response_type=token&client_id=${YD_ID}`, '_blank', 'noopener');
+    if (q('#ydIn')) q('#ydIn').onclick = async () => {
+      const v = q('#ydTok').value.trim().replace(/^.*access_token=([^&]+).*$/, '$1'); if (!v) return;
+      lsSet('kot.yd.token', v); q('#ydMsg').textContent = 'Проверяю…';
+      try { const u = await ydApi(''); YD.user = (u.user && (u.user.display_name || u.user.login)) || ''; toast('Яндекс Диск подключён' + (YD.user ? ': ' + YD.user : '')); d.hidden = true; if (after) after(); }
+      catch (e){ try { localStorage.removeItem('kot.yd.token'); } catch (er){} q('#ydMsg').textContent = 'Не получилось: ' + (e.message || 'проверьте токен'); }
+    };
+    if (q('#ydOut')) q('#ydOut').onclick = () => { try { localStorage.removeItem('kot.yd.token'); } catch (e){} YD.user = null; toast('Вы вышли из Яндекс Диска на этом устройстве'); draw(); };
+    if (q('#ydOk')) q('#ydOk').onclick = () => { d.hidden = true; if (after) after(); };
+  };
+  draw(); d.hidden = false;
+}
+// the Disk folders: browse, make a folder, open a .kot file, or save the project into the folder
+async function openYdBrowser(mode){
+  if (!ydToken()){ openYdLogin(() => openYdBrowser(mode)); return; }
+  const d = mkModal('ydBr', 'Яндекс Диск', `<div class="row" style="gap:6px;align-items:center;margin-bottom:6px"><button class="btn sm" id="ydUp" title="Вверх">↑</button><div id="ydPath" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600"></div><button class="btn sm" id="ydNew">Новая папка</button></div>
+    <div id="ydList" style="height:min(52vh,420px);overflow:auto;border:1px solid var(--line);border-radius:4px"></div>
+    <div class="row" id="ydSaveRow" style="gap:6px;margin-top:8px;align-items:center"><label for="ydName">Имя файла</label><input id="ydName" style="flex:1;min-width:0"><span>.kot</span><button class="btn primary" id="ydSaveHere">Сохранить в эту папку</button></div>
+    <p class="libnote" id="ydHint" style="margin:6px 0 0"></p>`, 640);
+  const q = s => d.querySelector(s); ydCloseBtn(d);
+  d.querySelector('h2').textContent = mode === 'save' ? 'Сохранить проект на Яндекс Диск' : 'Открыть проект с Яндекс Диска';
+  q('#ydSaveRow').hidden = mode !== 'save'; q('#ydName').value = safeName(proj.name);
+  q('#ydHint').textContent = mode === 'save' ? 'Выберите папку проекта (или создайте её). Дальше программа сама сохраняет изменения в этот файл.' : 'Откройте папку проекта и выберите файл .kot.';
+  let cur = lsGet('kot.yd.dir') || 'disk:/';
+  const show = async p => {
+    q('#ydList').innerHTML = '<p style="padding:8px;color:var(--muted)">Загружаю…</p>';
+    let r; try { r = await ydList(p); } catch (e){ if (e.status === 404 && p !== 'disk:/'){ cur = 'disk:/'; return show(cur); } q('#ydList').innerHTML = ''; ydErr(e); return; }
+    cur = r.path || p; lsSet('kot.yd.dir', cur); q('#ydPath').textContent = 'Яндекс Диск / ' + cur.replace(/^disk:\/?/, '').split('/').filter(Boolean).join(' / ');
+    const its = (r._embedded && r._embedded.items) || [], dirs = its.filter(i => i.type === 'dir'), files = its.filter(i => i.type === 'file' && /\.kot(\.json)?$|\.json$/i.test(i.name));
+    const when = s => s ? new Date(s).toLocaleString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+    q('#ydList').innerHTML = (dirs.map(i => `<button class="ydrow" data-dir="${esc(i.path)}"><span class="fdic"></span>${esc(i.name)}</button>`).join('')
+      + files.map(i => `<button class="ydrow f" data-file="${esc(i.path)}"${mode === 'save' ? ' data-name="' + esc(i.name.replace(/(\.kot)?(\.json)?$/i, '')) + '"' : ''}><span class="vic k-plan"></span>${esc(i.name)}<small>${when(i.modified)}</small></button>`).join(''))
+      || '<p style="padding:8px;color:var(--muted)">Папка пуста</p>';
+    q('#ydList').querySelectorAll('[data-dir]').forEach(b => b.onclick = () => show(b.dataset.dir));
+    q('#ydList').querySelectorAll('[data-file]').forEach(b => b.onclick = () => { if (mode === 'save'){ q('#ydName').value = b.dataset.name; return; } d.hidden = true; ydOpenFile(b.dataset.file); });
+  };
+  q('#ydUp').onclick = () => { if (cur === 'disk:/' || cur === 'disk:') return; show(cur.replace(/\/[^/]+\/?$/, '') || 'disk:/'); };
+  q('#ydNew').onclick = async () => { const n = prompt('Имя новой папки', 'Новый проект'); if (!n || !n.trim()) return; const p = cur.replace(/\/$/, '') + '/' + n.trim().replace(/[\\/:*?"<>|]+/g, ' ');
+    try { await ydApi(`/resources?path=${ydQ(p)}`, { method:'PUT' }); show(p); } catch (e){ ydErr(e); } };
+  q('#ydSaveHere').onclick = async () => {
+    const nm = safeName(q('#ydName').value); const p = cur.replace(/\/$/, '') + '/' + nm + '.kot';
+    try { const ex = await ydMeta(p).catch(() => null); if (ex && !confirm(`В папке уже есть «${nm}.kot». Заменить его этим проектом?`)) return;
+      d.hidden = true; await persist(); ydSetLink(proj.id, { path:p, modified:null }); YD.conflict = false; await ydPush(true, true); toast(`Проект сохранён на Яндекс Диск: ${p.replace(/^disk:\//, '')}. Дальше изменения сохраняются туда сами`); }
+    catch (e){ ydErr(e); }
+  };
+  d.hidden = false; show(cur);
+}
+// open a project file from the Disk; when this device has a newer copy of the same project, ask which one to keep
+async function ydOpenFile(p){
+  let text, meta; try { [text, meta] = await Promise.all([ydDownload(p), ydMeta(p)]); } catch (e){ ydErr(e); return; }
+  let data = null; try { data = JSON.parse(text); } catch (e){}
+  if (!data || data.format !== 'kot-project' || !Array.isArray(data.items)){ toast('Это не файл проекта Kot project'); return; }
+  if (proj.id) await persist();
+  const local = data.id ? await store.get(data.id) : null;
+  const body = { items:data.items, nextId:data.nextId, settings:data.settings, types:data.types, views:data.views, viewId:data.viewId, levels:data.levels, std:data.std, fams:data.fams, tpls:data.tpls, mats:data.mats };
+  let keepLocal = false;
+  if (local && (local.updated || 0) > (Number(data.updated) || 0) + 2000)
+    keepLocal = !confirm(`На этом устройстве есть более новая версия «${local.name}» (${new Date(local.updated).toLocaleString('ru-RU')}), чем файл на Диске (${new Date(Number(data.updated) || 0).toLocaleString('ru-RU')}).\n\nОК — открыть файл с Диска (версия устройства заменится).\nОтмена — оставить версию устройства и записать её на Диск.`);
+  const id = data.id || uid();
+  ydSetLink(id, { path:p, modified:meta.modified }); YD.conflict = false;
+  if (keepLocal){ loadRecord(local); await persist(); await ydPush(true, true); }
+  else { loadRecord({ ...(local || {}), id, name:String(data.name || meta.name.replace(/(\.kot)?(\.json)?$/i, '')).slice(0, 80), created:Number(data.created) || Date.now(), ...body }); await persist(); }
+  closeLib(); ydShowState(); toast(`Открыт с Яндекс Диска: ${p.replace(/^disk:\//, '')}`);
+}
+// save the open project to its Disk file (after every local save, a few seconds later). If the file was changed on another
+// device since our last save, stop and ask instead of overwriting it
+async function ydPush(now, force){
+  const L = ydLink(); if (!L || !ydToken()) return;
+  clearTimeout(YD.timer);
+  if (!now){ YD.timer = setTimeout(() => ydPush(true), 4000); return; }
+  if (YD.busy){ YD.timer = setTimeout(() => ydPush(true), 1500); return; }
+  if (YD.conflict && !force) return;
+  YD.busy = true; ydShowState('saving'); const pid = proj.id;
+  try {
+    if (!force && L.modified){ const m = await ydMeta(L.path).catch(e => { if (e.status === 404) return null; throw e; }); if (m && m.modified !== L.modified){ YD.conflict = true; ydShowState(); ydConflict(); return; } }
+    const txt = fileJSON(record()), key = txt.replace(/"updated":\d+,?/, '');
+    if (!force && key === YD.lastKey){ ydShowState(); return; }
+    await ydUpload(L.path, txt); YD.lastKey = key;
+    const m2 = await ydMeta(L.path); if (proj.id === pid) ydSetLink(pid, { path:L.path, modified:m2.modified }); YD.conflict = false; ydShowState();
+  } catch (e){ ydShowState('err'); if (e && e.code === 'auth') ydErr(e); }
+  finally { YD.busy = false; }
+}
+function ydConflict(){
+  const L = ydLink(); if (!L) return;
+  const d = mkModal('ydCf', 'Файл изменён на другом устройстве', `<p id="ydCfT"></p><div class="row" style="gap:6px;justify-content:flex-end;flex-wrap:wrap"><button class="btn primary" id="ydCfLoad">Открыть версию с Диска</button><button class="btn" id="ydCfMine">Записать мою версию на Диск</button><button class="btn" id="ydCfCopy">Сохранить мою копией…</button></div>`, 560);
+  d.querySelector('#ydCfT').textContent = `Файл «${L.path.replace(/^disk:\//, '')}» на Яндекс Диске изменили после вашего последнего сохранения (на другом устройстве). Автосохранение на Диск остановлено, чтобы не затереть те изменения. Что сделать?`;
+  d.querySelector('#ydCfLoad').onclick = () => { d.hidden = true; ydOpenFile(L.path); };
+  d.querySelector('#ydCfMine').onclick = () => { if (!confirm('Изменения, сделанные на другом устройстве, пропадут. Записать вашу версию?')) return; d.hidden = true; ydPush(true, true); };
+  d.querySelector('#ydCfCopy').onclick = () => { d.hidden = true; ydSetLink(proj.id, null); YD.conflict = false; openYdBrowser('save'); };
+  d.hidden = false;
+}
+// when a linked project is opened, look whether its file on the Disk is newer (saved on another device)
+async function ydCheck(){
+  const L = ydLink(); if (!L || !ydToken() || !L.modified) { ydShowState(); return; }
+  try { const m = await ydMeta(L.path); if (m.modified !== L.modified){ YD.conflict = true; ydShowState();
+      if (confirm(`На Яндекс Диске более новая версия этого проекта (сохранена ${new Date(m.modified).toLocaleString('ru-RU')}, возможно на другом устройстве). Открыть её?`)) ydOpenFile(L.path); else ydConflict(); }
+    else { YD.conflict = false; ydShowState(); } }
+  catch (e){ ydShowState(e && e.status === 404 ? undefined : 'err'); }
 }
 async function exportPNG(){
   renderer.render(scene, cam());
@@ -9854,7 +10012,7 @@ const fileMenu = $('#fileMenu'), fileBtn = $('#fileBtn');
 function openFileMenu(){ const r = fileBtn.getBoundingClientRect(); fileMenu.style.left = r.left + 'px'; fileMenu.style.top = (r.bottom + 2) + 'px'; fileMenu.hidden = false; fileBtn.setAttribute('aria-expanded', 'true'); fileMenu.querySelector('button').focus(); }
 function closeFileMenu(){ if (fileMenu.hidden) return; fileMenu.hidden = true; fileBtn.setAttribute('aria-expanded', 'false'); }
 fileBtn.onclick = () => fileMenu.hidden ? openFileMenu() : closeFileMenu();
-const ACTS = { new:newProject, library:openLib, save:saveNow, saveFile:() => saveAsFile(), openFile:openFileDialog, dup:duplicateCurrent, png:exportPNG, print:openPrint, install:openInstall };
+const ACTS = { new:newProject, library:openLib, save:saveNow, saveFile:() => saveAsFile(), openFile:openFileDialog, ydOpen:() => openYdBrowser('open'), ydSave:() => openYdBrowser('save'), ydLogin:() => openYdLogin(), dup:duplicateCurrent, png:exportPNG, print:openPrint, install:openInstall };
 fileMenu.querySelectorAll('[data-act]').forEach(b => b.onclick = () => { closeFileMenu(); ACTS[b.dataset.act](); });
 document.addEventListener('pointerdown', e => { if (!fileMenu.hidden && !fileMenu.contains(e.target) && e.target !== fileBtn) closeFileMenu(); });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && proj.id) persist(); });
