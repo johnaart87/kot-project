@@ -6538,7 +6538,7 @@ function buildLabels(){
     if (ceilO){
       // survey room tag: number in a circle, area underlined, the measured ceiling height in blue
       const sc2 = isSel(r.id) ? ' sel' : '', hc = roomCeil(r);
-      out.push({ x:r.x, y:0, z:r.z, t:String(r.num).padStart(2, '0'), cls:'svn' + sc2, dy:-15 });
+      out.push({ x:r.x, y:0, z:r.z, t:String(r.num).padStart(2, '0'), cls:'svn' + sc2, dy:-20 }); // the circle (20 px) stands fully above the area (no overlap)
       out.push({ x:r.x, y:0, z:r.z, t:d.open ? 'Не окружено' : m2(d.area).replace('.', ',') + ' м²', cls:'sva' + sc2 + (d.open ? ' open' : '') });
       out.push({ x:r.x, y:0, z:r.z, t:`h потолка=${hc != null ? Math.round(hc * 1000) : '—'}мм`, cls:'hb', dy:17, col:ceilO.c || '#2433c8' });
     } else out.push({ x:r.x, y:0, z:r.z, t:`${r.name}\n${r.num}  ·  ${d.open ? 'Не окружено' : m2(d.area) + ' м²'}`, cls:'rm' + (isSel(r.id) ? ' sel' : '') + (d.open ? ' open' : '') });
@@ -7623,7 +7623,7 @@ function drawImageLabels(g, PX){
       g.font = font(3.5 * PX, true); g.fillText(ln[0], 0, -2 * PX); g.font = font(2.5 * PX); g.fillText(ln[1] || '', 0, 2 * PX);
       g.strokeStyle = g.fillStyle; g.lineWidth = 0.3 * PX; g.beginPath(); g.moveTo(-w / 2, -4.3 * PX); g.lineTo(w / 2, -4.3 * PX); g.moveTo(-w / 2, 4 * PX); g.lineTo(w / 2, 4 * PX); g.stroke();
     }
-    else if (/^svn/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.beginPath(); g.arc(0, 0, 2.9 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.2 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(2.5 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.15 * PX); }
+    else if (/^svn/.test(cls)){ g.translate(0, L.dy ? -(2.9 + 1.25 + 1) * PX : 0); /* the circle (r 2,9 мм) 1 мм above the area text (2,5 мм) */ g.beginPath(); g.arc(0, 0, 2.9 * PX, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 0.2 * PX; g.strokeStyle = '#1b252c'; g.stroke(); g.font = font(2.5 * PX); g.fillStyle = '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0.15 * PX); }
     else if (/^sva/.test(cls)){ g.font = font(2.5 * PX); g.fillStyle = /open/.test(cls) ? '#c62828' : '#1b252c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); const tw = g.measureText(L.t).width; g.fillRect(-tw / 2, 1.5 * PX, tw, 0.18 * PX); }
     else if (/^hb/.test(cls)){ g.translate(0, (L.dy || 0) * PX / 4.2); g.rotate((L.rot || 0) * Math.PI / 180); g.font = font(2.5 * PX); g.fillStyle = L.col || '#2433c8'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.t, 0, 0); }
     else if (/^(lv|spt)/.test(cls)){ // ГОСТ height mark: a triangle on the point, the value above the shelf (a level: its name under the value)
@@ -12350,7 +12350,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-0118');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-0122');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
