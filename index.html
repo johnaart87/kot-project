@@ -1411,7 +1411,8 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
    The texture is drawn by the program itself (no files, works offline): a seamless 512 px tile of creases (ridged noise) and
    paper grain, lit from the top left. It is only light and shade over the colour --sheet, so it suits the light and dark theme.
    With PAPER.on the 3D scene has no background (the canvas is transparent) and the tile lies under it as the CSS background of #viewport. */
-const PAPER = { on:(() => { try { return localStorage.getItem('kot.paper') !== '0'; } catch (e){ return true; } })(), url:null };
+// off by default (the user found it too rough); key «kot.paper2» — the old choice is not taken over
+const PAPER = { on:(() => { try { return localStorage.getItem('kot.paper2') === '1'; } catch (e){ return false; } })(), url:null };
 function paperTex(){
   if (PAPER.url) return PAPER.url;
   const N = 512, H = new Float32Array(N * N);
@@ -1446,7 +1447,7 @@ function paperBg(){
   else { scene.background = new THREE.Color(C.sheet); if (vp) vp.style.backgroundImage = ''; }
   if (b){ b.setAttribute('aria-pressed', PAPER.on ? 'true' : 'false'); b.textContent = 'Бумага: ' + (PAPER.on ? 'вкл' : 'выкл'); }
 }
-function setPaper(on){ PAPER.on = !!on; try { localStorage.setItem('kot.paper', on ? '1' : '0'); } catch (e){} paperBg(); }
+function setPaper(on){ PAPER.on = !!on; try { localStorage.setItem('kot.paper2', on ? '1' : '0'); } catch (e){} paperBg(); }
 document.getElementById('vbPaper').onclick = () => setPaper(!PAPER.on);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -11431,7 +11432,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2145');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261023-2207');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
