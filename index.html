@@ -13982,7 +13982,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-1954');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-2011');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -17731,6 +17731,7 @@ const CLR = (() => {
 })();
 
 boot();
+window.__dbg = { get views(){ return views; }, renderPhoto, postProcess, POST_DEF, POST_PRESETS, HDRI_LIB };
 // the AI on the device, when it was downloaded: warmed up quietly after the start (the first launch on a GPU takes a minute or two)
 setTimeout(() => { if (llmReady()) llmLoad().catch(e => console.warn('ИИ без интернета:', e)); }, 20000);
 </script>
