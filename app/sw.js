@@ -5,7 +5,7 @@
 //   kotapp-v-<ver>   — the program page (and the libraries of that update) of a version
 //   kotapp-shell     — icons and manifest of the working program
 //   kot-lib-1        — libraries from CDNs (shared with the development copy; addresses carry exact versions)
-const BUNDLED = '2026.10.23-1259';   // the version this file came with (the first installation)
+const BUNDLED = '2026.10.24-1541';   // the version this file came with (the first installation)
 const LIBS = [
   "https://cdn.jsdelivr.net/gh/pissang/oidn-web@0.5.0/weights/rt_hdr_alb_nrm.tza",
   "https://cdn.jsdelivr.net/gh/pissang/oidn-web@0.5.0/weights/rt_hdr_alb_nrm_small.tza",
@@ -187,7 +187,9 @@ const LIBS = [
   "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3twJwlRFgtIU.woff2",
   "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3twJwl9FgtIU.woff2",
   "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3twJwl5FgtIU.woff2",
-  "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3twJwlBFgg.woff2"
+  "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3twJwlBFgg.woff2",
+  "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0/dist/transformers.min.js",
+  "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/exporters/GLTFExporter.js"
 ];           // the libraries of that version, cached at installation so it works offline at once
 const LOCAL = {};         // Windows installation: the same libraries lie next to the program (./lib/<file>) — taken from there, no internet
 const META = 'kotapp-meta', KEY = '/__kotapp/current', PRE = 'kotapp-v-', SHELL_C = 'kotapp-shell', LIB = 'kot-lib-1';
