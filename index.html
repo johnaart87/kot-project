@@ -229,6 +229,9 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 #left{border-right:1px solid var(--line)}
 #right{border-left:1px solid var(--line)}
 .dock.empty{display:none}
+/* each part keeps its own column: with both windows of a side hidden (.empty → display:none) the grid used to slide the working view
+   into the 0-px column — the view vanished (seen in «Рисование», which hides «Свойства» and «Диспетчер») */
+@media (min-width:1181px){ #app:not(.ui-hide) main > #left{grid-column:1;grid-row:1} #app:not(.ui-hide) main > #viewport{grid-column:2;grid-row:1} #app:not(.ui-hide) main > #right{grid-column:3;grid-row:1} }
 /* dockable windows (Revit-style): docked in a side column, or floating anywhere on the screen */
 .panel{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden;background:var(--panel)}
 .panel>.scroll{flex:1}
@@ -1972,11 +1975,12 @@ function configControls(){
     c.touches = { ONE: fingers ? THREE.TOUCH.ROTATE : null, TWO: THREE.TOUCH.DOLLY_PAN };
   }
   // «Рисование» (Procreate): the left button / one finger / the pen draw; the view turns with the right button, two fingers or «Рука»
-  // before «Фото ракурса» the view turns with any button / finger (choose the angle); on the photo everything stands still
+  // the user's way: the project stays on the screen, frozen; the brush draws at once (the first stroke takes the photo of the angle itself);
+  // the view turns only with the right button, two fingers or «Рука» — never by the brush by accident; on a photo everything stands still
   if (PAINT.on){ const flat = S.view === 'plan' || S.view === 'sect', mv = flat ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
     if (PAINT.doc){ c.enabled = false; return; }
-    c.mouseButtons = { LEFT: mv, MIDDLE: THREE.MOUSE.PAN, RIGHT: flat ? THREE.MOUSE.PAN : THREE.MOUSE.PAN };
-    c.touches = { ONE: flat ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }; }
+    c.mouseButtons = { LEFT: PAINT.hand ? mv : null, MIDDLE: THREE.MOUSE.PAN, RIGHT: mv };
+    c.touches = { ONE: PAINT.hand ? (flat ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE) : null, TWO: THREE.TOUCH.DOLLY_PAN }; }
 }
 // «Рисование» state (declared here: configControls runs while the page starts)
 const PAINT = { on:false, hand:false, tool:'brush', brush:'ink', size:12, op:1, col:'#2b2b2b', layers:[], cur:0, undo:[], redo:[], view:null, back:null };
@@ -15308,7 +15312,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-2346');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-2356');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -19365,7 +19369,7 @@ function pRedraw(){
   const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
   // the photo fits the viewport whole (as Procreate shows its canvas), the rest is dark
   const s = Math.min(c.height / D.h, c.width / D.w), ox = (c.width - D.w * s) / 2, oy = (c.height - D.h * s) / 2;
-  g.fillStyle = '#2b2b2d'; g.fillRect(0, 0, c.width, c.height); g.setTransform(s, 0, 0, s, ox, oy);
+  g.setTransform(s, 0, 0, s, ox, oy); // around a photo of another size — the frozen project itself is seen
   if (D.bg) g.drawImage(D.bg, 0, 0);
   PAINT.layers.forEach((L, i) => {
     if (!L.vis) return; let src = L.cv; const st = PAINT.stroke;
@@ -19570,9 +19574,9 @@ function paintUI(){
   const t = PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : PAINT.tool;
   if (!ui.dataset.built){ ui.dataset.built = '1';
     ui.innerHTML = `<div class="pn-side" id="pnSide"><div class="pn-vs" id="pnSz" title="Размер кисти"><div class="th"></div><div class="tip" hidden></div></div><button class="pn-sq" id="pnPick" title="Пипетка: взять цвет (I)" aria-label="Пипетка"></button><div class="pn-vs" id="pnOp" title="Непрозрачность"><div class="th"></div><div class="tip" hidden></div></div><button class="pn-ib" id="pnUndo" title="Отменить (Ctrl+Z)">${pSvg('undo')}</button><button class="pn-ib" id="pnRedo" title="Повторить (Ctrl+Shift+Z)">${pSvg('redo')}</button></div>
-      <div class="pn-top" id="pnTop"><button class="pn-photo" id="pnPhoto" title="Фото ракурса: сфотографировать вид и рисовать на фото">${pSvg('photo')}<span>Фото</span></button><button class="pn-ib" id="pnAngle" title="Новый ракурс: убрать фото и повернуть вид">${pSvg('angle')}</button><select id="pnSk" title="Наброски этого вида — вернуться к ракурсу"></select><button class="pn-ib" id="pnHand" hidden>${pSvg('hand')}</button><button class="pn-ib" id="pnBrush" title="Кисть (B) — повторный щелчок: библиотека кистей">${pSvg('brush')}</button><button class="pn-ib" id="pnSmudge" title="Палец — размазать (S)">${pSvg('smudge')}</button><button class="pn-ib" id="pnErase" title="Ластик (E)">${pSvg('erase')}</button><button class="pn-ib" id="pnLay" title="Слои">${pSvg('layers')}</button><button class="pn-dot" id="pnDot" title="Цвета"></button><button class="pn-done" id="pnDone" title="Закончить рисование">Готово</button></div>
+      <div class="pn-top" id="pnTop"><button class="pn-photo" id="pnPhoto" title="Фото ракурса: сфотографировать вид и рисовать на фото">${pSvg('photo')}<span>Фото</span></button><button class="pn-ib" id="pnAngle" title="Новый ракурс: убрать фото и повернуть вид">${pSvg('angle')}</button><select id="pnSk" title="Наброски этого вида — вернуться к ракурсу"></select><button class="pn-ib" id="pnHand" title="Рука: повернуть и сдвинуть вид левой кнопкой (также правая кнопка мыши, два пальца, Пробел)">${pSvg('hand')}</button><button class="pn-ib" id="pnBrush" title="Кисть (B) — повторный щелчок: библиотека кистей">${pSvg('brush')}</button><button class="pn-ib" id="pnSmudge" title="Палец — размазать (S)">${pSvg('smudge')}</button><button class="pn-ib" id="pnErase" title="Ластик (E)">${pSvg('erase')}</button><button class="pn-ib" id="pnLay" title="Слои">${pSvg('layers')}</button><button class="pn-dot" id="pnDot" title="Цвета"></button><button class="pn-done" id="pnDone" title="Закончить рисование">Готово</button></div>
       <div class="pn-pop" id="pnPop" hidden></div>
-      <div class="pn-hint" id="pnHint" hidden>Модель заморожена — правка недоступна. Поверните вид, как вам нравится,<br>и нажмите <b>«Фото»</b> — дальше рисуйте на фото. Наброски сохраняются в этом виде.</div>`;
+      <div class="pn-hint" id="pnHint" hidden>Модель заморожена — случайно сдвинуть ничего нельзя. Рисуйте кистью сразу: ракурс сфотографируется сам.<br>Повернуть вид: <b>правая кнопка мыши</b>, два пальца или <b>«Рука»</b>. Наброски сохраняются в этом виде.</div>`;
     pVSlider($('#pnSz'), () => szFrom(PAINT.sz[PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : PAINT.tool] || 10), v => { PAINT.sz[PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : PAINT.tool] = szTo(v); }, () => (PAINT.sz[PAINT.tool] || 10) + ' px');
     pVSlider($('#pnOp'), () => PAINT.opT[PAINT.tool] ?? 1, v => { PAINT.opT[PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : PAINT.tool] = Math.max(0.02, v); }, () => Math.round((PAINT.opT[PAINT.tool] ?? 1) * 100) + ' %');
     $('#pnPick').onclick = () => paintSet({ tool:PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : 'pick' });
@@ -19585,9 +19589,9 @@ function paintUI(){
     $('#pnPhoto').onclick = paintPhoto; $('#pnAngle').onclick = paintNewAngle; $('#pnSk').onchange = e => paintSkSel(e.target.value);
   }
   const hasDoc = !!PAINT.doc;
-  $('#viewport').classList.toggle('pdoc', hasDoc); $('#pnHint').hidden = hasDoc; $('#pnSide').hidden = !hasDoc;
-  for (const id of ['pnBrush', 'pnSmudge', 'pnErase', 'pnLay', 'pnDot']) $('#' + id).hidden = !hasDoc;
-  $('#pnAngle').hidden = !hasDoc; $('#pnSk').innerHTML = paintSkOpts(); $('#pnSk').hidden = !((curView() || {}).paint);
+  $('#viewport').classList.toggle('pdoc', hasDoc); $('#pnHint').hidden = hasDoc; $('#pnSide').hidden = false;
+  for (const id of ['pnBrush', 'pnSmudge', 'pnErase', 'pnDot']) $('#' + id).hidden = false; $('#pnLay').hidden = !hasDoc;
+  $('#pnAngle').hidden = !hasDoc; $('#pnHand').hidden = hasDoc; $('#pnSk').innerHTML = paintSkOpts(); $('#pnSk').hidden = !((curView() || {}).paint);
   { const sk = $('#pbSk'); if (sk) sk.innerHTML = paintSkOpts(); for (const id of ['pbAngle', 'pbDelSk']){ const b = $('#' + id); if (b) b.disabled = !hasDoc; } }
   for (const [id, k] of [['pnBrush', 'brush'], ['pnSmudge', 'smudge'], ['pnErase', 'erase']]) $('#' + id).classList.toggle('on', !PAINT.hand && PAINT.tool === k);
   $('#pnHand').classList.toggle('on', PAINT.hand); $('#pnPick').classList.toggle('on', PAINT.tool === 'pick');
@@ -19704,7 +19708,7 @@ function paintOn(){
   if (wide()){ if (PAINT.back.props) LAY.p.props.show = false; if (PAINT.back.browser) LAY.p.browser.show = false; applyLayout(); setTimeout(() => { resize && resize(); }, 60); }
   $('#viewport').classList.add('painting'); $('#paintCv').hidden = false;
   paintRibbon(); configControls();
-  const v = curView(); if (!PAINT.doc || PAINT.view !== (v && v.id)) paintLoad(v); else paintUI();
+  const v = curView(); if (PAINT.doc) paintSave(); paintLoad(v, -1); // the live project first (frozen); the sketches — from «Наброски вида»
   paintUI(); toast('Рисование: модель заморожена. Рисуйте мышью, пером или пальцем; вращать вид — правая кнопка, два пальца или «Рука»', 5000);
 }
 function paintOff(){
@@ -19720,7 +19724,7 @@ try { const b = JSON.parse(lsGet('kot.paintBack') || 'null'); if (b){ if (b.prop
 function paintTick(){
   const pc = $('#paintCv'); if (!pc) return;
   if (!PAINT.on){ if (!pc.hidden) pc.hidden = true; return; } // the sketches are shown only in «Рисование»
-  const v = curView(); if (v && PAINT.view !== v.id){ paintSave(); paintLoad(v); return; }
+  const v = curView(); if (v && PAINT.view !== v.id){ paintSave(); paintLoad(v, -1); return; }
   pc.hidden = !PAINT.doc; if (!PAINT.doc) return;
   const px = pViewPx(); if (pc.width !== px.w || pc.height !== px.h) pRedraw();
 }
@@ -19732,7 +19736,8 @@ function paintTick(){
     if (!PAINT.on || skip(e)) return;
     if (PAINT.pop && !e.target.closest('#pnPop')){ PAINT.pop = null; $('#pnPop').hidden = true; }
     if (e.pointerType === 'touch'){ PAINT.touches.add(e.pointerId); if (PAINT.touches.size > 1){ if (PAINT.stroke) pEnd(true); return; } }
-    if (!PAINT.doc || e.button !== 0) return; // no photo yet: the view turns (choose the angle)
+    if (e.button !== 0 || PAINT.hand || PAINT.space) return; // the right button / «Рука» turn the view
+    if (!PAINT.doc){ if (PAINT.tool === 'pick') return; paintNewSketch(paintSnap()); } // the first stroke: the photo of the angle is taken by itself
     e.preventDefault(); pStart(e);
   }, true);
   addEventListener('pointermove', e => { const st = PAINT.stroke; if (!st || e.pointerId !== st.pid) return; const list = e.getCoalescedEvents ? e.getCoalescedEvents() : [e]; for (const q of (list.length ? list : [e])){ const p = pPt(q); if (Number.isFinite(p.x) && Number.isFinite(p.y)) pTo(p); } pRedrawSoon(); }, true);
