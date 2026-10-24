@@ -236,15 +236,15 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .dim.wt.el{border-radius:2px 8px 2px 8px}
 .dim.wt.fl{border-width:1px;border-style:dotted;font-weight:600}
 .dim.wt.rf{border-radius:8px 8px 2px 2px}
-.dim.rm{white-space:pre-line;text-align:center;line-height:1.25;font-size:12px;padding:2px 6px;background:color-mix(in srgb,var(--sheet) 88%,transparent);border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);border-radius:0}
+.dim.rm{white-space:pre-line;text-align:center;line-height:1.25;font-size:calc(var(--tagfs,12px) * 1.15);padding:.15em .5em;background:color-mix(in srgb,var(--sheet) 88%,transparent);border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);border-radius:0}
 .dim.rm::first-line{font-weight:700}
 .dim.rm.sel{border-color:var(--sel);color:var(--sel)}
 /* survey look: room number in a circle, area underlined, heights in blue */
-.dim.svn{width:1.9em;height:1.9em;line-height:1.75em;padding:0;border:1px solid var(--ink);border-radius:50%;text-align:center;font-size:10.5px;background:color-mix(in srgb,var(--sheet) 85%,transparent)}
-.dim.sva{background:transparent;font-size:11px;padding:0 2px;border-bottom:1px solid currentColor;border-radius:0}
+.dim.svn{width:1.9em;height:1.9em;line-height:1.75em;padding:0;border:1px solid var(--ink);border-radius:50%;text-align:center;font-size:calc(var(--tagfs,10.5px) * 1.05);background:color-mix(in srgb,var(--sheet) 85%,transparent)}
+.dim.sva{background:transparent;font-size:var(--dimfs,11px);padding:0 2px;border-bottom:1px solid currentColor;border-radius:0}
 .dim.svn.sel,.dim.sva.sel{color:var(--sel);border-color:var(--sel)}
 .dim.sva.open{color:var(--bad)}
-.dim.hb{background:transparent;font-size:11.5px;padding:0 2px;white-space:nowrap}
+.dim.hb{background:transparent;font-size:var(--dimfs,11.5px);padding:0 2px;white-space:nowrap}
 .dim.rm.open{color:var(--bad);border-color:var(--bad)}
 .dim.lv{white-space:pre-line;line-height:1.2;font-size:var(--dimfs,11px);transform:translate(0,-100%);text-align:left;border-bottom:1px solid var(--datum);border-radius:0;background:transparent;padding:0 3px;pointer-events:auto;cursor:move}
 .dim.lv:hover{color:var(--sel);background:var(--accent-soft)}
@@ -720,7 +720,33 @@ details.more summary::-webkit-details-marker{display:none}
 #uiGrip:hover,#uiGrip:active{color:var(--accent)}
 #app.ui-hide #uiGrip svg{transform:rotate(180deg)}
 @media (pointer:coarse),(max-width:1180px){ #uiGrip{display:block} }
-#app.ui-hide > .rb,#app.ui-hide > #optbar,#app.ui-hide > .status,#app.ui-hide #left,#app.ui-hide #right,#app.ui-hide #splitL,#app.ui-hide #splitR,#app.ui-hide #vtabs,#app.ui-hide .vbar,#app.ui-hide #floatLayer{display:none!important}
+/* ArchiCAD pet palette at the edge of a selected wall */
+#petPal{position:absolute;z-index:12;display:flex;flex-wrap:wrap;width:172px;gap:2px;padding:4px 6px;background:var(--chrome,#f4f4f4);border:1px solid var(--line,#bbb);border-radius:3px;box-shadow:0 2px 6px var(--shade,#0003)}
+#petPal[hidden]{display:none}
+#petPal button{width:30px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:2px;background:none;color:var(--ic-ink,#222);cursor:pointer}
+#petPal button:hover{background:color-mix(in srgb,var(--accent,#2a6fd6) 14%,transparent);border-color:color-mix(in srgb,var(--accent,#2a6fd6) 45%,transparent)}
+#petPal button:disabled{opacity:.35;cursor:default}
+#petPal svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.2;stroke-linecap:square;stroke-linejoin:miter}
+#petPal .ic-paper{fill:var(--ic-paper,#fff)}
+#petPal i.br{flex-basis:100%;height:0;border-top:1px solid var(--line,#ccc);margin:1px 0}
+/* ArchiCAD tracker next to the cursor while drawing */
+#trk{position:absolute;z-index:8;pointer-events:none;padding:3px 7px;font:12px/1.35 'Segoe UI',system-ui,sans-serif;color:#1d1d1d;background:color-mix(in srgb,var(--chrome,#fff) 90%,transparent);border:1px solid color-mix(in srgb,var(--line,#ccc) 70%,transparent);border-radius:3px;box-shadow:0 1px 3px var(--shade,#0002);white-space:nowrap}
+#trk div{display:grid;grid-template-columns:14px auto auto;gap:5px;align-items:center}
+#trk i{display:flex;color:#3a6fb0} #trk i svg{width:12px;height:12px}
+#trk b{color:#1f4f8f;font-weight:600} #trk span{font-weight:600;text-align:right;min-width:44px} #trk .z b,#trk .z span{font-weight:400;font-style:italic;color:#555}
+#trkSvg{position:absolute;left:0;top:0;pointer-events:none;z-index:7;overflow:visible}
+#trkSvg .ray{stroke:#7a8a99;stroke-width:1;stroke-dasharray:2 3} #trkSvg .arc{fill:none;stroke:#9bb6d6;stroke-width:1;stroke-dasharray:3 2}
+#trkSvg text{font:11px 'Segoe UI',system-ui,sans-serif;fill:#8fb0d4;text-anchor:middle;dominant-baseline:middle}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) #trk{color:#eee} :root:not([data-theme="light"]) #trk b{color:#8fbaf0} }
+:root[data-theme="dark"] #trk{color:#eee} :root[data-theme="dark"] #trk b{color:#8fbaf0}
+/* touch helpers: bottom-left of the view, always visible (also when panels are hidden) */
+#touchBar{display:none;position:absolute;left:6px;bottom:38px;z-index:9;gap:4px;flex-direction:column}
+#touchBar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:52px;height:48px;padding:2px;border:1px solid var(--line);border-radius:6px;background:color-mix(in srgb,var(--chrome) 94%,transparent);color:var(--ink,#222);font:10px/1.1 'Segoe UI',system-ui,sans-serif;box-shadow:0 1px 4px var(--shade);touch-action:manipulation;cursor:pointer}
+#touchBar svg{width:22px;height:22px}
+#touchBar button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+@media (pointer:coarse),(max-width:1180px){ #touchBar{display:flex} }
+#app.ui-hide #touchBar{bottom:8px}
+@media (max-width:640px){ #touchBar{flex-direction:row;bottom:34px} #touchBar button{width:44px;height:40px;font-size:9px} #touchBar svg{width:18px;height:18px} }#app.ui-hide > .rb,#app.ui-hide > #optbar,#app.ui-hide > .status,#app.ui-hide #left,#app.ui-hide #right,#app.ui-hide #splitL,#app.ui-hide #splitR,#app.ui-hide #vtabs,#app.ui-hide .vbar,#app.ui-hide #floatLayer{display:none!important}
 #app.ui-hide{grid-template-rows:minmax(0,1fr)!important}
 #app.ui-hide main{grid-template-columns:minmax(0,1fr)!important;grid-row:1/-1}
 #app.ui-hide #viewport.hastabs .viewtag,#app.ui-hide #viewport.hastabs #vcube,#app.ui-hide #viewport.hastabs #vhome{margin-top:0}
@@ -813,7 +839,9 @@ details.more summary::-webkit-details-marker{display:none}
     <div class="rb-top">
       <button class="filebtn" id="fileBtn" aria-haspopup="menu" aria-expanded="false">Файл</button>
       <div class="qat" aria-label="Панель быстрого доступа">
+        <button id="qOpen" title="Открыть проект (Ctrl+O)" aria-label="Открыть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 16V4.5h5l1.5 2h7.5V9 M2.5 16l2.5-7h13l-2.5 7z"/></svg></button>
         <button id="qSave" title="Сохранить (Ctrl+S)" aria-label="Сохранить"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 3h10l3 3v11H3V3z M6 3v5h7V3 M6 17v-5h8v5"/></svg></button>
+        <button id="qPrint" title="Печать (Ctrl+P)" aria-label="Печать"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 7V2.5h8V7 M6 14H3V7h14v7h-3 M6 11.5h8v6H6z"/></svg></button>
         <button id="undoBtn" title="Отменить (Ctrl+Z)" aria-label="Отменить"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M7 5L3 9l4 4M3 9h9a5 5 0 010 10h-2"/></svg></button>
         <button id="histBtn" title="Журнал: отменить сразу несколько действий (до 10)" aria-label="Журнал действий" aria-haspopup="menu" style="padding:5px 2px"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" style="width:10px"><path d="M5 8l5 5 5-5"/></svg></button>
         <button id="redoBtn" title="Вернуть (Ctrl+Y)" aria-label="Вернуть"><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M13 5l4 4-4 4M17 9H8a5 5 0 000 10h2"/></svg></button>
@@ -986,6 +1014,11 @@ details.more summary::-webkit-details-marker{display:none}
       <div class="viewtag" id="viewtag"></div>
       <canvas id="vcube" width="208" height="208" aria-label="Видовой куб: нажмите грань, ребро или угол" hidden></canvas>
       <button class="btn icon sm" id="vhome" title="Исходный вид" aria-label="Исходный вид" hidden><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 9l7-6 7 6M5 8v9h10V8"/></svg></button>
+      <div id="touchBar" role="toolbar" aria-label="Построение на планшете">
+        <button type="button" id="tbOrtho" aria-pressed="false" title="По осям: стены и линии только по горизонтали и вертикали (как Shift)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M12 3l-2.5 3M12 3l2.5 3M21 12l-3-2.5M21 12l-3 2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg><span>Оси</span></button>
+        <button type="button" id="tbAngle" aria-pressed="false" title="Под углом: шаг 15°, 30°, 45° или свой угол"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h17M4 20L18 6M11 20a7 7 0 0 0-2-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg><span id="tbAngV">Угол</span></button>
+        <button type="button" id="tbModify" title="Изменить: закончить построение и выбирать элементы"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v15l4-4 3 7 2.5-1-3-7h6z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="miter"/></svg><span>Изменить</span></button>
+      </div>
       <div class="vbar" id="vbar">
         <span class="scale" id="scale">1:100</span><span class="sep"></span>
         <button id="vbDetail" title="Уровень детализации стен">Детализация: средняя</button><span class="sep"></span>
@@ -1582,6 +1615,14 @@ new ResizeObserver(resize).observe(vp);
 /* ---------- project standards (Revit «Управление → Дополнительные параметры») ----------
    weights: pen numbers 1–16 → width on paper, mm; patterns: dash/gap sequences on paper, mm;
    styles: weight + colour + pattern per line category; fills: hatch patterns and the cut hatch of each material; anno: dimension look */
+/* wood species for the procedural grain (fill kind woodg, variants 7…14 after the 6 general ones):
+   the parameters of the field are in WOOD_V (JS preview) and in woodF (GLSL) — they must match; D — lines per unit (denser), T — line thickness */
+const WOOD_SPECIES = [
+  { id:'oak', n:'Дуб (натуральный, светлый)', v:7, s:2.4, w:['дуб'] }, { id:'ash', n:'Ясень (светлый)', v:8, s:2.6, w:['ясен'] },
+  { id:'beech', n:'Бук (светлый)', v:9, s:2.2, w:['бук'] }, { id:'pine', n:'Сосна (светлая)', v:10, s:2.4, w:['сосн'] },
+  { id:'walnut', n:'Орех (тёмный)', v:11, s:2.4, w:['орех'] }, { id:'teak', n:'Тик (тёплый)', v:12, s:2.6, w:['тик'] },
+  { id:'wenge', n:'Венге (тёмный)', v:13, s:2.2, w:['венге'] }, { id:'veneer', n:'Шпон (текстура, мелкая)', v:14, s:2.4, w:['шпон'] }
+];
 const STD_DEF = () => ({
   weights:[0.10, 0.13, 0.18, 0.25, 0.35, 0.50, 0.70, 1.00, 1.40, 2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00],
   patterns:[
@@ -1607,7 +1648,9 @@ const STD_DEF = () => ({
     { id:'tile300', n:'Плитка 300×300 (модельная)', k:'cross', s:300, a:0, u:'model', sys:true },
     { id:'tile600', n:'Плитка 600×600 (модельная)', k:'cross', s:600, a:0, u:'model', sys:true },
     { id:'board150', n:'Доска 150 (модельная)', k:'lines', s:150, a:0, u:'model', sys:true },
-    { id:'siding200', n:'Сайдинг 200 (модельная)', k:'lines', s:200, a:0, u:'model', sys:true }
+    { id:'siding200', n:'Сайдинг 200 (модельная)', k:'lines', s:200, a:0, u:'model', sys:true },
+    // wood species (procedural grain, seamless): oak, ash, beech, pine, walnut, teak, wenge, veneer
+    ...WOOD_SPECIES.map(w => ({ id:'wd-' + w.id, n:'Дерево — ' + w.n, k:'woodg', v:w.v, s:w.s, a:0, sys:true }))
   ],
   mat:{ brick:{ f:'diag' }, facade:{ f:'diag' }, gas:{ f:'cross' }, block:{ f:'cross' }, concrete:{ f:'concrete' }, screed:{ f:'dots' }, insul:{ f:'insul' }, eps:{ f:'insul' },
     plaster:{ f:'dots' }, gkl:{ f:'dots' }, wood:{ f:'wood' }, frame:{ f:'none' }, generic:{ f:'diag2' }, tile:{ f:'diag' }, steel:{ f:'cross' } },
@@ -1622,8 +1665,8 @@ function sanitizeStd(o){
   out.patterns = list(o.patterns, d.patterns, x => ({ id:x.id.slice(0, 20), n:String(x.n || 'Образец').slice(0, 40), seq:Array.isArray(x.seq) ? x.seq.filter(N).map(v => clamp(+v, 0.1, 100)).slice(0, 12) : [] }));
   out.styles = list(o.styles, d.styles, x => ({ id:x.id.slice(0, 20), n:String(x.n || 'Стиль').slice(0, 40), w:clamp(Math.round(+x.w) || 1, 1, 16), c:/^#[0-9a-f]{6}$/i.test(x.c) ? x.c : '#1b252c', p:typeof x.p === 'string' ? x.p : 'solid' }));
   const fam = arr => Array.isArray(arr) ? arr.slice(0, 6).filter(q => q && N(q.off) && Math.abs(+q.off) > 1e-6).map(q => ({ a:N(q.a) ? +q.a : 0, x:N(q.x) ? +q.x : 0, y:N(q.y) ? +q.y : 0, sh:N(q.sh) ? +q.sh : 0, off:Math.abs(+q.off), d:Array.isArray(q.d) ? q.d.filter(N).map(Number).slice(0, 4) : [] })) : undefined;
-  out.fills = list(o.fills, d.fills, x => { const k = ['solid','none','lines','cross','concrete','insul','wood','dots','brick','pat','woodg'].includes(x.k) ? x.k : 'lines';
-    return { id:x.id.slice(0, 20), n:String(x.n || 'Штриховка').slice(0, 40), k, s:N(x.s) ? clamp(+x.s, k === 'pat' ? 0.01 : 0.3, x.u === 'model' ? 5000 : 50) : (k === 'pat' ? 1 : 2), a:N(x.a) ? +x.a : 0, u:x.u === 'model' ? 'model' : undefined, fam:k === 'pat' ? fam(x.fam) || [] : undefined, v:k === 'woodg' ? clamp(Math.round(+x.v) || 1, 1, 6) : undefined }; });
+  out.fills = list(o.fills, d.fills, x => { const k = ['solid','none','lines','cross','concrete','insul','wood','dots','brick','pat','woodg'].includes(x.k) ? x.k : 'lines', WN = WOOD_SPECIES.length + 6;
+    return { id:x.id.slice(0, 20), n:String(x.n || 'Штриховка').slice(0, 40), k, s:N(x.s) ? clamp(+x.s, k === 'pat' ? 0.01 : 0.3, x.u === 'model' ? 5000 : 50) : (k === 'pat' ? 1 : 2), a:N(x.a) ? +x.a : 0, u:x.u === 'model' ? 'model' : undefined, fam:k === 'pat' ? fam(x.fam) || [] : undefined, v:k === 'woodg' ? clamp(Math.round(+x.v) || 1, 1, WN) : undefined }; });
   out.mat = { ...d.mat }; if (o.mat) for (const [k, v] of Object.entries(o.mat)) if (MATS[k] && v) out.mat[k] = { f:typeof v.f === 'string' ? v.f : (d.mat[k] || {}).f || 'diag', ...(/^#[0-9a-f]{6}$/i.test(v.fg) ? { fg:v.fg } : {}), ...(/^#[0-9a-f]{6}$/i.test(v.bg) ? { bg:v.bg } : {}) };
   const a = o.anno || {};
   out.anno = { tick:['tick','arrow','dot'].includes(a.tick) ? a.tick : d.anno.tick, textMm:N(a.textMm) ? clamp(+a.textMm, 1, 10) : d.anno.textMm, units:['mm','cm','m'].includes(a.units) ? a.units : 'mm', dec:clamp(Math.round(+a.dec) || 0, 0, 3),
@@ -1678,7 +1721,8 @@ const THIN = { on:false }; try { THIN.on = localStorage.getItem('kot-thin') === 
 // Revit: annotations have a size on paper at the scale of the view — the numbers and ticks grow and shrink WITH the drawing
 // (zoomed in and out they keep their size against the plan, as on the printed sheet; the user's rule). Limits only against extremes.
 const annoZ = () => { if (RENDER || (S.view !== 'plan' && S.view !== 'sect')) return 1; const v = curView(), sc = (v && v.scale) || 100; return clamp(sc / 1000 / (wpp() * 96 / 25.4), 0.04, 12); };
-const paperMm = () => wpp() * (RENDER ? RENDER.pxmm : 96 / 25.4) / annoZ();
+// metres of the model in one millimetre of paper: on screen one paper mm is 96/25.4 · annoZ px (= the view scale / 1000 at any zoom)
+const paperMm = () => wpp() * (RENDER ? RENDER.pxmm : 96 / 25.4) * annoZ();
 // "Thin lines" (line weights off): every line on screen is one pixel thick; sheets and prints keep the weights
 const linePx = mm => RENDER ? Math.max(1, mm * RENDER.pxmm) : (THIN.on ? 1 : Math.max(1, mm / 0.25)) * Math.min(devicePixelRatio, 2);
 // fat lines (any width) with the dash pattern laid out on paper: pairs of points in, a LineSegments2 out
@@ -1725,7 +1769,7 @@ function famsOf(f){
 function patLayer(q){
   const f = q && STD.fills.find(x => x.id === q.p); if (!f || f.k === 'none') return null;
   if (f.k === 'pat' && !(f.fam && f.fam.length)) return null;
-  return { k:f.k === 'woodg' ? 10 + clamp(Math.round(f.v || 1), 1, 6) - 1 : FILL_KIND[f.k] ?? 2, s:q.s || f.s, a:f.a * Math.PI / 180, c:new THREE.Color(q.c || '#2b3439'), model:f.u === 'model', fam:f.k === 'pat' ? famsOf(f) : [] };
+  return { k:f.k === 'woodg' ? 10 + clamp(Math.round(f.v || 1), 1, 6 + WOOD_SPECIES.length) - 1 : FILL_KIND[f.k] ?? 2, s:q.s || f.s, a:f.a * Math.PI / 180, c:new THREE.Color(q.c || '#2b3439'), model:f.u === 'model', fam:f.k === 'pat' ? famsOf(f) : [] };
 }
 const hasPats = pp => !!(pp && (patLayer(pp.fg) || patLayer(pp.bg)));
 // uniforms of the custom line families of the two layers (6 slots each)
@@ -1772,6 +1816,9 @@ const PAT_GLSL = `
   float vn(vec2 p){ vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
     return mix(mix(hsh(i), hsh(i + vec2(1.0, 0.0)), u.x), mix(hsh(i + vec2(0.0, 1.0)), hsh(i + vec2(1.0, 1.0)), u.x), u.y); }
   float fbm2(vec2 p){ return vn(p) * 0.62 + vn(p * 2.07 + 5.3) * 0.28 + vn(p * 4.13 + 1.7) * 0.1; }
+  // lines per unit (the dense species) and line thickness (the dark ones)
+  float woodD(int v){ return v == 8 ? 1.6 : v == 9 ? 1.4 : v == 10 ? 1.8 : v == 12 ? 1.9 : v == 13 ? 2.2 : 1.0; }
+  float woodT(int v){ return v == 10 ? 1.3 : v == 12 ? 1.4 : v == 13 ? 0.6 : 1.0; }
   float woodF(vec2 q, int v){
     if (v == 2) q = vec2(q.y, -q.x);
     float A = 1.3, fx = 0.09, fy = 0.03, KH = 0.0, KR = 4.0, KE = 1.5, KP = 0.0; vec2 KC = vec2(14.0, 46.0);
@@ -1781,6 +1828,15 @@ const PAT_GLSL = `
     else if (v == 3){ A = 2.6; fx = 0.14; fy = 0.08; }
     else if (v == 4){ A = 0.9; fx = 0.18; fy = 0.025; }
     else if (v == 5){ A = 1.4; fy = 0.05; KH = 6.0; KR = 2.6; KE = 1.25; KP = 0.5; KC = vec2(12.0, 26.0); }
+    // the species (see WOOD_V in JS — the same numbers)
+    else if (v == 6){ A = 1.5; fx = 0.10; fy = 0.035; KH = 5.0; KR = 3.0; KE = 5.0; KP = 0.55; KC = vec2(10.0, 40.0); }   // oak
+    else if (v == 7){ A = 2.2; fx = 0.08; fy = 0.04; KH = 4.0; KR = 3.0; KE = 4.0; KP = 0.35; KC = vec2(14.0, 50.0); }    // ash
+    else if (v == 8){ A = 0.5; fx = 0.30; fy = 0.02; }                                                                 // beech
+    else if (v == 9){ A = 0.35; fx = 0.25; fy = 0.02; KH = 1.6; KR = 1.2; KE = 6.0; KP = 0.35; KC = vec2(18.0, 40.0); }  // pine
+    else if (v == 10){ A = 1.2; fx = 0.10; fy = 0.04; KH = 3.5; KR = 2.5; KE = 5.0; KP = 0.5; KC = vec2(10.0, 34.0); }   // walnut
+    else if (v == 11){ A = 2.8; fx = 0.06; fy = 0.05; }                                                                // teak
+    else if (v == 12){ A = 0.6; fx = 0.60; fy = 0.015; }                                                               // wenge
+    else if (v == 13){ A = 0.25; fx = 0.40; fy = 0.015; }                                                              // veneer
     float f = q.x + A * (fbm2(vec2(q.x * fx, q.y * fy)) - 0.5) * 2.0 + 0.6 * A * sin(q.y * fy * 2.0 + q.x * 0.05);
     if (KH > 0.0){
       vec2 c0 = floor(q / KC);
@@ -1791,13 +1847,13 @@ const PAT_GLSL = `
         f += KH * (0.6 + 0.4 * hsh(c + 9.2)) * exp(-dot(d, d) / (KR * KR));
       }
     }
-    return f;
+    return f * woodD(v);
   }
   float woodM(vec2 p, int v, float st, float lw, float fw){
     vec2 q = p / st; float e = 0.05;
     float f0 = woodF(q, v), gx = woodF(q + vec2(e, 0.0), v) - f0, gy = woodF(q + vec2(0.0, e), v) - f0;
-    float g = length(vec2(gx, gy)) / (e * st) + 1e-6, d = abs(fract(f0 + 0.5) - 0.5) / g, hw = max(lw, fw * 0.55);
-    return (1.0 - smoothstep(hw, hw + fw, d)) * smoothstep(2.0, 4.0, st / fw); // fades out when lines get denser than ~3 px
+    float g = length(vec2(gx, gy)) / (e * st) + 1e-6, d = abs(fract(f0 + 0.5) - 0.5) / g, hw = max(lw, fw * 0.55) * woodT(v);
+    return (1.0 - smoothstep(hw, hw + fw, d)) * smoothstep(2.0, 4.0, st / (fw * woodD(v))); // fades out when lines get denser than ~3 px
   }
   float patM(vec2 p, int k, float st, float ang, float lw, float fw, int L){
     float cs = cos(ang), sn = sin(ang); vec2 q = vec2(cs * p.x + sn * p.y, -sn * p.x + cs * p.y);
@@ -2019,9 +2075,53 @@ function lineOf(points, mat, segments = false){
   return l;
 }
 function wallFrame(w){
-  const dx = w.x2 - w.x1, dz = w.z2 - w.z1, L = Math.hypot(dx, dz) || 1e-9;
-  const dir = new V3(dx / L, 0, dz / L);
-  return { L, dir, nrm:new V3(-dir.z, 0, dir.x), rotY:-Math.atan2(dz, dx), p1:new V3(w.x1, 0, w.z1) };
+  const dx = w.x2 - w.x1, dz = w.z2 - w.z1, C = Math.hypot(dx, dz) || 1e-9;
+  const dir = new V3(dx / C, 0, dz / C), A = w.type === 'wall' ? arcOf(w) : null;
+  // an arc wall: L is the length along the arc (positions of openings, cuts and layers are measured along it); dir/nrm — of the chord
+  return { L:A ? A.L : C, chord:C, dir, nrm:new V3(-dir.z, 0, dir.x), rotY:-Math.atan2(dz, dx), p1:new V3(w.x1, 0, w.z1), arc:A };
+}
+/* ---------- ARC WALLS (ArchiCAD / Revit «Дуга») ----------
+   w.arc — the signed sagitta (стрела дуги, m) of the location line between its ends: + bulges to the left normal (nrm) of p1→p2.
+   The wall is built straight in its own frame (x along the arc, z across) and then bent: x → angle, z → radius. */
+function arcOf(w){
+  const h = w && +w.arc; if (!h || Math.abs(h) < 1e-4) return null;
+  const dx = w.x2 - w.x1, dz = w.z2 - w.z1, c = Math.hypot(dx, dz); if (c < 1e-3) return null;
+  const nx = -dz / c, nz = dx / c, ah = Math.min(Math.abs(h), c * 50), s = Math.sign(h), R = (c * c / 4 + ah * ah) / (2 * ah);
+  const mx = (w.x1 + w.x2) / 2, mz = (w.z1 + w.z2) / 2, cx = mx + nx * s * (ah - R), cz = mz + nz * s * (ah - R), th = 4 * Math.atan(2 * ah / c);
+  const a1 = Math.atan2(w.z1 - cz, w.x1 - cx), ax = mx + nx * s * ah, az = mz + nz * s * ah;
+  let d = th; const t = a1 + d / 2; if (Math.hypot(cx + R * Math.cos(t) - ax, cz + R * Math.sin(t) - az) > 1e-4 * Math.max(1, R)) d = -th;
+  return { cx, cz, R, a1, d, L:R * th, h:s * ah, c };
+}
+// a point of an arc wall: x along the location line (0…L), z across it (left of the direction of travel, like nrm of a straight wall)
+function arcPt(A, x, z = 0){ const a = A.a1 + A.d * (x / A.L), r = A.R - Math.sign(A.d) * z; return new V3(A.cx + r * Math.cos(a), 0, A.cz + r * Math.sin(a)); }
+function arcTan(A, x){ const a = A.a1 + A.d * (x / A.L), k = Math.sign(A.d); return new V3(-Math.sin(a) * k, 0, Math.cos(a) * k); }
+// where a point lies on an arc wall: s along it (clamped to the arc) and z across it (left +)
+function arcLocal(A, p){
+  const a = Math.atan2(p.z - A.cz, p.x - A.cx); let t = (a - A.a1) * Math.sign(A.d); t = ((t % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+  const sw = Math.abs(A.d); if (t > sw){ t = t - sw > 2 * Math.PI - t ? 0 : sw; }
+  const s = t / sw * A.L, r = Math.hypot(p.x - A.cx, p.z - A.cz); return { s, z:(A.R - r) * Math.sign(A.d), r };
+}
+// the frame at an end of a wall (an arc wall: the tangent there, with the origin set so that x = the length along the arc)
+function wallEndFrame(w, end){
+  const A = arcOf(w); if (!A) return wallFrame(w);
+  const x = end ? A.L : 0, t = arcTan(A, x), P = end ? new V3(w.x2, 0, w.z2) : new V3(w.x1, 0, w.z1);
+  return { L:A.L, dir:t, nrm:new V3(-t.z, 0, t.x), rotY:-Math.atan2(t.z, t.x), p1:P.clone().addScaledVector(t, -x), arc:A };
+}
+// the sagitta of an arc through p1, p2 and a third point q (signed, left of p1→p2 is +); null — the three are on one line
+function sagittaThrough(x1, z1, x2, z2, q){
+  const dx = x2 - x1, dz = z2 - z1, c = Math.hypot(dx, dz); if (c < 1e-3) return null;
+  const nx = -dz / c, nz = dx / c, u = ((q.x - x1) * dx + (q.z - z1) * dz) / c, v = (q.x - x1) * nx + (q.z - z1) * nz;
+  if (Math.abs(v) < 1e-4) return null;
+  // circle through (0,0), (c,0), (u,v) in the chord frame: centre (c/2, k)
+  const k = (u * u + v * v - c * u) / (2 * v), R = Math.hypot(c / 2, k), h = k + Math.sign(v) * R;
+  return Math.abs(h) < 1e-4 ? null : r4(h);
+}
+// the sagitta of the arc from p1 that leaves it along the direction t (tangent arc) and ends at p2
+function sagittaTangent(x1, z1, t, x2, z2){
+  const dx = x2 - x1, dz = z2 - z1, c = Math.hypot(dx, dz); if (c < 1e-3) return null;
+  const phi = Math.atan2(t.x * dz - t.z * dx, t.x * dx + t.z * dz); // angle from the tangent to the chord
+  if (Math.abs(phi) < 1e-3 || Math.abs(phi) > Math.PI - 1e-3) return null;
+  return r4(-(c / 2) * Math.tan(phi / 2));
 }
 function opsOf(w, L){
   if (!w.id) return [];
@@ -2066,20 +2166,22 @@ function computeCuts(){
   const toLocal = (f, q) => { const v = q.clone().sub(f.p1); return { x:v.dot(f.dir), z:v.dot(f.nrm) }; };
   const lineThrough = (f, A, B) => { const a = toLocal(f, A), b = toLocal(f, B); if (Math.abs(b.z - a.z) < 1e-6) return null; const m = (b.x - a.x) / (b.z - a.z); return { c:a.x - m * a.z, m }; };
   for (const w of walls){
-    const f = F.get(w.id), ends = [];
+    const f0 = F.get(w.id), ends = [];
     for (const end of [0, 1]){
-      const P = end ? new V3(w.x2, 0, w.z2) : f.p1.clone();
+      const f = f0.arc ? wallEndFrame(w, end) : f0; // an arc wall joins along its tangent at that end
+      const P = end ? new V3(w.x2, 0, w.z2) : new V3(w.x1, 0, w.z1);
       const uIn = end ? f.dir.clone().negate() : f.dir.clone();
       let cut = { c:end ? f.L : 0, m:0, kind:'free' };
       // Revit «Запретить соединение»: a disjoined end keeps a square end and nothing joins to it
       if (w.dj && w.dj[end]){ ends.push({ ...cut, kind:'free', dj:true }); continue; }
       for (const o of walls){
         if (o === w || lvOf(o) !== lvOf(w)) continue;
-        const fo = F.get(o.id); if (fo.L < 1e-3) continue;
-        const oa = fo.p1, ob = new V3(o.x2, 0, o.z2);
+        let fo = F.get(o.id); if (fo.L < 1e-3) continue;
+        const oa = new V3(o.x1, 0, o.z1), ob = new V3(o.x2, 0, o.z2);
         let d2 = null;
-        if (oa.distanceTo(P) < 2e-3){ if (o.dj && o.dj[0]) continue; d2 = fo.dir.clone(); }
-        else if (ob.distanceTo(P) < 2e-3){ if (o.dj && o.dj[1]) continue; d2 = fo.dir.clone().negate(); }
+        if (oa.distanceTo(P) < 2e-3){ if (o.dj && o.dj[0]) continue; if (fo.arc) fo = wallEndFrame(o, 0); d2 = fo.dir.clone(); }
+        else if (ob.distanceTo(P) < 2e-3){ if (o.dj && o.dj[1]) continue; if (fo.arc) fo = wallEndFrame(o, 1); d2 = fo.dir.clone().negate(); }
+        if (!d2 && fo.arc) continue; // a tee onto an arc wall: the end stays square (comes later)
         if (d2){
           if (uIn.dot(d2) < -0.999){ cut.kind = 'straight'; break; }
           const sA = f.nrm.dot(d2) > 0 ? -1 : 1, sB = fo.nrm.dot(uIn) > 0 ? -1 : 1;
@@ -2092,10 +2194,10 @@ function computeCuts(){
         }
         const v = P.clone().sub(oa), s = v.dot(fo.dir), dz = v.dot(fo.nrm);
         // Revit: an end that stops a little short of another wall (up to JOIN_GAP) still joins it — the wall reaches the face
-        const bodyP = end ? f.p1 : new V3(w.x2, 0, w.z2), bdz = bodyP.clone().sub(oa).dot(fo.nrm);
+        const bodyP = end ? new V3(w.x1, 0, w.z1) : new V3(w.x2, 0, w.z2), bdz = bodyP.clone().sub(oa).dot(fo.nrm);
         const gapJoin = Math.abs(dz) >= o.t / 2 + 2e-3 && Math.abs(dz) < o.t / 2 + JOIN_GAP && Math.sign(bdz) === Math.sign(dz) && Math.abs(bdz) > Math.abs(dz) && Math.abs(f.dir.dot(fo.nrm)) > 0.5;
         if (s > 0.02 && s < fo.L - 0.02 && (Math.abs(dz) < o.t / 2 + 2e-3 || gapJoin)){
-          const body = end ? f.p1 : new V3(w.x2, 0, w.z2);
+          const body = end ? new V3(w.x1, 0, w.z1) : new V3(w.x2, 0, w.z2);
           const side = Math.sign(body.clone().sub(oa).dot(fo.nrm)) || 1;
           const F0 = oa.clone().addScaledVector(fo.nrm, side * o.t / 2);
           const ln = lineThrough(f, F0, F0.clone().add(fo.dir));
@@ -2135,7 +2237,7 @@ const planLayersOf = w => S.view === 'plan' && S.detail === 'coarse' ? [{ m:'gen
 const faceLayer = (L, side) => side > 0 ? L.reduce((a, b) => b.s1 > a.s1 ? b : a) : L.reduce((a, b) => b.s0 < a.s0 ? b : a);
 function teeHost(o, end){
   const c = (CUTS.get(o.id) || [])[end]; if (!c || c.kind !== 'tee') return null;
-  const h = byId(c.other); if (!h || h.type !== 'wall' || !shown(h) || visState(h) !== visState(o)) return null;
+  const h = byId(c.other); if (!h || h.type !== 'wall' || !shown(h) || visState(h) !== visState(o) || arcOf(h) || arcOf(o)) return null;
   const f = wallFrame(h), far = end ? new V3(o.x1, 0, o.z1) : new V3(o.x2, 0, o.z2);
   return { h, f, side:Math.sign(far.sub(f.p1).dot(f.nrm)) || 1 };
 }
@@ -2178,6 +2280,11 @@ function buildWall(w, prevMat, prevEdge){
   const T0 = Math.min(...layers.map(l => l.s0)), T1 = Math.max(...layers.map(l => l.s1));
   const segs = [], segsI = [], Y = plan ? H + 0.002 : 0;
   const P = (x, y, z) => new V3(x, y, z);
+  // an arc wall: everything is built straight (x along the arc) and bent at the end; long edges are split into short pieces first
+  const A = f.arc, stepX = A ? A.L / Math.max(8, Math.ceil(Math.abs(A.d) / (3 * Math.PI / 180))) : 0;
+  const bendP = (x, y, z) => { const q = arcPt(A, x, z), dx = q.x - f.p1.x, dz = q.z - f.p1.z; return new V3(dx * f.dir.x + dz * f.dir.z, y, dx * f.nrm.x + dz * f.nrm.z); };
+  const subPoly = pp => { if (!A) return pp; const out = []; for (let i = 0; i < pp.length; i++){ const a = pp[i], b = pp[(i + 1) % pp.length], n = Math.max(1, Math.ceil(Math.abs(b.x - a.x) / stepX)); for (let k = 0; k < n; k++) out.push({ x:a.x + (b.x - a.x) * k / n, z:a.z + (b.z - a.z) * k / n }); } return out; };
+  const bendSegs = arr => { const out = []; for (let i = 0; i + 1 < arr.length; i += 2){ const a = arr[i], b = arr[i + 1], n = Math.max(1, Math.ceil(Math.abs(b.x - a.x) / stepX)); for (let k = 0; k < n; k++){ const p = a.clone().lerp(b, k / n), q = a.clone().lerp(b, (k + 1) / n); out.push(bendP(p.x, p.y, p.z), bendP(q.x, q.y, q.z)); } } return out; };
   const seg = (a, b) => segs.push(a, b);
   const doors = ops.filter(o => o.bot <= 1e-4);
   const gaps = plan ? teeGaps(w, layers) : { lo:[], hi:[] };
@@ -2187,7 +2294,8 @@ function buildWall(w, prevMat, prevEdge){
     const poly = [{ x:cutX(c0, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s1), z:ly.s1 }, { x:cutX(c0, ly.s1), z:ly.s1 }];
     if (poly[1].x - poly[0].x < 1e-4 || poly[2].x - poly[3].x < 1e-4) continue;
     const psel = pt && isSel(pt.id), mat = prevMat || (s || psel ? (plan || S.style === 'lines' ? M.selFlat : M.selShade) : phMat || layerMat(pt ? pt.m || ly.m : ly.m));
-    const add = (pp, y0, y1) => { const geo = prism(pp, y0, y1); if (!geo) return; const m = new THREE.Mesh(geo, mat); if (w.id) m.userData.id = pt ? pt.id : w.id; m.castShadow = m.receiveShadow = !plan && S.style !== 'lines' && !mat.transparent; g.add(m); };
+    const add = (pp, y0, y1) => { const geo = prism(subPoly(pp), y0, y1); if (!geo) return;
+      if (A){ const pa = geo.attributes.position; for (let i = 0; i < pa.count; i++){ const q = bendP(pa.getX(i), pa.getY(i), pa.getZ(i)); pa.setXYZ(i, q.x, q.y, q.z); } geo.deleteAttribute('normal'); geo.computeVertexNormals(); geo.computeBoundingSphere(); } const m = new THREE.Mesh(geo, mat); if (w.id) m.userData.id = pt ? pt.id : w.id; m.castShadow = m.receiveShadow = !plan && S.style !== 'lines' && !mat.transparent; g.add(m); };
     const xmin = Math.min(poly[0].x, poly[3].x) - 1, xmax = Math.max(poly[1].x, poly[2].x) + 1;
     // piers between openings (full height), and the parts below and above each opening
     const cuts = plan ? ops : ops.filter(() => false);
@@ -2234,18 +2342,20 @@ function buildWall(w, prevMat, prevEdge){
       if (o.door && o.inner) seg(P(o[o.inner], o.sill, T0), P(o[o.inner], o.sill, T1));
     }
   }
+  if (A){ const a2 = bendSegs(segs), b2 = bendSegs(segsI); segs.length = 0; segs.push(...a2); segsI.length = 0; segsI.push(...b2); }
   if (plan && !prevEdge && w.id){
     const sty = st === 'demo' ? 'demo' : st === 'exist' ? 'exist' : 'cut', col = s ? C.sel : null;
     const a = fatLines(segs, sty, col); if (a){ a.userData.cut = true; g.add(a); }
     const b = segsI.length && fatLines(segsI, st === 'demo' || st === 'exist' ? sty : 'layer', col); if (b){ b.userData.cut = true; g.add(b); }
   } else { if (segs.length) g.add(lineOf(segs, em, true)); if (segsI.length) g.add(lineOf(segsI, em, true)); }
+  const nOps = g.children.length;
   if (plan) for (const o of ops0.flatMap(opPieces).filter(cutOk)) planSymbol(g, o, w.t);
   else for (const o of ops0.flatMap(opPieces)){
     const os = isSel(o.o.id), ost = S.render ? 'normal' : visState(o.o), oe = os ? M.edgeSel : ost === 'demo' ? M.demoEdge : ost === 'exist' ? M.existEdge : M.edge;
     const pm = os ? null : ost === 'demo' ? M.demo3D : ost === 'exist' ? M.exist3D : null;
     const om = pm || (!os && o.o.m && MATS[o.o.m] && S.style !== 'lines' ? layerMat(o.o.m) : null);
     // windows and balcony blocks: a PVC unit (frame, sashes, glass, handles); a material chosen for the window colours its frame
-    if (o.o.type === 'window') pvcPart(g, o, os, oe, pm || (isBalc(o.o) ? null : om && o.o.m !== 'glass' ? om : null));
+    if (o.o.type === 'window'){ pvcPart(g, o, os, oe, pm || (isBalc(o.o) ? null : om && o.o.m !== 'glass' ? om : null)); casings(g, o, w.t, oe, os ? M.selShade : S.style === 'lines' && !S.render ? M.lines : pm, M.pvc); }
     else if (o.o.type === 'window' && !o.door) g.add(part(new THREE.BoxGeometry(o.b - o.a, o.top - o.bot, 0.02), om || matFor('glass', os), oe, o.o.id, o.pos, (o.bot + o.top) / 2, 0));
     else if (o.o.op) g.add(part(new THREE.BoxGeometry(o.b - o.a, o.top, w.t), os ? M.selShade : M.pick, null, o.o.id, o.pos, o.top / 2, 0)); // проём: an empty opening, picked by its volume
     else if (o.o.gl || o.door){ // balcony door: a frame with a glazed upper part and a solid lower panel (also the door of a balcony block)
@@ -2258,6 +2368,13 @@ function buildWall(w, prevMat, prevEdge){
       P(wd - 2 * f, H - f - pn - f / 2, 0.024, o.pos, (pn + f / 2 + H - f) / 2, matFor('glass', os));
     }
     else doorModel(g, o, os, oe, pm || om, w.t, pm); // interior door: frame, casings, leaf with panels, handle, hinges
+  }
+  // an arc wall: doors and windows stay straight (as in ArchiCAD), set on the arc along its tangent at their middle
+  if (A) for (const c of g.children.slice(nOps)){
+    const op = ops0.find(q => q.o.id === c.userData.id); if (!op) continue;
+    const Pl = bendP(op.pos, 0, 0), t = arcTan(A, op.pos), tx = t.x * f.dir.x + t.z * f.dir.z, tz = t.x * f.nrm.x + t.z * f.nrm.z;
+    const M4 = new THREE.Matrix4().makeTranslation(Pl.x, 0, Pl.z).multiply(new THREE.Matrix4().makeRotationY(Math.atan2(-tz, tx))).multiply(new THREE.Matrix4().makeTranslation(-op.pos, 0, 0));
+    c.applyMatrix4(M4);
   }
   return g;
 }
@@ -2324,8 +2441,7 @@ function doorModel(g, o, os, oe, om, t, pm){
   const a = o.a, b = o.b, H = o.top, J = 0.03, CW = 0.07, CT = 0.012, T = Math.max(0.06, t);
   // frame: two jambs and the head through the wall; casings on both faces, around the opening
   P(J, H, T, a + J / 2, H / 2, 0, km); P(J, H, T, b - J / 2, H / 2, 0, km); P(b - a - 2 * J, J, T, (a + b) / 2, H - J / 2, 0, km);
-  for (const s of [-1, 1]){ const z = s * (T / 2 + CT / 2);
-    P(CW, H + CW, CT, a - CW / 2 + 0.01, (H + CW) / 2, z, km); P(CW, H + CW, CT, b + CW / 2 - 0.01, (H + CW) / 2, z, km); P(b - a - 0.02, CW, CT, (a + b) / 2, H + CW / 2, z, km); }
+  void CW; void CT; casings(g, o, T, oe, os || lines || pm ? km : null, km);
   // the leaf
   const lx0 = a + J + 0.003, lx1 = b - J - 0.003, ly0 = 0.008, ly1 = H - J - 0.003, LT = 0.04, lw = lx1 - lx0, lh = ly1 - ly0;
   if (lw < 0.2 || lh < 0.5) return;
@@ -2344,6 +2460,22 @@ function doorModel(g, o, os, oe, om, t, pm){
   const hinge = o.o.hand ? lx1 : lx0, lock = o.o.hand ? lx0 + 0.06 : lx1 - 0.06, sd = o.o.flip ? -1 : 1, dir = o.o.hand ? 1 : -1;
   for (const y of [ly0 + 0.22, ly1 - 0.22]) P(0.012, 0.1, 0.012, hinge + (o.o.hand ? 0.004 : -0.004), y, sd * (LT / 2 + 0.004), mm2);
   for (const s of [-1, 1]){ const z = s * (LT / 2 + 0.006); P(0.05, 0.05, 0.008, lock, 1.0, z, mm2); P(0.12, 0.018, 0.018, lock + dir * 0.05, 1.0, s * (LT / 2 + 0.03), mm2); P(0.016, 0.016, 0.03, lock, 1.0, s * (LT / 2 + 0.018), mm2); }
+}
+/* «Наличники» (casings) of doors and windows: it.cs = { side 'both'|'in'|'out'|'none', w width (m), t thickness (m), m material }.
+   By default a door has them on both faces (70 × 12 mm), a window has none. 'in' — the side the door opens to / the room side of a window (flip). */
+const CS_DEF = { w:0.07, t:0.012 };
+function csOf(it){
+  const c = it && it.cs, def = it && it.type === 'door' && !it.op && !it.gl ? 'both' : 'none', side = c && ['both', 'in', 'out', 'none'].includes(c.side) ? c.side : def;
+  return { side, w:c && c.w > 0 ? c.w : CS_DEF.w, t:c && c.t > 0 ? c.t : CS_DEF.t, m:c && MATS[c.m] ? c.m : null };
+}
+const csSides = it => { const c = csOf(it), sd = it.flip ? -1 : 1; return c.side === 'both' ? [-1, 1] : c.side === 'in' ? [sd] : c.side === 'out' ? [-sd] : []; };
+// the casings in 3D around the opening a…b, bot…top on the faces of a wall of thickness T (a window: no bottom piece — the board is there)
+function casings(g, o, T, oe, force, dm){
+  const c = csOf(o.o), sides = csSides(o.o); if (!sides.length || o.inner) return;
+  const mat = force || (c.m ? layerMat(c.m) : dm), W = c.w, D = c.t, a = o.a, b = o.b, y0 = o.bot, H = o.top;
+  const P = (w2, h2, d2, x, y, z) => { if (w2 > 0.004 && h2 > 0.004) g.add(part(new THREE.BoxGeometry(w2, h2, d2), mat, oe, o.o.id, x, y, z)); };
+  for (const s of sides){ const z = s * (T / 2 + D / 2);
+    P(W, H - y0 + W, D, a - W / 2 + 0.01, (y0 + H + W) / 2, z); P(W, H - y0 + W, D, b + W / 2 - 0.01, (y0 + H + W) / 2, z); P(b - a - 0.02, W, D, (a + b) / 2, H + W / 2, z); }
 }
 // how many sashes an ordinary window has: it.sash (1–3) or by its width (up to 1,25 m — one, up to 2,1 m — two, wider — three)
 const winSashes = (it, w) => it && it.sash >= 1 && it.sash <= 3 ? Math.round(it.sash) : w < 1.25 ? 1 : w < 2.1 ? 2 : 3;
@@ -2385,6 +2517,9 @@ function planSymbol0(g, o, t){
    a window: the frame in the wall, the glass, the bars between sashes, the window board (подоконник) on the room side (flip),
    the drip (отлив) outside; a door: the frame (коробка) through the wall, casings (наличники) on both faces,
    the leaf 40 mm thick open at 90° and its swing; a balcony door — with the glass line in the leaf. */
+// fills of the high-detail plan symbols (shared materials, light greys like Revit)
+const FINE_C = { frame:'#d4d4d4', glass:'#b0b0b0', board:'#f1f1f1', leaf:'#ececec' }, FINE_M = {};
+const fineFill = c => FINE_M[c] || (FINE_M[c] = new THREE.MeshBasicMaterial({ color:c, depthWrite:false }));
 function planSymbolFine(g, o, t, em, s, nw){
   const y = 0.43, segs = [], V = (x, z) => new V3(x, y, z);
   const R = (x0, z0, x1, z1) => segs.push(V(x0, z0), V(x1, z0), V(x1, z0), V(x1, z1), V(x1, z1), V(x0, z1), V(x0, z1), V(x0, z0));
@@ -2393,23 +2528,33 @@ function planSymbolFine(g, o, t, em, s, nw){
   // a box to pick the element (also the fill of the selected / the new one)
   g.add(part(new THREE.BoxGeometry(wd, 0.4, t), s ? M.selFlat : nw ? M.newPlan : M.pick, null, o.o.id, o.pos, 0.2, 0));
   let arc = null;
+  // Revit «Высокий»: the profiles are filled (frame and bars — grey, the glass unit — a darker strip, the window board — light)
+  const Fi = (x0, z0, x1, z1, c) => { const dx = Math.abs(x1 - x0), dz = Math.abs(z1 - z0); if (dx < 1e-4 || dz < 1e-4) return; const m = new THREE.Mesh(new THREE.BoxGeometry(dx, 0.004, dz), fineFill(c)); m.position.set((x0 + x1) / 2, 0.415, (z0 + z1) / 2); m.userData.id = o.o.id; m.renderOrder = 3; g.add(m); };
   if (o.o.type === 'window' && !o.door){
-    const F = Math.min(0.07, t * 0.6), P = Math.min(0.065, wd / 5);
-    R(a, -F / 2, b, F / 2);                                                        // frame
-    Ln(a + P, -0.006, b - P, -0.006); Ln(a + P, 0.006, b - P, 0.006);                // glass
-    const n = o.inner ? 1 : winSashes(o.o, wd); for (let i = 1; i < n; i++){ const x = a + wd * i / n; Ln(x, -F / 2, x, F / 2); }
+    const F = Math.min(0.07, t * 0.6), P = Math.min(0.06, wd / 6), Gu = Math.min(0.016, F * 0.22), n = o.inner ? 1 : winSashes(o.o, wd);
     const ea = o.inner === 'a' ? 0 : 0.05, eb = o.inner === 'b' ? 0 : 0.05;       // no overhang towards the door of a balcony block
-    R(a - ea, side * F / 2, b + eb, side * (h + 0.05));                            // window board on the room side
+    Fi(a - ea, side * F / 2, b + eb, side * (h + 0.05), FINE_C.board); R(a - ea, side * F / 2, b + eb, side * (h + 0.05)); // window board on the room side
     R(a, -side * F / 2, b, -side * (h + 0.04));                                    // drip outside
+    R(a, -F / 2, b, F / 2);                                                        // the frame, outline
+    // the frame at the jambs (no jamb towards the door of a balcony block) and the bars between the sashes
+    const ja = o.inner === 'a' ? 0 : P, jb = o.inner === 'b' ? 0 : P, cuts = [a + ja];
+    if (ja){ Fi(a, -F / 2, a + P, F / 2, FINE_C.frame); R(a, -F / 2, a + P, F / 2); }
+    if (jb){ Fi(b - P, -F / 2, b, F / 2, FINE_C.frame); R(b - P, -F / 2, b, F / 2); }
+    for (let i = 1; i < n; i++){ const x = a + wd * i / n, m = P * 0.45; Fi(x - m, -F / 2, x + m, F / 2, FINE_C.frame); R(x - m, -F / 2, x + m, F / 2); cuts.push(x - m, x + m); }
+    cuts.push(b - jb);
+    for (let i = 0; i + 1 < cuts.length; i += 2){ const x0 = cuts[i], x1 = cuts[i + 1]; if (x1 - x0 < 0.02) continue; Fi(x0, -Gu, x1, Gu, FINE_C.glass); R(x0, -Gu, x1, Gu); } // the glass units
   } else if (!o.o.op){
     const J = Math.min(0.03, wd / 8), CW = 0.07, CT = 0.012, LT = 0.04, lw = wd - 2 * J;
+    Fi(a, -h, a + J, h, FINE_C.frame); Fi(b - J, -h, b, h, FINE_C.frame);
     R(a, -h, a + J, h); R(b - J, -h, b, h);                                        // frame through the wall
-    if (!o.door && !o.o.gl) for (const sd of [-1, 1]){ R(a - CW + 0.01, sd * h, a + 0.01, sd * (h + CT)); R(b - 0.01, sd * h, b + CW - 0.01, sd * (h + CT)); } // casings
+    void CW; void CT;
     const hx = o.o.hand ? b - J : a + J, sx = o.o.hand ? -1 : 1, z0 = side * h;
-    R(hx, z0, hx + sx * LT, z0 + side * lw);                                       // the leaf, open
+    Fi(hx, z0, hx + sx * LT, z0 + side * lw, FINE_C.leaf); R(hx, z0, hx + sx * LT, z0 + side * lw); // the leaf, open
     if (o.o.gl || o.door) Ln(hx + sx * LT / 2, z0 + side * 0.08, hx + sx * LT / 2, z0 + side * (lw - 0.08)); // glass of a balcony door
     arc = []; for (let k = 0; k <= 24; k++){ const q = k / 24 * Math.PI / 2; arc.push(V(hx + sx * lw * Math.sin(q), z0 + side * lw * Math.cos(q))); }
   }
+  // casings (наличники) on the faces of the wall, by it.cs (doors — both faces by default)
+  if (!o.o.op && !o.inner) { const c = csOf(o.o); for (const sd of csSides(o.o)){ Fi(a - c.w + 0.01, sd * h, a + 0.01, sd * (h + c.t), FINE_C.leaf); R(a - c.w + 0.01, sd * h, a + 0.01, sd * (h + c.t)); Fi(b - 0.01, sd * h, b + c.w - 0.01, sd * (h + c.t), FINE_C.leaf); R(b - 0.01, sd * h, b + c.w - 0.01, sd * (h + c.t)); } }
   if (segs.length) g.add(lineOf(segs, em, true));
   if (arc) g.add(lineOf(arc, em));
 }
@@ -4018,8 +4163,9 @@ function dimEditor(d){
 const MEAS = document.createElement('canvas').getContext('2d'), MEAS_W = new Map();
 function textW(t, fs){ const k = fs.toFixed(1) + '|' + t; if (MEAS_W.has(k)) return MEAS_W.get(k); MEAS.font = `${fs}px "Golos Text", "Segoe UI", Arial, sans-serif`; const w = MEAS.measureText(String(t)).width; if (MEAS_W.size > 4000) MEAS_W.clear(); MEAS_W.set(k, w); return w; }
 function spreadDimTexts(out){
-  const fs = STD.anno.textMm * 96 / 25.4 * 1.15 * (RENDER ? RENDER.pxmm / (96 / 25.4) : annoZ()), placed = [];
-  const box = L => { const s = toScreen(L.x, 0, L.z), w = textW(L.t, fs) + 6, h = fs * 1.2 + 2, a = (L.rot || 0) * Math.PI / 180, ca = Math.abs(Math.cos(a)), sa = Math.abs(Math.sin(a));
+  // everything is measured in millimetres of PAPER (PX — screen pixels per paper mm): the layout is the same at any zoom
+  const fs = STD.anno.textMm * 96 / 25.4 * 1.15 * (RENDER ? RENDER.pxmm / (96 / 25.4) : annoZ()), placed = [], PX = fs / (STD.anno.textMm * 1.15);
+  const box = L => { const s = toScreen(L.x, 0, L.z), w = textW(L.t, fs) + 1.2 * PX, h = fs * 1.15 + 0.5 * PX, a = (L.rot || 0) * Math.PI / 180, ca = Math.abs(Math.cos(a)), sa = Math.abs(Math.sin(a));
     return { x:s.x, y:s.y + (L.dy || 0), hw:(w * ca + h * sa) / 2, hh:(w * sa + h * ca) / 2, w, h }; };
   // obstacles besides other numbers: walls (their cut on the plan) and the lines of other dimensions
   const walls = [], dlines = [];
@@ -4030,32 +4176,35 @@ function spreadDimTexts(out){
   const inPoly = (x, y, P) => { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) if ((P[i].y > y) !== (P[j].y > y) && x < (P[j].x - P[i].x) * (y - P[i].y) / (P[j].y - P[i].y) + P[i].x) c = !c; return c; };
   let wallsOn = true;
   const blocked = (b, L) => {
-    const a = -(L.rot || 0) * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a), hw = b.w / 2 - 2, hh = b.h / 2 - 1;
+    const a = -(L.rot || 0) * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a), hw = b.w / 2 - 0.3 * PX, hh = b.h / 2 - 0.15 * PX;
     const loc = p => { const dx = p.x - b.x, dy = p.y - b.y; return { x:dx * ca - dy * sa, y:dx * sa + dy * ca }; }, inR = q => Math.abs(q.x) < hw && Math.abs(q.y) < hh;
     const pts = [[0, 0], [-1, -1], [1, -1], [1, 1], [-1, 1], [-1, 0], [1, 0]].map(([i, j]) => { const x = i * hw, y = j * hh; return { x:b.x + x * ca + y * sa, y:b.y - x * sa + y * ca }; });
     if (wallsOn) for (const P of walls) if (pts.some(p => inPoly(p.x, p.y, P)) || P.some(p => inR(loc(p)))) return true;
     for (const s of dlines){ if (s.id === L.dimId) continue; for (let k = 0; k <= 16; k++){ const t = k / 16; if (inR(loc({ x:s.a.x + (s.b.x - s.a.x) * t, y:s.a.y + (s.b.y - s.a.y) * t }))) return true; } }
     return false;
   };
-  const hit = (b, L) => placed.some(p => Math.abs(p.x - b.x) < p.hw + b.hw - 1 && Math.abs(p.y - b.y) < p.hh + b.hh - 1) || (L && L.du && blocked(b, L));
+  const ovl = (p, b) => Math.abs(p.x - b.x) < p.hw + b.hw - 0.1 * PX && Math.abs(p.y - b.y) < p.hh + b.hh - 0.1 * PX;
+  const hit = (b, L) => placed.some(p => ovl(p, b)) || (L && L.du && blocked(b, L));
   // fixed: room tags, marks, texts, angular / radial / diameter numbers, and numbers moved by hand
   for (const L of out) if (!L.du && L.x != null && /^(rm|svn|sva|hb|wt|tx|dl)/.test(L.cls || '')) placed.push(box(L));
   for (const L of out) if (L.du && L.man) placed.push(box(L));
   // a segment's half length on screen: a number may slide along its line only while it stays inside its own segment
   const segHalf = L => { if (!L.anc) return 1e9; const A = toScreen(L.anc.x, 0, L.anc.z), e1 = toScreen(L.anc.x + L.du.x * L.segL / 2, 0, L.anc.z + L.du.z * L.segL / 2); return Math.hypot(e1.x - A.x, e1.y - A.y); };
   const needLead = [];
+  // a number at its own place (or slid along its segment) may lie on a wall — only other numbers and dimension lines push it away
+  wallsOn = false;
   for (const L of out){
     if (!L.du || L.man) continue;
     let b = box(L);
     if (hit(b, L)){
-      const x0 = L.x, z0 = L.z, s0 = toScreen(x0, 0, z0), s1 = toScreen(x0 + L.du.x, 0, z0 + L.du.z), pl = Math.hypot(s1.x - s0.x, s1.y - s0.y) || 1, step = (b.w + 6) * 0.5;
+      const x0 = L.x, z0 = L.z, s0 = toScreen(x0, 0, z0), s1 = toScreen(x0 + L.du.x, 0, z0 + L.du.z), pl = Math.hypot(s1.x - s0.x, s1.y - s0.y) || 1, step = (b.w + 1.2 * PX) * 0.25;
       // the other side of the dimension line, when nothing is free along it
       const nx = -L.du.z, nz = L.du.x, flip = 2 * (STD.anno.textMm * 0.7 + 0.9) * paperMm();
       const side = L.lineOff != null ? Math.sign(L.lineOff) || 1 : 1, room = segHalf(L) - b.w / 2;
       let done = false;
       // (the number stays above its line — the other side is not tried; with no room it goes onto a leader)
       for (const fl of [0]){
-        for (let n = fl ? 0 : 1; n <= 12 && !done && n * step <= room; n++) for (const sg of n ? [1, -1] : [1]){
+        for (let n = fl ? 0 : 1; n <= 24 && !done && n * step <= room; n++) for (const sg of n ? [1, -1] : [1]){
           const dpx = sg * n * step; // screen px → model metres along the line
           L.x = x0 + L.du.x * dpx / pl - (fl ? nx * flip * side : 0); L.z = z0 + L.du.z * dpx / pl - (fl ? nz * flip * side : 0);
           b = box(L); if (!hit(b, L)){ done = true; break; }
@@ -4078,14 +4227,15 @@ function spreadDimTexts(out){
     for (const [r, s2] of leads) if (segX(p, q, r, s2)) n++;
     return n;
   };
-  const boxCost = (b, L) => placed.filter(p => Math.abs(p.x - b.x) < p.hw + b.hw - 1 && Math.abs(p.y - b.y) < p.hh + b.hh - 1).length * 3 + (L.du && blocked(b, L) ? 2 : 0);
+  // a number on another number or crossed by a dimension line is (almost) never allowed; a leader crossing a line is a small fault
+  const boxCost = (b, L) => placed.filter(p => ovl(p, b)).length * 100 + (L.du && blocked(b, L) ? 40 : 0);
   // Revit: a number of the first or last segment that does not fit goes beyond the end of the chain, beside the extension line (no leader)
   const kpx = wpp(), lead2 = [];
   for (const L of needLead){
     const ends = L.cn === 1 ? [1, -1] : L.ci === 0 ? [-1] : L.ci === L.cn - 1 ? [1] : [];
-    const w = (textW(L.t, fs) + 8) * kpx; let ok = false;
+    const w = (textW(L.t, fs) + 1.6 * PX) * kpx; let ok = false;
     for (const sg of ends){
-      const d = (sg > 0 ? L.tB - L.tm : L.tm - L.tA) + w / 2 + 3 * kpx;
+      const d = (sg > 0 ? L.tB - L.tm : L.tm - L.tA) + w / 2 + 0.8 * PX * kpx;
       L.x = L.base.x + L.du.x * sg * d; L.z = L.base.z + L.du.z * sg * d;
       const b = box(L); if (!hit(b, L)){ placed.push(b); ok = true; break; }
     }
@@ -4093,18 +4243,19 @@ function spreadDimTexts(out){
   }
   for (const L of lead2){
     const A = toScreen(L.anc.x, 0, L.anc.z), B = toScreen(L.base.x, 0, L.base.z), a = (L.rot || 0) * Math.PI / 180, u = { x:Math.cos(a), y:Math.sin(a) }, n = { x:-Math.sin(a), y:Math.cos(a) };
-    const w = textW(L.t, fs) + 4, h = fs * 1.2, pref = Math.sign((B.x - A.x) * n.x + (B.y - A.y) * n.y) || -1;
+    const w = textW(L.t, fs) + 0.8 * PX, h = fs * 1.2, pref = Math.sign((B.x - A.x) * n.x + (B.y - A.y) * n.y) || -1;
     let best = null, free = null;
     // first pass keeps numbers off walls too; the second allows a wall but still no other number, dimension line or leader
-    outer: for (const pass of [0, 1]) for (const k of [1.2, 1.7, 2.3, 3, 3.8]){ // short leaders only: the number stays next to its dimension
+    // short leaders first; longer ones only when nothing near is free (numbers never sit on each other)
+    outer: for (const pass of [0, 1]) for (const k of [1.2, 1.7, 2.3, 3, 3.8, 5, 6.5, 8.5]){
       wallsOn = pass === 0;
       const dn = k * fs;
       for (const sn of [pref, -pref]) for (const su of [1, -1]){
         const K = { x:A.x + u.x * su * dn + n.x * sn * dn, y:A.y + u.y * su * dn + n.y * sn * dn }, F = { x:K.x + u.x * su * w, y:K.y + u.y * su * w };
         const T = { x:K.x + u.x * su * w / 2 - n.x * h / 2, y:K.y + u.y * su * w / 2 - n.y * h / 2 };
-        const ca = Math.abs(u.x), sa = Math.abs(u.y), bw = w + 6, bh = h + 2, b = { x:T.x, y:T.y, hw:(bw * ca + bh * sa) / 2, hh:(bw * sa + bh * ca) / 2, w:bw, h:bh };
+        const ca = Math.abs(u.x), sa = Math.abs(u.y), bw = w + 1.2 * PX, bh = h + 0.5 * PX, b = { x:T.x, y:T.y, hw:(bw * ca + bh * sa) / 2, hh:(bw * sa + bh * ca) / 2, w:bw, h:bh };
         const cand = { T, pts:[A, K, F], b };
-        const cost = boxCost(b, L) + segCost(A, K, L, true) + segCost(K, F, L, false) + (pass ? 0.5 : 0);
+        const cost = boxCost(b, L) + segCost(A, K, L, true) + segCost(K, F, L, false) + (pass ? 0.5 : 0) + k * 0.01;
         if (!best || cost < best.cost){ cand.cost = cost; best = cand; }
         if (cost < 1){ free = cand; break outer; }
       }
@@ -4117,18 +4268,18 @@ function spreadDimTexts(out){
   for (const L of out){
     if (!L.du || !L.anc || !L.man) continue;
     const T = toScreen(L.x, 0, L.z), B = toScreen(L.base.x, 0, L.base.z), A = toScreen(L.anc.x, 0, L.anc.z);
-    const moved = Math.hypot(T.x - B.x, T.y - B.y); if (moved < 3) continue;
+    const moved = Math.hypot(T.x - B.x, T.y - B.y); if (moved < 0.6 * PX) continue;
     const half = segHalf(L), e1 = toScreen(L.anc.x + L.du.x * L.segL / 2, 0, L.anc.z + L.du.z * L.segL / 2);
     const ux = (e1.x - A.x) / (half || 1), uy = (e1.y - A.y) / (half || 1), along = (T.x - B.x) * ux + (T.y - B.y) * uy;
     const side0 = (B.x - A.x) * -uy + (B.y - A.y) * ux, side1 = (T.x - A.x) * -uy + (T.y - A.y) * ux;
-    if (Math.abs(along) > half - 2 || moved > fs * 1.6 || Math.sign(side0) !== Math.sign(side1)) L.leader = { x:L.anc.x, z:L.anc.z };
+    if (Math.abs(along) > half - 0.4 * PX || moved > fs * 1.6 || Math.sign(side0) !== Math.sign(side1)) L.leader = { x:L.anc.x, z:L.anc.z };
   }
 }// leader of a dimension number in screen pixels: from the middle of its segment to the edge of the text
 // leader on a shelf (ГОСТ 2.307): from the middle of the segment a line at 45° to a shelf under the number;
 // the number slides along its shelf so that the leader keeps 45° — returns the polyline and the new centre of the text
 function leaderPx(L, s, fs){
   const A = toScreen(L.leader.x, 0, L.leader.z); if (Math.hypot(s.x - A.x, s.y - A.y) < 2) return null;
-  const w = textW(L.t, fs) + 4, h = fs * 1.2, a = (L.rot || 0) * Math.PI / 180, u = { x:Math.cos(a), y:Math.sin(a) }, n = { x:-Math.sin(a), y:Math.cos(a) };
+  const w = textW(L.t, fs) + 0.8 * fs / (STD.anno.textMm * 1.15), h = fs * 1.2, a = (L.rot || 0) * Math.PI / 180, u = { x:Math.cos(a), y:Math.sin(a) }, n = { x:-Math.sin(a), y:Math.cos(a) };
   const au = (A.x - s.x) * u.x + (A.y - s.y) * u.y, an = (A.x - s.x) * n.x + (A.y - s.y) * n.y, sh = h / 2;
   const sg = au > 0 ? -1 : 1, dn = Math.abs(sh - an), d = au + sg * dn + sg * w / 2;
   const T = { x:s.x + u.x * d, y:s.y + u.y * d }, P = (cu, cn) => ({ x:T.x + u.x * cu + n.x * cn, y:T.y + u.y * cu + n.y * cn });
@@ -4258,6 +4409,8 @@ function hoverCands(px, py, alt){
   for (const h of ray.intersectObjects(model.children, true)){ const id = h.object.userData.id; if (!h.object.isMesh || !id || !clipKeep(h.point) || hits.includes(id)) continue; hits.push(id); }
   // order like Revit: lines right under the cursor, then model elements from the top down, then other lines, rooms, roofs and floors last
   const lineish = id => { const t = byId(id)?.type; return ['dim', 'line', 'circle', 'grid', 'text', 'spot', 'adim', 'rdim'].includes(t); };
+  // a door / window right under the cursor comes before the dimensions that run past it (their lines are close when zoomed out)
+  for (const id of hits) if (isOp(byId(id))) one(id);
   for (const [id, d] of flat) if (d < 3.5 && lineish(id)) one(id);
   for (const id of hits) one(id);
   for (const [id] of flat) if (lineish(id)) one(id);
@@ -4275,10 +4428,16 @@ function hovClear(){ for (const ch of [...hovG.children]){ if (ch.userData.own) 
 /* the reference lines of a door / window (Revit: dashed lines at the edges of the family, across the wall) — on hover and selection */
 let OPREF_M = null;
 function opRefLines(g, o, Y){
-  const w = byId(o.wall); if (!w) return; const f = wallFrame(w), half = o.w / 2, ext = w.t / 2 + Math.max(0.9, paperMm() * 14);
-  const k = paperMm(), mat = new THREE.LineDashedMaterial({ color:C.sel, dashSize:2 * k, gapSize:1.2 * k, depthTest:false, transparent:true }); void OPREF_M;
-  const pts = []; for (const s of [o.pos - half, o.pos + half]){ const c = f.p1.clone().addScaledVector(f.dir, s); pts.push(c.clone().addScaledVector(f.nrm, -ext).setY(Y), c.clone().addScaledVector(f.nrm, ext).setY(Y)); }
-  const l = lineOf(pts, mat, true); l.renderOrder = 52; l.userData.own = true; g.add(l);
+  // the lines go 4 mm of paper past the faces of the wall; a clear dashed line 1.5 px (dash 1.6 mm, gap 0.9 mm of paper)
+  const w = byId(o.wall); if (!w) return; const f = wallFrame(w), half = o.w / 2, k = paperMm(), ext = w.t / 2 + Math.max(0.06, k * 4);
+  if (!OPREF_M) OPREF_M = new LineMaterial({ color:C.sel, linewidth:1.5, worldUnits:false, dashed:true, depthTest:false, transparent:true });
+  OPREF_M.color.set(C.sel); OPREF_M.linewidth = 1.5 * Math.min(devicePixelRatio, 2); OPREF_M.dashSize = 1.6 * k; OPREF_M.gapSize = 0.9 * k; OPREF_M.dashScale = 1; OPREF_M.resolution.set(cv.width || 1, cv.height || 1);
+  const pts = []; for (const s of [o.pos - half, o.pos + half]){
+    // an arc wall: the opening is straight along the tangent at its middle
+    const A = f.arc, t = A ? arcTan(A, o.pos) : f.dir, n = new V3(-t.z, 0, t.x), c = A ? arcPt(A, o.pos).addScaledVector(t, s - o.pos) : f.p1.clone().addScaledVector(f.dir, s);
+    pts.push(c.clone().addScaledVector(n, -ext).setY(Y), c.clone().addScaledVector(n, ext).setY(Y)); }
+  const geo = new LineSegmentsGeometry(); geo.setPositions(pts.flatMap(p => [p.x, p.y, p.z]));
+  const l = new LineSegments2(geo, OPREF_M); l.computeLineDistances(); l.renderOrder = 52; l.userData.own = true; g.add(l);
 }
 function hovDraw(){
   hovClear();
@@ -4416,9 +4575,11 @@ function placeQuickBar(){
 function hovUpdate(px, py, alt){
   if (S.tool !== 'select' || drag || box){ if (HOV.list.length){ HOV.list = []; hovDraw(); } return; }
   if (Math.hypot(px - HOV.x, py - HOV.y) < 3 && HOV.list.length) return;
-  const prev = HOV.list[HOV.i], list = hoverCands(px, py, alt);
+  const prev = HOV.list[HOV.i], top0 = HOV.list[0], list = hoverCands(px, py, alt);
   HOV.x = px; HOV.y = py; HOV.list = list;
-  const k = prev ? prev.ids.join(',') : null; const j = list.findIndex(c => c.ids.join(',') === k); HOV.i = j >= 0 ? j : 0;
+  // the Tab choice stays only while the same element is on top under the cursor (else the floor under everything stuck and doors/windows did not light up)
+  const key = c => c ? c.ids.join(',') + (c.view || '') : null, same = top0 && list[0] && key(top0) === key(list[0]);
+  const j = HOV.tab && same ? list.findIndex(c => key(c) === key(prev)) : -1; HOV.i = j >= 0 ? j : 0; if (!same) HOV.tab = false;
   hovDraw();
   cv.style.cursor = list.length ? CUR.hit : CUR.arrow;
 }
@@ -4426,7 +4587,7 @@ function hovHide(){ HOV.list = []; HOV.x = HOV.y = -99; hovDraw(); }
 function pruneDims(){ items = items.filter(d => d.type !== 'dim' || d.refs.filter(r => refPoint(r)).length >= 2); }
 function autoDims(){
   // the walls this view shows (its stage: demolished ones are not measured on «Монтаж»); the automatic dimensions of OTHER stages stay
-  const walls = items.filter(i => i.type === 'wall' && wallFrame(i).L > 0.5 && (S.view !== 'plan' || shown(i))); if (!walls.length) return 0;
+  const walls = items.filter(i => i.type === 'wall' && !arcOf(i) && wallFrame(i).L > 0.5 && (S.view !== 'plan' || shown(i))); if (!walls.length) return 0;
   CUTS = computeCuts();
   const b = bounds(), c = b.getCenter(new V3());
   const hor = walls.filter(w => Math.abs(w.x2 - w.x1) >= Math.abs(w.z2 - w.z1)), ver = walls.filter(w => Math.abs(w.x2 - w.x1) < Math.abs(w.z2 - w.z1));
@@ -4942,7 +5103,7 @@ function refreshSurveyDims(){
   if (STD.svOff) return; // «Убрать все размеры» on the survey plan: they stay away until «Размеры заново»
   CUTS = computeCuts();
   for (const w of items){
-    if (w.type !== 'wall' || w.ph !== 'obmer' || !shown(w) || wallFrame(w).L < 0.2) continue;
+    if (w.type !== 'wall' || w.ph !== 'obmer' || !shown(w) || wallFrame(w).L < 0.2 || arcOf(w)) continue; // arc walls: radial dimensions — a later stage
     if (lvOf(w) !== actLv()) continue;
     const want = surveySides(w), f = wallFrame(w), dir = { x:f.dir.x, z:f.dir.z };
     items = items.filter(d => !(d.type === 'dim' && d.survey && d.sw === w.id && !want.includes(d.side)));
@@ -5392,7 +5553,7 @@ function candidates(){
   const grs = items.filter(g => g.type === 'grid');
   for (const it of items){
     if (!shown(it) || (SNAP_SKIP && SNAP_SKIP.has(it.id))) continue;
-    if (it.type === 'wall'){ out.push({ x:it.x1, z:it.z1, k:'end' }, { x:it.x2, z:it.z2, k:'end' }, { x:(it.x1 + it.x2) / 2, z:(it.z1 + it.z2) / 2, k:'mid' }); }
+    if (it.type === 'wall'){ const A = arcOf(it), m = A ? arcPt(A, A.L / 2) : { x:(it.x1 + it.x2) / 2, z:(it.z1 + it.z2) / 2 }; out.push({ x:it.x1, z:it.z1, k:'end' }, { x:it.x2, z:it.z2, k:'end' }, { x:m.x, z:m.z, k:'mid' }); }
     else if (it.type === 'box'){ out.push({ x:it.x, z:it.z, k:'end' }, { x:it.x + it.w, z:it.z, k:'end' }, { x:it.x, z:it.z + it.d, k:'end' }, { x:it.x + it.w, z:it.z + it.d, k:'end' }); }
     else if (it.type === 'line' || it.type === 'stair'){ out.push({ x:it.x1, z:it.z1, k:'end' }, { x:it.x2, z:it.z2, k:'end' }, ...(it.type === 'line' ? [{ x:(it.x1 + it.x2) / 2, z:(it.z1 + it.z2) / 2, k:'mid' }] : [])); }
     else if (it.type === 'circle' || it.type === 'column' || it.type === 'fam') out.push({ x:it.x, z:it.z, k:'end' });
@@ -5410,8 +5571,22 @@ function candidates(){
 }
 let GUIDES = [];
 // snapping: points → (with a start point) axis directions and alignment with other points → grid lines → the snap step
+/* touch helpers (tablet / phone, bottom-left of the view): «По осям» = Shift held (TMOD.ortho),
+   «Под углом» — the line goes only at multiples of a step (TMOD.step, °) or at one angle (TMOD.fix, ° from east, counter-clockwise) */
+const TMOD = { ortho:false, step:0, fix:null };
+function snapAngle(g, from){
+  const dx = g.x - from.x, dz = g.z - from.z, len = Math.hypot(dx, dz); if (len < 1e-6) return null;
+  const a = Math.atan2(-dz, dx) * 180 / Math.PI;
+  let b; if (TMOD.fix != null){ const f = TMOD.fix, d1 = Math.abs(((a - f) % 360 + 540) % 360 - 180), d2 = Math.abs(((a - f - 180) % 360 + 540) % 360 - 180); b = d1 <= d2 ? f : f + 180; }
+  else b = Math.round(a / TMOD.step) * TMOD.step;
+  const r = b * Math.PI / 180, ux = Math.cos(r), uz = -Math.sin(r), L = Math.max(0, roundS(dx * ux + dz * uz));
+  const p = new V3(r4(from.x + ux * L), 0, r4(from.z + uz * L)); GUIDES.push({ a:from.clone(), b:p.clone(), axis:'x' });
+  return { p, kind:'grid-step', ang:b };
+}
 function snap(px, py, from, ortho){
   GUIDES = [];
+  ortho = ortho || TMOD.ortho;
+  if (from && !ortho && (TMOD.step || TMOD.fix != null)){ const g = groundAt(px, py); if (g){ const s = snapAngle(g, from); if (s) return s; } }
   let best = null, bd = coarsePtr ? 18 : 12;
   for (const c of candidates()){ const s = toScreen(c.x, 0, c.z); if (!s.ok) continue; const d = Math.hypot(s.x - px, s.y - py); if (d < bd){ bd = d; best = c; } }
   const g = groundAt(px, py);
@@ -5491,6 +5666,7 @@ function alongWall(w, px, py){
   let p = null;
   if (S.view !== 'plan'){ setRay(px, py); const pl = new THREE.Plane().setFromNormalAndCoplanarPoint(f.nrm, f.p1); p = ray.ray.intersectPlane(pl, new V3()); }
   if (!p) p = groundAt(px, py);
+  if (p && f.arc) return arcLocal(f.arc, p).s; // an arc wall: the length along the arc
   return p ? p.sub(f.p1).dot(f.dir) : null;
 }
 // only openings that are there in this view block the place: not the ones of a later stage, demolished before or hidden
@@ -5570,7 +5746,7 @@ const DD = { refs:[], hover:null, off:0.8, dir:null };
 const drawing = () => ['wall','rect','box','grid','line','move','copy','floor','ceiling','roof','stair','section','camera'].includes(S.tool);
 const pointTool = () => ['column','room','ielev','fam'].includes(S.tool);
 const placing = () => S.tool === 'door' || S.tool === 'window';
-function endDraw(){ if (typeof E !== 'undefined'){ E.step = 0; E.ref = null; E.pts = []; E.picks = []; E.center = null; E.hover = null; E.lastLock = null; } D.start = D.first = D.op = D.prevWall = D.firstWall = D.poly = null; DD.refs = []; DD.hover = null; DD.dir = null; GUIDES = []; disposeGroup(preview); lenInput.value = ''; annoDirty = true; updateHint(); }
+function endDraw(){ D.arcB = null; D.arcR = null; if (typeof E !== 'undefined'){ E.step = 0; E.ref = null; E.pts = []; E.picks = []; E.center = null; E.hover = null; E.lastLock = null; } D.start = D.first = D.op = D.prevWall = D.firstWall = D.poly = null; DD.refs = []; DD.hover = null; DD.dir = null; GUIDES = []; disposeGroup(preview); lenInput.value = ''; annoDirty = true; updateHint(); try { trkHide(); } catch (e){} }
 function addPreview(obj){ if (!obj) return; obj.traverse(o => o.renderOrder = 5); preview.add(obj); }
 // a drawn wall: the picked line is its location line; the centre is moved off it by the layers of the type (all six Revit lines)
 function locOffset(t, flip){ if (!S.loc || S.loc === 'center') return 0; return -locOffsetOf({ type:'wall', wt:typeById(S.wallType) ? S.wallType : '', t, flipL:!!flip }, S.loc); }
@@ -5627,7 +5803,14 @@ function updatePreview(){
   if ((S.tool === 'floor' || S.tool === 'ceiling' || S.tool === 'roof') && Math.abs(a.x - b.x) > 1e-3 && Math.abs(a.z - b.z) > 1e-3){
     const pts = rectPts(a, b).map(p => new V3(p.x, Y, p.z)); addPreview(lineOf([...pts, pts[0]], M.edgePrev)); return;
   }
-  if (S.tool === 'wall'){ const sp = drawnWallSpec(a, b); if (sp) addPreview(buildWall({ type:'wall', x1:sp.a.x, z1:sp.a.z, x2:sp.b.x, z2:sp.b.z, t:sp.t, h:S.wallH, wt:S.wallType, flipL:D.flip }, null, M.edgePrev)); }
+  if (S.tool === 'wall'){
+    // arc walls: «по 3 точкам» after the end is set the cursor is a point on the arc; «по касательной» continues the previous wall
+    let B0 = b, h = null; D.arcR = null;
+    if (S.wallForm === '3p' && D.arcB){ B0 = D.arcB; h = sagittaThrough(a.x, a.z, B0.x, B0.z, b); }
+    else if (S.wallForm === 'tan' && D.prevWall) h = sagittaTangent(a.x, a.z, wallEndFrame(D.prevWall, 1).dir, b.x, b.z);
+    const sp = drawnWallSpec(a, B0);
+    if (sp){ const pw = { type:'wall', x1:sp.a.x, z1:sp.a.z, x2:sp.b.x, z2:sp.b.z, t:sp.t, h:S.wallH, wt:S.wallType, flipL:D.flip, ...(h ? { arc:h } : {}) }; const A = arcOf(pw); if (A) D.arcR = A.R; addPreview(buildWall(pw, null, M.edgePrev)); }
+  }
   else if (S.tool === 'grid' || S.tool === 'move' || S.tool === 'copy' || (S.tool === 'line' && S.lineMode === 'line')) addPreview(lineOf([new V3(a.x, Y, a.z), new V3(b.x, Y, b.z)], M.edgePrev));
   else if (S.tool === 'line' && S.lineMode === 'circle'){ const r = a.distanceTo(b), pts = []; for (let k = 0; k <= 72; k++){ const t = k / 72 * Math.PI * 2; pts.push(new V3(a.x + Math.cos(t) * r, Y, a.z + Math.sin(t) * r)); } addPreview(lineOf(pts, M.edgePrev)); }
   else if (Math.abs(a.x - b.x) > 1e-3 && Math.abs(a.z - b.z) > 1e-3){
@@ -5839,16 +6022,24 @@ function click(px, py, shift, ctrl){
     if (!D.start){ D.start = p.clone(); D.first = p.clone(); D.prevWall = null; D.firstWall = null; }
     else {
       if (p.distanceTo(D.start) < 1e-3) return;
+      if (S.tool === 'wall' && S.wallForm === '3p' && !D.arcB){ D.arcB = p.clone(); toast('Дуга: укажите точку на дуге'); updatePreview(); updateHint(); return; }
       pushUndo();
       if (S.tool === 'line'){ items.push({ id:nextId++, type:'line', x1:D.start.x, z1:D.start.z, x2:p.x, z2:p.z }); markEdited(); rebuild(); D.start = p.clone(); D.cur = p.clone(); updatePreview(); updateHint(); return; }
-      const w = addWallFromTool(D.start, p);
+      // an arc wall: «по 3 точкам» — the second click is the end, the third a point on the arc; «по касательной» — leaves the previous wall smoothly
+      let arcH = null, endP = p;
+      if (S.wallForm === '3p'){
+        arcH =sagittaThrough(D.start.x, D.start.z, D.arcB.x, D.arcB.z, p); endP = D.arcB; D.arcB = null;
+      } else if (S.wallForm === 'tan' && D.prevWall) arcH = sagittaTangent(D.start.x, D.start.z, wallEndFrame(D.prevWall, 1).dir, p.x, p.z);
+      const w = addWallFromTool(D.start, endP);
+      if (w && arcH) w.arc = arcH;
       if (!D.firstWall) D.firstWall = w;
-      const closed = D.first && p.distanceTo(D.first) < 1e-3;
+      const closed = D.first && endP.distanceTo(D.first) < 1e-3;
       if (closed && D.firstWall && D.firstWall !== w && locOffset(1, false) !== 0) joinWalls(w, D.firstWall);
       markEdited(); rebuild();
+      if (w && arcH){ const A = arcOf(w); if (A) toast(`Дуговая стена: радиус ${mm(A.R)} мм, длина ${mm(A.L)} мм`); }
       if (closed){ endDraw(); toast('Контур замкнут'); return; }
       if (!S.chain){ D.start = null; D.first = null; D.prevWall = null; D.firstWall = null; D.cur = null; disposeGroup(preview); updateHint(); return; }
-      D.start = p.clone(); D.prevWall = w;
+      D.start = endP.clone(); D.prevWall = w;
     }
   } else {
     if (!D.start){ D.start = p.clone(); }
@@ -6104,7 +6295,7 @@ function pasteAligned(){
 const reflectP = (x, z, p0, d) => { const v = new V3(x - p0.x, 0, z - p0.z), t = v.dot(d); return { x:r4(2 * (p0.x + d.x * t) - x), z:r4(2 * (p0.z + d.z * t) - z) }; };
 function mirrorItem(it, p0, d){
   const R = (x, z) => reflectP(x, z, p0, d);
-  if (['wall', 'grid', 'line', 'stair'].includes(it.type)){ const a = R(it.x1, it.z1), b = R(it.x2, it.z2); Object.assign(it, { x1:a.x, z1:a.z, x2:b.x, z2:b.z }); if (it.type === 'wall') it.flipL = !it.flipL; }
+  if (['wall', 'grid', 'line', 'stair'].includes(it.type)){ const a = R(it.x1, it.z1), b = R(it.x2, it.z2); Object.assign(it, { x1:a.x, z1:a.z, x2:b.x, z2:b.z }); if (it.type === 'wall'){ it.flipL = !it.flipL; if (it.arc) it.arc = -it.arc; } }
   else if (it.type === 'box' || it.type === 'roof'){ const a = R(it.x, it.z), b = R(it.x + it.w, it.z + it.d); Object.assign(it, { x:Math.min(a.x, b.x), z:Math.min(a.z, b.z) }); }
   else if (it.pts) it.pts = it.pts.map(p => R(p.x, p.z)).reverse();
   else if (['column', 'room', 'circle', 'text', 'spot'].includes(it.type)){ const a = R(it.x, it.z); it.x = a.x; it.z = a.z; }
@@ -6185,12 +6376,14 @@ function trimToBoundary(it, click, bound){
 function splitEl(it, click, gap = 0){
   if (!linear(it) || it.type === 'grid') return 'Разделить можно стену или линию';
   if (it.pin) return 'Элемент закреплён';
-  const f = wallFrame(it), s = clamp(click.clone().sub(f.p1).dot(f.dir), 0, f.L);
+  const f = wallFrame(it), A = it.type === 'wall' ? f.arc : null, s = clamp(A ? arcLocal(A, click).s : click.clone().sub(f.p1).dot(f.dir), 0, f.L);
   const s0 = s - gap / 2, s1 = s + gap / 2; if (s0 < 0.05 || s1 > f.L - 0.05) return 'Слишком близко к концу';
   pushUndo(gap ? 'Разделить с зазором' : 'Разделить'); markEdited();
   const c = JSON.parse(JSON.stringify(it)); c.id = nextId++; if (TAGGED.includes(c.type)) c.tag = null;
-  const P = t => f.p1.clone().addScaledVector(f.dir, t);
+  const P = t => A ? arcPt(A, t) : f.p1.clone().addScaledVector(f.dir, t);
   setEnd(c, 0, P(s1)); setEnd(it, 1, P(s0)); items.push(c); if (TAGGED.includes(c.type)) c.tag = nextTag(c.type);
+  // an arc wall: both pieces stay on the same circle (the sagitta of each piece from its own length)
+  if (A){ const sg = Math.sign(A.h), sag = l => r4(sg * A.R * (1 - Math.cos(l / A.R / 2))); it.arc = sag(s0); c.arc = sag(f.L - s1); }
   if (it.type === 'wall'){
     delete c.dj; if (it.dj) it.dj = [it.dj[0], false];
     for (const o of items) if (isOp(o) && o.wall === it.id && o.pos > s){ o.wall = c.id; o.pos = r4(o.pos - s1); }
@@ -6550,7 +6743,7 @@ function doDrag(px, py){
   let dx = roundS(g.x - drag.g0.x), dz = roundS(g.z - drag.g0.z);
   // Shift held: move only along X or Y (whichever the cursor moved further along), with a guide line
   GUIDES = [];
-  if (mouse.shift && S.view !== 'sect'){
+  if ((mouse.shift || TMOD.ortho) && S.view !== 'sect'){
     if (Math.abs(dx) >= Math.abs(dz)) dz = 0; else dx = 0;
     GUIDES.push({ a:drag.g0.clone(), b:new V3(drag.g0.x + dx, 0, drag.g0.z + dz), axis:dx ? 'x' : 'y' });
     if (!dx && !dz) GUIDES = [];
@@ -6578,6 +6771,9 @@ function setPenOnly(on, announce){
 }
 cv.addEventListener('pointerdown', e => {
   if (HDRAG && HDRAG.free){ e.preventDefault(); e.stopImmediatePropagation(); if (e.button === 2) endFreeDrag(true); else { hdragModelMove(e.clientX, e.clientY, e.shiftKey); endFreeDrag(false); } return; }
+  // the wall palette: a click finishes the running function, the right button cancels it
+  if (PET){ e.preventDefault(); e.stopImmediatePropagation(); NO_CTX = Date.now(); if (e.button === 2) petCancel(); else { const { x, y } = local(e); petMove(x, y); const m = petCommit(); if (m) toast(m); } return; }
+  if (!petEl.hidden) petClose();
   closeFileMenu();
   if (e.pointerType === 'pen' && !penSeen){ penSeen = true; if (!S.penOnly && lsGet('kot.penOnly') !== '0') setPenOnly(true, true); }
   if (fingerIgnored(e)) return;
@@ -6604,7 +6800,7 @@ cv.addEventListener('pointerdown', e => {
       if (e.shiftKey && !e.ctrlKey && !e.metaKey && all && S.view !== 'sect'){ down.ctrl = false; down.ctrlDone = true; down.shiftSel = ids; selId = id; startDrag(id, x, y); if (drag && drag.ids){ drag.copy = true; drag.joined = false; cv.style.cursor = 'copy'; } return; }
       if (ctrl){ const s2 = new Set(sel); for (const i of ids) all ? s2.delete(i) : s2.add(i); setSel([...s2], id); rebuild(); down.ctrlDone = true; }
       else if (!all || sel.size !== ids.length){ setSel(ids, id); rebuild(); }
-      else if (!ctrl){ selId = id; }
+      else if (!ctrl){ selId = id; if (S.view === 'plan' && sel.size === 1 && byId(id)?.type === 'wall') down.pet = id; } // ArchiCAD: a click on the selected wall — the palette
       if (!ctrl && S.view !== 'sect') startDrag(id, x, y);
     } else box = { x0:x, y0:y, ctrl };
   }
@@ -6617,6 +6813,7 @@ cv.addEventListener('pointerdown', e => {
 cv.addEventListener('pointermove', e => {
   if (HDRAG && HDRAG.free){ hdragModelMove(e.clientX, e.clientY, e.shiftKey); return; }
   if (fingerIgnored(e)) return;
+  if (PET){ const q = local(e); mouse.shift = e.shiftKey; petMove(q.x, q.y); return; }
   const { x, y } = local(e);
   Object.assign(mouse, { x, y, inside:true, shift:e.shiftKey, alt:e.altKey });
   if (down && !down.moved && Math.hypot(x - down.x, y - down.y) > 6){ down.moved = true; clearTimeout(lpT); }
@@ -6644,6 +6841,7 @@ cv.addEventListener('pointerup', e => {
     if (!moved && d0 && !d0.moved){
       // Shift+click on an already selected element (drag never started) takes it out of the selection
       if (d0.shiftSel){ const s2 = new Set(sel); for (const i of d0.shiftSel) s2.delete(i); setSel([...s2], [...s2][0] || null); rebuild(); }
+      else if (d0.pet && isSel(d0.pet)) openPet(d0.pet, x, y);
       else click(x, y, e.shiftKey, false);
     }
     return;
@@ -6796,12 +6994,126 @@ function hover(px, py, shift){
     D.cur = s.p; D.kind = s.kind;
     snapCursor(s.kind);
     $('#coords').textContent = fmtXY(s.p);
-    updatePreview();
+    updatePreview(); trkUpdate(px, py);
   } else {
-    cursorEl.hidden = true;
+    cursorEl.hidden = true; trkHide();
     if (S.tool === 'select') hovUpdate(px, py, mouse.alt);
   }
 }
+/* ArchiCAD tracker: while drawing, next to the cursor — Расстояние (from the previous point), Угол (from east, counter-clockwise),
+   Координата Z (the level); on the plan a dotted horizontal ray from the previous point and the arc of the angle with its value */
+S.trkOff = lsGet('kot.trkOff') === '1';
+const trkEl = document.createElement('div'); trkEl.id = 'trk'; trkEl.hidden = true; vp.append(trkEl);
+const trkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); trkSvg.id = 'trkSvg'; trkSvg.style.display = 'none'; vp.append(trkSvg);
+function trkHide(){ trkEl.hidden = true; trkSvg.style.display = 'none'; }
+function trkUpdate(px, py){
+  if (S.view !== 'plan' || !D.cur || S.trkOff){ trkHide(); return; }
+  const z = Math.round((lvElev(actLv()) || 0) * 1000), fmt = (x, d = 0) => x.toLocaleString('ru-RU', { minimumFractionDigits:d, maximumFractionDigits:d });
+  const IC = { r:'<svg viewBox="0 0 12 12"><path d="M2 10A8 8 0 0 1 10 2M2 10l5-5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', d:'<svg viewBox="0 0 12 12"><path d="M2 10L10 2M6 2h4v4M2 6v4h4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', a:'<svg viewBox="0 0 12 12"><path d="M10 2L2 6l8 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', z:'<svg viewBox="0 0 12 12"><path d="M3 1v10M1 3l2-2 2 2M1 9l2 2 2-2M7 10h4M7 7h4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>' };
+  let h = '', svg = '';
+  const radOnly = !!(D.arcR && (PET ? PET.k === 'arc' : S.tool === 'wall' && D.arcB)); // bending an edge / the 3rd point of an arc: only the radius
+  if (radOnly) h += `<div><i>${IC.r}</i><b>Радиус дуги</b><span>${fmt(Math.round(D.arcR * 1000))}</span></div>`;
+  else if (D.start){
+    const dx = D.cur.x - D.start.x, dz = D.cur.z - D.start.z, L = Math.hypot(dx, dz), ang = L > 1e-6 ? ((Math.atan2(-dz, dx) * 180 / Math.PI) + 360) % 360 : 0;
+    if (D.arcR) h += `<div><i>${IC.r}</i><b>Радиус дуги</b><span>${fmt(Math.round(D.arcR * 1000))}</span></div>`;
+    h += `<div><i>${IC.d}</i><b>Расстояние</b><span>${fmt(Math.round(L * 1000))}</span></div><div><i>${IC.a}</i><b>Угол</b><span>${fmt(ang, 2)}°</span></div>`;
+    const a = toScreen(D.start.x, 0, D.start.z), b = toScreen(D.cur.x, 0, D.cur.z), R = Math.min(60, Math.max(24, Math.hypot(b.x - a.x, b.y - a.y) * 0.45));
+    if (a.ok && L > 1e-6){
+      const sa = (Math.atan2(-(b.y - a.y), b.x - a.x) + 2 * Math.PI) % (2 * Math.PI), ex = a.x + R * Math.cos(sa), ey = a.y - R * Math.sin(sa), big = sa > Math.PI ? 1 : 0, mid = sa / 2, lx = a.x + (R + 14) * Math.cos(mid), ly = a.y - (R + 14) * Math.sin(mid);
+      svg = `<line x1="${a.x}" y1="${a.y}" x2="${a.x + Math.max(R * 2.4, 90)}" y2="${a.y}" class="ray"/><path d="M${a.x + R} ${a.y} A${R} ${R} 0 ${big} 0 ${ex} ${ey}" class="arc"/><text x="${lx}" y="${ly}">${fmt(ang, 2)}°</text>`;
+    }
+  }
+  h += `<div class="z"><i>${IC.z}</i><b>Координата Z</b><span>${fmt(z)}</span></div>`;
+  trkEl.innerHTML = h; trkEl.hidden = false;
+  const W = vp.clientWidth, H = vp.clientHeight, tw = trkEl.offsetWidth || 150, th = trkEl.offsetHeight || 54;
+  trkEl.style.left = Math.min(px + 22, W - tw - 4) + 'px'; trkEl.style.top = Math.min(py + 18, H - th - 4) + 'px';
+  if (svg){ trkSvg.setAttribute('width', W); trkSvg.setAttribute('height', H); trkSvg.innerHTML = svg; trkSvg.style.display = ''; } else trkSvg.style.display = 'none';
+}
+// the wall tool: straight, arc by 3 points, tangent arc (S.wallForm)
+function setWallForm(v){
+  S.wallForm = v === '3p' || v === 'tan' ? v : 'line'; lsSet('kot.wallForm', S.wallForm); D.arcB = null; D.arcR = null;
+  const sl = $('#oForm'); if (sl) sl.value = S.wallForm; updatePreview(); updateHint();
+  return S.wallForm === '3p' ? 'Стена: дуга по 3 точкам — начало, конец, точка на дуге' : S.wallForm === 'tan' ? 'Стена: дуга по касательной — продолжает предыдущую стену цепи плавно' : 'Стена: прямая';
+}
+S.wallForm = ['3p', 'tan'].includes(lsGet('kot.wallForm')) ? lsGet('kot.wallForm') : 'line';
+/* ---------- ArchiCAD «Pet palette» on the edge of a selected wall ----------
+   a click on a wall that is already selected (plan) opens the icons; a function then follows the cursor (tracker), click — done, Esc / right button — cancel */
+let PET = null;
+const petEl = document.createElement('div'); petEl.id = 'petPal'; petEl.hidden = true; petEl.setAttribute('role', 'toolbar'); vp.append(petEl);
+const PET_IC = {
+  node:'<path d="M2 15L9 5l7 10" fill="none"/><rect x="7.5" y="3.5" width="3" height="3" class="ic-paper"/>',
+  arc:'<path d="M2 15Q9 1 16 15" fill="none"/><path d="M9 2v3M7.5 3.5h3" fill="none"/>',
+  tan:'<path d="M2 15h6" fill="none"/><path d="M8 15Q15 14 16 4" fill="none"/><path d="M13 2l3 2-1 3" fill="none"/>',
+  offset:'<path d="M2 13h14M4 6h12" fill="none" stroke-dasharray="2 1.5"/><path d="M9 13V7M7 9l2-2.5 2 2.5" fill="none"/>',
+  straight:'<path d="M2 12h14" fill="none"/><path d="M2 12Q9 3 16 12" fill="none" stroke-dasharray="2 1.5"/>',
+  move:'<path d="M9 2v14M2 9h14M9 2l-2 2.5M9 2l2 2.5M9 16l-2-2.5M9 16l2-2.5M2 9l2.5-2M2 9l2.5 2M16 9l-2.5-2M16 9l-2.5 2" fill="none"/>',
+  rotate:'<rect x="5" y="7" width="7" height="7" fill="none"/><path d="M4 5a7 7 0 0 1 10 1M14 6V2.5M14 6h-3.5" fill="none"/>',
+  mirror:'<path d="M9 1v16" fill="none" stroke-dasharray="2 1.5"/><path d="M7 4L2 13h5zM11 4l5 9h-5z" fill="none"/>',
+  elevate:'<path d="M2 16h14M5 13h8v-4H5z" fill="none"/><path d="M9 7V1M7 3l2-2 2 2" fill="none"/>',
+  multiply:'<rect x="2" y="9" width="7" height="7" fill="none"/><rect x="6" y="5" width="7" height="7" class="ic-paper"/><rect x="10" y="1" width="6" height="6" fill="none"/>'
+};
+const PET_FN = [
+  ['node', 'Вставить узел: стена делится, узел тянется за курсором'], ['arc', 'Изогнуть ребро: дуга через точку курсора'], ['tan', 'Дуга по касательной: дальний конец остаётся, ближний тянется по дуге'],
+  ['offset', 'Сместить ребро: стена смещается параллельно, соседние следуют'], ['straight', 'Выпрямить: убрать дугу'], null,
+  ['move', 'Переместить'], ['rotate', 'Повернуть'], ['mirror', 'Зеркально отразить'], ['elevate', 'Поднять / опустить (смещение снизу)'], ['multiply', 'Тиражировать: копии с шагом']
+];
+function petClose(){ petEl.hidden = true; }
+function openPet(id, px, py){
+  const w = byId(id); if (!w || w.type !== 'wall') return;
+  if (w.pin){ toast('Стена закреплена — сначала откройте замок'); return; }
+  const g = groundAt(px, py); if (!g) return;
+  PET = null; petEl.innerHTML = PET_FN.map(r => r ? `<button type="button" data-pf="${r[0]}" title="${r[1]}"${r[0] === 'straight' && !arcOf(w) ? ' disabled' : ''}><svg viewBox="0 0 18 18" aria-hidden="true">${PET_IC[r[0]]}</svg></button>` : '<i class="br"></i>').join('');
+  petEl.hidden = false;
+  const W = vp.clientWidth, H = vp.clientHeight, r = petEl.getBoundingClientRect();
+  petEl.style.left = Math.max(4, Math.min(px + 14, W - r.width - 6)) + 'px'; petEl.style.top = Math.max(4, Math.min(py + 14, H - r.height - 6)) + 'px';
+  petEl.dataset.id = id; petEl._p0 = g; petEl._px = [px, py];
+}
+petEl.addEventListener('pointerdown', e => e.stopPropagation());
+petEl.addEventListener('click', e => { const b = e.target.closest('[data-pf]'); if (!b || b.disabled) return; const id = +petEl.dataset.id, p0 = petEl._p0; petClose(); petStart(b.dataset.pf, id, p0); });
+function petStart(k, id, p0, opt = {}){
+  const w = byId(id); if (!w) return 'Нет стены';
+  if (k === 'rotate' || k === 'mirror'){ setSel([id]); setTool(k); return k === 'rotate' ? 'Повернуть: укажите центр поворота' : 'Зеркало: укажите ось двумя точками'; }
+  if (k === 'straight'){ if (!arcOf(w)) return 'Стена и так прямая'; pushUndo('Выпрямить стену'); markEdited(); delete w.arc; rebuild(); return `Стена ${w.tag || ''} выпрямлена`; }
+  if (k === 'elevate'){
+    const v = opt.mm != null ? +opt.mm : Number(String(prompt('Поднять (+) или опустить (−) стену, мм', '0') || '').replace(',', '.')); if (!Number.isFinite(v) || !v) return 'Отменено';
+    pushUndo('Поднять стену'); markEdited(); w.bo = r4((w.bo || 0) + v / 1000); if (!w.bo) delete w.bo; rebuild(); return `Стена ${w.tag || ''}: смещение снизу ${mm(w.bo || 0)} мм`; }
+  if (k === 'node' && arcOf(w)) return 'Узел вставляется в прямую стену (дугу сначала выпрямите или разделите)';
+  let n = 1; if (k === 'multiply'){ n = opt.n != null ? Math.round(+opt.n) : Math.round(Number(prompt('Сколько копий?', '3'))); if (!(n >= 1 && n <= 100)) return 'Отменено'; }
+  const f = wallFrame(w), P1 = new V3(w.x1, 0, w.z1), P2 = new V3(w.x2, 0, w.z2);
+  if (k === 'node'){ const nid0 = nextId, m = splitEl(w, p0); if (typeof m === 'string' && !/Разделено/.test(m)) return m; const w2 = items.find(i => i.type === 'wall' && i.id >= nid0); PET = { k, id, id2:w2 ? w2.id : null, from:p0.clone() }; }
+  else { pushUndo({ arc:'Изогнуть стену', tan:'Дуга по касательной', offset:'Сместить стену', move:'Переместить', multiply:'Тиражировать' }[k] || 'Изменить стену'); PET = { k, id, from:p0.clone(), n }; }
+  if (k === 'tan'){ const fe = P1.distanceTo(p0) > P2.distanceTo(p0) ? 0 : 1; PET.fe = fe; PET.from = fe ? P2 : P1; PET.t = fe ? wallEndFrame(w, 1).dir.clone().negate() : wallEndFrame(w, 0).dir.clone(); }
+  PET.nrm = f.nrm.clone(); PET.back = JSON.parse(JSON.stringify(items)); PET.ids = k === 'move' || k === 'multiply' ? liveIds(sel).filter(i => !byId(i).pin) : [id];
+  markEdited();
+  if (opt.to) { petMove(null, null, opt.to); return petCommit(); }
+  toast('Ведите курсор, щелчок — готово, Esc — отмена', 2500);
+  return '';
+}
+function petMove(px, py, at){
+  if (!PET) return;
+  SNAP_SKIP = new Set([PET.id, PET.id2].filter(Boolean));
+  let p = at; if (!p){ const s = snap(px, py, PET.k === 'arc' ? null : PET.from, mouse.shift); SNAP_SKIP = null; if (!s) return; p = s.p; } SNAP_SKIP = null;
+  items = JSON.parse(JSON.stringify(PET.back));
+  const w = byId(PET.id); if (!w) return; D.arcR = null;
+  if (PET.k === 'node'){ const w2 = byId(PET.id2); setWallEnd(w, 2, p.x, p.z); if (w2) setWallEnd(w2, 1, p.x, p.z); } // setWallEnd: 1 — start, 2 — end
+  else if (PET.k === 'arc'){ const h = sagittaThrough(w.x1, w.z1, w.x2, w.z2, p); if (h) w.arc = h; else delete w.arc; const A = arcOf(w); if (A) D.arcR = A.R; }
+  else if (PET.k === 'tan'){ const F = PET.from, me = 1 - PET.fe; if (p.distanceTo(F) > 0.05){ setWallEnd(w, me ? 2 : 1, p.x, p.z); const h = sagittaTangent(F.x, F.z, PET.t, p.x, p.z); if (h) w.arc = PET.fe ? -h : h; else delete w.arc; const A = arcOf(w); if (A) D.arcR = A.R; } }
+  else if (PET.k === 'offset'){ const d = r4(Math.round((p.clone().sub(PET.from).dot(PET.nrm)) * 200) / 200); if (d) moveItemsJoined([PET.id], r4(PET.nrm.x * d), r4(PET.nrm.z * d)); PET.d = d; }
+  else if (PET.k === 'move'){ const dx = r4(p.x - PET.from.x), dz = r4(p.z - PET.from.z); if (dx || dz) moveItemsJoined(PET.ids, dx, dz); }
+  else if (PET.k === 'multiply'){ const dx = r4(p.x - PET.from.x), dz = r4(p.z - PET.from.z); if (dx || dz) for (let k = 1; k <= PET.n; k++) copyItems(PET.ids, r4(dx * k), r4(dz * k)); }
+  PET.p = p; D.start = PET.k === 'arc' ? null : PET.from; D.cur = p;
+  rebuild(); if (px != null) trkUpdate(px, py);
+}
+function petCommit(){
+  if (!PET) return ''; const P = PET; PET = null; D.start = D.cur = null; D.arcR = null; trkHide();
+  const w = byId(P.id); rebuild(); scheduleSave();
+  if (P.k === 'arc' || P.k === 'tan'){ const A = w && arcOf(w); return A ? `Дуговая стена ${w.tag || ''}: радиус ${mm(A.R)} мм, длина ${mm(A.L)} мм` : 'Стена прямая'; }
+  if (P.k === 'node') return 'Узел вставлен: две стены';
+  if (P.k === 'offset') return `Стена смещена на ${mm(P.d || 0)} мм`;
+  if (P.k === 'multiply') return `Тиражировано: ${P.n} копий`;
+  return 'Готово';
+}
+function petCancel(){ if (!PET) return; PET = null; D.start = D.cur = null; D.arcR = null; trkHide(); undo(); toast('Отменено'); }
 // typed-length clicks reuse snap(): honour the exact point when one is pending
 const _snap = snap;
 snap = function(px, py, from, ortho){ if (snapOverride){ GUIDES = []; return snapOverride; } return _snap(px, py, from, ortho); };
@@ -6854,9 +7166,10 @@ function buildLabels(){
     if (ceilO){
       // survey room tag: number in a circle, area underlined, the measured ceiling height in blue
       const sc2 = isSel(r.id) ? ' sel' : '', hc = roomCeil(r);
-      out.push({ x:r.x, y:0, z:r.z, t:String(r.num).padStart(2, '0'), cls:'svn' + sc2, dy:-20 }); // the circle (20 px) stands fully above the area (no overlap)
+      const AZ = annoZ(); // the offsets grow and shrink with the paper (like the fonts), so the dimensions see the same tag at any zoom
+      out.push({ x:r.x, y:0, z:r.z, t:String(r.num).padStart(2, '0'), cls:'svn' + sc2, dy:-20 * AZ }); // the circle (20 px) stands fully above the area (no overlap)
       out.push({ x:r.x, y:0, z:r.z, t:d.open ? 'Не окружено' : m2(d.area).replace('.', ',') + ' м²', cls:'sva' + sc2 + (d.open ? ' open' : '') });
-      out.push({ x:r.x, y:0, z:r.z, t:`h потолка=${hc != null ? Math.round(hc * 1000) : '—'}мм`, cls:'hb', dy:17, col:ceilO.c || '#2433c8' });
+      out.push({ x:r.x, y:0, z:r.z, t:`h потолка=${hc != null ? Math.round(hc * 1000) : '—'}мм`, cls:'hb', dy:17 * AZ, col:ceilO.c || '#2433c8' });
     } else out.push({ x:r.x, y:0, z:r.z, t:`${r.name}\n${r.num}  ·  ${d.open ? 'Не окружено' : m2(d.area) + ' м²'}`, cls:'rm' + (isSel(r.id) ? ' sel' : '') + (d.open ? ' open' : '') });
   }
   // survey: the sill and the opening height of every window, outside the wall
@@ -9770,7 +10083,16 @@ function vnJ(x, y){ const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, f
 const fbmJ = (x, y) => vnJ(x, y) * 0.62 + vnJ(x * 2.07 + 5.3, y * 2.07 + 5.3) * 0.28 + vnJ(x * 4.13 + 1.7, y * 4.13 + 1.7) * 0.1;
 const WOOD_V = [
   { A:1.6, fx:0.12, fy:0.05 }, { A:1.2, fx:0.09, fy:0.03, KH:4.5, KR:3.2, KE:4, KP:0.9, KC:[9, 30] }, { A:2.0, fx:0.15, fy:0.09, swap:true },
-  { A:2.6, fx:0.14, fy:0.08 }, { A:0.9, fx:0.18, fy:0.025 }, { A:1.4, fx:0.09, fy:0.05, KH:6, KR:2.6, KE:1.25, KP:0.5, KC:[12, 26] }
+  { A:2.6, fx:0.14, fy:0.08 }, { A:0.9, fx:0.18, fy:0.025 }, { A:1.4, fx:0.09, fy:0.05, KH:6, KR:2.6, KE:1.25, KP:0.5, KC:[12, 26] },
+  // the species (WOOD_SPECIES): the same numbers as in woodF / woodD / woodT (GLSL)
+  { A:1.5, fx:0.10, fy:0.035, KH:5, KR:3, KE:5, KP:0.55, KC:[10, 40] },            // oak
+  { A:2.2, fx:0.08, fy:0.04, KH:4, KR:3, KE:4, KP:0.35, KC:[14, 50] },             // ash
+  { A:0.5, fx:0.30, fy:0.02, D:1.6 },                                              // beech
+  { A:0.35, fx:0.25, fy:0.02, KH:1.6, KR:1.2, KE:6, KP:0.35, KC:[18, 40], D:1.4 }, // pine
+  { A:1.2, fx:0.10, fy:0.04, KH:3.5, KR:2.5, KE:5, KP:0.5, KC:[10, 34], D:1.8, T:1.3 }, // walnut
+  { A:2.8, fx:0.06, fy:0.05 },                                                     // teak
+  { A:0.6, fx:0.60, fy:0.015, D:1.9, T:1.4 },                                      // wenge
+  { A:0.25, fx:0.40, fy:0.015, D:2.2, T:0.6 }                                      // veneer
 ];
 function woodFJ(x, y, v){
   const P = WOOD_V[v] || WOOD_V[0]; if (P.swap){ const t = x; x = y; y = -t; }
@@ -9779,15 +10101,15 @@ function woodFJ(x, y, v){
     for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++){ const cx = cx0 + i, cy = cy0 + j; if (hshJ(cx + 11.3, cy + 11.3) > P.KP) continue;
       const ox = (cx + 0.2 + 0.6 * hshJ(cx + 2.1, cy + 2.1)) * P.KC[0], oy = (cy + 0.2 + 0.6 * hshJ(cx + 5.7, cy + 5.7)) * P.KC[1], dx = x - ox, dy = (y - oy) / P.KE;
       f += P.KH * (0.6 + 0.4 * hshJ(cx + 9.2, cy + 9.2)) * Math.exp(-(dx * dx + dy * dy) / (P.KR * P.KR)); } }
-  return f;
+  return f * (P.D || 1);
 }
 function drawWood(g, W, H, f, fg){
-  const k = (f.u === 'model' ? 1 / 20 : 1) * PREV_K, st = f.s || 1.5, v = clamp(Math.round(f.v || 1), 1, 6) - 1, a = (f.a || 0) * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+  const k = (f.u === 'model' ? 1 / 20 : 1) * PREV_K, st = f.s || 1.5, v = clamp(Math.round(f.v || 1), 1, WOOD_V.length) - 1, TK = (WOOD_V[v] && WOOD_V[v].T) || 1, a = (f.a || 0) * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
   const img = g.getImageData(0, 0, W, H), D = img.data, col = new THREE.Color(fg), cr = col.r * 255, cg = col.g * 255, cb = col.b * 255, e = 0.05, fw = 1 / (k * st);
   for (let py = 0; py < H; py++) for (let px = 0; px < W; px++){
     const X = (px - W / 2) / k, Y = (H / 2 - py) / k, qx = (ca * X + sa * Y) / st, qy = (-sa * X + ca * Y) / st;
     const f0 = woodFJ(qx, qy, v), gx = woodFJ(qx + e, qy, v) - f0, gy = woodFJ(qx, qy + e, v) - f0, gr = Math.hypot(gx, gy) / e + 1e-6;
-    const d = Math.abs(fr(f0 + 0.5) - 0.5) / gr, hw = fw * 0.6, m = d < hw ? 1 : d < hw + fw ? 1 - (d - hw) / fw : 0;
+    const d = Math.abs(fr(f0 + 0.5) - 0.5) / gr, hw = fw * 0.6 * TK, m = d < hw ? 1 : d < hw + fw ? 1 - (d - hw) / fw : 0;
     if (m > 0){ const i = (py * W + px) * 4; D[i] += (cr - D[i]) * m; D[i + 1] += (cg - D[i + 1]) * m; D[i + 2] += (cb - D[i + 2]) * m; }
   }
   g.putImageData(img, 0, 0);
@@ -9963,7 +10285,7 @@ const PAT_LIB = [
   { n:'Утеплитель', k:'insul', s:2.5, a:0 }, { n:'Дерево (волна)', k:'wood', s:1.8, a:0 },
   { n:'Дерево 1 — тонкие волокна', k:'woodg', v:1, s:2.4, a:0 }, { n:'Дерево 2 — арки (тангенциальный)', k:'woodg', v:2, s:3, a:0 },
   { n:'Дерево 3 — поперечная волна', k:'woodg', v:3, s:2.6, a:0 }, { n:'Дерево 4 — свилеватое', k:'woodg', v:4, s:2.6, a:0 },
-  { n:'Дерево 5 — прямослойное', k:'woodg', v:5, s:2.2, a:0 }, { n:'Дерево 6 — с сучками', k:'woodg', v:6, s:2.6, a:0 },
+  { n:'Дерево 5 — прямослойное', k:'woodg', v:5, s:2.2, a:0 }, { n:'Дерево 6 — с сучками', k:'woodg', v:6, s:2.6, a:0 }, ...WOOD_SPECIES.map(w => ({ n:'Дерево — ' + w.n, k:'woodg', v:w.v, s:w.s, a:0 })),
   { n:'Точки (штукатурка)', k:'dots', s:1.2, a:0 }, { n:'Гидроизоляция', k:'lines', s:0.8, a:0 },
   { n:'Кирпичная кладка', k:'brick', s:1.2, a:0 },
   { n:'Штриховая диагональ', k:'pat', s:1, a:0, fam:[{ a:45, x:0, y:0, sh:1.5, off:2, d:[3, -1.5] }] },
@@ -9978,10 +10300,10 @@ const PAT_LIB = [
   { n:'Доска 150', k:'lines', s:150, a:0, u:'model' }, { n:'Сайдинг 200', k:'lines', s:200, a:0, u:'model' },
   { n:'Древесина 1 — тонкие волокна', k:'woodg', v:1, s:10, a:0, u:'model' }, { n:'Древесина 2 — арки', k:'woodg', v:2, s:12, a:0, u:'model' },
   { n:'Древесина 3 — поперечная волна', k:'woodg', v:3, s:10, a:0, u:'model' }, { n:'Древесина 4 — свилеватая', k:'woodg', v:4, s:10, a:0, u:'model' },
-  { n:'Древесина 5 — прямослойная', k:'woodg', v:5, s:8, a:0, u:'model' }, { n:'Древесина 6 — с сучками', k:'woodg', v:6, s:10, a:0, u:'model' },
+  { n:'Древесина 5 — прямослойная', k:'woodg', v:5, s:8, a:0, u:'model' }, { n:'Древесина 6 — с сучками', k:'woodg', v:6, s:10, a:0, u:'model' }, ...WOOD_SPECIES.map(w => ({ n:'Древесина — ' + w.n.replace(/\s*\(.*\)$/, ''), k:'woodg', v:w.v, s:Math.round(w.s * 4), a:0, u:'model' })),
   { n:'Профлист С-20', k:'pat', s:1, a:0, u:'model', fam:[{ a:90, x:0, y:0, sh:0, off:200, d:[] }, { a:90, x:40, y:0, sh:0, off:200, d:[] }] }
 ];
-const PAT_KINDS = [['lines', 'Линии'], ['cross', 'Сетка (перекрёстная)'], ['brick', 'Кирпичная кладка'], ['dots', 'Точки'], ['concrete', 'Бетон'], ['insul', 'Утеплитель (зигзаг)'], ['wood', 'Дерево (волна)'], ['woodg', 'Древесина (волокна, 6 вариантов)'], ['pat', 'Пользовательская (семейства линий)'], ['solid', 'Сплошная заливка'], ['none', 'Без штриховки']];
+const PAT_KINDS = [['lines', 'Линии'], ['cross', 'Сетка (перекрёстная)'], ['brick', 'Кирпичная кладка'], ['dots', 'Точки'], ['concrete', 'Бетон'], ['insul', 'Утеплитель (зигзаг)'], ['wood', 'Дерево (волна)'], ['woodg', 'Древесина (волокна: 6 рисунков и 8 пород)'], ['pat', 'Пользовательская (семейства линий)'], ['solid', 'Сплошная заливка'], ['none', 'Без штриховки']];
 const patDlg = $('#patDlg'); const PE = { fill:null, d:null, file:[], cb:null };
 const patCopy = f => ({ n:f.n, k:f.k, s:f.s, a:f.a || 0, ...(f.u === 'model' ? { u:'model' } : {}), ...(f.k === 'pat' ? { fam:JSON.parse(JSON.stringify(f.fam || [])) } : {}), ...(f.k === 'woodg' ? { v:f.v || 1 } : {}) });
 // Revit / AutoCAD .pat: «*Name, description», optional «;%UNITS=MM|INCH» and «;%TYPE=MODEL|DRAFTING», then «angle, x, y, shift, offset, dash…» lines
@@ -10022,7 +10344,7 @@ function renderPatEd(){
   ed.innerHTML = row('Название', `<input type="text" id="peN" maxlength="40" value="${esc(d.n)}">`)
     + row('Тип', `<select id="peU"><option value="paper">Чертёжная — мм на бумаге</option><option value="model"${d.u === 'model' ? ' selected' : ''}>Модельная — реальные мм</option></select>`)
     + row('Вид', `<select id="peK">${PAT_KINDS.map(([v, n]) => `<option value="${v}"${v === d.k ? ' selected' : ''}>${n}</option>`).join('')}</select>`)
-    + (d.k === 'woodg' ? row('Вариант рисунка', `<select id="peV">${['1 — тонкие волокна', '2 — арки (тангенциальный распил)', '3 — поперечная волна', '4 — свилеватое', '5 — прямослойное', '6 — с сучками'].map((n, i) => `<option value="${i + 1}"${i + 1 === (d.v || 1) ? ' selected' : ''}>${n}</option>`).join('')}</select>`) : '')
+    + (d.k === 'woodg' ? row('Вариант рисунка', `<select id="peV">${['1 — тонкие волокна', '2 — арки (тангенциальный распил)', '3 — поперечная волна', '4 — свилеватое', '5 — прямослойное', '6 — с сучками', ...WOOD_SPECIES.map(w => w.v + ' — ' + w.n)].map((n, i) => `<option value="${i + 1}"${i + 1 === (d.v || 1) ? ' selected' : ''}>${n}</option>`).join('')}</select>`) : '')
     + (simple ? row(d.k === 'brick' ? 'Высота ряда, мм' : d.k === 'woodg' ? 'Шаг волокон, мм' : 'Шаг, мм', `<input type="number" id="peS" min="0.3" step="${d.u === 'model' ? 10 : 0.1}" value="${d.s}">`) : '')
     + (pat ? row('Масштаб', `<input type="number" id="peS" min="0.01" step="0.1" value="${d.s}">`) : '')
     + (simple || pat ? row('Угол поворота, °', `<input type="number" id="peA" step="5" value="${d.a || 0}">`) : '')
@@ -11595,6 +11917,7 @@ function renderOptbar(){
   if (t === 'wall' || t === 'rect'){
     h += `<label for="oType">Тип<select id="oType">${typeOptions(S.wallType)}</select></label>` + num('oH', 'Высота', S.wallH)
       + `<label for="oLoc">Линия привязки<select id="oLoc">${Object.entries(LOC_LINES).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select></label>`
+      + (t === 'wall' ? `<label for="oForm" title="Форма стены (как в ArchiCAD): прямая; дуга по трём точкам — начало, конец, точка на дуге; дуга по касательной — продолжает предыдущую стену цепи плавно">Форма<select id="oForm"><option value="line">Прямая</option><option value="3p"${S.wallForm === '3p' ? ' selected' : ''}>Дуга по 3 точкам</option><option value="tan"${S.wallForm === 'tan' ? ' selected' : ''}>Дуга по касательной</option></select></label>` : '')
       + (t === 'wall' ? `<label><input type="checkbox" id="oChain"${S.chain ? ' checked' : ''}> Цепь</label>` : '')
       + `<span class="tip">Пробел — наружная сторона. Точки липнут к осям здания и направлениям X/Y</span>`;
   } else if (t === 'door') h += `<label for="oDOp">Вид<select id="oDOp"><option value="">Дверь</option><option value="gl"${S.doorOp === 'gl' ? ' selected' : ''}>Балконная, остеклённая</option><option value="1"${S.doorOp === '1' || S.doorOp === true ? ' selected' : ''}>Проём (без полотна)</option></select></label>` + num('oDW', 'Ширина', S.doorW) + num('oDH', 'Высота', S.doorH);
@@ -11636,6 +11959,7 @@ function renderOptbar(){
   on('oType', 'change', e => { S.wallType = e.target.value; updatePreview(); updatePanel(); });
   const loc = ob.querySelector('#oLoc'); if (loc){ loc.value = S.loc; loc.onchange = e => { S.loc = e.target.value; updatePreview(); }; }
   on('oChain', 'change', e => { S.chain = e.target.checked; });
+  on('oForm', 'change', e => { setWallForm(e.target.value); });
   if (ob.querySelector('#oDOp')) ob.querySelector('#oDOp').onchange = e => { S.doorOp = e.target.value; if (e.target.value === 'gl' && S.doorW < 0.7){ S.doorW = 0.8; S.doorH = 2.2; renderOptbar(); } };
   if (ob.querySelector('#oWBd')) ob.querySelector('#oWBd').onchange = e => { S.winBd = !!e.target.value; if (S.winBd && S.winW < 1.3){ S.winW = 1.72; S.winH = 1.45; S.winSill = 0.9; } renderOptbar(); updatePreview(); };
   if (ob.querySelector('#oWDS')) ob.querySelector('#oWDS').onchange = e => { S.balcSide = e.target.value; updatePreview(); };
@@ -12022,7 +12346,8 @@ function renderPanel(_el, _it){
     h += `<div class="typesel"><span class="tname">Стена ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span><select id="sType"><option value="">Базовая (толщина вручную)</option>${typeOptions(it.wt)}</select><span class="tsub">${ty ? ty.layers.length + ' слоя(ёв), ' + mm(typeT(ty)) + ' мм' : 'один слой'}${nops ? ' · проёмов: ' + nops : ''}</span>${ty ? '<button class="btn sm" id="sTypeEdit">Изменить тип…</button>' : ''}</div>`
       + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
       + consRows(it)
-      + `<div class="pgrp">Размеры</div>` + prow('Длина, мм', pnum('sLen', Math.hypot(dx, dz), 'min="10" step="10"'))
+      + `<div class="pgrp">Размеры</div>` + (arcOf(it) ? prow('Длина по дуге, мм', `<span class="val">${mm(arcOf(it).L)}</span>`) + prow('Радиус дуги, мм', pnum('sArcR', arcOf(it).R, 'min="10" step="10"')) + prow('Хорда, мм', `<span class="val">${mm(Math.hypot(dx, dz))}</span>`) : prow('Длина, мм', pnum('sLen', Math.hypot(dx, dz), 'min="10" step="10"')))
+      + prow('Форма', `<select id="sArcF"><option value="">Прямая</option><option value="1"${arcOf(it) ? ' selected' : ''}>Дуга</option></select>`)
       + prow('Площадь', `<span class="val">${m2(wallStats(it).area)} м²</span>`) + prow('Объём', `<span class="val">${wallStats(it).vol.toLocaleString('ru-RU', { maximumFractionDigits:2 })} м³</span>`)
       + prow('Толщина, мм', pnum('sT', it.t, ty ? 'readonly tabindex="-1"' : 'min="10" step="10"'))
       + `<div class="pgrp">Положение</div>` + prow('Угол к оси X', `<span class="val">${Math.round(((Math.atan2(-dz, dx) * 180 / Math.PI) + 360) % 360)}°</span>`)
@@ -12064,6 +12389,10 @@ function renderPanel(_el, _it){
       + (door && it.op ? '' : `<div class="pgrp">Материалы и отделка</div>` + prow(door ? 'Материал (вся дверь)' : 'Материал рамы', matPick('sMatX', it.m, door ? 'По умолчанию (серый дуб)' : 'По умолчанию (белый ПВХ)'))
         + (door && !it.gl ? prow('Отделка полотна спереди', matPick('sMF', it.mf, 'Как дверь')) + prow('Отделка полотна сзади', matPick('sMB', it.mb, 'Как дверь')) + prow('Материал каркаса', matPick('sMK', it.mk, 'Как дверь')) : '')
         + prow('Готово', `<label class="pchk"><input type="checkbox" id="sODone"${it.done ? ' checked' : ''}> да</label>`))
+      // «Наличники»: the faces, width, thickness, material
+      + (door && it.op ? '' : (() => { const c = csOf(it), on = c.side !== 'none'; return `<div class="pgrp">Наличники</div>`
+        + prow('Наличники', `<select id="sCsS">${[['none', 'Нет'], ['both', 'С двух сторон'], ['in', door ? 'Со стороны открывания' : 'Со стороны комнаты'], ['out', door ? 'С обратной стороны' : 'Снаружи']].map(([k, n]) => `<option value="${k}"${k === c.side ? ' selected' : ''}>${n}</option>`).join('')}</select>`)
+        + (on ? prow('Ширина наличника, мм', pnum('sCsW', c.w, 'min="10" step="5"')) + prow('Толщина наличника, мм', pnum('sCsT', c.t, 'min="2" step="1"')) + prow('Материал наличников', matPick('sCsM', c.m, door ? 'Как каркас' : 'Белый ПВХ')) : ''); })())
       // Revit «Идентификация»
       + `<div class="pgrp">Идентификация</div>`
       + prow('Изображение', `${it.img ? `<img src="${it.img}" alt="" style="max-width:60px;max-height:40px;vertical-align:middle;border:1px solid var(--pp-line,#ccc)"> <button class="btn sm" id="sOImgDel" title="Убрать изображение">×</button> ` : ''}<button class="btn sm" id="sOImg">${it.img ? 'Заменить…' : 'Выбрать…'}</button>`)
@@ -12218,6 +12547,9 @@ function renderPanel(_el, _it){
   }
   if (it.type === 'wall'){
     bind('sLen', L => { const dx = it.x2 - it.x1, dz = it.z2 - it.z1, l = Math.hypot(dx, dz) || 1; it.x2 = r4(it.x1 + dx / l * L); it.z2 = r4(it.z1 + dz / l * L); });
+    // arc walls: the radius (the ends stay; the smaller arc), straight / arc
+    bind('sArcR', R => { const c = Math.hypot(it.x2 - it.x1, it.z2 - it.z1); if (R < c / 2 + 1e-4){ toast(`Радиус не меньше половины хорды: ${mm(c / 2)} мм`); return; } it.arc = r4(Math.sign(it.arc || 1) * (R - Math.sqrt(R * R - c * c / 4))); });
+    if (q('sArcF')) q('sArcF').onchange = e => { pushUndo('Форма стены'); markEdited(); if (e.target.value){ if (!it.arc) it.arc = r4(Math.hypot(it.x2 - it.x1, it.z2 - it.z1) / 8); } else delete it.arc; el.dataset.id = 'x'; rebuild(); };
     bind('sT', v => keepLocLine(it, () => { it.t = v; })); bind('sH', v => it.h = v);
     q('sType').onchange = e => { pushUndo(); markEdited(); keepLocLine(it, () => { it.wt = e.target.value; if (typeById(it.wt)) it.t = typeT(typeById(it.wt)); }); el.dataset.id = 'x'; rebuild(); };
     const te = q('sTypeEdit'); if (te) te.onclick = () => openTypes(it.wt);
@@ -12232,6 +12564,11 @@ function renderPanel(_el, _it){
       if (q('sOBL')) q('sOBL').onchange = e => ch(() => { it.blv = e.target.value; if (it.type === 'door') delete it.boff; else it.boff = r4(wb() + it.sill - lvElev(it.blv)); });
       // «Материалы и отделка» and «Идентификация»
       for (const [id, k] of [['sMF', 'mf'], ['sMB', 'mb'], ['sMK', 'mk']]) if (q(id)) q(id).onchange = e => ch(() => { if (e.target.value) it[k] = e.target.value; else delete it[k]; });
+      // «Наличники»
+      const csSet = fn => ch(() => { const c = csOf(it); it.cs = { side:c.side, w:c.w, t:c.t, ...(c.m ? { m:c.m } : {}) }; fn(it.cs); });
+      if (q('sCsS')) q('sCsS').onchange = e => csSet(c => { c.side = e.target.value; });
+      for (const [id, k, lo] of [['sCsW', 'w', 0.01], ['sCsT', 't', 0.002]]) if (q(id)) q(id).onchange = e => { const v = Number(e.target.value) / 1000; if (Number.isFinite(v) && v >= lo) csSet(c => { c[k] = r4(Math.min(v, k === 'w' ? 0.4 : 0.1)); }); };
+      if (q('sCsM')) q('sCsM').onchange = e => csSet(c => { if (e.target.value) c.m = e.target.value; else delete c.m; });
       if (q('sODone')) q('sODone').onchange = e => ch(() => { if (e.target.checked) it.done = true; else delete it.done; });
       if (q('sOCmt')) q('sOCmt').onchange = e => ch(() => { const s = e.target.value.trim().slice(0, 300); if (s) it.cmt = s; else delete it.cmt; });
       if (q('sOImgDel')) q('sOImgDel').onclick = () => ch(() => { delete it.img; });
@@ -12626,10 +12963,10 @@ function sanitizeItems(arr){
     if (!it || typeof it !== 'object') continue;
     const id = Math.round(+it.id); if (!(id > 0) || seen.has(id)) continue;
     let o = null;
-    if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it), ...(Array.isArray(it.svNo) ? { svNo:it.svNo.filter(s => /^-?1:\d{1,2}$/.test(s)) } : {}), ...(Array.isArray(it.svNoT) ? { svNoT:it.svNoT.filter(s => s === 1 || s === -1 || /^-?1:\d{1,2}$/.test(s)) } : {}), ...(Array.isArray(it.dj) && (it.dj[0] || it.dj[1]) ? { dj:[!!it.dj[0], !!it.dj[1]] } : {}), ...(LOC_LINES[it.loc] && it.loc !== 'center' ? { loc:it.loc } : {}), ...(it.nrb ? { nrb:true } : {}) };
+    if (it.type === 'wall' && seg(it) && N(it.t) && N(it.h)) o = { id, type:'wall', x1:+it.x1, z1:+it.z1, x2:+it.x2, z2:+it.z2, t:Math.max(+it.t, 0.01), h:Math.max(+it.h, 0.1), wt:typeof it.wt === 'string' ? it.wt : '', flipL:!!it.flipL, tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it), ...(Array.isArray(it.svNo) ? { svNo:it.svNo.filter(s => /^-?1:\d{1,2}$/.test(s)) } : {}), ...(Array.isArray(it.svNoT) ? { svNoT:it.svNoT.filter(s => s === 1 || s === -1 || /^-?1:\d{1,2}$/.test(s)) } : {}), ...(Array.isArray(it.dj) && (it.dj[0] || it.dj[1]) ? { dj:[!!it.dj[0], !!it.dj[1]] } : {}), ...(LOC_LINES[it.loc] && it.loc !== 'center' ? { loc:it.loc } : {}), ...(it.nrb ? { nrb:true } : {}), ...(N(it.arc) && Math.abs(+it.arc) >= 1e-4 ? { arc:r4(+it.arc) } : {}) };
     else if (it.type === 'box' && ['x','z','w','d','h'].every(k => N(it[k]))) o = { id, type:'box', x:+it.x, z:+it.z, w:Math.max(+it.w, 0.01), d:Math.max(+it.d, 0.01), h:Math.max(+it.h, 0.01), ...(MATS[it.m] ? { m:it.m } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
     else if ((it.type === 'door' || it.type === 'window') && ['wall','pos','w','h'].every(k => N(it[k]))) o = { id, type:it.type, wall:Math.round(+it.wall), pos:+it.pos, w:Math.max(+it.w, 0.05), h:Math.max(+it.h, 0.05), sill:N(it.sill) ? +it.sill : 0,
-      ...(typeof it.blv === 'string' ? { blv:it.blv.slice(0, 20), boff:N(it.boff) ? +it.boff : 0 } : {}), ...(typeof it.tlv === 'string' ? { tlv:it.tlv.slice(0, 20), toff:N(it.toff) ? +it.toff : 0 } : {}), flip:!!it.flip, hand:!!it.hand, ...(it.type === 'door' && it.op ? { op:true } : it.type === 'door' && it.gl ? { gl:true } : {}), ...(it.type === 'window' && [1, 2, 3].includes(+it.sash) ? { sash:+it.sash } : {}), ...(it.type === 'door' && it.lf === 'flat' ? { lf:'flat' } : {}), ...(it.type === 'window' && it.bd && N(it.bd.w) && +it.bd.w > 0 ? { bd:{ w:Math.max(+it.bd.w, 0.3), side:it.bd.side === 'l' ? 'l' : 'r', ...(it.bd.low === 'panel' ? { low:'panel' } : {}) } } : {}), ...(MATS[it.m] ? { m:it.m } : {}), ...Object.fromEntries(['mf', 'mb', 'mk'].filter(k => MATS[it[k]]).map(k => [k, it[k]])), ...(it.done ? { done:true } : {}), ...(typeof it.cmt === 'string' && it.cmt ? { cmt:it.cmt.slice(0, 300) } : {}), ...(typeof it.img === 'string' && /^data:image\//.test(it.img) && it.img.length < 400000 ? { img:it.img } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
+      ...(typeof it.blv === 'string' ? { blv:it.blv.slice(0, 20), boff:N(it.boff) ? +it.boff : 0 } : {}), ...(typeof it.tlv === 'string' ? { tlv:it.tlv.slice(0, 20), toff:N(it.toff) ? +it.toff : 0 } : {}), flip:!!it.flip, hand:!!it.hand, ...(it.type === 'door' && it.op ? { op:true } : it.type === 'door' && it.gl ? { gl:true } : {}), ...(it.type === 'window' && [1, 2, 3].includes(+it.sash) ? { sash:+it.sash } : {}), ...(it.type === 'door' && it.lf === 'flat' ? { lf:'flat' } : {}), ...(it.type === 'window' && it.bd && N(it.bd.w) && +it.bd.w > 0 ? { bd:{ w:Math.max(+it.bd.w, 0.3), side:it.bd.side === 'l' ? 'l' : 'r', ...(it.bd.low === 'panel' ? { low:'panel' } : {}) } } : {}), ...(MATS[it.m] ? { m:it.m } : {}), ...Object.fromEntries(['mf', 'mb', 'mk'].filter(k => MATS[it[k]]).map(k => [k, it[k]])), ...(it.cs && typeof it.cs === 'object' && ['both', 'in', 'out', 'none'].includes(it.cs.side) ? { cs:{ side:it.cs.side, w:clamp(+it.cs.w || CS_DEF.w, 0.01, 0.4), t:clamp(+it.cs.t || CS_DEF.t, 0.002, 0.1), ...(MATS[it.cs.m] ? { m:it.cs.m } : {}) } } : {}), ...(it.done ? { done:true } : {}), ...(typeof it.cmt === 'string' && it.cmt ? { cmt:it.cmt.slice(0, 300) } : {}), ...(typeof it.img === 'string' && /^data:image\//.test(it.img) && it.img.length < 400000 ? { img:it.img } : {}), tag:TAG_RE.test(it.tag) ? it.tag : null, ...phOf(it) };
     else if (it.type === 'dim' && Array.isArray(it.refs) && it.refs.every(okRef)) o = { id, type:'dim', refs:it.refs.map(r => ({ ...r })), off:N(it.off) ? +it.off : 0.8, mode:['h','v'].includes(it.mode) ? it.mode : undefined, dir:it.dir && N(it.dir.x) && N(it.dir.z) ? { x:+it.dir.x, z:+it.dir.z } : undefined, auto:!!it.auto, ...(it.survey ? { survey:true, sw:Math.round(+it.sw) || 0, side:+it.side === -1 ? -1 : 1, ...(it.dup ? { dup:true } : {}), ...(it.tot ? { tot:true } : {}), ...(Number.isInteger(+it.sg) && +it.sg > 0 ? { sg:+it.sg } : {}) } : {}), ...(typeof it.dph === 'string' ? { dph:it.dph.slice(0, 24) } : {}), ...(typeof it.sub === 'string' && it.sub ? { sub:it.sub.slice(0, 24) } : {}), ...(typeof it.dt === 'string' && it.dt ? { dt:it.dt.slice(0, 24) } :{}), ...(it.demo ? { demo:true, dk:String(it.dk || '').slice(0, 30) } : {}),
       ...(it.tp && typeof it.tp === 'object' ? { tp:Object.fromEntries(Object.entries(it.tp).filter(([k, v]) => /^\d{1,3}$/.test(k) && v && N(v.u) && N(v.v)).map(([k, v]) => [k, { u:clamp(+v.u, -100, 100), v:clamp(+v.v, -100, 100) }])) } : {}),
       ...(it.txt && typeof it.txt === 'object' ? { txt:Object.fromEntries(Object.entries(it.txt).filter(([k, v]) => /^\d{1,3}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.slice(0, 40)])) } : {}) };
@@ -13048,7 +13385,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-1719');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-1810');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -13348,10 +13685,15 @@ function exportIFC(){
     const S0 = ST.get(lvOf(w)) || [...ST.values()][0], z0 = baseY(w) - S0.elev;
     const pl = place(S0.pl, w.x1, -w.z1, z0, f.dir.x, -f.dir.z);
     const ty = typeById(w.wt), name = `Стена ${w.tag || w.id}`;
-    const e = add(`IFCWALL('${ifcGuid()}',${oh},${ifcStr(name)},${ifcStr(ty ? ty.name : 'Стена ' + Math.round(w.t * 1000) + ' мм')},$,${pl},${shape('SweptSolid', [box(f.L / 2, 0, f.L, w.t, w.h)])},${ifcStr(w.tag)})`);
+    // an arc wall: the profile is the ring sector between its two faces (in the frame of the chord), extruded up
+    const A = f.arc, arcBody = () => { const n = Math.max(8, Math.ceil(Math.abs(A.d) / (3 * Math.PI / 180))), loc = q => { const dx = q.x - w.x1, dz = q.z - w.z1; return P2(dx * f.dir.x + dz * f.dir.z, dx * f.dir.z - dz * f.dir.x); };
+      const pts = []; for (let i = 0; i <= n; i++) pts.push(loc(arcPt(A, A.L * i / n, w.t / 2))); for (let i = n; i >= 0; i--) pts.push(loc(arcPt(A, A.L * i / n, -w.t / 2))); pts.push(pts[0]);
+      const prof = add(`IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,${add(`IFCPOLYLINE((${pts.join(',')}))`)})`); return add(`IFCEXTRUDEDAREASOLID(${prof},${add(`IFCAXIS2PLACEMENT3D(${P(0, 0, 0)},$,$)`)},${Z},${ifcNum(w.h)})`); };
+    const e = add(`IFCWALL('${ifcGuid()}',${oh},${ifcStr(name)},${ifcStr(ty ? ty.name : 'Стена ' + Math.round(w.t * 1000) + ' мм')},$,${pl},${shape('SweptSolid', [A ? arcBody() : box(f.L / 2, 0, f.L, w.t, w.h)])},${ifcStr(w.tag)})`);
     cont.get(lvOf(w)).push(e); matOf(ty ? ty.name : 'Стена').els.push(e); nW++;
     for (const op of opsOf(w, f.L).flatMap(opPieces)){ // a balcony block goes as a window and a door
-      const o = op.door ? { ...op.o, type:'door', gl:true, tag:(op.o.tag || op.o.id) + '-д' } : op.o, ww = op.b - op.a, hh = op.top - op.bot, opl = place(pl, op.pos, 0, op.bot);
+      const ap = A && arcPt(A, op.pos), at = A && arcTan(A, op.pos);
+      const o = op.door ? { ...op.o, type:'door', gl:true, tag:(op.o.tag || op.o.id) + '-д' } : op.o, ww = op.b - op.a, hh = op.top - op.bot, opl = A ? place(S0.pl, ap.x, -ap.z, z0 + op.bot, at.x, -at.z) : place(pl, op.pos, 0, op.bot);
       const oe = add(`IFCOPENINGELEMENT('${ifcGuid()}',${oh},${ifcStr('Проём')},$,$,${opl},${shape('SweptSolid', [box(0, 0, ww, w.t + 0.2, hh)])},$)`);
       add(`IFCRELVOIDSELEMENT('${ifcGuid()}',${oh},$,$,${e},${oe})`);
       if (o.op) { nO++; continue; } // an opening without a leaf (проём)
@@ -13574,6 +13916,31 @@ function pnToggle(k){
   setPanel(k, true); pnSync();
 }
 document.querySelectorAll('#phoneNav [data-pn]').forEach(b => b.onclick = () => pnToggle(b.dataset.pn));
+// touch helpers (tablet, phone): «По осям», «Под углом», «Изменить» — bottom-left of the view, also when panels are hidden
+function setTmod(o = {}){
+  if (o.off){ TMOD.ortho = false; TMOD.step = 0; TMOD.fix = null; }
+  if (o.ortho != null){ TMOD.ortho = !!o.ortho; if (TMOD.ortho){ TMOD.step = 0; TMOD.fix = null; } }
+  if (o.step != null){ const s = Math.round(+o.step); TMOD.step = s > 0 && s <= 90 ? s : 0; TMOD.fix = null; if (TMOD.step) TMOD.ortho = false; }
+  if (o.fix != null){ const f = +o.fix; if (Number.isFinite(f)){ TMOD.fix = ((f % 180) + 180) % 180; TMOD.step = 0; TMOD.ortho = false; } }
+  lsSet('kot.tmod', JSON.stringify(TMOD)); tmodSync();
+  if (mouse.inside) hover(mouse.x, mouse.y, mouse.shift);
+  return TMOD.ortho ? 'Построение по осям: включено' : TMOD.fix != null ? `Построение под углом ${TMOD.fix}°` : TMOD.step ? `Построение с шагом угла ${TMOD.step}°` : 'Построение: свободное (оси и угол выключены)';
+}
+function tmodSync(){
+  const o = $('#tbOrtho'), a = $('#tbAngle'), v = $('#tbAngV'); if (!o) return;
+  o.setAttribute('aria-pressed', TMOD.ortho); const on = !!TMOD.step || TMOD.fix != null; a.setAttribute('aria-pressed', on);
+  v.textContent = TMOD.fix != null ? TMOD.fix + '°' : TMOD.step ? 'шаг ' + TMOD.step + '°' : 'Угол';
+}
+{ try { const t = JSON.parse(lsGet('kot.tmod') || 'null'); if (t){ TMOD.ortho = !!t.ortho; TMOD.step = +t.step || 0; TMOD.fix = t.fix == null ? null : +t.fix; } } catch (e){}
+  const stop = e => e.stopPropagation();
+  for (const id of ['tbOrtho', 'tbAngle', 'tbModify']){ const b = $('#' + id); b.addEventListener('pointerdown', stop); b.addEventListener('mousedown', stop); }
+  $('#tbOrtho').onclick = () => toast(setTmod({ ortho:!TMOD.ortho }));
+  $('#tbAngle').onclick = e => popMenu(e, [
+    ['Выключить', '', () => toast(setTmod({ step:0, fix:null, ortho:false, off:true })), !!TMOD.step || TMOD.fix != null],
+    ['Шаг 15°', TMOD.step === 15 ? '✓' : '', () => toast(setTmod({ step:15 })), true], ['Шаг 30°', TMOD.step === 30 ? '✓' : '', () => toast(setTmod({ step:30 })), true], ['Шаг 45°', TMOD.step === 45 ? '✓' : '', () => toast(setTmod({ step:45 })), true],
+    ['Свой угол…', TMOD.fix != null ? TMOD.fix + '°' : '', () => { const s = prompt('Угол построения, градусы (от горизонтали против часовой стрелки)', TMOD.fix != null ? TMOD.fix : 60); if (s == null) return; const f = Number(String(s).replace(',', '.')); if (Number.isFinite(f)) toast(setTmod({ fix:f })); else toast('Нужно число градусов'); }, true]]);
+  $('#tbModify').onclick = () => { setTool('select'); toast('Изменить: выбирайте элементы'); };
+  tmodSync(); }
 // full screen for the drawing (phone, tablet): the grip at the top — pull up or tap to hide the ribbon, the bars and all windows; pull down or tap to bring them back
 function setUiHide(on){
   const app = $('#app'); on = on == null ? !app.classList.contains('ui-hide') : !!on;
@@ -13964,7 +14331,7 @@ const RB_LAYOUT = [
 })();
 $('#fltAll').onclick = () => $('#filterList').querySelectorAll('input').forEach(i => i.checked = true);
 $('#fltNone').onclick = () => $('#filterList').querySelectorAll('input').forEach(i => i.checked = false);
-$('#undoBtn').onclick = () => undo(1); $('#redoBtn').onclick = () => redo(1); $('#qSave').onclick = saveNow;
+$('#undoBtn').onclick = () => undo(1); $('#redoBtn').onclick = () => redo(1); $('#qSave').onclick = saveNow; $('#qOpen').onclick = () => openLib(); $('#qPrint').onclick = () => openPrint();
 // Revit-style undo list: pick an action and everything after it is undone too
 const histMenu = $('#histMenu');
 function openHist(){
@@ -14021,6 +14388,9 @@ let keyBuf = '', keyT = null;
 const LAT = Object.fromEntries('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => ['Key' + c, c]));
 addEventListener('keydown', e => {
   const mod = e.ctrlKey || e.metaKey;
+  // the wall palette (ArchiCAD): Esc cancels the running function or closes the icons
+  if (e.key === 'Escape' && PET){ e.preventDefault(); petCancel(); return; }
+  if (e.key === 'Escape' && !petEl.hidden){ petClose(); return; }
   if (mod && e.code === 'KeyS'){ e.preventDefault(); e.shiftKey ? saveAsFile() : saveNow(); return; }
   if (mod && e.code === 'KeyO'){ e.preventDefault(); openLib(); return; }
   if (!famDlg.hidden){ if (e.key === 'Escape'){ if (FE.mode === 'sketch') feCancel(); else famDlg.hidden = true; e.preventDefault(); } else if (e.key === 'Enter' && FE.mode === 'sketch' && !e.target.matches('input, select, textarea')){ e.preventDefault(); feNext(); } return; }
@@ -14035,7 +14405,7 @@ addEventListener('keydown', e => {
   }
   if (e.target.matches('input, select, textarea')) return;
   // Revit Tab: the next element under the cursor (Shift+Tab — back)
-  if (e.key === 'Tab' && S.tool === 'select' && mouse.inside && HOV.list.length){ e.preventDefault(); const n = HOV.list.length; HOV.i = (HOV.i + (e.shiftKey ? n - 1 : 1)) % n; hovDraw(); return; }
+  if (e.key === 'Tab' && S.tool === 'select' && mouse.inside && HOV.list.length){ e.preventDefault(); HOV.tab = true; const n = HOV.list.length; HOV.i = (HOV.i + (e.shiftKey ? n - 1 : 1)) % n; hovDraw(); return; }
   if (mod && e.code === 'KeyP'){ e.preventDefault(); openPrint(); return; }
   if (mod && e.code === 'KeyZ'){ e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
   if (mod && e.code === 'KeyC'){ e.preventDefault(); clipCopy(false); return; }
@@ -14346,7 +14716,27 @@ function parseOne(f){
   if (/перехват|работать в файле/.test(f)) return { a:'ydtake' };
   if (/бумаг/.test(f) && /(?:фон|поле|сделай|включи|выключи|убери|верни|мят|скомкан|без)/.test(f)) return { a:'paper', on:!/(?:выключ|убер|без|ровн|отключ|не надо)/.test(f) };
   if (/(?:ровный|обычный|простой)\s+фон/.test(f)) return { a:'paper', on:false };
-  if (/(?:на )?весь экран|полн[а-я]* экран/.test(f)) return { a:'fullscreen', on:!/выйд|выход|верни|убер|отмен/.test(f) };
+  // a fill on a material: «штриховка дуб для материала дерево», «материал паркет штриховка орех», «у материала дерево штриховка сечения венге»
+  { const m = f.match(/штриховк[а-яё]*\s+(?:(сечени[а-яё]*|разрез[а-яё]*|поверхност[а-яё]*)\s+)?(дуб|ясен[а-яё]*|бук|сосн[а-яё]*|орех[а-яё]*|тик|венге|шпон[а-яё]*)\s+(?:для|у|на)\s+материал[а-яё]*\s+(.+)$/) || f.match(/(?:у\s+)?материал[а-яё]*\s+(.+?)\s+штриховк[а-яё]*\s+(?:(сечени[а-яё]*|разрез[а-яё]*|поверхност[а-яё]*)\s+)?(дуб|ясен[а-яё]*|бук|сосн[а-яё]*|орех[а-яё]*|тик|венге|шпон[а-яё]*)$/);
+    if (m){ const first = /^штриховк/.test(m[0]) || m[0].indexOf('штриховк') < m[0].indexOf('материал'); const lay = first ? m[1] : m[2], sp = first ? m[2] : m[3], mat = first ? m[3] : m[1];
+      return { a:'matfill', mat:mat.trim(), fill:sp, layer:lay && /сечени|разрез/.test(lay) ? 'cut' : 'surf' }; } }  if (/трекер|подсказк[а-яё]*\s+(?:у\s+курсора|при\s+построени)/.test(f)) return { a:'tracker', on:!/(?:скро|убер|выключ|отключ|не\s+показ)/.test(f) };
+  // arc walls and the wall palette: «стену Б дугой радиус 3000», «выпрями стену Б», «стена дугой», «стена по касательной», «прямая стена»,
+  // «вставь узел в стену Б», «сместить стену Б на 200», «подними стену Б на 100», «палитра стены»
+  { const T = f.match(/стен[а-яё]*\s+([а-яёa-z])(?:\s|$)/i), wall = T ? { wall:T[1] } : {}, num = x => { const v = +String(x).replace(',', '.'); return Math.abs(v) > 50 ? v / 1000 : v; };
+    if (/(?:выпрям|сделай\s+прям)[а-яё]*\s+стен/.test(f) && T) return { a:'wallarc', ...wall, off:true };
+    { const m = f.match(/стен[а-яё]*\s+([а-яёa-z])\s+(?:сделай\s+)?(?:дуг[а-яё]*|изогн[а-яё]*|радиус[а-яё]*)(?:.*?радиус[а-яё]*)?\s*(\d+(?:[.,]\d+)?)?/i) || f.match(/(?:изогн|согн)[а-яё]*\s+стен[а-яё]*\s+([а-яёa-z])(?:.*?радиус[а-яё]*\s*(\d+(?:[.,]\d+)?))?/i);
+      if (m) return { a:'wallarc', wall:m[1], ...(m[2] ? { r:num(m[2]) } : {}), ...(/наружу|вправо|справа/.test(f) ? { side:'r' } : /влево|слева/.test(f) ? { side:'l' } : {}) }; }
+    if (/(?:^|\s)(?:стен[а-яё]*\s+(?:дугой|по\s+дуге|дуга)|дугов[а-яё]*\s+стен[а-яё]*|рису[а-яё]*\s+стен[а-яё]*\s+дугой)(?:\s|$)/.test(f) && !T) return { a:'wallform', f:/касател/.test(f) ? 'tan' : '3p' };
+    if (/стен[а-яё]*\s+по\s+касательн/.test(f)) return { a:'wallform', f:'tan' };
+    if (/(?:^|\s)(?:прям[а-яё]*\s+стен[а-яё]*|стен[а-яё]*\s+прям[а-яё]*)(?:\s|$)/.test(f) && !T) return { a:'wallform', f:'line' };
+    if (/(?:встав|добав|постав)[а-яё]*\s+узел/.test(f)){ const n = f.match(/(?:на|выдвин[а-яё]*\s+на)\s+(-?\d+(?:[.,]\d+)?)/); return { a:'wallnode', ...wall, ...(n ? { off:num(n[1]) } : {}) }; }
+    { const m = f.match(/(?:смест|сдвин|отодвин)[а-яё]*\s+(?:ребро\s+)?стен[а-яё]*\s+([а-яёa-z])\s+(?:параллельно\s+)?на\s+(-?\d+(?:[.,]\d+)?)/i); if (m) return { a:'walloffset', wall:m[1], d:num(m[2]) }; }
+    { const m = f.match(/(подним|опуст)[а-яё]*\s+стен[а-яё]*\s+([а-яёa-z])\s+на\s+(\d+(?:[.,]\d+)?)/i); if (m){ const v = num(m[3]) * 1000; return { a:'wallelev', wall:m[2], mm:/опуст/.test(m[1]) ? -v : v }; } }
+    if (/палитр[а-яё]*\s+стен|(?:иконк|значк)[а-яё]*\s+стен/.test(f)) return { a:'wallpet' }; }  // building helpers (the touch buttons at the bottom-left): «построение по осям», «рисуй под углом 45», «шаг угла 15», «свободное построение»
+  if (/(?:построени[а-яё]*|рису[а-яё]*|стро[йи][а-яё]*|черти[а-яё]*)\s+(?:только\s+)?по\s+осям/.test(f) || /режим[а-яё]*\s+по\s+осям/.test(f)) return /(?:выключ|отключ|убер|сним|без)/.test(f) ? { a:'tmod', ortho:false } : { a:'tmod', ortho:true };
+  { const m = f.match(/шаг[а-яё]*\s+угл[а-яё]*\s+(\d+)/) || f.match(/(?:построени[а-яё]*|рису[а-яё]*|стро[йи][а-яё]*|черти[а-яё]*)\s+с\s+шагом\s+(\d+)\s*(?:°|градус)/); if (m) return { a:'tmod', step:+m[1] }; }
+  { const m = f.match(/(?:построени[а-яё]*|рису[а-яё]*|стро[йи][а-яё]*|черти[а-яё]*)\s+под\s+угл[а-яё]*\s+(-?\d+(?:[.,]\d+)?)/); if (m) return { a:'tmod', fix:+m[1].replace(',', '.') }; }
+  if (/свободн[а-яё]*\s+построени|(?:выключ|отключ|убер)[а-яё]*\s+(?:построени[а-яё]*\s+)?(?:под\s+углом|угол\s+построени|шаг\s+угла)/.test(f)) return { a:'tmod', off:true };  if (/(?:на )?весь экран|полн[а-я]* экран/.test(f)) return { a:'fullscreen', on:!/выйд|выход|верни|убер|отмен/.test(f) };
   if (/(?:скрой|спрячь|убери)\s+(?:все\s+)?(?:панели|окна|меню)/.test(f)) return { a:'fullscreen', on:true };
   if (/(?:покажи|верни|открой)\s+(?:все\s+)?(?:панели|окна|меню)/.test(f)) return { a:'fullscreen', on:false };
   if (/лент/.test(f) && /сверн|скрой|спрячь|убер/.test(f)) return { a:'ribbon', on:false };
@@ -14393,7 +14783,17 @@ function parseOne(f){
   // «Мастер проекта»: the window, or build the whole project from the survey at once
   if (/мастер[а-яё]*\s+проект/.test(f)) return { a:'wizard', open:!/(?:запуст|собер|сдела|выполн|постро)/.test(f) };
   if (/(?:собер|собра|сдела|постро|оформ)[а-яё]*\s+(?:весь\s+|целый\s+|мне\s+)?проект(?:\s+(?:целиком|полностью|автоматически|сам[а-яё]*))?(?:\s+(?:из|по)\s+обмер[а-яё]*)?$/.test(f) || /проект[а-яё]*\s+(?:из|по)\s+обмер/.test(f)) return { a:'wizard' };
-  // a door's / window's finish and identity (Revit): «у двери Д3 отделка спереди дуб», «у двери Б каркас белый», «у двери Б комментарий 900», «дверь Б готово»
+  // «Наличники»: «наличники у двери А с двух сторон», «у окна Б наличники со стороны комнаты», «убери наличники у двери А»,
+  // «наличник у двери А шириной 90», «толщина наличника у двери А 16», «материал наличников у двери А дерево»
+  if (/наличник/.test(f)){ const T = f.match(/(окн|двер)[а-яё]*\s+([а-яёa-z]\d{0,2})(?:\s|$)/); if (T){ const el = '@' + (T[1] === 'окн' ? 'window' : 'door') + ':' + T[2].toUpperCase(), o = { a:'setop', el }, mm = x => { const v = +String(x).replace(',', '.'); return v > 1 ? v / 1000 : v; };
+    if (/(?:убер|удал|без|сним)[а-яё]*/.test(f)) o.cs = 'none';
+    else if (/(?:с\s+)?(?:двух|обеих|обе)\s+сторон/.test(f)) o.cs = 'both';
+    else if (/(?:со\s+)?сторон[а-яё]*\s+(?:комнат|открыв|помещен)|внутр/.test(f)) o.cs = 'in';
+    else if (/снаружи|наружн|обратн/.test(f)) o.cs = 'out';
+    const w = f.match(/ширин[а-яё]*\s+(\d+(?:[.,]\d+)?)/), t = f.match(/толщин[а-яё]*(?:\s+наличник[а-яё]*)?(?:\s+у\s+(?:окн|двер)[а-яё]*\s+[а-яёa-z]\d{0,2})?\s+(\d+(?:[.,]\d+)?)/), m = f.match(/материал[а-яё]*\s+наличник[а-яё]*(?:\s+у\s+(?:окн|двер)[а-яё]*\s+[а-яёa-z]\d{0,2})?\s+(.+)$/);
+    if (w) o.csw = mm(w[1]); if (t) o.cst = mm(t[1]); if (m) o.csm = m[1].trim();
+    if (!o.cs && !w && !t && !m) o.cs = T[1] === 'окн' ? 'in' : 'both';
+    return o; } }  // a door's / window's finish and identity (Revit): «у двери Д3 отделка спереди дуб», «у двери Б каркас белый», «у двери Б комментарий 900», «дверь Б готово»
   { const m = f.match(/(окн|двер)[а-яё]*\s+([а-яёa-z]\d{0,2})(?:\s|$).*?(отделк[а-яё]*\s+(?:полотн[а-яё]*\s+)?(?:спереди|сзади)|(?:каркас|коробк)[а-яё]*|комментари[а-яё]*|(?:не\s+)?готов[а-яё]*)(?:\s+|$)(.*)$/);
     if (m){ const el = '@' + (m[1] === 'окн' ? 'window' : 'door') + ':' + m[2].toUpperCase(), v = m[4].replace(/^(?:—|-|:|это|из|материал[а-яё]*)\s*/, '').trim();
       if (/^комментари/.test(m[3])) return { a:'setop', el, cmt:/^(?:нет|убери|пуст)/.test(v) ? '' : v };
@@ -14688,8 +15088,10 @@ function execOne(a, ctx){
       if (!voice.chainStart) voice.chainStart = p.clone();
       const wt = a.type && typeById(a.type) ? a.type : S.wallType;
       const w = addWall(p, end, null, S.wallH, { wt }); if (a.ref) ctx.refs[a.ref] = w.id;
+      // an arc wall: a.r — the radius (m), a.arc — the sagitta (m), a.side 'l'|'r' — which way it bulges (left of the direction by default)
+      if (okNum(a.r) || okNum(a.arc)){ const sg = a.side === 'r' ? -1 : 1, R = okNum(a.r); if (R && R < len / 2) throw new Error(`Радиус не меньше половины длины: ${mm(len / 2)} мм`); w.arc = r4(sg * (R ? R - Math.sqrt(R * R - len * len / 4) : Math.abs(+a.arc))); }
       voice.pen = end; voice.dir = ang; voice.room = null;
-      return `${wt === 'gkl' ? 'Перегородка' : 'Стена'} ${mm(len)} мм ${DIR_NAME[((ang % 360) + 360) % 360] || 'под углом ' + ang + '°'}`;
+      return `${wt === 'gkl' ? 'Перегородка' : 'Стена'} ${mm(len)} мм ${DIR_NAME[((ang % 360) + 360) % 360] || 'под углом ' + ang + '°'}${w.arc ? `, дугой радиусом ${mm(arcOf(w).R)} мм` : ''}`;
     }
     case 'wallxy': {
       const p = new V3(X(a.x1), 0, Z(a.z1)), q = new V3(X(a.x2), 0, Z(a.z2));
@@ -14837,7 +15239,12 @@ function execOne(a, ctx){
         for (const k of ['mf', 'mb', 'mk']) if (a[k] !== undefined){ const v = mk(a[k]); if (v) it[k] = v; else delete it[k]; }
         if (a.cmt !== undefined){ const s = String(a.cmt).trim().slice(0, 300); if (s) it.cmt = s; else delete it.cmt; }
         if (a.done !== undefined){ if (a.done) it.done = true; else delete it.done; }
-        if (a.img === false) delete it.img; }
+        if (a.img === false) delete it.img;
+        // «Наличники»: cs 'both'|'in'|'out'|'none', csw / cst (m), csm (material)
+        if (a.cs != null || a.csw != null || a.cst != null || a.csm != null){ const c = csOf(it); it.cs = { side:c.side, w:c.w, t:c.t, ...(c.m ? { m:c.m } : {}) };
+          if (a.cs != null){ if (!['both', 'in', 'out', 'none'].includes(a.cs)) throw new Error('Наличники: both, in, out или none'); it.cs.side = a.cs; } else if (it.cs.side === 'none' && (a.csw != null || a.cst != null || a.csm != null)) it.cs.side = it.type === 'door' ? 'both' : 'in';
+          if (okNum(a.csw)) it.cs.w = clamp(+a.csw, 0.01, 0.4); if (okNum(a.cst)) it.cs.t = clamp(+a.cst, 0.002, 0.1);
+          if (a.csm != null){ if (a.csm === '') delete it.cs.m; else it.cs.m = mk(a.csm); } } }
       return `${tagName(it)}:${mm(it.w)} × ${mm(it.h)} мм${it.type === 'window' ? ', подоконник ' + mm(it.sill) : ''}${isBalc(it) ? `, дверь ${mm(it.bd.w)} ${it.bd.side === 'l' ? 'слева' : 'справа'}` : it.type === 'window' ? `, створок: ${winSashes(it, it.w)}${it.sash ? '' : ' (по ширине)'}` : it.type === 'door' && !it.op && !it.gl ? `, полотно ${it.lf === 'flat' ? 'гладкое' : 'с двумя филёнками'}` : ''}`;
     }
     case 'moveop': {
@@ -15326,6 +15733,35 @@ function execMore(a, ctx){
     case 'ydtake': { const L = YD.lock; if (!L || L.pid !== proj.id) throw new Error('Проект не открыт с Яндекс Диска'); if (!L.ro) return 'Файл и так открыт на этом устройстве'; L.ro = false; ydLockTake(L.path).then(() => { ydShowState(); ydPush(true); }); return 'Теперь в файле работает это устройство'; }
     case 'devname': { const n = String(a.name || '').trim().slice(0, 40); if (!n) throw new Error('Назовите устройство'); lsSet('kot.devName', n); if (YD.lock && !YD.lock.ro) ydLockTake(YD.lock.path); return 'Это устройство теперь называется «' + n + '»'; }
     case 'paper': setPaper(a.on == null ? !PAPER.on : !!a.on); return PAPER.on ? 'Фон рабочего поля — мятая бумага' : 'Фон рабочего поля — ровный цвет';
+    case 'matfill': { // a fill (wood species and others) on a material: surface (surf) or cut, front (fg) or back (bg) layer
+      const e = Object.entries(MATS), s = lc(String(a.mat || '')), mk = MATS[a.mat] ? a.mat : (e.find(([, m]) => lc(m.n) === s) || e.find(([, m]) => lc(m.n).startsWith(s)) || e.find(([, m]) => lc(m.n).includes(s)) || [])[0];
+      if (!mk) throw new Error('Нет материала «' + (a.mat || '') + '»');
+      const fs = lc(String(a.fill || '')), sp = WOOD_SPECIES.find(w => w.id === a.fill || w.w.some(x => fs.includes(x))), f = STD.fills.find(x => x.id === a.fill) || (sp && STD.fills.find(x => x.id === 'wd-' + sp.id)) || STD.fills.find(x => lc(x.n).includes(fs));
+      if (!f) throw new Error('Нет штриховки «' + (a.fill || '') + '»');
+      pushUndo('Штриховка материала'); markEdited(); const x = matEdit(mk), L = a.layer === 'cut' ? 'cut' : 'surf', R = a.role === 'bg' ? 'bg' : 'fg';
+      x[L][R] = { ...(x[L][R] || {}), p:f.id, c:(x[L][R] && x[L][R].c) || '#2b3439' }; applyMats();
+      return `${MATS[mk].n}: ${L === 'cut' ? 'штриховка сечения' : 'штриховка поверхности'} — ${f.n}`; }    case 'tracker': { S.trkOff = a.on === false; lsSet('kot.trkOff', S.trkOff ? '1' : '0'); if (S.trkOff) trkHide(); return S.trkOff ? 'Трекер при построении скрыт' : 'Трекер при построении: расстояние, угол и координата Z у курсора'; }
+    // arc walls and the wall palette (ArchiCAD)
+    case 'wallform': { if (S.tool !== 'wall') setTool('wall'); return setWallForm(a.f); }
+    case 'wallarc': {
+      const w = elOfSpec(a.wall || 'selected'); if (!w || w.type !== 'wall') throw new Error('Какую стену? Например «стену Б дугой радиус 3000»');
+      const c = Math.hypot(w.x2 - w.x1, w.z2 - w.z1); pushUndo('Дуга стены'); markEdited();
+      if (a.off){ delete w.arc; rebuild(); return `Стена ${w.tag || ''} выпрямлена`; }
+      const sg = a.side === 'r' ? -1 : a.side === 'l' ? 1 : Math.sign(w.arc || 1), R = okNum(a.r);
+      if (R){ if (R < c / 2 + 1e-4) throw new Error(`Радиус не меньше половины хорды: ${mm(c / 2)} мм`); w.arc = r4(sg * (R - Math.sqrt(R * R - c * c / 4))); }
+      else w.arc = r4(sg * (okNum(a.h) || c / 8));
+      rebuild(); const A = arcOf(w); return `Стена ${w.tag || ''} — дуга: радиус ${mm(A.R)} мм, длина по дуге ${mm(A.L)} мм`; }
+    case 'wallnode': {
+      const w = elOfSpec(a.wall || 'selected'); if (!w || w.type !== 'wall') throw new Error('В какую стену вставить узел?'); if (arcOf(w)) throw new Error('Узел вставляется в прямую стену');
+      const f = wallFrame(w), s = Number.isFinite(+a.at) ? clamp(+a.at, 0.1, f.L - 0.1) : f.L / 2, p0 = f.p1.clone().addScaledVector(f.dir, s);
+      const to = ptOf(a.x, a.z) || p0.clone().addScaledVector(f.nrm, +a.off || 0).add(new V3(+a.dx || 0, 0, +a.dz || 0));
+      const m = petStart('node', w.id, p0, { to }); return m || 'Узел вставлен'; }
+    case 'walloffset': {
+      const w = elOfSpec(a.wall || 'selected'); if (!w || w.type !== 'wall') throw new Error('Какую стену сместить?'); const d = +a.d; if (!Number.isFinite(d) || !d) throw new Error('На сколько сместить? Например «сместить стену Б на 200»');
+      const f = wallFrame(w), p0 = new V3((w.x1 + w.x2) / 2, 0, (w.z1 + w.z2) / 2); petStart('offset', w.id, p0, { to:p0.clone().addScaledVector(f.nrm, d) }); return `Стена ${w.tag || ''} смещена на ${mm(d)} мм`; }
+    case 'wallelev': { const w = elOfSpec(a.wall || 'selected'); if (!w || w.type !== 'wall') throw new Error('Какую стену поднять?'); return petStart('elevate', w.id, null, { mm:+a.mm }); }
+    case 'wallpet': { const w = byId([...sel][0]); if (!w || w.type !== 'wall' || S.view !== 'plan') throw new Error('Выберите одну стену на плане'); const f = wallFrame(w), A = f.arc, m = A ? arcPt(A, A.L / 2) : f.p1.clone().addScaledVector(f.dir, f.L / 2), s = toScreen(m.x, 0, m.z); openPet(w.id, s.x, s.y); return 'Палитра стены открыта'; }
+    case 'tmod': return setTmod({ ...(a.off ? { off:true } : {}), ...(a.ortho != null ? { ortho:a.ortho } : {}), ...(a.step != null ? { step:a.step } : {}), ...(a.fix != null ? { fix:a.fix } : {}) });
     case 'fullscreen': return setUiHide(a.on == null ? null : !!a.on) ? 'Рабочее поле на весь экран. Вернуть — ползунок вверху или «покажи панели»' : 'Лента и окна показаны';
     case 'ribbon': { const f = $('#app').classList.contains('rb-fold'); if (a.on == null || !!a.on === f) pnToggle('rb'); return $('#app').classList.contains('rb-fold') ? 'Лента свёрнута' : 'Лента показана'; }
     case 'about': openAbout(); return null;
@@ -15429,7 +15865,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 {"a":"wall","len":3,"angle":0,"type":"gkl"} — стена от текущей точки; angle в градусах против часовой стрелки от востока (0 вправо, 90 вверх/север, 180 влево, 270 вниз/юг)
 {"a":"close"} — замкнуть цепочку стен к её началу
 {"a":"room","w":4,"d":3,"x":0,"z":0,"h":2.7,"type":"ext","ref":"r1"} — прямоугольная комната из 4 стен; (x,z) — левый верхний угол; ref "r1" даёт стены "r1N","r1E","r1S","r1W"
-{"a":"opening","kind":"door","wall":"w1","w":0.9,"h":2.1,"sill":0.9,"offset":0.5,"count":1} — проём; wall: ref, "N","S","E","W","last" или номер стены; offset — от начала стены до края проёма, без него проём ставится по центру; sill только для окна; балконный блок (окно + балконная дверь в одном проёме): {"a":"opening","kind":"window","balc":true,"wall":"S","w":1.72,"h":1.45,"sill":0.9,"dw":0.74,"side":"r","low":"glass"} (w — ширина всего блока, h — высота окна, dw — ширина двери, side — дверь "r" справа / "l" слева; дверь до пола, верх общий; у двери стекло сверху и снизу с перемычкой на уровне подоконника, low:"panel" — снизу глухая филёнка); у готового окна: {"a":"setop","el":"@Б","balc":true,"dw":0.8,"side":"l"} (balc:false — обычное окно); створки окна: {"a":"setop","el":"@Б","sash":2} (1–3, 0 — сами по ширине: до 1250 мм одна, до 2100 — две, шире — три, средняя глухая), то же поле "sash" у {"a":"opening"}; окна в 3D — белый ПВХ: рама, створки, стекло, ручки; межкомнатная дверь в 3D — коробка, наличники, полотно с двумя филёнками, ручка, петли (серый дуб): {"a":"setop","el":"@А","lf":"flat"} — гладкое полотно, "panel" — с филёнками; зависимости проёма как в Revit: {"a":"setop","el":"@Б","baseLevel":"Этаж 1","baseOff":0.9,"topLevel":"Этаж 2","topOff":-0.2} (topLevel:"none" — неприсоединённая высота; смещения в метрах); отделка и идентификация двери: {"a":"setop","el":"@door:Д3","mf":"Дуб","mb":"Дуб","mk":"Белый","cmt":"900","done":true} (mf — полотно спереди, mb — сзади, mk — каркас; "" — как дверь)
+{"a":"opening","kind":"door","wall":"w1","w":0.9,"h":2.1,"sill":0.9,"offset":0.5,"count":1} — проём; wall: ref, "N","S","E","W","last" или номер стены; offset — от начала стены до края проёма, без него проём ставится по центру; sill только для окна; балконный блок (окно + балконная дверь в одном проёме): {"a":"opening","kind":"window","balc":true,"wall":"S","w":1.72,"h":1.45,"sill":0.9,"dw":0.74,"side":"r","low":"glass"} (w — ширина всего блока, h — высота окна, dw — ширина двери, side — дверь "r" справа / "l" слева; дверь до пола, верх общий; у двери стекло сверху и снизу с перемычкой на уровне подоконника, low:"panel" — снизу глухая филёнка); у готового окна: {"a":"setop","el":"@Б","balc":true,"dw":0.8,"side":"l"} (balc:false — обычное окно); створки окна: {"a":"setop","el":"@Б","sash":2} (1–3, 0 — сами по ширине: до 1250 мм одна, до 2100 — две, шире — три, средняя глухая), то же поле "sash" у {"a":"opening"}; окна в 3D — белый ПВХ: рама, створки, стекло, ручки; межкомнатная дверь в 3D — коробка, наличники, полотно с двумя филёнками, ручка, петли (серый дуб): {"a":"setop","el":"@А","lf":"flat"} — гладкое полотно, "panel" — с филёнками; зависимости проёма как в Revit: {"a":"setop","el":"@Б","baseLevel":"Этаж 1","baseOff":0.9,"topLevel":"Этаж 2","topOff":-0.2} (topLevel:"none" — неприсоединённая высота; смещения в метрах); наличники: {"a":"setop","el":"@door:А","cs":"both","csw":0.09,"cst":0.016,"csm":"Дерево (брус)"} (cs: both — с двух сторон, in — со стороны открывания / комнаты, out — с обратной, none — нет; размеры в метрах); отделка и идентификация двери: {"a":"setop","el":"@door:Д3","mf":"Дуб","mb":"Дуб","mk":"Белый","cmt":"900","done":true} (mf — полотно спереди, mb — сзади, mk — каркас; "" — как дверь)
 {"a":"box","w":2,"d":0.6,"h":0.9,"x":0,"z":0} — объём (мебель, крыльцо, блок), x,z — угол на плане
 У стен, дверей, окон и объёмов есть русские буквы (поле letter), в каждой категории свой счёт с «А»: стены А, Б, В…, окна А, Б…, двери А, Б… После «Я» идут АА, АБ… Буквы Ё, Й, Ъ, Ы, Ь не используются. Ссылки: стена Д — "@Д"; окно А — "@window:А"; дверь Б — "@door:Б"; объём В — "@box:В". Пользователь может называть буквы словами («дэ», «эль», «эм»).
 {"a":"movewall","wall":"@В","from":"@А","by":1.2} — сдвинуть стену В на 1,2 м от стены А (по нормали к А; "toward":true — к стене А); "dist" вместо "by" — поставить на это расстояние от А между осями; без "from" — с "angle" как у "wall". Примыкающие стены тянутся следом.
@@ -15474,7 +15910,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 Уровни: {"a":"levelset","lv":"Этаж 2","elev":3.3,"rename":"2 этаж","pin":true}. Высотная отметка на плане: {"a":"spot","room":"1"} или {"a":"spot","x":0,"z":0}.
 Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetnew","sec":"obmer","name":"Обмерный план 2"} — новый лист в разделе (cover — обложка без номера, gen — общие данные 1-…, obmer — обмер 2-…, dem — демонтаж 3-…, mont — монтаж 4-…; или название раздела); номера листов ставятся сами; {"a":"sheetmove","sheet":"2-3","dir":"up"} — сдвинуть лист в своём разделе; {"a":"sheetset","sheet":"2-1","sec":"mont","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений. {"a":"frame","sheet":"А101","l":20,"t":5,"r":5,"b":5,"lw":0.6,"all":true} — рамка листа (all — для всех листов; reset:true — по ГОСТ; open:true — окно); {"a":"explcfg","sheet":"А101", "addcol":{"k":"num|name|area|perim|h|txt","n":"Примечание","w":30}, "delcol":"Примечание", "colw":{"col":"Наименование","w":50}, "colname":{"col":"№","n":"Поз."}, "rh":8, "hh":15, "fs":2.8, "ttl":"…"|false, "tot":true, "addrow":{"cells":{"Наименование":"Балкон","Площадь":"3,20"}}, "delrow":"last", "cell":{"room":"3","col":"Наименование","text":"Кухня-гостиная"}, "reset":true, "open":true} — настройка экспликации (любые поля вместе); {"a":"stampcell","op":"rowAbove|rowBelow|rowDel|colLeft|colRight|colDel|splitH|splitV|text","x":30,"y":12,"size":5,"text":"…"} — строки/столбцы/текст штампа листа по ячейке в точке x, y мм от левого верхнего угла штампа (open:true — редактор); {"a":"side","sheet":"4-1","on":true,"w":80,"notes":"пункт 1; пункт 2","addnote":"новый пункт","parts":{"ved":false,"legend":true,"notes":true,"expl":true,"own":true},"own":true,"all":true,"edit":true,"text":{"t":"Текст","x":2,"y":150,"s":2.6},"line":[0,150,80,150],"table":{"rows":4,"cols":3,"h":7,"y":160}} — боковая колонка листа справа (edit — редактирование прямо на листе: линии, прямоугольники, тексты, таблицы; text/line/table — в мм от левого верхнего угла колонки) (экспликация, ведомость монтажа, условные обозначения, примечание, свой блок — own:true открывает его в редакторе: тексты, линии, таблицы; внизу узкий штамп); {"a":"stampline","x":0,"y":10,"x2":65,"y2":10,"lw":0.5} — линия в штампе (мм от левого верхнего угла штампа; без координат или draw:true — открыть редактор в режиме «Чертить линии»); штамп стоит в углу рамки по своим линиям;{"a":"phf","view":"План монтажа","f":"allnew"} — фильтр стадий вида (all — «Показать все», allnew — «Показать все, новое зелёным» (так у планов монтажа по умолчанию), done, demo, new, prevdemo, prevnew, prev, none или название); {"a":"vptitle","sheet":"2-1","view":"Обмерный план","text":"План квартиры","on":true} — название вида на листе (по умолчанию названия выключены; on:true — показать, on:false — скрыть; text — свой текст (и показать), "" — как у вида; без view — все виды листа или выбранный); {"a":"stampfield","sheet":"2-1","k":"author|checker|nk|gip|obj|code|stage|date|org|proj|sheet","val":"Иванов"} — вписать поле в штамп листа (proj — название проекта, sheet — название листа; номер листа считается сам);{"a":"sheetaxo","sheet":"2-1"} — поставить на лист обмерного плана две аксонометрии обмера (создаются, если нет); {"a":"sheetpic","sheet":"А101"} — добавить фото на лист (откроется выбор файла; del:true — убрать последнее фото); {"a":"sheetlayout","sheet":"А101","auto":true,"mode":"zones"|"rows","zk":"b3"|"b2"|"l2"|"l3"} — (zk — вариант зон: b3 план сверху 3 снизу, b2 план сверху 2 снизу, l2 план по центру 2 слева, l3 план по центру 3 слева; масштаб видов любой 1:N под окно)разложить виды листа в области размещения (zones — сетка: главный план сверху, снизу три зоны для аксонометрий и фото, всё масштабируется под свою ячейку; линии сетки тянутся мышью, вид, брошенный в ячейку, встаёт в неё; сетка видна только на экране; rows — рядами; auto — делать это само при добавлении видов); {"a":"sheetzoom","z":150|"in":true,"out":true,"fit":true} — масштаб листа на экране; {"a":"vpact","view":"Обмерный план"} — активировать вид прямо на листе (в нём работают все инструменты; off:true — деактивировать, вернуться к листу); {"a":"wizard","obj":"ЖК …, кв. 5","addr":"г. Саранск, ул. …","org":"…","author":"Иванов","st":["obmer","demontazh","montazh","otdelka","mebel"],"zk":"b3"} — «Мастер проекта» (а также {"a":"vbar","k":"sun"|"shadows"|"crop"|"cropshow"|"isocat"|"hidecat"|"iso"|"hide"|"reset"|"apply"|"tvp"|"tvpoff"|"cons","on":true,"tpl":"План мебели"} — нижняя строка вида как в Revit: траектория солнца, тени, обрезать вид, граница обрезки, временно скрыть/изолировать категорию или элемент, восстановить, применить к виду, временные свойства вида (шаблон на время), показать зависимости; {"a":"viewcrop","crop":true,"show":true,"anno":true,"off":15} — «Границы» плана: обрезать вид, показать границу обрезки (тогда она видна и на листе), обрезать аннотации со смещением в мм бумаги; {"a":"viewsub","view":"current","sub":"Потолки"} — подвид вида или листа (лист отдаёт его своим видам): у подвида свои размеры и свой тип размеров; open:true — список подвидов; {"a":"newview2","kind":"rcp"|"light"} — план потолка / план освещения; {"a":"plankind","k":"rcp"|"light"|"plan"} — сделать открытый план планом потолка, освещения или этажа; {"a":"viewrange","cut":1500,"top":"above","bot":0,"depth":0} — секущий диапазон плана в мм от его уровня (open:true — окно, reset:true — по умолчанию); {"a":"furn","k":"spot","room":"3","n":6} — светильники сеткой в помещении (k: spot, downlight, pendant, track, ledline, sconce, switch1, switch2, socket — под потолком или на стене сами); {"a":"dimoff","mm":300} — выбранные размерные линии дальше от элемента на 300 мм, −200 — ближе; {"a":"dimoff","off":600} — на 600 мм от элемента): из обмера сам делает стадии, планы, помещения, размеры, развёртки, аксонометрии, листы, экспликацию и поля штампа (open:true — открыть окно мастера);{"a":"vpscale","view":"план","scale":27} — масштаб вида на листе, любой 1:N; {"a":"vpscale","fit":true} — вписать виды в их окна (зоны) листа: масштаб 1:N сам под размер окна;{"a":"sheetarea","sheet":"А101","x":25,"y":10,"w":230,"h":220} — область размещения видов в мм от левого верхнего угла листа (reset:true — по умолчанию).
 Экспорт: {"a":"export","f":"ifc"} — для Revit (IFC: стены с проёмами, двери, окна, перекрытия, крыши, колонны, лестницы, мебель, помещения, уровни), "obj" — для 3ds Max (ZIP с OBJ, MTL и текстурами), "glb" — glTF.
-Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"paper","on":true} — фон рабочего поля «мятая бумага» (false — ровный цвет);{"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
+Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"matfill","mat":"Дерево (брус)","fill":"oak","layer":"surf"} — штриховка материала: породы дерева oak/ash/beech/pine/walnut/teak/wenge/veneer (дуб, ясень, бук, сосна, орех, тик, венге, шпон) или название штриховки; layer surf — поверхность, cut — сечение; role fg/bg; {"a":"tracker","on":false} — скрыть трекер у курсора при построении (расстояние, угол, координата Z; true — показать); {"a":"wallform","f":"3p"} — инструмент «Стена» дугой по 3 точкам ("tan" — по касательной к предыдущей стене, "line" — прямая); {"a":"wall","len":4,"dir":"E","r":3} — стена дугой радиусом 3 м ("arc":0.5 — стрелой дуги, "side":"r" — выпуклая вправо); {"a":"wallarc","wall":"Б","r":3} — изогнуть стену Б (радиус, м; "off":true — выпрямить); {"a":"wallnode","wall":"Б","off":0.5} — вставить узел в середину стены и выдвинуть его на 0,5 м; {"a":"walloffset","wall":"Б","d":0.2} — сместить стену параллельно (соседние следуют); {"a":"wallelev","wall":"Б","mm":100} — поднять стену; {"a":"wallpet"} — палитра выбранной стены (как в ArchiCAD); {"a":"tmod","ortho":true} — построение по осям (как Shift; кнопка «Оси» внизу слева на планшете), {"a":"tmod","step":15} — шаг угла 15/30/45°, {"a":"tmod","fix":60} — строить под углом 60°, {"a":"tmod","off":true} — свободное построение; {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"paper","on":true} — фон рабочего поля «мятая бумага» (false — ровный цвет);{"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
 Если просят то, что делается мышью (нарисовать произвольный контур, щёлкнуть по месту), включи нужный инструмент действием tool и в reply объясни, куда щёлкнуть.`;
 function commandPrompt(text){
   return `Ты переводишь команду пользователя для программы архитектурного черчения «Kot project» в список действий JSON.
@@ -15599,7 +16035,7 @@ const LLM_CMDS = `комната 5 на 4 | стена 3 метра вправо
 покажи план | покажи 3д | покажи аксонометрию | покажи южный фасад | разрез | разрез от 0 2 до 8 2 | развёртки помещения 1 | камера из 1 5 на 4 1 | узел от 1 1 до 2 2
 стадия демонтаж (обмер, монтаж, мебель, все) | снеси стену Б | открой план демонтажа | новый лист | размести виды | экспликация помещений | рамка листа
 скрой буквы | покажи буквы | скрытые линии | тонированный | графичный | на весь экран | покажи панели | фон бумага | ровный фон | отмени | верни | сохрани | распечатай | визуализация | что умеешь
-экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | балконный блок в южной стене | балконный блок 1720 дверь 740 справа в северной стене | в окне Б балконный блок дверь 800 | в окне Б балконный блок низ двери глухой | у окна Б две створки | у окна Б створки сами | дверь А гладкая | у двери А филёнки | активируй вид Обмерный план | деактивируй вид | масштаб плана на листе 1:27 | впиши виды в окна | создай план мебели | примени шаблон план мебели | создай план отделки | стадия отделка | создай план потолка | создай план освещения | секущая плоскость 1500 | секущий диапазон | сделай этот план планом потолка | поставь 6 точечных светильников в помещении 3 | поставь выключатель | подвид потолки | подвиды | обрежь вид | скрой границу обрезки | обрезать аннотации | покажи траекторию солнца | выключи тени | изолируй категорию | восстанови скрытые | примени скрытие к виду | временно примени шаблон план мебели | восстанови свойства вида | покажи зависимости | у окна Б зависимость сверху Этаж 2 | окно Б смещение сверху -200 | у двери Б отделка спереди дуб | у двери Б каркас белый | у двери Б комментарий 900 | мастер проекта | собери проект из обмера | размер дальше на 300 | размерную линию ближе на 200 | выход размерной линии на 1 мм |раскладка план сверху два снизу | раскладка план по центру два слева | раскладка план по центру три слева | разложи виды по зонам | разложи виды рядами | приблизь лист | отдали лист | лист целиком | боковая колонка | убери боковую колонку | редактировать колонку | в колонке напиши Отделка по проекту | в колонке таблица 4 на 3 | боковая колонка на всех листах | в примечание добавь Пол выровнять | свой блок на листе | начерти штамп линиями | линия в штампе от 0 10 до 65 10 | в штампе разработал Иванов | в штампе объект Саранск | засечки меньше | засечки 2 мм | текст размеров 2,5 мм | детализация высокая | детализация средняя | детализация низкая | проставь обмерные размеры | новое зелёным | новое обычным цветом | фильтр стадий показать все | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
+экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | балконный блок в южной стене | балконный блок 1720 дверь 740 справа в северной стене | в окне Б балконный блок дверь 800 | в окне Б балконный блок низ двери глухой | у окна Б две створки | у окна Б створки сами | дверь А гладкая | у двери А филёнки | активируй вид Обмерный план | деактивируй вид | масштаб плана на листе 1:27 | впиши виды в окна | создай план мебели | примени шаблон план мебели | создай план отделки | стадия отделка | создай план потолка | создай план освещения | секущая плоскость 1500 | секущий диапазон | сделай этот план планом потолка | поставь 6 точечных светильников в помещении 3 | поставь выключатель | подвид потолки | подвиды | обрежь вид | скрой границу обрезки | обрезать аннотации | покажи траекторию солнца | выключи тени | изолируй категорию | восстанови скрытые | примени скрытие к виду | временно примени шаблон план мебели | восстанови свойства вида | покажи зависимости | построение по осям | стена дугой | стена по касательной | прямая стена | стену Б дугой радиус 3000 | выпрями стену Б | вставь узел в стену Б | сместить стену Б на 200 | подними стену Б на 100 | скрой трекер | покажи трекер | штриховка дуб для материала дерево | рисуй под углом 45 | шаг угла 15 | свободное построение | у окна Б зависимость сверху Этаж 2 | окно Б смещение сверху -200 | у двери Б отделка спереди дуб | наличники у двери А с двух сторон | наличник у двери А шириной 90 | толщина наличника у двери А 16 | материал наличников у двери А дерево | у двери Б каркас белый | у двери Б комментарий 900 | мастер проекта | собери проект из обмера | размер дальше на 300 | размерную линию ближе на 200 | выход размерной линии на 1 мм |раскладка план сверху два снизу | раскладка план по центру два слева | раскладка план по центру три слева | разложи виды по зонам | разложи виды рядами | приблизь лист | отдали лист | лист целиком | боковая колонка | убери боковую колонку | редактировать колонку | в колонке напиши Отделка по проекту | в колонке таблица 4 на 3 | боковая колонка на всех листах | в примечание добавь Пол выровнять | свой блок на листе | начерти штамп линиями | линия в штампе от 0 10 до 65 10 | в штампе разработал Иванов | в штампе объект Саранск | засечки меньше | засечки 2 мм | текст размеров 2,5 мм | детализация высокая | детализация средняя | детализация низкая | проставь обмерные размеры | новое зелёным | новое обычным цветом | фильтр стадий показать все | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
 выбери все экземпляры | выбери предыдущий | скрой категорию | графика элемента | полутона для выбранного | сдвинь выбранное вправо на 100 | поверни выбранное на 90 | скопируй выбранное вправо на 1000 | скрой выбранное
 открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы
 посчитай объём всех стен | посчитай площадь всех помещений | добавь аксонометрии на лист | калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
@@ -15660,7 +16096,7 @@ const LEARN_BUILTIN = [
   ['покажи сверху', 'покажи план'], ['давай в объёме', 'покажи 3д'], ['в три дэ', 'покажи 3д'], ['аксонометрию покажи', 'покажи аксонометрию'], ['фасад с юга', 'покажи южный фасад'], ['сделай разрез', 'разрез'], ['развёртку первой комнаты', 'развёртки помещения 1'],
   ['включи демонтаж', 'стадия демонтаж'], ['перейди на обмер', 'стадия обмер'], ['покажи все стадии', 'стадия все'], ['снеси стену бэ', 'снеси стену Б'], ['открой план демонтажа', 'открой план демонтажа'],
   ['новый лист', 'новый лист'], ['разложи виды на листе', 'размести виды'], ['таблицу помещений на лист', 'экспликация помещений'], ['поля листа', 'рамка листа'],
-  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['сделай окно Б двустворчатым', 'у окна Б две створки'], ['выдели всё новое зелёным', 'новое зелёным'], ['нарисуй план подробно, со всеми деталями', 'детализация высокая'], ['засечки на размерах слишком большие', 'засечки меньше'], ['сделай засечки покрупнее', 'засечки больше'],['сделай план попроще, только заливка стен', 'детализация низкая'],['на обмере поставь все размеры автоматически', 'проставь обмерные размеры'], ['я удалил размеры, верни обмерные', 'проставь обмерные размеры'], ['размеры на обмерном плане пусть стоят сами', 'проставь обмерные размеры'],['не надо зелёного, покажи как обычно', 'новое обычным цветом'],['хочу дверь А без рисунка, ровную', 'дверь А гладкая'], ['верни у двери А филенки', 'у двери А филёнки'],['пусть окно Б будет на три створки', 'у окна Б 3 створки'], ['поставь окно с балконной дверью на юге','балконный блок в южной стене'], ['у балконной двери в окне Б внизу филёнка, не стекло', 'в окне Б балконный блок низ двери глухой'],['выход на балкон с окном в северной стене, дверь слева', 'балконный блок дверь слева в северной стене'], ['впиши в штамп что разработал петров','в штампе разработал Петров'], ['хочу сам нарисовать штамп линиями', 'начерти штамп линиями'], ['оформи лист как у меня, справа блок с экспликацией, примечанием и штампом', 'боковая колонка'], ['хочу добавить на лист свою таблицу', 'свой блок на листе'], ['план сверху крупно, а внизу аксонометрии', 'разложи виды по зонам'], ['покажи лист поближе', 'приблизь лист'], ['хочу поправить план прямо на листе', 'активируй вид Обмерный план'], ['вернись на лист', 'деактивируй вид'], ['пусть план займёт всё окно на листе', 'впиши виды в окна'], ['нужен план с расстановкой мебели', 'создай план мебели'], ['нужен чертёж чистовой отделки', 'создай план отделки'], ['нужен чертёж потолков', 'создай план потолка'], ['этот лист относится к освещению', 'подвид освещение'], ['не показывай рамку обрезки', 'скрой границу обрезки'], ['оставь на экране только эту категорию', 'изолируй категорию'], ['где солнце ходит', 'покажи траекторию солнца'], ['посмотрю как будет с шаблоном мебели, не насовсем', 'временно примени шаблон план мебели'], ['что тут закреплено', 'покажи зависимости'], ['привяжи верх окна Б ко второму этажу', 'у окна Б зависимость сверху Этаж 2'], ['сделай полотно двери Б с лицевой стороны дубовым', 'у двери Б отделка спереди дуб'], ['коробку двери Б сделай белой', 'у двери Б каркас белый'], ['подпиши у двери Б комментарий без порога', 'у двери Б комментарий без порога'], ['пусть размеры за рамкой тоже обрезаются', 'обрезать аннотации'],['пусть этот план будет для розеток', 'подвид розетки'],['сделай схему освещения', 'создай план освещения'], ['подними секущую плоскость до полутора метров', 'секущая плоскость 1500'], ['точечные светильники в кухне, шесть штук', 'поставь 6 точечных светильников в помещении 3'],['переключи на отделку', 'стадия отделка'],['обмер готов, сделай остальное сам', 'собери проект из обмера'], ['оформи весь проект по обмеру со всеми листами', 'собери проект из обмера'], ['открой мастер', 'мастер проекта'], ['отодвинь размер подальше от стены', 'размер дальше на 300'], ['придвинь размерную линию к стене', 'размерную линию ближе на 200'], ['уменьши длину линий после засечек', 'выход размерной линии на 1 мм'],['оформи этот план как план мебели', 'примени шаблон план мебели'],['аксонометрии поставь слева от плана, две штуки', 'раскладка план по центру два слева'], ['под планом только две ячейки', 'раскладка план сверху два снизу'], ['хочу три окна слева а план в середине', 'раскладка план по центру три слева'],['сделай план на листе в масштабе 28', 'масштаб плана на листе 1:28'],['хочу поправить блок справа прямо на листе', 'редактировать колонку'], ['добавь в правый блок таблицу на 4 строки и 3 столбца', 'в колонке таблица 4 на 3'],['покажи весь лист', 'лист целиком'], ['проведи в штампе черту от 0 10 до 65 10', 'линия в штампе от 0 10 до 65 10'],['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
+  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['сделай окно Б двустворчатым', 'у окна Б две створки'], ['выдели всё новое зелёным', 'новое зелёным'], ['нарисуй план подробно, со всеми деталями', 'детализация высокая'], ['засечки на размерах слишком большие', 'засечки меньше'], ['сделай засечки покрупнее', 'засечки больше'],['сделай план попроще, только заливка стен', 'детализация низкая'],['на обмере поставь все размеры автоматически', 'проставь обмерные размеры'], ['я удалил размеры, верни обмерные', 'проставь обмерные размеры'], ['размеры на обмерном плане пусть стоят сами', 'проставь обмерные размеры'],['не надо зелёного, покажи как обычно', 'новое обычным цветом'],['хочу дверь А без рисунка, ровную', 'дверь А гладкая'], ['верни у двери А филенки', 'у двери А филёнки'],['пусть окно Б будет на три створки', 'у окна Б 3 створки'], ['поставь окно с балконной дверью на юге','балконный блок в южной стене'], ['у балконной двери в окне Б внизу филёнка, не стекло', 'в окне Б балконный блок низ двери глухой'],['выход на балкон с окном в северной стене, дверь слева', 'балконный блок дверь слева в северной стене'], ['впиши в штамп что разработал петров','в штампе разработал Петров'], ['хочу сам нарисовать штамп линиями', 'начерти штамп линиями'], ['оформи лист как у меня, справа блок с экспликацией, примечанием и штампом', 'боковая колонка'], ['хочу добавить на лист свою таблицу', 'свой блок на листе'], ['план сверху крупно, а внизу аксонометрии', 'разложи виды по зонам'], ['покажи лист поближе', 'приблизь лист'], ['хочу поправить план прямо на листе', 'активируй вид Обмерный план'], ['вернись на лист', 'деактивируй вид'], ['пусть план займёт всё окно на листе', 'впиши виды в окна'], ['нужен план с расстановкой мебели', 'создай план мебели'], ['нужен чертёж чистовой отделки', 'создай план отделки'], ['нужен чертёж потолков', 'создай план потолка'], ['этот лист относится к освещению', 'подвид освещение'], ['не показывай рамку обрезки', 'скрой границу обрезки'], ['оставь на экране только эту категорию', 'изолируй категорию'], ['где солнце ходит', 'покажи траекторию солнца'], ['посмотрю как будет с шаблоном мебели, не насовсем', 'временно примени шаблон план мебели'], ['что тут закреплено', 'покажи зависимости'], ['хочу рисовать стены только ровно по горизонтали и вертикали', 'построение по осям'], ['хочу полукруглую стену', 'стена дугой'], ['стена плавно продолжает предыдущую', 'стена по касательной'], ['сделай стену Б закруглённой, радиус три метра', 'стену Б дугой радиус 3000'], ['стену Б обратно ровной', 'выпрями стену Б'], ['сломай стену Б посередине уголком на полметра', 'вставь узел в стену Б на 500'], ['перенеси стену Б на 20 сантиметров параллельно', 'сместить стену Б на 200'], ['убери цифры возле курсора когда рисую', 'скрой трекер'], ['верни длину и угол у курсора', 'покажи трекер'], ['сделай дерево с рисунком дуба', 'штриховка дуб для материала дерево'], ['пусть брус в разрезе будет как венге', 'штриховка сечения венге для материала дерево'], ['стену надо под сорок пять градусов', 'рисуй под углом 45'], ['пусть линии ложатся через каждые пятнадцать градусов', 'шаг угла 15'], ['хватит углов, рисую как хочу', 'свободное построение'], ['привяжи верх окна Б ко второму этажу', 'у окна Б зависимость сверху Этаж 2'], ['сделай полотно двери Б с лицевой стороны дубовым', 'у двери Б отделка спереди дуб'], ['поставь наличники на окно Б изнутри', 'у окна Б наличники со стороны комнаты'], ['наличники у двери А пошире, сантиметров девять', 'наличник у двери А шириной 90'], ['у двери А наличников не надо', 'убери наличники у двери А'], ['коробку двери Б сделай белой', 'у двери Б каркас белый'], ['подпиши у двери Б комментарий без порога', 'у двери Б комментарий без порога'], ['пусть размеры за рамкой тоже обрезаются', 'обрезать аннотации'],['пусть этот план будет для розеток', 'подвид розетки'],['сделай схему освещения', 'создай план освещения'], ['подними секущую плоскость до полутора метров', 'секущая плоскость 1500'], ['точечные светильники в кухне, шесть штук', 'поставь 6 точечных светильников в помещении 3'],['переключи на отделку', 'стадия отделка'],['обмер готов, сделай остальное сам', 'собери проект из обмера'], ['оформи весь проект по обмеру со всеми листами', 'собери проект из обмера'], ['открой мастер', 'мастер проекта'], ['отодвинь размер подальше от стены', 'размер дальше на 300'], ['придвинь размерную линию к стене', 'размерную линию ближе на 200'], ['уменьши длину линий после засечек', 'выход размерной линии на 1 мм'],['оформи этот план как план мебели', 'примени шаблон план мебели'],['аксонометрии поставь слева от плана, две штуки', 'раскладка план по центру два слева'], ['под планом только две ячейки', 'раскладка план сверху два снизу'], ['хочу три окна слева а план в середине', 'раскладка план по центру три слева'],['сделай план на листе в масштабе 28', 'масштаб плана на листе 1:28'],['хочу поправить блок справа прямо на листе', 'редактировать колонку'], ['добавь в правый блок таблицу на 4 строки и 3 столбца', 'в колонке таблица 4 на 3'],['покажи весь лист', 'лист целиком'], ['проведи в штампе черту от 0 10 до 65 10', 'линия в штампе от 0 10 до 65 10'],['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
   ['отмени последнее', 'отмени'], ['верни как было', 'верни'], ['сохрани проект', 'сохрани'], ['напечатай', 'распечатай'], ['сделай красивую картинку', 'визуализация'], ['что ты умеешь', 'что умеешь'],
   ['сделай нормальную спальню', 'комната 3500 на 4'], ['нужна детская', 'комната 3 на 3500'], ['гостиную побольше', 'комната 5 на 4'], ['маленькую кухню', 'комната 3 на 3'], ['кухню гостиную', 'комната 6 на 4'],
   ['совмещённый санузел', 'комната 2 на 1700'], ['ванную комнату', 'комната 2 на 1700'], ['прихожую', 'комната 2500 на 1500'], ['кладовку', 'комната 1500 на 1200'], ['гардеробную', 'комната 2 на 1500'],
