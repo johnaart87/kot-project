@@ -113,6 +113,69 @@ svg.mi{width:16px;height:16px;flex:none}
 .rstack{display:flex;flex-direction:column;gap:3px;justify-content:center;padding:2px 0}
 .rstack label{display:flex;gap:6px;align-items:center;font-size:12px;white-space:nowrap}
 .rstack.wrows{gap:1px}
+/* «Рисование» (как Procreate) */
+#camExit{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:41;background:#2b2b2d;color:#fff;border:0;border-radius:6px;padding:5px 12px;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer}
+#camExit:hover{background:#3b8cff}
+#viewport.hastabs #camExit{top:36px}
+#viewport.painting #camExit{top:auto;bottom:10px}
+#paintCv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:35;touch-action:none}
+#viewport.painting.pdoc #paintCv{pointer-events:auto}
+#viewport.painting #sheetWrap{pointer-events:none}
+.pn-photo{background:#3b8cff;color:#fff;border:0;border-radius:6px;padding:5px 10px;font:600 12px inherit;cursor:pointer;display:flex;gap:5px;align-items:center}
+.pn-photo svg{width:18px;height:18px}
+.pn-top select{background:#1f1f21;color:var(--pl);border:1px solid #4a4a4e;border-radius:4px;font:12px inherit;max-width:150px;padding:2px}
+.pn-hint{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);background:var(--pd);color:var(--pl);padding:8px 12px;border-radius:8px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.35);text-align:center}
+#paintUI{position:absolute;inset:0;pointer-events:none;z-index:40;--pd:#2b2b2d;--pd2:#3a3a3d;--pl:#e9e9ea}
+#paintUI > *{pointer-events:auto}
+#viewport.painting #vcube,#viewport.painting #vhome,#viewport.painting #touchBar,#viewport.painting #finishBtn{display:none!important}
+#viewport.painting{cursor:crosshair}
+#viewport.painting.phand{cursor:grab}
+.pn-side{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:40px;padding:8px 0;background:var(--pd);border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.pn-vs{position:relative;width:26px;height:150px;border-radius:6px;background:var(--pd2);touch-action:none;cursor:ns-resize}
+.pn-vs .th{position:absolute;left:3px;right:3px;height:16px;border-radius:4px;background:#bdbdbf;margin-top:-8px}
+.pn-vs .tip{position:absolute;left:34px;top:50%;transform:translateY(-50%);background:var(--pd);color:var(--pl);font-size:11px;padding:2px 6px;border-radius:4px;white-space:nowrap;pointer-events:none}
+.pn-sq{width:22px;height:22px;border:2px solid #bdbdbf;border-radius:4px;background:none;cursor:pointer;padding:0}
+.pn-sq.on{background:#bdbdbf}
+.pn-ib{width:30px;height:30px;border:0;border-radius:6px;background:none;color:var(--pl);display:grid;place-items:center;cursor:pointer;padding:0}
+.pn-ib:hover{background:var(--pd2)} .pn-ib.on{color:#3b8cff} .pn-ib:disabled{opacity:.35}
+.pn-ib svg{width:22px;height:22px}
+.pn-top{position:absolute;right:10px;top:8px;display:flex;gap:4px;align-items:center;background:var(--pd);border-radius:8px;padding:4px 6px;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+#viewport.hastabs .pn-top{top:36px}
+.pn-dot{width:26px;height:26px;border-radius:50%;border:2px solid #fff;cursor:pointer;padding:0;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.pn-done{background:#3b8cff;color:#fff;border:0;border-radius:6px;padding:5px 10px;font:600 12px inherit;cursor:pointer;margin-left:4px}
+.pn-pop{position:absolute;right:10px;top:52px;width:340px;max-height:calc(100% - 70px);overflow:auto;background:var(--pd);color:var(--pl);border-radius:10px;padding:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);font-size:12px}
+#viewport.hastabs .pn-pop{top:80px}
+.pn-pop h3{margin:0 0 8px;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+.pn-pop h3 .sw{margin-left:auto;display:flex;gap:4px}
+.pn-pop h3 .sw i{width:36px;height:20px;border-radius:4px;display:block;cursor:pointer}
+.pn-pop .row{display:flex;gap:6px;align-items:center}
+.pn-pop button.pb{background:var(--pd2);color:var(--pl);border:0;border-radius:5px;padding:4px 8px;cursor:pointer;font:inherit}
+.pn-pop button.pb:hover{background:#4a4a4e} .pn-pop button.pb.on{background:#3b8cff;color:#fff}
+.pn-pop select,.pn-pop input[type=text],.pn-pop input[type=number]{background:#1f1f21;color:var(--pl);border:1px solid #4a4a4e;border-radius:4px;padding:2px 4px;font:inherit}
+.pn-sv{position:relative;width:100%;height:210px;border-radius:6px;touch-action:none;cursor:crosshair}
+.pn-sv canvas,.pn-wheel canvas{width:100%;height:100%;border-radius:6px;display:block}
+.pn-sv .k,.pn-wheel .k{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.5);pointer-events:none}
+.pn-hs{position:relative;height:14px;margin:12px 4px;border-radius:7px;touch-action:none;cursor:pointer}
+.pn-hs .k{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.5);pointer-events:none}
+.pn-wheel{position:relative;width:240px;height:240px;margin:4px auto;touch-action:none;cursor:crosshair}
+.pn-sws{display:flex;flex-wrap:wrap;gap:0}
+.pn-sws i{width:34px;height:34px;display:block;cursor:pointer}
+.pn-sec{display:flex;justify-content:space-between;align-items:center;margin:10px 0 4px;color:#bdbdbf}
+.pn-tabs{display:flex;justify-content:space-around;margin-top:10px;border-top:1px solid #444;padding-top:6px}
+.pn-tabs button{background:none;border:0;color:#bdbdbf;font:11px inherit;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:2px 4px}
+.pn-tabs button.on{color:#3b8cff}
+.pn-tabs svg{width:20px;height:20px}
+.pn-lay{display:flex;gap:8px;align-items:center;padding:5px;border-radius:6px;background:var(--pd2);margin-bottom:4px;cursor:pointer}
+.pn-lay.on{background:#3b8cff;color:#fff}
+.pn-lay .th{width:52px;height:34px;border-radius:3px;background:repeating-conic-gradient(#ccc 0 25%,#fff 0 50%) 0 0/10px 10px;flex:none;object-fit:contain}
+.pn-lay .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pn-brush{display:flex;gap:8px;align-items:center;padding:6px;border-radius:6px;cursor:pointer}
+.pn-brush:hover{background:var(--pd2)} .pn-brush.on{background:#3b8cff;color:#fff}
+.pn-brush canvas{width:150px;height:28px;flex:none}
+.pn-note{position:absolute;left:50%;top:60px;transform:translateX(-50%);background:var(--pd);color:var(--pl);padding:8px 10px;border-radius:8px;display:flex;gap:8px;align-items:center;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.pn-note button{background:#3b8cff;color:#fff;border:0;border-radius:5px;padding:4px 8px;cursor:pointer;font:inherit}
+.pn-note button.g{background:var(--pd2);color:var(--pl)}
+@media (max-width:640px){ .pn-pop{left:6px;right:6px;width:auto} .pn-side{left:4px} .pn-vs{height:110px} }
 #cutDlg .sheetd{height:min(860px,96vh);display:flex;flex-direction:column}
 #cutDlg .cutbar{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:4px 0}
 #cutDlg .cutbar .btn{display:inline-flex;gap:4px;align-items:center}
@@ -992,6 +1055,7 @@ details.more summary::-webkit-details-marker{display:none}
         <button role="tab" data-tab="rbAnno" aria-selected="false">Аннотации</button>
         <button role="tab" data-tab="rbView" aria-selected="false">Вид</button>
         <button role="tab" data-tab="rbManage" aria-selected="false">Управление</button>
+        <button role="tab" data-tab="rbDraw" aria-selected="false" title="Рисование поверх вида, как в Procreate: кисти, слои, цвета. Модель замораживается">Рисование</button>
       </div>
       <div class="ptitle"><b>Kot project</b> —
         <button class="projname" id="projName" title="Переименовать проект">Проект</button>
@@ -1072,6 +1136,8 @@ details.more summary::-webkit-details-marker{display:none}
       </div><div class="grp-label">Детализация (только на плане)</div></div>
     </div>
     <div class="rb-panel" id="rbModify" role="tabpanel" hidden></div>
+    <!-- «Рисование» (как Procreate): the panel is built by paintRibbon() -->
+    <div class="rb-panel" id="rbDraw" role="tabpanel" hidden></div>
     <div class="rb-panel" id="rbManage" role="tabpanel" hidden>
       <div class="grp"><div class="grp-items">
         <button class="rbtn" id="rbPhases" title="Стадии: список стадий, фильтры стадий и переопределения графики">Стадии</button><button class="rbtn" id="rbMats" title="Материалы: тонирование, штриховка поверхности и сечения, фото текстуры"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M4.5 6.5l9 9M3.4 10.6l6 6M6.5 4.5l9 9M10.6 3.4l6 6" stroke-width=".9"/></svg>Материалы</button>
@@ -1157,6 +1223,7 @@ details.more summary::-webkit-details-marker{display:none}
       <div class="viewtag" id="viewtag"></div>
       <canvas id="vcube" width="208" height="208" aria-label="Видовой куб: нажмите грань, ребро или угол" hidden></canvas>
       <button class="btn icon sm" id="vhome" title="Исходный вид" aria-label="Исходный вид" hidden><svg class="i" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 9l7-6 7 6M5 8v9h10V8"/></svg></button>
+      <button class="btn sm" id="camExit" hidden title="Выйти из камеры: вернуться к виду, открытому до неё">✕ Выйти из камеры</button>
       <div id="touchBar" role="toolbar" aria-label="Построение на планшете">
         <button type="button" id="tbOrtho" aria-pressed="false" title="По осям: стены и линии только по горизонтали и вертикали (как Shift)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M12 3l-2.5 3M12 3l2.5 3M21 12l-3-2.5M21 12l-3 2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg><span>Оси</span></button>
         <button type="button" id="tbAngle" aria-pressed="false" title="Под углом: шаг 15°, 30°, 45° или свой угол"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h17M4 20L18 6M11 20a7 7 0 0 0-2-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg><span id="tbAngV">Угол</span></button>
@@ -1174,6 +1241,9 @@ details.more summary::-webkit-details-marker{display:none}
         <button id="vbPaper" aria-pressed="true" title="Фон рабочего поля: мятая бумага или ровный цвет">Бумага: вкл</button>
       </div>
       <div id="sheetWrap" hidden><canvas id="sheetCv"></canvas></div>
+      <!-- «Рисование»: the drawing over the view and the Procreate-like controls (paintUI) -->
+      <canvas id="paintCv" hidden></canvas>
+      <div id="paintUI" hidden></div>
       <div id="vpActBar" hidden>Вид «<b></b>» активен на листе <button class="btn sm primary" id="vpActOff">Деактивировать вид</button></div>
       <button class="btn primary" id="finishBtn" hidden>Завершить стену</button>
       <div id="toast" role="status"></div>
@@ -1894,7 +1964,15 @@ function configControls(){
     c.mouseButtons = { LEFT: hand ? THREE.MOUSE.ROTATE : null, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.ROTATE };
     c.touches = { ONE: fingers ? THREE.TOUCH.ROTATE : null, TWO: THREE.TOUCH.DOLLY_PAN };
   }
+  // «Рисование» (Procreate): the left button / one finger / the pen draw; the view turns with the right button, two fingers or «Рука»
+  // before «Фото ракурса» the view turns with any button / finger (choose the angle); on the photo everything stands still
+  if (PAINT.on){ const flat = S.view === 'plan' || S.view === 'sect', mv = flat ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+    if (PAINT.doc){ c.enabled = false; return; }
+    c.mouseButtons = { LEFT: mv, MIDDLE: THREE.MOUSE.PAN, RIGHT: flat ? THREE.MOUSE.PAN : THREE.MOUSE.PAN };
+    c.touches = { ONE: flat ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }; }
 }
+// «Рисование» state (declared here: configControls runs while the page starts)
+const PAINT = { on:false, hand:false, tool:'brush', brush:'ink', size:12, op:1, col:'#2b2b2b', layers:[], cur:0, undo:[], redo:[], view:null, back:null };
 function resize(){
   const w = cv.clientWidth, h = cv.clientHeight;
   if (!w || !h) return;
@@ -7425,6 +7503,7 @@ function setPenOnly(on, announce){
   if (announce) toast(on ? 'Стилус найден: им чертите, пальцами двигайте лист' : 'Пальцы снова чертят');
 }
 cv.addEventListener('pointerdown', e => {
+  if (PAINT.on) return; // «Рисование»: the model is frozen (the view still turns — OrbitControls got the event first)
   if (HDRAG && HDRAG.free){ e.preventDefault(); e.stopImmediatePropagation(); if (e.button === 2) endFreeDrag(true); else { hdragModelMove(e.clientX, e.clientY, e.shiftKey); endFreeDrag(false); } return; }
   // the wall palette: a click finishes the running function, the right button cancels it
   if (PET){ e.preventDefault(); e.stopImmediatePropagation(); NO_CTX = Date.now(); if (e.button === 2) petCancel(); else { const { x, y } = local(e); petMove(x, y); const m = petCommit(); if (m) toast(m); } return; }
@@ -7466,6 +7545,7 @@ cv.addEventListener('pointerdown', e => {
   }
 });
 cv.addEventListener('pointermove', e => {
+  if (PAINT.on) return;
   if (HDRAG && HDRAG.free){ hdragModelMove(e.clientX, e.clientY, e.shiftKey); return; }
   if (fingerIgnored(e)) return;
   if (PET){ const q = local(e); mouse.shift = e.shiftKey; petMove(q.x, q.y); return; }
@@ -7482,6 +7562,7 @@ cv.addEventListener('pointermove', e => {
   hover(x, y, e.shiftKey);
 });
 cv.addEventListener('pointerup', e => {
+  if (PAINT.on) return;
   if (fingerIgnored(e)) return;
   ptrs.delete(e.pointerId); clearTimeout(lpT);
   const { x, y } = local(e);
@@ -7522,7 +7603,7 @@ cv.addEventListener('pointerup', e => {
 });
 cv.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); down = null; drag = null; box = null; $('#selbox').hidden = true; clearTimeout(lpT); });
 cv.addEventListener('pointerleave', e => { if (e.pointerType === 'touch') return; mouse.inside = false; cursorEl.hidden = true; hovHide(); if (placing()){ D.op = null; updatePreview(); } });
-cv.addEventListener('contextmenu', e => { e.preventDefault(); if (S.tool === 'select' && S.view !== 'sheet') openCtxMenu(e); });
+cv.addEventListener('contextmenu', e => { e.preventDefault(); if (PAINT.on) return; if (S.tool === 'select' && S.view !== 'sheet') openCtxMenu(e); });
 // a menu at the pointer: rows [name, key, action, enabled, submenu rows] or null for a line; a row with a submenu opens it to the side
 let NO_CTX = 0;
 function popMenu(e, rows){
@@ -7592,6 +7673,7 @@ function openCtxMenu(e){
   popMenu(e, rows);
 }
 cv.addEventListener('dblclick', e => {
+  if (PAINT.on) return;
   if (S.tool === 'dim' && DD.refs.length >= 2){ placeDim(); return; }
   if (D.poly){ finishPoly(); return; }
   if (S.tool === 'select'){ const { x, y } = local(e), vm = pickViewMark(x, y); if (vm){ openView(vm); return; }
@@ -8074,6 +8156,7 @@ function setView(v){
   updateHint(); renderVbar(); realSky();
 }
 function setTool(t){
+  if (PAINT.on && t !== 'select' && t !== S.tool) paintExitTab(); // a tool of the model (chat, keys) ends «Рисование»
   S.similar = null; if (t && t !== 'select'){ S.lastTool = t; S.recent = [t, ...(S.recent || []).filter(x => x !== t)].slice(0, 8); }
   if (t === 'grid' && curView().noGrid){ delete curView().noGrid; annoDirty = true; rebuild(); scheduleSave(); setTimeout(renderVbar); }
   if (['mirror', 'mirror2', 'rotate', 'scale', 'attach'].includes(t) && !liveIds(sel).length){ toast('Сначала выберите элементы, затем инструмент'); t = 'select'; }
@@ -8191,6 +8274,7 @@ function tvpSet(id){
 }
 function renderVbar(){
   vbIcons();
+  { const ce = $('#camExit'), v = curView(); if (ce) ce.hidden = !v || v.kind !== 'camera'; }
   $('#vbDetail').textContent = 'Детализация: ' + (DETAIL_NAME[S.detail] || DETAIL_NAME.medium);
   $('#vbStyle').textContent = 'Стиль: ' + (STYLE_NAME[S.style] || STYLE_NAME.shaded);
   $('#vbDetail').hidden = S.view !== 'plan'; $('#vbStyle').hidden = S.view === 'plan';
@@ -8390,6 +8474,7 @@ function sanitizeViews(arr){
     if (['coarse', 'fine'].includes(v.detail)) o.detail = v.detail;
     if (v.noSheet) o.noSheet = true; // its sheet was deleted by the user // «Уровень детализации» of the view (medium — by default)
     if (Number.isFinite(+v.tord)) o.tord = Math.round(+v.tord); // its place in its list of the browser (dragged by the user)
+    if (v.paint){ const pp = sanPaint(v.paint); if (pp) o.paint = pp; } // «Рисование»: the sketches over the photos of this view
 
     if (v.kind === 'camera'){
       if (!o.cam) continue;
@@ -8471,7 +8556,7 @@ function renderTabs(){
 function openView(id){
   const v = views.find(x => x.id === id); if (!v) return;
   if (VPACT.on && !VPACT.entering) exitVpAct(true); // another view is opened while a view was active on a sheet
-  if (S.viewId && S.viewId !== id) saveCam();
+  if (S.viewId && S.viewId !== id){ saveCam(); const pv = views.find(x => x.id === S.viewId); if (pv && pv.kind !== 'camera') S.camBack = S.viewId; } // «Выйти из камеры» goes back there
   S.viewId = id; S.phase = v.phase || 'all'; S.detail = v.detail || 'medium'; SHEET.colEdit = null; SHEET.colSel = -1;
   if (v.kind === 'plan' || v.kind === 'detail') S.level = v.lv && levels.some(l => l.id === v.lv) ? v.lv : levels[0].id;
   const mode = KIND_MODE[v.kind];
@@ -13358,8 +13443,11 @@ function renderCube(){
 
 /* ---------- ribbon, options bar, properties, project browser ---------- */
 function showTab(id){
+  const was = (document.querySelector('.tabs [role=tab][aria-selected="true"]') || {}).dataset?.tab;
   document.querySelectorAll('.tabs [role=tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === id));
   document.querySelectorAll('.rb-panel').forEach(p => p.hidden = p.id !== id);
+  // «Рисование»: entering the tab freezes the model and hides the windows; any other tab ends it
+  if (id === 'rbDraw'){ if (was && was !== 'rbDraw') PAINT.tabBack = was; paintRibbon(); paintOn(); } else if (PAINT.on) paintOff();
 }
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 const TOOL_NAMES = { select:'Изменить', wall:'Изменить | Разместить стену', rect:'Изменить | Комната из стен', door:'Изменить | Разместить дверь', window:'Изменить | Разместить окно', box:'Изменить | Разместить объём', dim:'Изменить | Разместить размеры', orbit:'Обзор', grid:'Изменить | Разместить ось', line:'Изменить | Линии детализации', text:'Изменить | Текст', move:'Переместить', copy:'Копировать', callout:'Изменить | Узел (выносной вид)', demolish:'Изменить | Снос элементов',
@@ -15056,7 +15144,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-2246');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-2320');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -16599,6 +16687,7 @@ function parseOne(f){
   if (/яндекс|диск/.test(f) && /сохран|запиш/.test(f)) return { a:'ydsave' };
   if (/яндекс|диск/.test(f) && /откр|загруз/.test(f)) return { a:'ydopen' };
   if (/(?:dwg|dxf|двг|дхф|автокад|autocad|нанокад)/.test(f) && /(?:сохран|экспорт|выгрузи|конверт|переведи|передай)/.test(f)) return { a:'export', f:'dxf' }; // before «сохрани»
+  if (/^(?:сохрани|сохранить)[а-яё]*\s+(?:рисунок|набросок)/.test(f)) return { a:'paint', save:'png' };
   if (/^(?:сохрани|сохранить|сохран[а-я]* проект)/.test(f)) return { a:'save' };
   if (/распечат|^печат/.test(f)) return { a:'print' };
   { // Physical Material: «у материала сталь пресет хром», «материал дерево лакированное дерево», «материал стекло преломление 1», «сделай материал краска светящимся»
@@ -16621,6 +16710,26 @@ function parseOne(f){
       if (/зим/.test(f) && !dm) o.date = '12-21'; if (/(?:^|\s)(?:летом|летн[а-яё]*|лето)(?:\s|$)/.test(f) && !dm) o.date = '06-21'; if (/весн|осен/.test(f) && !dm) o.date = /весн/.test(f) ? '03-21' : '09-22';
       const ct = SUN_CITIES.find(x => f.includes(lc(x[0]).slice(0, Math.max(4, lc(x[0]).length - 2)))); if (ct) o.city = ct[0];
       if (Object.keys(o).length > 1) return o; } }
+  if (/(?:выйди|выход|выйти|вернись)[а-яё]*\s+(?:из\s+)?камер/.test(f)) return { a:'camexit' };
+  { // «Рисование» (Procreate): «режим рисования», «фото ракурса», «кисть карандаш», «размер кисти 20», «цвет кисти красный», «ластик», «новый слой», «сохрани рисунок»
+    const P2 = PAINT.on || /рисова|рисунок|рисунк|набросок|наброск|кист[ьи]|ластик|ракурс/.test(f) || (/(?:^|\s)(?:нов|очист|объедин|копи)[а-яё]*\s+сло[йяи]/.test(f) && !/стен|тип/.test(f));
+    if (/(?:закончи|выйди|выход|заверши|хватит)[а-яё]*\s+(?:из\s+)?(?:режим[а-яё]*\s+)?рисова/.test(f)) return { a:'paint', off:true };
+    if (/(?:фото|сфотограф|снимок|сними)[а-яё]*\s+ракурс/.test(f) || /(?:^|\s)сфотографируй(?:\s+вид)?(?:\s|$)/.test(f)) return { a:'paint', photo:true };
+    if (/нов[а-яё]*\s+ракурс|другой\s+ракурс|выбрать\s+ракурс/.test(f)) return { a:'paint', angle:true };
+    if (/верни[а-яё]*\s+(?:ракурс|вид\s+наброск)/.test(f)) return { a:'paint', back:true };
+    { const m = f.match(/(?:открой|покажи)\s+набросок\s+(\d+)/); if (m) return { a:'paint', sketch:+m[1] }; }
+    if (P2){
+      if (/(?:режим[а-яё]*\s+рисова|(?:включи|начни|давай|хочу)\s+рисова|^рисование$|^рисовать$|вкладк[а-яё]*\s+рисова)/.test(f)) return { a:'paint', on:true };
+      const o = { a:'paint' };
+      const bm = f.match(/(?:кист[ьи]|кисточк[а-яё]*)\s+(туш|карандаш|маркер|аэрограф|угол|уголь|акварел)/) || f.match(/(?:^|\s)(карандаш|маркер|аэрограф|акварел)[а-яё]*(?:\s|$)/); if (bm) o.brush = { 'туш':'ink', 'карандаш':'pencil', 'маркер':'marker', 'аэрограф':'air', 'угол':'chalk', 'уголь':'chalk', 'акварел':'water' }[bm[1]];
+      if (/(?:^|\s)ластик|сотри\s+кист|стирать/.test(f)) o.tool = 'erase'; else if (/(?:^|\s)палец|размаж|размазать|растушуй|растушевать/.test(f)) o.tool = 'smudge'; else if (/пипетк|взять\s+цвет|возьми\s+цвет/.test(f)) o.tool = 'pick';
+      const sz = f.match(/(?:размер|толщин)[а-яё]*\s+(?:кист[а-яё]*\s+|ластик[а-яё]*\s+)?(\d+)/); if (sz) o.size = +sz[1];
+      const op = f.match(/(?:непрозрачност|прозрачност)[а-яё]*\s+(?:кист[а-яё]*\s+)?(\d+)/); if (op) o.op = /(?:^|\s)прозрачност/.test(f) ? 100 - +op[1] : +op[1];
+      const cl = (/кист|рису/.test(f) || (PAINT.on && !/размер|стен|материал|текст|линий/.test(f))) && f.match(/цвет[а-яё]*\s+(?:кист[а-яё]*\s+)?([а-яё]+|#[0-9a-f]{6})/); if (cl && !/цвета$/.test(cl[0])) o.color = cl[1];
+      if (/нов[а-яё]*\s+сло/.test(f) && !/стен|тип/.test(f)) o.layer = 'add'; else if (/(?:очист|сотри)[а-яё]*\s+(?:весь\s+)?сло/.test(f)) o.layer = 'clear'; else if (/удал[а-яё]*\s+сло/.test(f) && !/стен|тип/.test(f)) o.layer = 'del'; else if (/(?:объедин|слей)[а-яё]*\s+сло/.test(f)) o.layer = 'merge'; else if (/(?:копи|дублир)[а-яё]*\s+сло/.test(f)) o.layer = 'dup';
+      if (/(?:сохрани|скачай)[а-яё]*\s+(?:рисунок|набросок|картинку\s+рисунка)/.test(f)) o.save = 'png'; else if (/(?:рисунок|набросок)\s+на\s+лист|(?:поставь|положи)\s+(?:рисунок|набросок)\s+на\s+лист/.test(f)) o.save = 'sheet';
+      if (Object.keys(o).length > 1) return o;
+    } }
   if (/видеокарт/.test(f) && /(?:как[а-яё]*|котор[а-яё]*|покажи|узна|счита|работа)/.test(f) && !/рендер\s+(?:на|с)\s/.test(f)) return { a:'gpu' }; // «какая видеокарта считает рендер»
   if (/фот[оа]|картинк|изображен|снимк/.test(f) && /(?:убер|удал|сотр|выреж|выдел|оставь|обвед|отдел|прозрачн)[а-яё]*/.test(f) && /фон|предмет|только|выре[зж]|обвед|контур/.test(f) && !/с\s+листа/.test(f)){ // «убери фон у фото», «на фото оставь только стул», «вырежи стул из фото», «обведи на фото»
     if (/(?:убер|удал|сотр)[а-яё]*\s+(?:весь\s+)?фон|без\s+фона|фон\s+прозрачн/.test(f)) return { a:'piccut', mode:'bg' };
@@ -17786,6 +17895,26 @@ function execMore(a, ctx){
       if (a.clay != null) $('#rnClay').value = a.clay === true ? 'glass' : a.clay === false ? 'off' : ['glass', 'all', 'off'].includes(a.clay) ? a.clay : 'glass';
       if (a.go) setTimeout(() => $('#rnGo').click(), 50);
       return 'Окно визуализации открыто' + (a.level ? ', уровень «' + $('#rnPreset').selectedOptions[0].textContent + '»' : '') + (a.noise != null ? ', предел шума ' + ($('#rnNoise').value === '0' ? 'выкл.' : $('#rnNoise').value + ' %') : '') + (a.clay != null && $('#rnClay').value !== 'off' ? ', белая модель' + ($('#rnClay').value === 'glass' ? ' со стеклом' : '') : '') + (a.go ? ' — рендер запущен' : ''); }
+    case 'camexit': return camExit();
+    case 'paint': { // «Рисование» (Procreate): {on|off, photo, angle, back, sketch (номер или имя), tool:'brush'|'smudge'|'erase'|'pick', brush, size, op, color, layer:'add'|'del'|'clear'|'dup'|'merge', save:'png'|'sheet', sheet, undo, redo, cut:'bg'|'sam'|'lasso'}
+      if (a.off){ if (PAINT.on) paintExitTab(); return 'Рисование закончено: окна и правка модели вернулись'; }
+      if (!PAINT.on) showTab('rbDraw');
+      const out = [];
+      if (a.photo){ paintPhoto(); out.push('фото ракурса сделано'); }
+      if (a.angle){ paintNewAngle(); out.push('выберите новый ракурс'); }
+      if (a.back){ paintBackCam(); out.push('вид в ракурсе наброска'); }
+      if (a.sketch != null){ const v = curView(), L = (v && v.paint && v.paint.list) || [], i = Number.isFinite(+a.sketch) ? +a.sketch - 1 : L.findIndex(s => lc(s.n).includes(lc(a.sketch))); if (!L[i]) throw new Error('Нет такого наброска'); paintSkSel(String(i)); out.push('набросок «' + L[i].n + '»'); }
+      const col = a.color ? (/^#[0-9a-f]{6}$/i.test(a.color) ? a.color : (Object.entries(COLOR_WORDS).find(([w]) => lc(a.color).includes(w)) || [])[1] || (lc(a.color).includes('бел') ? '#ffffff' : '')) : '';
+      if (a.color && !col) throw new Error('Не знаю цвет «' + a.color + '»');
+      const brush = a.brush ? (PBRUSH[a.brush] ? a.brush : (Object.entries(PBRUSH).find(([, b]) => lc(a.brush).startsWith(lc(b.n).slice(0, 4))) || [])[0]) : null;
+      if (a.brush && !brush) throw new Error('Нет кисти «' + a.brush + '»: ' + Object.values(PBRUSH).map(b => b.n).join(', '));
+      paintSet({ tool:a.tool, brush, size:a.size, op:a.op, col });
+      if (a.tool) out.push({ brush:'кисть', smudge:'палец', erase:'ластик', pick:'пипетка' }[a.tool] || a.tool); if (brush) out.push('кисть «' + PBRUSH[brush].n + '»'); if (a.size != null) out.push('размер ' + a.size + ' px'); if (a.op != null) out.push('непрозрачность ' + Math.round(PAINT.opT[PAINT.tool] * 100) + ' %'); if (col) out.push('цвет ' + col);
+      if (a.layer){ if (!PAINT.doc) throw new Error('Сначала «Фото ракурса»'); paintLayerOp(a.layer); out.push({ add:'новый слой', del:'слой удалён', clear:'слой очищен', dup:'копия слоя', merge:'слой объединён с нижним' }[a.layer] || a.layer); }
+      if (a.undo) pUndo(true); if (a.redo) pUndo(false);
+      if (a.save === 'png'){ paintSavePng(); out.push('картинка сохраняется'); } if (a.save === 'sheet'){ paintToSheet(a.sheet); out.push('на лист'); }
+      if (a.cut) out.push(paintCutPhoto(a.cut));
+      return 'Рисование' + (out.length ? ': ' + out.join(', ') : ': поверните вид и нажмите «Фото»'); }
     case 'gpu': { const n = gpuName(); return n ? (gpuWeak(n) ? `Рендер считает встроенная видеокарта: ${n}. Если есть NVIDIA — Параметры Windows → Система → Дисплей → Графика → браузер → «Высокая производительность», и перезапустите браузер.` : `Рендер считает видеокарта: ${n}`) : 'Не удалось узнать видеокарту'; }
     case 'piccut': { // the photo of the sheet: {mode:'bg'|'sam'|'lasso'} — remove the background / cut one object out
       const { v, pic } = selSheetPic(); if (!v) throw new Error('Откройте лист с фото'); if (!pic) throw new Error('Выберите фото на листе (щелчок по нему)');
@@ -18008,7 +18137,7 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 Уровни: {"a":"levelset","lv":"Этаж 2","elev":3.3,"rename":"2 этаж","pin":true}. Высотная отметка на плане: {"a":"spot","room":"1"} или {"a":"spot","x":0,"z":0}.
 Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetnew","sec":"obmer","name":"Обмерный план 2"} — новый лист в разделе (cover — обложка без номера, gen — общие данные 1-…, obmer — обмер 2-…, dem — демонтаж 3-…, mont — монтаж 4-…; или название раздела); номера листов ставятся сами; {"a":"sheetmove","sheet":"2-3","dir":"up"} — сдвинуть лист в своём разделе; {"a":"sheetset","sheet":"2-1","sec":"mont","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений. {"a":"frame","sheet":"А101","l":20,"t":5,"r":5,"b":5,"lw":0.6,"all":true} — рамка листа (all — для всех листов; reset:true — по ГОСТ; open:true — окно); {"a":"explcfg","sheet":"А101", "addcol":{"k":"num|name|area|perim|h|txt","n":"Примечание","w":30}, "delcol":"Примечание", "colw":{"col":"Наименование","w":50}, "colname":{"col":"№","n":"Поз."}, "rh":8, "hh":15, "fs":2.8, "ttl":"…"|false, "tot":true, "addrow":{"cells":{"Наименование":"Балкон","Площадь":"3,20"}}, "delrow":"last", "cell":{"room":"3","col":"Наименование","text":"Кухня-гостиная"}, "reset":true, "open":true} — настройка экспликации (любые поля вместе); {"a":"stampcell","op":"rowAbove|rowBelow|rowDel|colLeft|colRight|colDel|splitH|splitV|text","x":30,"y":12,"size":5,"text":"…"} — строки/столбцы/текст штампа листа по ячейке в точке x, y мм от левого верхнего угла штампа (open:true — редактор); {"a":"side","sheet":"4-1","on":true,"w":80,"notes":"пункт 1; пункт 2","addnote":"новый пункт","parts":{"ved":false,"legend":true,"notes":true,"expl":true,"own":true},"own":true,"all":true,"edit":true,"text":{"t":"Текст","x":2,"y":150,"s":2.6},"line":[0,150,80,150],"table":{"rows":4,"cols":3,"h":7,"y":160}} — боковая колонка листа справа (edit — редактирование прямо на листе: линии, прямоугольники, тексты, таблицы; text/line/table — в мм от левого верхнего угла колонки) (экспликация, ведомость монтажа, условные обозначения, примечание, свой блок — own:true открывает его в редакторе: тексты, линии, таблицы; внизу узкий штамп); {"a":"stampline","x":0,"y":10,"x2":65,"y2":10,"lw":0.5} — линия в штампе (мм от левого верхнего угла штампа; без координат или draw:true — открыть редактор в режиме «Чертить линии»); штамп стоит в углу рамки по своим линиям;{"a":"phf","view":"План монтажа","f":"allnew"} — фильтр стадий вида (all — «Показать все», allnew — «Показать все, новое зелёным» (так у планов монтажа по умолчанию), done, demo, new, prevdemo, prevnew, prev, none или название); {"a":"vptitle","sheet":"2-1","view":"Обмерный план","text":"План квартиры","on":true} — название вида на листе (по умолчанию названия выключены; on:true — показать, on:false — скрыть; text — свой текст (и показать), "" — как у вида; без view — все виды листа или выбранный); {"a":"stampfield","sheet":"2-1","k":"author|checker|nk|gip|obj|code|stage|date|org|proj|sheet","val":"Иванов"} — вписать поле в штамп листа (proj — название проекта, sheet — название листа; номер листа считается сам);{"a":"sheetaxo","sheet":"2-1"} — поставить на лист обмерного плана две аксонометрии обмера (создаются, если нет); {"a":"sheetpic","sheet":"А101"} — добавить фото на лист (откроется выбор файла; del:true — убрать последнее фото); {"a":"sheetlayout","sheet":"А101","auto":true,"mode":"zones"|"rows","zk":"b3"|"b2"|"l2"|"l3"} — (zk — вариант зон: b3 план сверху 3 снизу, b2 план сверху 2 снизу, l2 план по центру 2 слева, l3 план по центру 3 слева; масштаб видов любой 1:N под окно)разложить виды листа в области размещения (zones — сетка: главный план сверху, снизу три зоны для аксонометрий и фото, всё масштабируется под свою ячейку; линии сетки тянутся мышью, вид, брошенный в ячейку, встаёт в неё; сетка видна только на экране; rows — рядами; auto — делать это само при добавлении видов); {"a":"sheetzoom","z":150|"in":true,"out":true,"fit":true} — масштаб листа на экране; {"a":"vpact","view":"Обмерный план"} — активировать вид прямо на листе (в нём работают все инструменты; off:true — деактивировать, вернуться к листу); {"a":"wizard","obj":"ЖК …, кв. 5","addr":"г. Саранск, ул. …","org":"…","author":"Иванов","st":["obmer","demontazh","montazh","otdelka","mebel"],"zk":"b3"} — «Мастер проекта» (а также {"a":"vbar","k":"sun"|"shadows"|"crop"|"cropshow"|"isocat"|"hidecat"|"iso"|"hide"|"reset"|"apply"|"tvp"|"tvpoff"|"cons","on":true,"tpl":"План мебели"} — нижняя строка вида как в Revit: траектория солнца, тени, обрезать вид, граница обрезки, временно скрыть/изолировать категорию или элемент, восстановить, применить к виду, временные свойства вида (шаблон на время), показать зависимости; {"a":"viewcrop","crop":true,"show":true,"anno":true,"off":15} — «Границы» плана: обрезать вид, показать границу обрезки (тогда она видна и на листе), обрезать аннотации со смещением в мм бумаги; {"a":"viewsub","view":"current","sub":"Потолки"} — подвид вида или листа (лист отдаёт его своим видам): у подвида свои размеры и свой тип размеров; open:true — список подвидов; {"a":"newview2","kind":"rcp"|"light"} — план потолка / план освещения; {"a":"plankind","k":"rcp"|"light"|"plan"} — сделать открытый план планом потолка, освещения или этажа; {"a":"viewrange","cut":1500,"top":"above","bot":0,"depth":0} — секущий диапазон плана в мм от его уровня (open:true — окно, reset:true — по умолчанию); {"a":"furn","k":"spot","room":"3","n":6} — светильники сеткой в помещении (k: spot, downlight, pendant, track, ledline, sconce, switch1, switch2, socket — под потолком или на стене сами); {"a":"dimoff","mm":300} — выбранные размерные линии дальше от элемента на 300 мм, −200 — ближе; {"a":"dimoff","off":600} — на 600 мм от элемента): из обмера сам делает стадии, планы, помещения, размеры, развёртки, аксонометрии, листы, экспликацию и поля штампа (open:true — открыть окно мастера);{"a":"vpscale","view":"план","scale":27} — масштаб вида на листе, любой 1:N; {"a":"vpscale","fit":true} — вписать виды в их окна (зоны) листа: масштаб 1:N сам под размер окна;{"a":"sheetarea","sheet":"А101","x":25,"y":10,"w":230,"h":220} — область размещения видов в мм от левого верхнего угла листа (reset:true — по умолчанию).
 Экспорт: {"a":"export","f":"ifc"} — для Revit (IFC: стены с проёмами, двери, окна, перекрытия, крыши, колонны, лестницы, мебель, помещения, уровни), "obj" — для 3ds Max (ZIP с OBJ, MTL и текстурами), "glb" — glTF.
-Видеокарта рендера: {"a":"gpu"} — какая видеокарта считает (встроенная — подсказка, как включить мощную). Фото на листе (выбранное): {"a":"piccut","mode":"bg"|"sam"|"lasso"} — bg: убрать фон (ИИ), sam: оставить предмет по щелчку (ИИ), lasso: обвести вручную; фон становится прозрачным. Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"} — окно Kot Render; {"a":"render","level":"draft"|"good"|"high"|"max","lights":"off"|2700|3000|4000|5000,"lk":0,"pbr":true,"lightmix":true,"ceil":true,"vert":true,"ffly":true,"imperf":true,"tmax":10,"fog":0.015,"noise":5,"clay":"glass"|"all"|"off","go":true} — уровень качества, noise — предел шума в % (0 — выкл., рендер останавливается сам), clay — белая модель (glass — стекло остаётся стеклом, солнце проходит в комнаты), fog — объёмная дымка (0 нет, 0.015 лёгкая, 0.04 лучи, 0.1 туман), vert — вертикали прямые (сдвиг объектива), ffly — убирать «светлячки», imperf — неровности материалов, tmax — предел времени в минутах, lightmix — небо и лампы двумя картинками (смешивать после рендера), ceil — временный потолок у камеры в помещении без потолка, светильники горят (цветовая температура, яркость в EV), фото-материалы, сразу запустить; {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"matfill","mat":"Дерево (брус)","fill":"oak","layer":"surf"} — штриховка материала: породы дерева oak/ash/beech/pine/walnut/teak/wenge/veneer (дуб, ясень, бук, сосна, орех, тик, венге, шпон) или название штриховки; layer surf — поверхность, cut — сечение; role fg/bg; {"a":"tracker","on":false} — скрыть трекер у курсора при построении (расстояние, угол, координата Z; true — показать); {"a":"wallform","f":"3p"} — инструмент «Стена» дугой по 3 точкам ("tan" — по касательной к предыдущей стене, "line" — прямая); {"a":"wall","len":4,"dir":"E","r":3} — стена дугой радиусом 3 м ("arc":0.5 — стрелой дуги, "side":"r" — выпуклая вправо); {"a":"wallarc","wall":"Б","r":3} — изогнуть стену Б (радиус, м; "off":true — выпрямить); {"a":"wallnode","wall":"Б","off":0.5} — вставить узел в середину стены и выдвинуть его на 0,5 м; {"a":"walloffset","wall":"Б","d":0.2} — сместить стену параллельно (соседние следуют); {"a":"wallelev","wall":"Б","mm":100} — поднять стену; {"a":"wallpet"} — палитра выбранной стены (как в ArchiCAD); {"a":"textset","ff":"arial","mm":3,"b":true,"i":false,"u":false,"st":false,"col":"#1b252c","lh":120} — шрифт (golos, arial, times, gost, mono, hand), высота букв в мм бумаги, жирный, курсив, подчёркнутый, зачёркнутый, цвет, межстрочный интервал %; {"a":"textset","ha":"c","va":"m","leader":{"side":"l","arc":true},"at":{"side":"l","pos":"m"}} — текст как в Revit (выбранный или последний): выравнивание ha l|c|r и va t|m|b, добавить выноску слева/справа (arc — дугой), "unleader":true — убрать последнюю, at — откуда выноска (t верхняя строка, m середина, b нижняя); {"a":"textfont","f":"hand"} — рукописный шрифт (Marck Script, русские и латинские буквы) для выбранных текстов и новых ("all":true — для всех текстов, "f":"" — обычный); у "text2d" поле "font":"hand"; {"a":"matchprop","from":"window:Б","to":["window:В","window:Г"]} — копировать свойства (Revit «Сопоставить свойства типа»): элементы одного вида получают всё своё (стена — тип, толщину, высоту; дверь — размер, отделку, наличники; текст — вид), разных видов — общее (материал: стол → шкаф); без "to" — включить инструмент (образец — выбранный); {"a":"viewscale","scale":50} — масштаб вида (Revit): под него подстраиваются размеры, тексты и марки; {"a":"viewscale","sheet":true} — по листу (масштаб, с которым вид стоит на своём листе; по умолчанию); {"a":"tag","cats":["door","window"],"tt":"Размер","ld":true} — марки (Revit): поставить марки всем элементам категорий (wall, door, window, fam, column, box, floor, ceiling, stair, roof) в этом виде, tt — тип марки (название или часть: «Размер», «Материал», «Наименование»…), ld — с выносками; {"a":"tag","el":"window:Б"} — одному элементу; {"a":"tag","del":["door"]} или "all" — убрать марки; {"a":"tag"} — инструмент «Марка по категории»; {"a":"tagtype","cat":"door","n":"Размер и материал","txt":"{wh} {mat}","sh":"round","ld":true} — тип марки категории (поля {mark} {name} {w} {h} {wh} {t} {sill} {area} {mat} {cmt}, рамки rect round circle double hex dashed under none), становится типом по умолчанию; {"a":"tagtype","open":true} — окно «Типы марок»; {"a":"export","f":"dxf"} — открытый вид в DXF для AutoCAD (DWG — закрытый формат: AutoCAD открывает DXF и «Сохранить как → DWG»), 2D в мм, слои по категориям, тексты; {"a":"tmod","ortho":true} — построение по осям (как Shift; кнопка «Оси» внизу слева на планшете), {"a":"tmod","step":15} — шаг угла 15/30/45°, {"a":"tmod","fix":60} — строить под углом 60°, {"a":"tmod","off":true} — свободное построение; {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"paper","on":true} — фон рабочего поля «мятая бумага» (false — ровный цвет);{"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
+Рисование (как Procreate, вкладка «Рисование»; модель заморожена): {"a":"paint","on":true} | {"photo":true} — фото ракурса, на нём рисуют | {"angle":true} — новый ракурс | {"back":true} — вернуть ракурс наброска | {"sketch":2} | {"tool":"brush"|"smudge"|"erase"|"pick","brush":"ink"|"pencil"|"marker"|"air"|"chalk"|"water","size":20,"op":80,"color":"красный"|"#rrggbb"} | {"layer":"add"|"del"|"clear"|"dup"|"merge"} | {"save":"png"|"sheet","sheet":"имя"} | {"undo":true} | {"cut":"bg"|"sam"} | {"off":true}. Выйти из камеры: {"a":"camexit"}. Видеокарта рендера: {"a":"gpu"} — какая видеокарта считает (встроенная — подсказка, как включить мощную). Фото на листе (выбранное): {"a":"piccut","mode":"bg"|"sam"|"lasso"} — bg: убрать фон (ИИ), sam: оставить предмет по щелчку (ИИ), lasso: обвести вручную; фон становится прозрачным. Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"} — окно Kot Render; {"a":"render","level":"draft"|"good"|"high"|"max","lights":"off"|2700|3000|4000|5000,"lk":0,"pbr":true,"lightmix":true,"ceil":true,"vert":true,"ffly":true,"imperf":true,"tmax":10,"fog":0.015,"noise":5,"clay":"glass"|"all"|"off","go":true} — уровень качества, noise — предел шума в % (0 — выкл., рендер останавливается сам), clay — белая модель (glass — стекло остаётся стеклом, солнце проходит в комнаты), fog — объёмная дымка (0 нет, 0.015 лёгкая, 0.04 лучи, 0.1 туман), vert — вертикали прямые (сдвиг объектива), ffly — убирать «светлячки», imperf — неровности материалов, tmax — предел времени в минутах, lightmix — небо и лампы двумя картинками (смешивать после рендера), ceil — временный потолок у камеры в помещении без потолка, светильники горят (цветовая температура, яркость в EV), фото-материалы, сразу запустить; {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"matfill","mat":"Дерево (брус)","fill":"oak","layer":"surf"} — штриховка материала: породы дерева oak/ash/beech/pine/walnut/teak/wenge/veneer (дуб, ясень, бук, сосна, орех, тик, венге, шпон) или название штриховки; layer surf — поверхность, cut — сечение; role fg/bg; {"a":"tracker","on":false} — скрыть трекер у курсора при построении (расстояние, угол, координата Z; true — показать); {"a":"wallform","f":"3p"} — инструмент «Стена» дугой по 3 точкам ("tan" — по касательной к предыдущей стене, "line" — прямая); {"a":"wall","len":4,"dir":"E","r":3} — стена дугой радиусом 3 м ("arc":0.5 — стрелой дуги, "side":"r" — выпуклая вправо); {"a":"wallarc","wall":"Б","r":3} — изогнуть стену Б (радиус, м; "off":true — выпрямить); {"a":"wallnode","wall":"Б","off":0.5} — вставить узел в середину стены и выдвинуть его на 0,5 м; {"a":"walloffset","wall":"Б","d":0.2} — сместить стену параллельно (соседние следуют); {"a":"wallelev","wall":"Б","mm":100} — поднять стену; {"a":"wallpet"} — палитра выбранной стены (как в ArchiCAD); {"a":"textset","ff":"arial","mm":3,"b":true,"i":false,"u":false,"st":false,"col":"#1b252c","lh":120} — шрифт (golos, arial, times, gost, mono, hand), высота букв в мм бумаги, жирный, курсив, подчёркнутый, зачёркнутый, цвет, межстрочный интервал %; {"a":"textset","ha":"c","va":"m","leader":{"side":"l","arc":true},"at":{"side":"l","pos":"m"}} — текст как в Revit (выбранный или последний): выравнивание ha l|c|r и va t|m|b, добавить выноску слева/справа (arc — дугой), "unleader":true — убрать последнюю, at — откуда выноска (t верхняя строка, m середина, b нижняя); {"a":"textfont","f":"hand"} — рукописный шрифт (Marck Script, русские и латинские буквы) для выбранных текстов и новых ("all":true — для всех текстов, "f":"" — обычный); у "text2d" поле "font":"hand"; {"a":"matchprop","from":"window:Б","to":["window:В","window:Г"]} — копировать свойства (Revit «Сопоставить свойства типа»): элементы одного вида получают всё своё (стена — тип, толщину, высоту; дверь — размер, отделку, наличники; текст — вид), разных видов — общее (материал: стол → шкаф); без "to" — включить инструмент (образец — выбранный); {"a":"viewscale","scale":50} — масштаб вида (Revit): под него подстраиваются размеры, тексты и марки; {"a":"viewscale","sheet":true} — по листу (масштаб, с которым вид стоит на своём листе; по умолчанию); {"a":"tag","cats":["door","window"],"tt":"Размер","ld":true} — марки (Revit): поставить марки всем элементам категорий (wall, door, window, fam, column, box, floor, ceiling, stair, roof) в этом виде, tt — тип марки (название или часть: «Размер», «Материал», «Наименование»…), ld — с выносками; {"a":"tag","el":"window:Б"} — одному элементу; {"a":"tag","del":["door"]} или "all" — убрать марки; {"a":"tag"} — инструмент «Марка по категории»; {"a":"tagtype","cat":"door","n":"Размер и материал","txt":"{wh} {mat}","sh":"round","ld":true} — тип марки категории (поля {mark} {name} {w} {h} {wh} {t} {sill} {area} {mat} {cmt}, рамки rect round circle double hex dashed under none), становится типом по умолчанию; {"a":"tagtype","open":true} — окно «Типы марок»; {"a":"export","f":"dxf"} — открытый вид в DXF для AutoCAD (DWG — закрытый формат: AutoCAD открывает DXF и «Сохранить как → DWG»), 2D в мм, слои по категориям, тексты; {"a":"tmod","ortho":true} — построение по осям (как Shift; кнопка «Оси» внизу слева на планшете), {"a":"tmod","step":15} — шаг угла 15/30/45°, {"a":"tmod","fix":60} — строить под углом 60°, {"a":"tmod","off":true} — свободное построение; {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"paper","on":true} — фон рабочего поля «мятая бумага» (false — ровный цвет);{"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
 Если просят то, что делается мышью (нарисовать произвольный контур, щёлкнуть по месту), включи нужный инструмент действием tool и в reply объясни, куда щёлкнуть.`;
 function commandPrompt(text){
   return `Ты переводишь команду пользователя для программы архитектурного черчения «Kot project» в список действий JSON.
@@ -18133,7 +18262,7 @@ const LLM_CMDS = `комната 5 на 4 | стена 3 метра вправо
 покажи план | покажи 3д | покажи аксонометрию | покажи южный фасад | разрез | разрез от 0 2 до 8 2 | развёртки помещения 1 | камера из 1 5 на 4 1 | узел от 1 1 до 2 2
 стадия демонтаж (обмер, монтаж, мебель, все) | снеси стену Б | открой план демонтажа | новый лист | размести виды | экспликация помещений | рамка листа
 скрой буквы | покажи буквы | скрытые линии | тонированный | графичный | на весь экран | покажи панели | фон бумага | ровный фон | отмени | верни | сохрани | распечатай | визуализация | что умеешь
-экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | балконный блок в южной стене | балконный блок 1720 дверь 740 справа в северной стене | в окне Б балконный блок дверь 800 | в окне Б балконный блок низ двери глухой | у окна Б две створки | у окна Б створки сами | дверь А гладкая | у двери А филёнки | активируй вид Обмерный план | деактивируй вид | масштаб плана на листе 1:27 | впиши виды в окна | создай план мебели | примени шаблон план мебели | создай план отделки | стадия отделка | создай план потолка | создай план освещения | секущая плоскость 1500 | секущий диапазон | сделай этот план планом потолка | поставь 6 точечных светильников в помещении 3 | поставь выключатель | подвид потолки | подвиды | обрежь вид | скрой границу обрезки | обрезать аннотации | покажи траекторию солнца | выключи тени | изолируй категорию | восстанови скрытые | примени скрытие к виду | временно примени шаблон план мебели | восстанови свойства вида | покажи зависимости | построение по осям | экспорт в dwg | сохрани в dxf | замаркируй двери и окна | марки всех элементов | поставь марку на окно Б | убери марки окон | типы марок | марка по категории | масштаб вида 1:50 | масштаб вида по листу | копировать свойства | скопируй свойства с окна Б на окно В | рукописный шрифт | выровняй текст по центру | текст жирный | текст курсивом | подчеркни текст | высота текста 5 мм | шрифт arial | текст по правому краю | добавь выноску слева | добавь выноску справа дугой | убери выноску | обычный шрифт | стиль эскиз | стена дугой | стена по касательной | прямая стена | стену Б дугой радиус 3000 | выпрями стену Б | вставь узел в стену Б | сместить стену Б на 200 | подними стену Б на 100 | скрой трекер | покажи трекер | семейство ваза в подкатегорию декор | подкатегория сама для семейства ваза | сделай рендер на максимум | рендер черновик | рендер белой модели со стеклом | какая видеокарта считает рендер | убери фон у фото | на фото оставь только стул | обведи предмет на фото | предел шума 3 | lut kodak portra 400 | рендер со светильниками 4000 к | рендер без светильников | рендер с лайтмикс | рендер с дымкой | рендер 10 минут | рендер вертикали прямые | у материала сталь пресет хром | материал дерево пресет лакированное дерево | материал стекло ior 1.52 | сделай материал краска светящимся | материал паркет случайный сдвиг | солнце в 15:00 | солнце 21 декабря в 12:00 | солнце в саранске | север проекта 20 | мягкие тени | параметры солнца | лучи от ламп | добавь зерно | кривая agx | фильтр тёплый вечер | убери фильтр | поставь группу узлы перед планами этажей | раздел 05 план мебели после раздела 06 | вид 2-3 аксонометрия выше 2-2 аксонометрия | штриховка дуб для материала дерево | рисуй под углом 45 | шаг угла 15 | свободное построение | у окна Б зависимость сверху Этаж 2 | окно Б смещение сверху -200 | у двери Б отделка спереди дуб | наличники у двери А с двух сторон | наличник у двери А шириной 90 | толщина наличника у двери А 16 | материал наличников у двери А дерево | у двери Б каркас белый | у двери Б комментарий 900 | мастер проекта | собери проект из обмера | размер дальше на 300 | размерную линию ближе на 200 | выход размерной линии на 1 мм |раскладка план сверху два снизу | раскладка план по центру два слева | раскладка план по центру три слева | разложи виды по зонам | разложи виды рядами | приблизь лист | отдали лист | лист целиком | боковая колонка | убери боковую колонку | редактировать колонку | в колонке напиши Отделка по проекту | в колонке таблица 4 на 3 | боковая колонка на всех листах | в примечание добавь Пол выровнять | свой блок на листе | начерти штамп линиями | линия в штампе от 0 10 до 65 10 | в штампе разработал Иванов | в штампе объект Саранск | засечки меньше | засечки 2 мм | текст размеров 2,5 мм | детализация высокая | детализация средняя | детализация низкая | проставь обмерные размеры | новое зелёным | новое обычным цветом | фильтр стадий показать все | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
+экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | балконный блок в южной стене | балконный блок 1720 дверь 740 справа в северной стене | в окне Б балконный блок дверь 800 | в окне Б балконный блок низ двери глухой | у окна Б две створки | у окна Б створки сами | дверь А гладкая | у двери А филёнки | активируй вид Обмерный план | деактивируй вид | масштаб плана на листе 1:27 | впиши виды в окна | создай план мебели | примени шаблон план мебели | создай план отделки | стадия отделка | создай план потолка | создай план освещения | секущая плоскость 1500 | секущий диапазон | сделай этот план планом потолка | поставь 6 точечных светильников в помещении 3 | поставь выключатель | подвид потолки | подвиды | обрежь вид | скрой границу обрезки | обрезать аннотации | покажи траекторию солнца | выключи тени | изолируй категорию | восстанови скрытые | примени скрытие к виду | временно примени шаблон план мебели | восстанови свойства вида | покажи зависимости | построение по осям | экспорт в dwg | сохрани в dxf | замаркируй двери и окна | марки всех элементов | поставь марку на окно Б | убери марки окон | типы марок | марка по категории | масштаб вида 1:50 | масштаб вида по листу | копировать свойства | скопируй свойства с окна Б на окно В | рукописный шрифт | выровняй текст по центру | текст жирный | текст курсивом | подчеркни текст | высота текста 5 мм | шрифт arial | текст по правому краю | добавь выноску слева | добавь выноску справа дугой | убери выноску | обычный шрифт | стиль эскиз | стена дугой | стена по касательной | прямая стена | стену Б дугой радиус 3000 | выпрями стену Б | вставь узел в стену Б | сместить стену Б на 200 | подними стену Б на 100 | скрой трекер | покажи трекер | семейство ваза в подкатегорию декор | подкатегория сама для семейства ваза | сделай рендер на максимум | рендер черновик | рендер белой модели со стеклом | какая видеокарта считает рендер | режим рисования | фото ракурса | новый ракурс | кисть карандаш | размер кисти 20 | цвет кисти красный | ластик | новый слой | сохрани рисунок | рисунок на лист | закончи рисование | выйди из камеры | убери фон у фото | на фото оставь только стул | обведи предмет на фото | предел шума 3 | lut kodak portra 400 | рендер со светильниками 4000 к | рендер без светильников | рендер с лайтмикс | рендер с дымкой | рендер 10 минут | рендер вертикали прямые | у материала сталь пресет хром | материал дерево пресет лакированное дерево | материал стекло ior 1.52 | сделай материал краска светящимся | материал паркет случайный сдвиг | солнце в 15:00 | солнце 21 декабря в 12:00 | солнце в саранске | север проекта 20 | мягкие тени | параметры солнца | лучи от ламп | добавь зерно | кривая agx | фильтр тёплый вечер | убери фильтр | поставь группу узлы перед планами этажей | раздел 05 план мебели после раздела 06 | вид 2-3 аксонометрия выше 2-2 аксонометрия | штриховка дуб для материала дерево | рисуй под углом 45 | шаг угла 15 | свободное построение | у окна Б зависимость сверху Этаж 2 | окно Б смещение сверху -200 | у двери Б отделка спереди дуб | наличники у двери А с двух сторон | наличник у двери А шириной 90 | толщина наличника у двери А 16 | материал наличников у двери А дерево | у двери Б каркас белый | у двери Б комментарий 900 | мастер проекта | собери проект из обмера | размер дальше на 300 | размерную линию ближе на 200 | выход размерной линии на 1 мм |раскладка план сверху два снизу | раскладка план по центру два слева | раскладка план по центру три слева | разложи виды по зонам | разложи виды рядами | приблизь лист | отдали лист | лист целиком | боковая колонка | убери боковую колонку | редактировать колонку | в колонке напиши Отделка по проекту | в колонке таблица 4 на 3 | боковая колонка на всех листах | в примечание добавь Пол выровнять | свой блок на листе | начерти штамп линиями | линия в штампе от 0 10 до 65 10 | в штампе разработал Иванов | в штампе объект Саранск | засечки меньше | засечки 2 мм | текст размеров 2,5 мм | детализация высокая | детализация средняя | детализация низкая | проставь обмерные размеры | новое зелёным | новое обычным цветом | фильтр стадий показать все | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
 выбери все экземпляры | выбери предыдущий | скрой категорию | графика элемента | полутона для выбранного | сдвинь выбранное вправо на 100 | поверни выбранное на 90 | скопируй выбранное вправо на 1000 | скрой выбранное
 открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы
 посчитай объём всех стен | посчитай площадь всех помещений | добавь аксонометрии на лист | калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
@@ -18194,7 +18323,7 @@ const LEARN_BUILTIN = [
   ['покажи сверху', 'покажи план'], ['давай в объёме', 'покажи 3д'], ['в три дэ', 'покажи 3д'], ['аксонометрию покажи', 'покажи аксонометрию'], ['фасад с юга', 'покажи южный фасад'], ['сделай разрез', 'разрез'], ['развёртку первой комнаты', 'развёртки помещения 1'],
   ['включи демонтаж', 'стадия демонтаж'], ['перейди на обмер', 'стадия обмер'], ['покажи все стадии', 'стадия все'], ['снеси стену бэ', 'снеси стену Б'], ['открой план демонтажа', 'открой план демонтажа'],
   ['новый лист', 'новый лист'], ['разложи виды на листе', 'размести виды'], ['таблицу помещений на лист', 'экспликация помещений'], ['поля листа', 'рамка листа'],
-  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['сделай окно Б двустворчатым', 'у окна Б две створки'], ['выдели всё новое зелёным', 'новое зелёным'], ['нарисуй план подробно, со всеми деталями', 'детализация высокая'], ['засечки на размерах слишком большие', 'засечки меньше'], ['сделай засечки покрупнее', 'засечки больше'],['сделай план попроще, только заливка стен', 'детализация низкая'],['на обмере поставь все размеры автоматически', 'проставь обмерные размеры'], ['я удалил размеры, верни обмерные', 'проставь обмерные размеры'], ['размеры на обмерном плане пусть стоят сами', 'проставь обмерные размеры'],['не надо зелёного, покажи как обычно', 'новое обычным цветом'],['хочу дверь А без рисунка, ровную', 'дверь А гладкая'], ['верни у двери А филенки', 'у двери А филёнки'],['пусть окно Б будет на три створки', 'у окна Б 3 створки'], ['поставь окно с балконной дверью на юге','балконный блок в южной стене'], ['у балконной двери в окне Б внизу филёнка, не стекло', 'в окне Б балконный блок низ двери глухой'],['выход на балкон с окном в северной стене, дверь слева', 'балконный блок дверь слева в северной стене'], ['впиши в штамп что разработал петров','в штампе разработал Петров'], ['хочу сам нарисовать штамп линиями', 'начерти штамп линиями'], ['оформи лист как у меня, справа блок с экспликацией, примечанием и штампом', 'боковая колонка'], ['хочу добавить на лист свою таблицу', 'свой блок на листе'], ['план сверху крупно, а внизу аксонометрии', 'разложи виды по зонам'], ['покажи лист поближе', 'приблизь лист'], ['хочу поправить план прямо на листе', 'активируй вид Обмерный план'], ['вернись на лист', 'деактивируй вид'], ['пусть план займёт всё окно на листе', 'впиши виды в окна'], ['нужен план с расстановкой мебели', 'создай план мебели'], ['нужен чертёж чистовой отделки', 'создай план отделки'], ['нужен чертёж потолков', 'создай план потолка'], ['этот лист относится к освещению', 'подвид освещение'], ['не показывай рамку обрезки', 'скрой границу обрезки'], ['оставь на экране только эту категорию', 'изолируй категорию'], ['где солнце ходит', 'покажи траекторию солнца'], ['посмотрю как будет с шаблоном мебели, не насовсем', 'временно примени шаблон план мебели'], ['что тут закреплено', 'покажи зависимости'], ['хочу рисовать стены только ровно по горизонтали и вертикали', 'построение по осям'], ['нужен файл для автокада', 'экспорт в dwg'], ['конвертируй план в двг', 'экспорт в dwg'], ['подпиши все двери и окна буквами', 'замаркируй двери и окна'], ['подпиши у мебели материал со стрелочками', 'замаркируй мебель по материалу с выносками'], ['убери все марки', 'убери марки'], ['какие бывают марки', 'типы марок'], ['размеры слишком крупные, план будет в пятидесятом масштабе', 'масштаб вида 1:50'], ['пусть размеры подстраиваются под лист', 'масштаб вида по листу'], ['сделай окно В таким же как окно Б', 'скопируй свойства с окна Б на окно В'], ['шкаф пусть будет из того же материала что стол', 'копировать свойства'], ['напиши подписи красивым почерком', 'рукописный шрифт'], ['поставь надпись посередине', 'выровняй текст по центру'], ['сделай надпись пожирнее', 'текст жирный'], ['буквы текста по пять миллиметров', 'высота текста 5 мм'], ['надпись наклонным шрифтом', 'текст курсивом'], ['от текста стрелочку влево', 'добавь выноску слева'], ['стрелку к тексту справа плавной линией', 'добавь выноску справа дугой'], ['пусть все надписи будут как от руки', 'все тексты рукописным шрифтом'], ['верни нормальные буквы', 'обычный шрифт'], ['сделай аксонометрию как рисунок для презентации', 'стиль эскиз'], ['покажи 3д в стиле скетча', 'стиль эскиз'], ['хочу полукруглую стену', 'стена дугой'], ['стена плавно продолжает предыдущую', 'стена по касательной'], ['сделай стену Б закруглённой, радиус три метра', 'стену Б дугой радиус 3000'], ['стену Б обратно ровной', 'выпрями стену Б'], ['сломай стену Б посередине уголком на полметра', 'вставь узел в стену Б на 500'], ['перенеси стену Б на 20 сантиметров параллельно', 'сместить стену Б на 200'], ['убери цифры возле курсора когда рисую', 'скрой трекер'], ['верни длину и угол у курсора', 'покажи трекер'], ['перенеси вазу в диспетчере в раздел декор', 'семейство ваза в подкатегорию декор'], ['табурет это стулья, положи его к стульям', 'семейство табурет в подкатегорию стулья'], ['пусть программа сама решит куда отнести вазу', 'подкатегория сама для семейства ваза'], ['хочу чтобы камеры были в диспетчере сразу после планов', 'поставь группу камеры после планов этажей'], ['отрендери красиво в лучшем качестве', 'сделай рендер на максимум'], ['покажи быстро как будет выглядеть', 'рендер черновик'], ['почему рендер такой медленный, на чём он считает', 'какая видеокарта считает рендер'], ['хочу фото без фона, только сам предмет', 'убери фон у фото'], ['на фотке много мебели, мне нужен только стул', 'на фото оставь только стул'], ['вырежу сам по контуру на картинке', 'обведи предмет на фото'], ['сделай белую модель, но чтобы окна были стеклянные и солнце светило в комнаты', 'рендер белой модели со стеклом'], ['пусть рендер считает почище, шума поменьше', 'предел шума 3'], ['наложи на картинку цвет как плёнка портра', 'lut kodak portra 400'], ['сделай картинку как на слайдовой плёнке велвия', 'lut fuji velvia 50'], ['включи лампы на картинке, свет потеплее', 'рендер со светильниками 3000 к'], ['хочу потом сам менять свет дня и ламп на картинке', 'рендер с лайтмикс'], ['пусть рендер считает не дольше пяти минут', 'рендер 5 минут'], ['сделай чтобы на картинке лампы сияли звёздочками', 'лучи от ламп'], ['картинку потеплее как на закате', 'фильтр тёплый вечер'], ['как на плёночной фотографии', 'добавь зерно'], ['покажи как падают тени зимой в полдень', 'солнце 21 декабря в 12:00'], ['пусть ручки будут блестящие как хром', 'у материала сталь пресет хром'], ['чтобы паркет не повторялся одинаково', 'материал паркет случайный сдвиг'], ['хочу видеть лучи солнца из окна', 'рендер с дымкой'], ['дом стоит в саранске', 'солнце в саранске'], ['а что будет вечером с тенями', 'солнце в 18:00'], ['подними аксонометрию 3 над второй', 'вид аксонометрия 3 выше аксонометрия 2'], ['сделай дерево с рисунком дуба', 'штриховка дуб для материала дерево'], ['пусть брус в разрезе будет как венге', 'штриховка сечения венге для материала дерево'], ['стену надо под сорок пять градусов', 'рисуй под углом 45'], ['пусть линии ложатся через каждые пятнадцать градусов', 'шаг угла 15'], ['хватит углов, рисую как хочу', 'свободное построение'], ['привяжи верх окна Б ко второму этажу', 'у окна Б зависимость сверху Этаж 2'], ['сделай полотно двери Б с лицевой стороны дубовым', 'у двери Б отделка спереди дуб'], ['поставь наличники на окно Б изнутри', 'у окна Б наличники со стороны комнаты'], ['наличники у двери А пошире, сантиметров девять', 'наличник у двери А шириной 90'], ['у двери А наличников не надо', 'убери наличники у двери А'], ['коробку двери Б сделай белой', 'у двери Б каркас белый'], ['подпиши у двери Б комментарий без порога', 'у двери Б комментарий без порога'], ['пусть размеры за рамкой тоже обрезаются', 'обрезать аннотации'],['пусть этот план будет для розеток', 'подвид розетки'],['сделай схему освещения', 'создай план освещения'], ['подними секущую плоскость до полутора метров', 'секущая плоскость 1500'], ['точечные светильники в кухне, шесть штук', 'поставь 6 точечных светильников в помещении 3'],['переключи на отделку', 'стадия отделка'],['обмер готов, сделай остальное сам', 'собери проект из обмера'], ['оформи весь проект по обмеру со всеми листами', 'собери проект из обмера'], ['открой мастер', 'мастер проекта'], ['отодвинь размер подальше от стены', 'размер дальше на 300'], ['придвинь размерную линию к стене', 'размерную линию ближе на 200'], ['уменьши длину линий после засечек', 'выход размерной линии на 1 мм'],['оформи этот план как план мебели', 'примени шаблон план мебели'],['аксонометрии поставь слева от плана, две штуки', 'раскладка план по центру два слева'], ['под планом только две ячейки', 'раскладка план сверху два снизу'], ['хочу три окна слева а план в середине', 'раскладка план по центру три слева'],['сделай план на листе в масштабе 28', 'масштаб плана на листе 1:28'],['хочу поправить блок справа прямо на листе', 'редактировать колонку'], ['добавь в правый блок таблицу на 4 строки и 3 столбца', 'в колонке таблица 4 на 3'],['покажи весь лист', 'лист целиком'], ['проведи в штампе черту от 0 10 до 65 10', 'линия в штампе от 0 10 до 65 10'],['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
+  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['сделай окно Б двустворчатым', 'у окна Б две створки'], ['выдели всё новое зелёным', 'новое зелёным'], ['нарисуй план подробно, со всеми деталями', 'детализация высокая'], ['засечки на размерах слишком большие', 'засечки меньше'], ['сделай засечки покрупнее', 'засечки больше'],['сделай план попроще, только заливка стен', 'детализация низкая'],['на обмере поставь все размеры автоматически', 'проставь обмерные размеры'], ['я удалил размеры, верни обмерные', 'проставь обмерные размеры'], ['размеры на обмерном плане пусть стоят сами', 'проставь обмерные размеры'],['не надо зелёного, покажи как обычно', 'новое обычным цветом'],['хочу дверь А без рисунка, ровную', 'дверь А гладкая'], ['верни у двери А филенки', 'у двери А филёнки'],['пусть окно Б будет на три створки', 'у окна Б 3 створки'], ['поставь окно с балконной дверью на юге','балконный блок в южной стене'], ['у балконной двери в окне Б внизу филёнка, не стекло', 'в окне Б балконный блок низ двери глухой'],['выход на балкон с окном в северной стене, дверь слева', 'балконный блок дверь слева в северной стене'], ['впиши в штамп что разработал петров','в штампе разработал Петров'], ['хочу сам нарисовать штамп линиями', 'начерти штамп линиями'], ['оформи лист как у меня, справа блок с экспликацией, примечанием и штампом', 'боковая колонка'], ['хочу добавить на лист свою таблицу', 'свой блок на листе'], ['план сверху крупно, а внизу аксонометрии', 'разложи виды по зонам'], ['покажи лист поближе', 'приблизь лист'], ['хочу поправить план прямо на листе', 'активируй вид Обмерный план'], ['вернись на лист', 'деактивируй вид'], ['пусть план займёт всё окно на листе', 'впиши виды в окна'], ['нужен план с расстановкой мебели', 'создай план мебели'], ['нужен чертёж чистовой отделки', 'создай план отделки'], ['нужен чертёж потолков', 'создай план потолка'], ['этот лист относится к освещению', 'подвид освещение'], ['не показывай рамку обрезки', 'скрой границу обрезки'], ['оставь на экране только эту категорию', 'изолируй категорию'], ['где солнце ходит', 'покажи траекторию солнца'], ['посмотрю как будет с шаблоном мебели, не насовсем', 'временно примени шаблон план мебели'], ['что тут закреплено', 'покажи зависимости'], ['хочу рисовать стены только ровно по горизонтали и вертикали', 'построение по осям'], ['нужен файл для автокада', 'экспорт в dwg'], ['конвертируй план в двг', 'экспорт в dwg'], ['подпиши все двери и окна буквами', 'замаркируй двери и окна'], ['подпиши у мебели материал со стрелочками', 'замаркируй мебель по материалу с выносками'], ['убери все марки', 'убери марки'], ['какие бывают марки', 'типы марок'], ['размеры слишком крупные, план будет в пятидесятом масштабе', 'масштаб вида 1:50'], ['пусть размеры подстраиваются под лист', 'масштаб вида по листу'], ['сделай окно В таким же как окно Б', 'скопируй свойства с окна Б на окно В'], ['шкаф пусть будет из того же материала что стол', 'копировать свойства'], ['напиши подписи красивым почерком', 'рукописный шрифт'], ['поставь надпись посередине', 'выровняй текст по центру'], ['сделай надпись пожирнее', 'текст жирный'], ['буквы текста по пять миллиметров', 'высота текста 5 мм'], ['надпись наклонным шрифтом', 'текст курсивом'], ['от текста стрелочку влево', 'добавь выноску слева'], ['стрелку к тексту справа плавной линией', 'добавь выноску справа дугой'], ['пусть все надписи будут как от руки', 'все тексты рукописным шрифтом'], ['верни нормальные буквы', 'обычный шрифт'], ['сделай аксонометрию как рисунок для презентации', 'стиль эскиз'], ['покажи 3д в стиле скетча', 'стиль эскиз'], ['хочу полукруглую стену', 'стена дугой'], ['стена плавно продолжает предыдущую', 'стена по касательной'], ['сделай стену Б закруглённой, радиус три метра', 'стену Б дугой радиус 3000'], ['стену Б обратно ровной', 'выпрями стену Б'], ['сломай стену Б посередине уголком на полметра', 'вставь узел в стену Б на 500'], ['перенеси стену Б на 20 сантиметров параллельно', 'сместить стену Б на 200'], ['убери цифры возле курсора когда рисую', 'скрой трекер'], ['верни длину и угол у курсора', 'покажи трекер'], ['перенеси вазу в диспетчере в раздел декор', 'семейство ваза в подкатегорию декор'], ['табурет это стулья, положи его к стульям', 'семейство табурет в подкатегорию стулья'], ['пусть программа сама решит куда отнести вазу', 'подкатегория сама для семейства ваза'], ['хочу чтобы камеры были в диспетчере сразу после планов', 'поставь группу камеры после планов этажей'], ['отрендери красиво в лучшем качестве', 'сделай рендер на максимум'], ['покажи быстро как будет выглядеть', 'рендер черновик'], ['почему рендер такой медленный, на чём он считает', 'какая видеокарта считает рендер'], ['хочу порисовать поверх модели как в прокриейт', 'режим рисования'], ['зафиксируй этот вид, буду делать набросок', 'фото ракурса'], ['дай карандаш потоньше, красный', 'кисть карандаш\nразмер кисти 4\nцвет кисти красный'], ['хочу выйти из этой камеры обратно', 'выйди из камеры'], ['хочу фото без фона, только сам предмет', 'убери фон у фото'], ['на фотке много мебели, мне нужен только стул', 'на фото оставь только стул'], ['вырежу сам по контуру на картинке', 'обведи предмет на фото'], ['сделай белую модель, но чтобы окна были стеклянные и солнце светило в комнаты', 'рендер белой модели со стеклом'], ['пусть рендер считает почище, шума поменьше', 'предел шума 3'], ['наложи на картинку цвет как плёнка портра', 'lut kodak portra 400'], ['сделай картинку как на слайдовой плёнке велвия', 'lut fuji velvia 50'], ['включи лампы на картинке, свет потеплее', 'рендер со светильниками 3000 к'], ['хочу потом сам менять свет дня и ламп на картинке', 'рендер с лайтмикс'], ['пусть рендер считает не дольше пяти минут', 'рендер 5 минут'], ['сделай чтобы на картинке лампы сияли звёздочками', 'лучи от ламп'], ['картинку потеплее как на закате', 'фильтр тёплый вечер'], ['как на плёночной фотографии', 'добавь зерно'], ['покажи как падают тени зимой в полдень', 'солнце 21 декабря в 12:00'], ['пусть ручки будут блестящие как хром', 'у материала сталь пресет хром'], ['чтобы паркет не повторялся одинаково', 'материал паркет случайный сдвиг'], ['хочу видеть лучи солнца из окна', 'рендер с дымкой'], ['дом стоит в саранске', 'солнце в саранске'], ['а что будет вечером с тенями', 'солнце в 18:00'], ['подними аксонометрию 3 над второй', 'вид аксонометрия 3 выше аксонометрия 2'], ['сделай дерево с рисунком дуба', 'штриховка дуб для материала дерево'], ['пусть брус в разрезе будет как венге', 'штриховка сечения венге для материала дерево'], ['стену надо под сорок пять градусов', 'рисуй под углом 45'], ['пусть линии ложатся через каждые пятнадцать градусов', 'шаг угла 15'], ['хватит углов, рисую как хочу', 'свободное построение'], ['привяжи верх окна Б ко второму этажу', 'у окна Б зависимость сверху Этаж 2'], ['сделай полотно двери Б с лицевой стороны дубовым', 'у двери Б отделка спереди дуб'], ['поставь наличники на окно Б изнутри', 'у окна Б наличники со стороны комнаты'], ['наличники у двери А пошире, сантиметров девять', 'наличник у двери А шириной 90'], ['у двери А наличников не надо', 'убери наличники у двери А'], ['коробку двери Б сделай белой', 'у двери Б каркас белый'], ['подпиши у двери Б комментарий без порога', 'у двери Б комментарий без порога'], ['пусть размеры за рамкой тоже обрезаются', 'обрезать аннотации'],['пусть этот план будет для розеток', 'подвид розетки'],['сделай схему освещения', 'создай план освещения'], ['подними секущую плоскость до полутора метров', 'секущая плоскость 1500'], ['точечные светильники в кухне, шесть штук', 'поставь 6 точечных светильников в помещении 3'],['переключи на отделку', 'стадия отделка'],['обмер готов, сделай остальное сам', 'собери проект из обмера'], ['оформи весь проект по обмеру со всеми листами', 'собери проект из обмера'], ['открой мастер', 'мастер проекта'], ['отодвинь размер подальше от стены', 'размер дальше на 300'], ['придвинь размерную линию к стене', 'размерную линию ближе на 200'], ['уменьши длину линий после засечек', 'выход размерной линии на 1 мм'],['оформи этот план как план мебели', 'примени шаблон план мебели'],['аксонометрии поставь слева от плана, две штуки', 'раскладка план по центру два слева'], ['под планом только две ячейки', 'раскладка план сверху два снизу'], ['хочу три окна слева а план в середине', 'раскладка план по центру три слева'],['сделай план на листе в масштабе 28', 'масштаб плана на листе 1:28'],['хочу поправить блок справа прямо на листе', 'редактировать колонку'], ['добавь в правый блок таблицу на 4 строки и 3 столбца', 'в колонке таблица 4 на 3'],['покажи весь лист', 'лист целиком'], ['проведи в штампе черту от 0 10 до 65 10', 'линия в штампе от 0 10 до 65 10'],['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
   ['отмени последнее', 'отмени'], ['верни как было', 'верни'], ['сохрани проект', 'сохрани'], ['напечатай', 'распечатай'], ['сделай красивую картинку', 'визуализация'], ['что ты умеешь', 'что умеешь'],
   ['сделай нормальную спальню', 'комната 3500 на 4'], ['нужна детская', 'комната 3 на 3500'], ['гостиную побольше', 'комната 5 на 4'], ['маленькую кухню', 'комната 3 на 3'], ['кухню гостиную', 'комната 6 на 4'],
   ['совмещённый санузел', 'комната 2 на 1700'], ['ванную комнату', 'комната 2 на 1700'], ['прихожую', 'комната 2500 на 1500'], ['кладовку', 'комната 1500 на 1200'], ['гардеробную', 'комната 2 на 1500'],
@@ -18940,8 +19069,511 @@ if (lsGet('kot.tags') === '0'){ S.tags = false; $('#cTags').checked = false; }
 setTool('select');
 setView('axo');
 showName(); greet(); renderVbar();
+/* ---------- «РИСОВАНИЕ» — как Procreate, поверх вида ----------
+   The ribbon tab «Рисование» (showTab → paintOn/paintOff): the windows «Свойства» and «Диспетчер проекта» hide (and come back), the model
+   is frozen (the cv handlers return while PAINT.on), the view only turns: the right button / two fingers / «Рука» / Space (configControls).
+   A drawing belongs to its view: v.paint = { w, h (pixels of the layers), cam (camKey — the view it was drawn on), layers:[{id, n, vis, op, bl, src PNG}] }.
+   It is drawn over the view while the view looks the same (camSame); turned away — it fades and «Вернуть ракурс» brings the view back.
+   Strokes: dabs along the path (spacing, streamline, pen pressure) into a stroke canvas, merged into the layer with the opacity at the end
+   (no build-up inside a stroke, as in Procreate); «Палец» smears the layer itself; the eraser = the same brush with destination-out. */
+const PBRUSH = {
+  ink:{ n:'Тушь', sp:0.06, min:0.35 }, pencil:{ n:'Карандаш', sp:0.1, min:0.2, grain:1, flow:0.6 }, marker:{ n:'Маркер', sp:0.05, min:0.9, bl:'multiply', op:0.75, edge:0.75 },
+  air:{ n:'Аэрограф', sp:0.12, min:1, soft:1, flow:0.06 }, chalk:{ n:'Уголь', sp:0.12, min:0.55, chalk:1, flow:0.85 }, water:{ n:'Акварель', sp:0.1, min:0.75, soft:1, flow:0.14, bl:'multiply' }
+};
+const PAINT_PAL = [['Архитектурный скетч', ['#2b2b2b', '#5f5f5f', '#9a9a9a', '#d6d2c8', '#b48a5a', '#7a5a3a', '#6f8f5a', '#4f7fa8', '#c9a227', '#b5523b']],
+  ['Небо и зелень', ['#cfe0e3', '#a9cfd6', '#79b9c8', '#5ba7d2', '#1e6fd9', '#2a6a64', '#0f5a57', '#4f9a87', '#2e7d70', '#5c9a4c']],
+  ['Интерьер, тёплый', ['#efe6d8', '#e2cfb4', '#c9a27e', '#a47551', '#6e4b33', '#f2d7a6', '#d9a066', '#8c5a3c', '#cfc6bb', '#7d7368']],
+  ['Серые', ['#ffffff', '#e6e6e6', '#cccccc', '#b3b3b3', '#999999', '#808080', '#666666', '#4d4d4d', '#333333', '#000000']]];
+Object.assign(PAINT, { sz:{ brush:8, smudge:28, erase:24 }, opT:{ brush:1, smudge:0.7, erase:1 }, smooth:0.35, doc:null, stroke:null, touches:new Set(), space:false, pop:null, ctab:'classic', saveT:0, ver:0 });
+try { const s = JSON.parse(lsGet('kot.paint') || '{}'); if (s.brush && PBRUSH[s.brush]) PAINT.brush = s.brush; if (/^#[0-9a-f]{6}$/i.test(s.col || '')) PAINT.col = s.col; if (s.sz) Object.assign(PAINT.sz, s.sz); if (s.opT) Object.assign(PAINT.opT, s.opT); if (s.ctab) PAINT.ctab = s.ctab; } catch (e){}
+const paintPrefs = () => lsSet('kot.paint', JSON.stringify({ brush:PAINT.brush, col:PAINT.col, sz:PAINT.sz, opT:PAINT.opT, ctab:PAINT.ctab }));
+const pHist = () => { try { return JSON.parse(lsGet('kot.paint.hist') || '[]').filter(c => /^#[0-9a-f]{6}$/i.test(c)).slice(0, 10); } catch (e){ return []; } };
+const pMyPal = () => { try { return JSON.parse(lsGet('kot.paint.pal') || '[]').filter(c => /^#[0-9a-f]{6}$/i.test(c)).slice(0, 40); } catch (e){ return []; } };
+const pCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; };
+function camKey(){
+  if (S.view === 'sheet') return { m:'sheet', z:r4(SHEET.zoom || 1), px:Math.round((SHEET.pan || {}).x || 0), py:Math.round((SHEET.pan || {}).y || 0) };
+  const c = cam(), t = ctl[S.view].target; return { m:S.view, p:c.position.toArray().map(r4), t:t.toArray().map(r4), u:c.up.toArray().map(r4), z:r4(c.zoom || 1) };
+}
+function camSame(a, b){
+  if (!a || !b || a.m !== b.m) return false;
+  if (a.m === 'sheet') return Math.abs(a.z - b.z) < 1e-3 && Math.abs(a.px - b.px) < 2 && Math.abs(a.py - b.py) < 2;
+  const d = (x, y) => Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]), sc = Math.max(1, d(a.p, a.t));
+  return d(a.p, b.p) < sc * 0.003 && d(a.t, b.t) < sc * 0.003 && Math.abs(a.z - b.z) / a.z < 0.004 && d(a.u, b.u) < 0.02;
+}
+function camRestore(k){
+  if (!k) return false;
+  if (k.m === 'sheet'){ if (S.view !== 'sheet') return false; SHEET.zoom = k.z; SHEET.pan = { x:k.px, y:k.py }; drawSheet(); return true; }
+  if (S.view !== k.m) return false;
+  const c = cam(); c.position.fromArray(k.p); c.up.fromArray(k.u); if (k.z) c.zoom = k.z; c.updateProjectionMatrix(); ctl[S.view].target.fromArray(k.t); ctl[S.view].update(); annoDirty = true; return true;
+}
+// the size of the layers: the viewport in device pixels (at most 2×)
+function pViewPx(){ const r = $('#viewport').getBoundingClientRect(), k = Math.min(2, devicePixelRatio || 1); return { w:Math.max(2, Math.round(r.width * k)), h:Math.max(2, Math.round(r.height * k)), k }; }
+function pNewLayer(n){ const D = PAINT.doc; return { id:'L' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), n:n || 'Слой ' + (PAINT.layers.length + 1), vis:true, op:1, bl:'source-over', cv:pCanvas(D.w, D.h), dirty:true }; }
+/* «Фото ракурса» (the user's way): set the view you like → a photo of it → sketch on the photo; the view is frozen while you sketch.
+   v.paint = { cur, list:[{ id, n, w, h, cam, bg (the photo, JPEG), cur, layers:[{id, n, vis, op, bl, src PNG}] }] } — the sketches of the view. */
+async function paintLoad(v, idx){
+  const ver = ++PAINT.ver; PAINT.view = v ? v.id : null; PAINT.stroke = null; PAINT.undo = []; PAINT.redo = []; PAINT.layers = []; PAINT.cur = 0; PAINT.doc = null;
+  const P = v && v.paint, list = (P && P.list) || [], S0 = list[idx != null ? idx : (P ? P.cur : -1)];
+  if (!S0){ pRedraw(); if (PAINT.on){ configControls(); paintUI(); } return; }
+  const doc = { id:S0.id, n:S0.n, w:S0.w, h:S0.h, cam:S0.cam || null, bg:pCanvas(S0.w, S0.h), bgSrc:S0.bg };
+  const img = async (src, c) => { if (!src) return; try { const im = new Image(); im.src = src; await im.decode(); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); } catch (e){} };
+  await img(S0.bg, doc.bg); if (ver !== PAINT.ver) return;
+  const Ls = [];
+  for (const l of S0.layers || []){ const L = { id:l.id, n:l.n, vis:l.vis !== false, op:l.op ?? 1, bl:l.bl || 'source-over', cv:pCanvas(S0.w, S0.h), src:l.src, dirty:false }; await img(l.src, L.cv); if (ver !== PAINT.ver) return; Ls.push(L); }
+  PAINT.doc = doc; PAINT.layers = Ls; if (!Ls.length) Ls.push(pNewLayer('Слой 1'));
+  PAINT.cur = clamp(S0.cur ?? Ls.length - 1, 0, Ls.length - 1);
+  if (PAINT.on) $('#paintCv').hidden = false; pRedraw(); if (PAINT.on){ configControls(); paintUI(); }
+}
+// the sketch → the view (PNG of the changed layers)
+function paintSave(){
+  clearTimeout(PAINT.saveT); PAINT.saveT = 0;
+  const v = views.find(x => x.id === PAINT.view), D = PAINT.doc; if (!v || !D) return;
+  for (const L of PAINT.layers) if (L.dirty){ L.src = pEmpty(L.cv) ? '' : L.cv.toDataURL('image/png'); L.dirty = false; }
+  const rec = { id:D.id, n:D.n, w:D.w, h:D.h, cam:D.cam, bg:D.bgSrc, cur:PAINT.cur, layers:PAINT.layers.map(L => ({ id:L.id, n:L.n, vis:L.vis, op:L.op, bl:L.bl, src:L.src || '' })) };
+  const P = v.paint && Array.isArray(v.paint.list) ? v.paint : (v.paint = { list:[], cur:0 }), i = P.list.findIndex(s => s.id === D.id);
+  if (i >= 0) P.list[i] = rec; else P.list.push(rec); P.cur = P.list.findIndex(s => s.id === D.id);
+  FDIRTY.file = FDIRTY.copy = true; scheduleSave();
+}
+// the picture of the view as it is on the screen (no drawing): the photo of the angle
+function paintSnap(){
+  const px = pViewPx(), o = pCanvas(px.w, px.h), g = o.getContext('2d'), vr = $('#viewport').getBoundingClientRect();
+  g.fillStyle = getComputedStyle($('#viewport')).backgroundColor || '#ffffff'; if (/rgba\(0, 0, 0, 0\)|transparent/.test(g.fillStyle)) g.fillStyle = '#ffffff'; g.fillRect(0, 0, o.width, o.height);
+  try {
+    if (S.view === 'sheet'){ const sc = $('#sheetCv'), r = sc.getBoundingClientRect(); g.drawImage(sc, (r.left - vr.left) * px.k, (r.top - vr.top) * px.k, r.width * px.k, r.height * px.k); }
+    else { renderer.render(scene, cam()); const r = cv.getBoundingClientRect(); g.drawImage(cv, (r.left - vr.left) * px.k, (r.top - vr.top) * px.k, r.width * px.k, r.height * px.k); }
+  } catch (e){}
+  return o;
+}
+function paintNewSketch(bg, n){
+  if (PAINT.doc) paintSave();
+  const v = curView(); if (!v) return; const P = v.paint && Array.isArray(v.paint.list) ? v.paint : null;
+  PAINT.view = v.id; PAINT.doc = { id:'S' + Date.now().toString(36), n:n || 'Набросок ' + (((P && P.list.length) || 0) + 1), w:bg.width, h:bg.height, cam:camKey(), bg, bgSrc:bg.toDataURL('image/jpeg', 0.9) };
+  PAINT.layers = [pNewLayer('Слой 1')]; PAINT.cur = 0; PAINT.undo = []; PAINT.redo = []; PAINT.hand = false;
+  if (PAINT.tool === 'pick') PAINT.tool = 'brush';
+  $('#paintCv').hidden = false; paintSave(); pRedraw(); configControls(); paintUI();
+}
+function paintPhoto(){
+  if (!PAINT.on){ showTab('rbDraw'); }
+  const fl = document.createElement('div'); fl.style.cssText = 'position:absolute;inset:0;background:#fff;opacity:.85;z-index:39;pointer-events:none;transition:opacity .35s'; $('#viewport').append(fl); requestAnimationFrame(() => { fl.style.opacity = 0; setTimeout(() => fl.remove(), 400); });
+  paintNewSketch(paintSnap()); toast('Фото ракурса готово — рисуйте поверх. «Новый ракурс» — выбрать другой вид');
+  return 'Фото ракурса сделано';
+}
+function paintNewAngle(){ if (PAINT.doc) paintSave(); PAINT.doc = null; PAINT.layers = []; PAINT.undo = []; PAINT.redo = []; const v = curView(); if (v && v.paint) v.paint.cur = -1; pRedraw(); configControls(); paintUI(); toast('Выставьте ракурс и нажмите «Фото ракурса»'); }
+function paintOpenSketch(i){ const v = curView(); if (!v || !v.paint || !v.paint.list[i]) return false; if (PAINT.doc) paintSave(); v.paint.cur = i; paintLoad(v, i); return true; }
+function paintDelSketch(){ const v = curView(), D = PAINT.doc; if (!v || !D || !v.paint) return; if (!confirm(`Удалить набросок «${D.n}»?`)) return; v.paint.list = v.paint.list.filter(s => s.id !== D.id); if (!v.paint.list.length) delete v.paint; else v.paint.cur = v.paint.list.length - 1; PAINT.doc = null; FDIRTY.file = FDIRTY.copy = true; scheduleSave(); paintLoad(v); }
+const paintSaveSoon = () => { clearTimeout(PAINT.saveT); PAINT.saveT = setTimeout(paintSave, 900); };
+function pEmpty(c){ const s = pCanvas(64, Math.max(1, Math.round(64 * c.height / c.width))), g = s.getContext('2d'); g.drawImage(c, 0, 0, s.width, s.height); const d = g.getImageData(0, 0, s.width, s.height).data; for (let i = 3; i < d.length; i += 4) if (d[i] > 2) return false; return true; }
+function sanPaint(p){
+  if (!p || !Array.isArray(p.list)) return null;
+  const img = s => typeof s === 'string' && /^data:image\/(png|jpeg|webp);base64,/.test(s) && s.length < 12e6 ? s : '';
+  const list = p.list.slice(0, 40).filter(s => s && typeof s.id === 'string' && +s.w > 0 && +s.h > 0 && img(s.bg)).map(s => {
+    const layers = (Array.isArray(s.layers) ? s.layers : []).slice(0, 24).filter(l => l && typeof l.id === 'string').map(l => ({ id:l.id.slice(0, 24), n:String(l.n || 'Слой').slice(0, 40), vis:l.vis !== false, op:clamp(+l.op || 0, 0, 1), bl:['source-over', 'multiply', 'screen', 'overlay', 'darken', 'lighten'].includes(l.bl) ? l.bl : 'source-over', src:img(l.src) }));
+    return { id:s.id.slice(0, 24), n:String(s.n || 'Набросок').slice(0, 60), w:clamp(Math.round(+s.w), 2, 8192), h:clamp(Math.round(+s.h), 2, 8192), cam:s.cam && typeof s.cam === 'object' ? JSON.parse(JSON.stringify(s.cam)) : null, bg:s.bg, cur:clamp(Math.round(+s.cur || 0), 0, Math.max(0, layers.length - 1)), layers };
+  });
+  return list.length ? { cur:clamp(Math.round(+p.cur || 0), -1, list.length - 1), list } : null;
+}
+// what is shown: the layers (and the stroke being drawn) over the view, scaled to the viewport by its height (as the cameras do)
+function pRedraw(){
+  const c = $('#paintCv'), D = PAINT.doc; if (!D) return;
+  const px = pViewPx(); if (c.width !== px.w || c.height !== px.h){ c.width = px.w; c.height = px.h; }
+  const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+  // the photo fits the viewport whole (as Procreate shows its canvas), the rest is dark
+  const s = Math.min(c.height / D.h, c.width / D.w), ox = (c.width - D.w * s) / 2, oy = (c.height - D.h * s) / 2;
+  g.fillStyle = '#2b2b2d'; g.fillRect(0, 0, c.width, c.height); g.setTransform(s, 0, 0, s, ox, oy);
+  if (D.bg) g.drawImage(D.bg, 0, 0);
+  PAINT.layers.forEach((L, i) => {
+    if (!L.vis) return; let src = L.cv; const st = PAINT.stroke;
+    if (i === PAINT.cur && st && st.tmp){ const sc = PAINT.scr && PAINT.scr.width === D.w && PAINT.scr.height === D.h ? PAINT.scr : (PAINT.scr = pCanvas(D.w, D.h)), sg = sc.getContext('2d');
+      sg.globalCompositeOperation = 'copy'; sg.globalAlpha = 1; sg.drawImage(L.cv, 0, 0); sg.globalCompositeOperation = st.erase ? 'destination-out' : (st.B.bl || 'source-over'); sg.globalAlpha = st.op; sg.drawImage(st.tmp, 0, 0); sg.globalAlpha = 1; sg.globalCompositeOperation = 'source-over'; src = sc; }
+    g.globalAlpha = L.op; g.globalCompositeOperation = L.bl || 'source-over'; g.drawImage(src, 0, 0);
+  });
+  g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.setTransform(1, 0, 0, 1, 0, 0);
+}
+let PRAF = 0; const pRedrawSoon = () => { if (!PRAF) PRAF = requestAnimationFrame(() => { PRAF = 0; pRedraw(); }); };
+// the pointer → the layer pixels
+function pPt(e){ const pc = $('#paintCv'); if (pc.hidden){ pc.hidden = false; pRedraw(); } const r = pc.getBoundingClientRect(), D = PAINT.doc, s = Math.min(r.height / D.h, r.width / D.w), ox = (r.width - D.w * s) / 2, oy = (r.height - D.h * s) / 2; return { x:(e.clientX - r.left - ox) / s, y:(e.clientY - r.top - oy) / s, p:e.pointerType === 'mouse' ? 1 : (e.pressure > 0 ? e.pressure : 0.5), k:1 / s }; }
+const hex2rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgb2hex = (r, g, b) => '#' + [r, g, b].map(x => clamp(Math.round(x), 0, 255).toString(16).padStart(2, '0')).join('');
+function pDab(g, x, y, r, a, st){
+  const B = st.B, [R, G, Bl] = st.rgb;
+  if (B.soft){ const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, `rgba(${R},${G},${Bl},${a})`); gr.addColorStop(1, `rgba(${R},${G},${Bl},0)`); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); return; }
+  g.fillStyle = `rgb(${R},${G},${Bl})`;
+  if (B.grain || B.chalk){ const n = Math.min(B.chalk ? 90 : 260, Math.ceil(r * r * (B.chalk ? 0.35 : 1.2)) + 2), q = B.chalk ? Math.max(1, r * 0.22) : Math.max(0.8, r * 0.18);
+    for (let i = 0; i < n; i++){ const t = Math.random() * 6.283, d = Math.sqrt(Math.random()) * r; g.globalAlpha = a * (0.35 + Math.random() * 0.65); g.fillRect(x + Math.cos(t) * d - q / 2, y + Math.sin(t) * d - q / 2, q, q); } g.globalAlpha = 1; return; }
+  if (B.edge){ const gr = g.createRadialGradient(x, y, r * B.edge, x, y, r); gr.addColorStop(0, `rgba(${R},${G},${Bl},${a})`); gr.addColorStop(1, `rgba(${R},${G},${Bl},0)`); g.fillStyle = gr; }
+  g.globalAlpha = B.edge ? 1 : a; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.globalAlpha = 1;
+}
+function pSmudge(L, p, q, r, a){
+  const R = Math.max(2, Math.ceil(r)), d = 2 * R, pc = PAINT.patch && PAINT.patch.width === d ? PAINT.patch : (PAINT.patch = pCanvas(d, d)), g = pc.getContext('2d');
+  g.globalCompositeOperation = 'copy'; g.drawImage(L.cv, p.x - R, p.y - R, d, d, 0, 0, d, d);
+  g.globalCompositeOperation = 'destination-in'; const gr = g.createRadialGradient(R, R, 0, R, R, R); gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, d, d); g.globalCompositeOperation = 'source-over';
+  const lg = L.cv.getContext('2d'); lg.globalAlpha = a; lg.drawImage(pc, q.x - R, q.y - R); lg.globalAlpha = 1;
+}
+function pUndoPush(L){ const c = pCanvas(L.cv.width, L.cv.height); c.getContext('2d').drawImage(L.cv, 0, 0); PAINT.undo.push({ k:'px', id:L.id, cv:c }); if (PAINT.undo.length > 30) PAINT.undo.shift(); PAINT.redo = []; }
+function pUndoLayers(){ PAINT.undo.push({ k:'ly', cur:PAINT.cur, list:PAINT.layers.map(L => { const c = pCanvas(L.cv.width, L.cv.height); c.getContext('2d').drawImage(L.cv, 0, 0); return { ...L, cv:c }; }) }); if (PAINT.undo.length > 30) PAINT.undo.shift(); PAINT.redo = []; }
+function pUndo(back){
+  const from = back ? PAINT.undo : PAINT.redo, to = back ? PAINT.redo : PAINT.undo, u = from.pop(); if (!u) return false;
+  if (u.k === 'px'){ const L = PAINT.layers.find(x => x.id === u.id); if (!L){ return pUndo(back); } const c = pCanvas(L.cv.width, L.cv.height); c.getContext('2d').drawImage(L.cv, 0, 0); to.push({ k:'px', id:L.id, cv:c }); const g = L.cv.getContext('2d'); g.globalCompositeOperation = 'copy'; g.drawImage(u.cv, 0, 0); g.globalCompositeOperation = 'source-over'; L.dirty = true; }
+  else { to.push({ k:'ly', cur:PAINT.cur, list:PAINT.layers.map(L => ({ ...L })) }); PAINT.layers = u.list.map(L => ({ ...L, dirty:true })); PAINT.cur = clamp(u.cur, 0, PAINT.layers.length - 1); }
+  pRedraw(); paintSaveSoon(); if (PAINT.on) paintUI(); return true;
+}
+function pStart(e){
+  const L = PAINT.layers[PAINT.cur]; if (!L) return;
+  if (!L.vis){ toast('Слой скрыт — включите его в «Слоях»'); return; }
+  if (PAINT.tool === 'pick'){ pPick(e); return; }
+  if (!PAINT.doc.cam) PAINT.doc.cam = camKey();
+  pUndoPush(L);
+  const t = PAINT.tool, B = PBRUSH[PAINT.brush] || PBRUSH.ink, q = pPt(e);
+  if (!Number.isFinite(q.x) || !Number.isFinite(q.y) || !Number.isFinite(q.k)){ PAINT.undo.pop(); return; }
+  const st = { pid:e.pointerId, t, B, erase:t === 'erase', rgb:hex2rgb(PAINT.col), size:PAINT.sz[t] || 10, op:clamp((PAINT.opT[t] ?? 1) * (t === 'brush' && B.op ? B.op : 1), 0.02, 1), last:null, sm:null, left:0, mouse:e.pointerType === 'mouse' };
+  if (t !== 'smudge'){ st.tmp = PAINT.tmp && PAINT.tmp.width === PAINT.doc.w && PAINT.tmp.height === PAINT.doc.h ? PAINT.tmp : (PAINT.tmp = pCanvas(PAINT.doc.w, PAINT.doc.h)); st.tmp.getContext('2d').clearRect(0, 0, st.tmp.width, st.tmp.height); }
+  PAINT.stroke = st; pTo(q); pRedrawSoon();
+  if (!PAINT.hist0 || PAINT.hist0 !== PAINT.col){ PAINT.hist0 = PAINT.col; const h = pHist().filter(c => c !== PAINT.col); h.unshift(PAINT.col); lsSet('kot.paint.hist', JSON.stringify(h.slice(0, 10))); }
+}
+// one point of the path: streamline (Procreate), then dabs at the spacing with the pressure in between
+function pTo(q){
+  const st = PAINT.stroke; if (!st) return;
+  const k = PAINT.smooth; st.sm = st.sm ? { x:st.sm.x + (q.x - st.sm.x) * (1 - k), y:st.sm.y + (q.y - st.sm.y) * (1 - k), p:st.sm.p + (q.p - st.sm.p) * 0.5, k:q.k } : { ...q };
+  const c = st.sm, B = st.B, rad = pr => Math.max(0.5, st.size * q.k / 2 * (st.mouse ? 1 : B.min + (1 - B.min) * pr));
+  const L = PAINT.layers[PAINT.cur], g = st.tmp ? st.tmp.getContext('2d') : null, flow = st.t === 'smudge' ? 1 : (B.flow || 1);
+  if (!st.last){ if (g) pDab(g, c.x, c.y, rad(c.p), flow, st); st.last = { ...c }; return; }
+  const a = st.last, dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy); if (dist < 0.01) return;
+  if (!Number.isFinite(dist) || dist > 4 * (PAINT.doc.w + PAINT.doc.h)){ st.last = { ...c }; st.sm = { ...c }; return; } // a broken point (hidden canvas): never an endless line
+  let t = st.left, guard = 0;
+  while (guard++ < 50000){
+    const pr = a.p + (c.p - a.p) * Math.min(1, t / dist), r = rad(pr), step = Math.max(0.6, r * 2 * B.sp);
+    if (t > dist){ st.left = t - dist; break; }
+    const x = a.x + dx * t / dist, y = a.y + dy * t / dist;
+    if (st.t === 'smudge'){ const pv = st.pv || { x:a.x, y:a.y }; pSmudge(L, pv, { x, y }, r, st.op); st.pv = { x, y }; }
+    else pDab(g, x, y, r, flow, st);
+    t += step;
+  }
+  st.last = { ...c };
+}
+function pEnd(cancel){
+  const st = PAINT.stroke; if (!st) return; PAINT.stroke = null;
+  const L = PAINT.layers[PAINT.cur];
+  if (cancel){ const u = PAINT.undo.pop(); if (u && u.k === 'px' && L){ const g = L.cv.getContext('2d'); g.globalCompositeOperation = 'copy'; g.drawImage(u.cv, 0, 0); g.globalCompositeOperation = 'source-over'; } pRedraw(); return; }
+  if (st.tmp && L){ const g = L.cv.getContext('2d'); g.globalAlpha = st.op; g.globalCompositeOperation = st.erase ? 'destination-out' : (st.B.bl || 'source-over'); g.drawImage(st.tmp, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
+  if (L) L.dirty = true; pRedraw(); paintSaveSoon(); if (PAINT.pop === 'layers') paintPopUI();
+}
+// «Пипетка»: the colour of the view and the drawing under the point
+function pPick(e){
+  const out = pCanvas(1, 1), g = out.getContext('2d');
+  try { pRedraw(); const pc = $('#paintCv'), r2 = pc.getBoundingClientRect(); g.drawImage(pc, (e.clientX - r2.left) * pc.width / r2.width, (e.clientY - r2.top) * pc.height / r2.height, 1, 1, 0, 0, 1, 1); } catch (er){}
+  const d = g.getImageData(0, 0, 1, 1).data; if (d[3] < 8){ toast('Здесь пусто'); return; }
+  paintSet({ col:rgb2hex(d[0], d[1], d[2]), tool:PAINT.prevTool || 'brush' });
+}
+// the picture: the photo of the angle + the sketch, in the photo's own pixels
+function paintImage(){
+  const D = PAINT.doc; if (!D) return null; const o = pCanvas(D.w, D.h), g = o.getContext('2d');
+  g.fillStyle = '#ffffff'; g.fillRect(0, 0, o.width, o.height); if (D.bg) g.drawImage(D.bg, 0, 0);
+  for (const L of PAINT.layers){ if (!L.vis) continue; g.globalAlpha = L.op; g.globalCompositeOperation = L.bl || 'source-over'; g.drawImage(L.cv, 0, 0); }
+  g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; return o;
+}
+function paintSavePng(){ const c = paintImage(), v = curView(); if (!c){ toast('Сначала «Фото ракурса»'); return; } c.toBlob(b => { if (!b) return; const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = ((v && v.name) || 'Рисунок').replace(/[\\/:*?"<>|]+/g, ' ').trim() + ' — рисунок.png'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }, 'image/png'); toast('Картинка с рисунком сохраняется (PNG)'); }
+function paintToSheet(sid){
+  const sheets = views.filter(x => x.kind === 'sheet'); if (!sheets.length){ toast('В проекте нет листов'); return false; }
+  if (!PAINT.doc){ toast('Сначала «Фото ракурса»'); return false; }
+  const put = s => { const c = paintImage(), k = Math.min(1, 2400 / Math.max(c.width, c.height)), o = k < 1 ? pCanvas(c.width * k, c.height * k) : c; if (o !== c) o.getContext('2d').drawImage(c, 0, 0, o.width, o.height);
+    const A = sheetArea(s), w = Math.min(160, A.w * 0.6), h = w * o.height / o.width; pushUndo('Рисунок на лист');
+    (s.pics = s.pics || []).push({ id:vid('pic'), src:o.toDataURL('image/jpeg', 0.9), x:Math.round(A.x + 6), y:Math.round(A.y + 6), w:Math.round(w * 10) / 10, h:Math.round(h * 10) / 10 });
+    FDIRTY.file = FDIRTY.copy = true; scheduleSave(); toast(`Рисунок поставлен на лист «${s.name}»`); return true; };
+  if (sid){ const s = sheets.find(x => x.id === sid || lc(x.name) === lc(sid) || lc(x.name).includes(lc(sid))); if (!s){ toast('Нет такого листа'); return false; } return put(s); }
+  const d = mkModal('pnSheetDlg', 'Рисунок на лист', '<div id="pnShList" style="display:grid;gap:4px;max-height:60vh;overflow:auto"></div>', 420);
+  d.querySelector('#pnShList').innerHTML = sheetsInOrder().map(s => `<button class="btn" data-s="${s.id}" style="text-align:left">${esc((s.num ? s.num + ' ' : '') + s.name)}</button>`).join('');
+  d.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { d.hidden = true; put(views.find(x => x.id === b.dataset.s)); });
+  d.hidden = false; return true;
+}
+// a photo → a new layer (fitted into 70 % of the view)
+function paintAddImage(src, name){
+  const im = new Image(); im.onload = () => {
+    // no sketch yet: the photo itself becomes the picture to draw on
+    if (!PAINT.doc){ const c = pCanvas(im.naturalWidth, im.naturalHeight), g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0); paintNewSketch(c, name || 'Фото'); toast('Рисуйте на фото'); return; }
+    pUndoLayers(); const L = pNewLayer(name || 'Фото'), D = PAINT.doc, k = Math.min(D.w * 0.7 / im.naturalWidth, D.h * 0.7 / im.naturalHeight), w = im.naturalWidth * k, h = im.naturalHeight * k;
+    L.cv.getContext('2d').drawImage(im, (D.w - w) / 2, (D.h - h) / 2, w, h); PAINT.layers.splice(PAINT.cur + 1, 0, L); PAINT.cur++; if (!PAINT.doc.cam) PAINT.doc.cam = camKey(); pRedraw(); paintSaveSoon(); paintUI(); toast('Фото — новый слой «' + L.n + '»'); };
+  im.src = src;
+}
+function paintPickPhoto(cut){
+  const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*';
+  i.onchange = async () => { const f = i.files && i.files[0]; if (!f) return; try { const r = await picLoad(f, 2400); if (cut) openPicCut(r.src, o => paintAddImage(o.src, 'Вырезанное фото'), cut === true ? 'sam' : cut); else paintAddImage(r.src, 'Фото'); } catch (e){ toast('Не картинка'); } };
+  i.click();
+}
+// «Вырезать фото»: the selected photo of a sheet, or a file → a layer of the drawing
+function paintCutPhoto(mode){ const { v, pic } = S.view === 'sheet' ? selSheetPic() : {}; if (v && pic){ cutSheetPic(v, pic, mode); return 'Вырезаю выбранное фото листа'; } if (!PAINT.on) showTab('rbDraw'); paintPickPhoto(mode || true); return 'Выберите фото — потом щёлкните по предмету или «Убрать фон»'; }
+function paintLayerOp(op, i = PAINT.cur){
+  const Ls = PAINT.layers, L = Ls[i]; if (!PAINT.doc) return;
+  if (op === 'add'){ pUndoLayers(); Ls.splice(i + 1, 0, pNewLayer()); PAINT.cur = i + 1; }
+  else if (op === 'del'){ if (!L) return; pUndoLayers(); Ls.splice(i, 1); if (!Ls.length) Ls.push(pNewLayer('Слой 1')); PAINT.cur = clamp(i - 1, 0, Ls.length - 1); }
+  else if (op === 'dup'){ if (!L) return; pUndoLayers(); const N = pNewLayer(L.n + ' копия'); N.op = L.op; N.bl = L.bl; N.cv.getContext('2d').drawImage(L.cv, 0, 0); Ls.splice(i + 1, 0, N); PAINT.cur = i + 1; }
+  else if (op === 'up' || op === 'down'){ const j = op === 'up' ? i + 1 : i - 1; if (!L || j < 0 || j >= Ls.length) return; pUndoLayers(); [Ls[i], Ls[j]] = [Ls[j], Ls[i]]; PAINT.cur = j; }
+  else if (op === 'merge'){ if (!L || i === 0) return; pUndoLayers(); const D = Ls[i - 1], g = D.cv.getContext('2d'); g.globalAlpha = L.op; g.globalCompositeOperation = L.bl; g.drawImage(L.cv, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; Ls.splice(i, 1); PAINT.cur = i - 1; D.dirty = true; }
+  else if (op === 'clear'){ if (!L) return; pUndoPush(L); L.cv.getContext('2d').clearRect(0, 0, L.cv.width, L.cv.height); }
+  else if (op === 'clearall'){ pUndoLayers(); for (const x of Ls) x.cv.getContext('2d').clearRect(0, 0, x.cv.width, x.cv.height); }
+  for (const x of Ls) x.dirty = true; pRedraw(); paintSaveSoon(); paintUI();
+}
+function paintSet(o){
+  if (o.tool){ if (o.tool === 'pick' && PAINT.tool !== 'pick') PAINT.prevTool = PAINT.tool; if (o.tool === 'hand') PAINT.hand = !PAINT.hand; else { PAINT.tool = o.tool; PAINT.hand = false; } configControls(); }
+  if (o.hand != null){ PAINT.hand = !!o.hand; configControls(); }
+  if (o.brush && PBRUSH[o.brush]){ PAINT.brush = o.brush; if (PAINT.tool !== 'erase' && PAINT.tool !== 'smudge') PAINT.tool = 'brush'; }
+  const t = PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : PAINT.tool;
+  if (o.size != null) PAINT.sz[t] = clamp(+o.size, 1, 400);
+  if (o.op != null) PAINT.opT[t] = clamp(+o.op > 1 ? +o.op / 100 : +o.op, 0.02, 1);
+  if (o.col && /^#[0-9a-f]{6}$/i.test(o.col)) PAINT.col = o.col.toLowerCase();
+  paintPrefs(); if (PAINT.on) paintUI();
+}
+/* the controls */
+const PIC = {
+  brush:'<path d="M14 3l7 7-8.5 8.5c-1 1-2.5.8-3.3 0L7 16.3c-.8-.8-1-2.3 0-3.3z"/><path d="M7 16.3c-1.2 0-2.6.6-3.3 2.4L3 21l2.3-.7c1.8-.7 2.4-2.1 2.4-3.3"/>',
+  smudge:'<path d="M9 21v-7.5M9 13.5V5a1.6 1.6 0 0 1 3.2 0v6M12.2 11V9.5a1.6 1.6 0 0 1 3.2 0V12M15.4 12v-.6a1.6 1.6 0 0 1 3.2 0V16c0 3-2 5-5 5H11c-1.8 0-3-1-4-2.5l-2.6-4a1.5 1.5 0 0 1 2.5-1.7L9 15"/>',
+  erase:'<path d="M15 4l6 6-9 9H6.5L3 15.5z"/><path d="M9.5 9.5l6 6M12 19h9"/>',
+  layers:'<path d="M3 8.5L12 4l9 4.5-9 4.5z"/><path d="M3 12.5l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"/>',
+  hand:'<path d="M8 12V5.5a1.5 1.5 0 0 1 3 0V11M11 10.5V4a1.5 1.5 0 0 1 3 0v6.5M14 10.5V5.5a1.5 1.5 0 0 1 3 0V13M17 9.5a1.5 1.5 0 0 1 3 0V15c0 3.5-2.5 6-6 6h-2c-2 0-3.3-.9-4.4-2.4L4.4 14a1.5 1.5 0 0 1 2.4-1.8L8 14"/>',
+  undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>', redo:'<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>',
+  pick:'<path d="M20.5 3.5a2.1 2.1 0 0 0-3 0L15 6l-1.5-1.5-2 2L13 8l-8 8V19h3l8-8 1.5 1.5 2-2L18 9l2.5-2.5a2.1 2.1 0 0 0 0-3z"/>',
+  photo:'<path d="M3 8h3.5L8 5.5h8L17.5 8H21v11H3z"/><circle cx="12" cy="13.3" r="3.6"/>', angle:'<path d="M12 3a9 9 0 1 0 9 9"/><path d="M21 4v5h-5"/><path d="M12 8v4l3 2"/>', cut:'<circle cx="6" cy="18" r="2.5"/><circle cx="6" cy="6" r="2.5"/><path d="M8 7.5L20 18M8 16.5L20 6"/>',
+  circle:'<circle cx="12" cy="12" r="8"/>', classic:'<rect x="5" y="5" width="14" height="14" fill="currentColor"/>', harm:'<path d="M5 12h7l5-6M12 12l5 6"/>', value:'<path d="M4 8h16M4 12h10M4 16h13"/>', pal:'<path d="M4 5h4v4H4zM10 5h4v4h-4zM16 5h4v4h-4zM4 11h4v4H4zM10 11h4v4h-4zM16 11h4v4h-4z" fill="currentColor"/>'
+};
+const pSvg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">${PIC[k]}</svg>`;
+function paintRibbon(){
+  const p = $('#rbDraw'); if (!p || p.dataset.built) return; p.dataset.built = '1';
+  const big = (id, ic, t, tip) => `<button class="rbtn mbig" id="${id}" title="${tip}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">${PIC[ic]}</svg><span>${t}</span></button>`;
+  const sm = (id, t, tip) => `<button class="rbtn msm" id="${id}" title="${tip}"><span>${t}</span></button>`;
+  p.innerHTML = `<div class="grp"><div class="grp-items">${big('pbPhotoV', 'photo', 'Фото ракурса', 'Сфотографировать вид как он сейчас на экране — и рисовать на фото (вид не меняется)')}<div class="mcol">${sm('pbAngle', 'Новый ракурс', 'Убрать фото с экрана и выбрать другой ракурс (наброски сохраняются)')}${sm('pbBackCam', 'Вернуть ракурс', 'Поставить вид в ракурс этого наброска')}${sm('pbDelSk', 'Удалить набросок', 'Удалить текущий набросок вида')}</div><div class="mcol"><label for="pbSk" style="font-size:11px">Наброски вида</label><select id="pbSk" style="max-width:160px"></select></div></div><div class="grp-label">Ракурс</div></div>
+    <div class="grp"><div class="grp-items">${big('pbBrush', 'brush', 'Кисть', 'Кисть (B): тушь, карандаш, маркер, аэрограф, уголь, акварель')}${big('pbSmudge', 'smudge', 'Палец', 'Размазать (S)')}${big('pbErase', 'erase', 'Ластик', 'Ластик (E)')}</div><div class="grp-label">Инструменты</div></div>
+    <div class="grp"><div class="grp-items"><div class="mcol">${Object.entries(PBRUSH).slice(0, 3).map(([k, b]) => sm('pbB_' + k, b.n, 'Кисть «' + b.n + '»')).join('')}</div><div class="mcol">${Object.entries(PBRUSH).slice(3).map(([k, b]) => sm('pbB_' + k, b.n, 'Кисть «' + b.n + '»')).join('')}</div></div><div class="grp-label">Кисти</div></div>
+    <div class="grp"><div class="grp-items">${big('pbColor', 'circle', 'Цвета', 'Цвета: круг, классический, гармония, значение, палитры')}${big('pbLayers', 'layers', 'Слои', 'Слои рисунка')}<div class="mcol">${sm('pbPick', 'Пипетка', 'Взять цвет с экрана (I)')}${sm('pbHand', 'Рука', 'Вращать и двигать вид (или правая кнопка, два пальца, Пробел)')}${sm('pbUndo', 'Отменить', 'Ctrl+Z')}</div></div><div class="grp-label">Цвет и слои</div></div>
+    <div class="grp"><div class="grp-items">${big('pbCut', 'pick', 'Вырезать фото', 'Убрать фон у фото или оставить только нужный предмет (ИИ без интернета или обводкой). На листе — выбранное фото')}<div class="mcol">${sm('pbPhoto', 'Фото в слой…', 'Фото как новый слой рисунка')}${sm('pbCutBg', 'Фото без фона…', 'Фото → убрать фон → в слой')}</div></div><div class="grp-label">Фото</div></div>
+    <div class="grp"><div class="grp-items"><div class="mcol">${sm('pbSave', 'Сохранить PNG', 'Вид с рисунком — картинкой')}${sm('pbSheet', 'На лист…', 'Вид с рисунком — фото на лист')}${sm('pbClear', 'Очистить слой', 'Стереть текущий слой')}</div>${big('pbDone', 'hand', 'Готово', 'Закончить рисование: вернуть окна и правку модели')}</div><div class="grp-label">Рисунок</div></div>`;
+  const on = (id, f) => { const b = $('#' + id); if (b) b.onclick = f; };
+  on('pbBrush', () => { paintSet({ tool:'brush' }); paintPop('brushes'); }); on('pbSmudge', () => paintSet({ tool:'smudge' })); on('pbErase', () => paintSet({ tool:'erase' }));
+  for (const k of Object.keys(PBRUSH)) on('pbB_' + k, () => paintSet({ brush:k, tool:'brush' }));
+  on('pbColor', () => paintPop('color')); on('pbLayers', () => paintPop('layers')); on('pbPick', () => paintSet({ tool:'pick' })); on('pbHand', () => paintSet({ tool:'hand' })); on('pbUndo', () => pUndo(true));
+  on('pbCut', () => toast(paintCutPhoto())); on('pbPhoto', () => paintPickPhoto(false)); on('pbCutBg', () => paintPickPhoto('bg'));
+  on('pbSave', paintSavePng); on('pbSheet', () => paintToSheet()); on('pbClear', () => paintLayerOp('clear')); on('pbDone', paintExitTab);
+  on('pbPhotoV', paintPhoto); on('pbAngle', paintNewAngle); on('pbBackCam', paintBackCam); on('pbDelSk', paintDelSketch);
+  const sk = $('#pbSk'); if (sk) sk.onchange = () => paintSkSel(sk.value);
+}
+// «Вернуть ракурс»: the view goes back to the angle of the sketch (its photo is put away — the view can be turned again)
+function paintBackCam(){ const D = PAINT.doc, v = curView(), S0 = !D && v && v.paint && v.paint.list[v.paint.list.length - 1]; const k = D ? D.cam : S0 && S0.cam; if (!k){ toast('Нет наброска'); return false; } if (D) paintNewAngle(); if (!camRestore(k)){ toast('Набросок сделан в другом режиме вида'); return false; } toast('Вид в ракурсе наброска. «Фото ракурса» — новый набросок'); return true; }
+function paintSkSel(val){ if (val === 'new') paintNewAngle(); else { const i = +val; if (Number.isFinite(i)){ paintOpenSketch(i); const v = curView(), s = v && v.paint && v.paint.list[i]; if (s && s.cam) camRestore(s.cam); } } }
+// the sketches of the view in the lists (ribbon and the top bar)
+function paintSkOpts(){ const v = curView(), L = (v && v.paint && v.paint.list) || [], cur = PAINT.doc ? L.findIndex(s => s.id === PAINT.doc.id) : -1;
+  return `<option value="new"${cur < 0 ? ' selected' : ''}>${L.length ? '— выбрать ракурс —' : 'набросков нет'}</option>` + L.map((s, i) => `<option value="${i}"${i === cur ? ' selected' : ''}>${esc(s.n)}</option>`).join(''); }
+// «Выйти из камеры»: back to the view that was open before the camera (else the 3D view, else the plan)
+function camExit(){
+  const v = curView(); if (!v || v.kind !== 'camera') return 'Сейчас открыт не вид камеры';
+  const b = views.find(x => x.id === S.camBack && x.kind !== 'camera') || views.find(x => x.kind === 'd3') || views.find(x => x.kind === 'plan');
+  if (!b) return 'Некуда выйти'; openView(b.id); return 'Вышли из камеры: открыт вид «' + b.name + '»';
+}
+$('#camExit').onclick = () => toast(camExit());
+function paintExitTab(){ showTab(PAINT.tabBack && PAINT.tabBack !== 'rbDraw' ? PAINT.tabBack : 'rbArch'); }
+// a vertical slider of the side bar (size / opacity), 0…1
+function pVSlider(el, get, set, fmt){
+  const th = el.querySelector('.th'), tip = el.querySelector('.tip');
+  const show = () => { const v = get(); th.style.top = ((1 - v) * 100) + '%'; tip.textContent = fmt(); };
+  let drag = false; const at = e => { const r = el.getBoundingClientRect(); set(clamp(1 - (e.clientY - r.top) / r.height, 0, 1)); show(); };
+  el.onpointerdown = e => { drag = true; el.setPointerCapture(e.pointerId); tip.hidden = false; at(e); e.stopPropagation(); };
+  el.onpointermove = e => { if (drag) at(e); };
+  el.onpointerup = el.onpointercancel = () => { drag = false; tip.hidden = true; paintPrefs(); };
+  show();
+}
+const szTo = v => Math.round(1 + 399 * Math.pow(v, 2.2)), szFrom = s => Math.pow((s - 1) / 399, 1 / 2.2);
+function paintUI(){
+  const ui = $('#paintUI'); ui.hidden = !PAINT.on; if (!PAINT.on) return;
+  const t = PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : PAINT.tool;
+  if (!ui.dataset.built){ ui.dataset.built = '1';
+    ui.innerHTML = `<div class="pn-side" id="pnSide"><div class="pn-vs" id="pnSz" title="Размер кисти"><div class="th"></div><div class="tip" hidden></div></div><button class="pn-sq" id="pnPick" title="Пипетка: взять цвет (I)" aria-label="Пипетка"></button><div class="pn-vs" id="pnOp" title="Непрозрачность"><div class="th"></div><div class="tip" hidden></div></div><button class="pn-ib" id="pnUndo" title="Отменить (Ctrl+Z)">${pSvg('undo')}</button><button class="pn-ib" id="pnRedo" title="Повторить (Ctrl+Shift+Z)">${pSvg('redo')}</button></div>
+      <div class="pn-top" id="pnTop"><button class="pn-photo" id="pnPhoto" title="Фото ракурса: сфотографировать вид и рисовать на фото">${pSvg('photo')}<span>Фото</span></button><button class="pn-ib" id="pnAngle" title="Новый ракурс: убрать фото и повернуть вид">${pSvg('angle')}</button><select id="pnSk" title="Наброски этого вида — вернуться к ракурсу"></select><button class="pn-ib" id="pnHand" hidden>${pSvg('hand')}</button><button class="pn-ib" id="pnBrush" title="Кисть (B) — повторный щелчок: библиотека кистей">${pSvg('brush')}</button><button class="pn-ib" id="pnSmudge" title="Палец — размазать (S)">${pSvg('smudge')}</button><button class="pn-ib" id="pnErase" title="Ластик (E)">${pSvg('erase')}</button><button class="pn-ib" id="pnLay" title="Слои">${pSvg('layers')}</button><button class="pn-dot" id="pnDot" title="Цвета"></button><button class="pn-done" id="pnDone" title="Закончить рисование">Готово</button></div>
+      <div class="pn-pop" id="pnPop" hidden></div>
+      <div class="pn-hint" id="pnHint" hidden>Модель заморожена — правка недоступна. Поверните вид, как вам нравится,<br>и нажмите <b>«Фото»</b> — дальше рисуйте на фото. Наброски сохраняются в этом виде.</div>`;
+    pVSlider($('#pnSz'), () => szFrom(PAINT.sz[PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : PAINT.tool] || 10), v => { PAINT.sz[PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : PAINT.tool] = szTo(v); }, () => (PAINT.sz[PAINT.tool] || 10) + ' px');
+    pVSlider($('#pnOp'), () => PAINT.opT[PAINT.tool] ?? 1, v => { PAINT.opT[PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : PAINT.tool] = Math.max(0.02, v); }, () => Math.round((PAINT.opT[PAINT.tool] ?? 1) * 100) + ' %');
+    $('#pnPick').onclick = () => paintSet({ tool:PAINT.tool === 'pick' ? (PAINT.prevTool || 'brush') : 'pick' });
+    $('#pnUndo').onclick = () => pUndo(true); $('#pnRedo').onclick = () => pUndo(false);
+    $('#pnHand').onclick = () => paintSet({ tool:'hand' });
+    $('#pnBrush').onclick = () => { if (PAINT.tool === 'brush' && !PAINT.hand) paintPop('brushes'); else paintSet({ tool:'brush' }); };
+    $('#pnSmudge').onclick = () => { if (PAINT.tool === 'smudge' && !PAINT.hand) paintPop('brushes'); else paintSet({ tool:'smudge' }); };
+    $('#pnErase').onclick = () => { if (PAINT.tool === 'erase' && !PAINT.hand) paintPop('brushes'); else paintSet({ tool:'erase' }); };
+    $('#pnLay').onclick = () => paintPop('layers'); $('#pnDot').onclick = () => paintPop('color'); $('#pnDone').onclick = paintExitTab;
+    $('#pnPhoto').onclick = paintPhoto; $('#pnAngle').onclick = paintNewAngle; $('#pnSk').onchange = e => paintSkSel(e.target.value);
+  }
+  const hasDoc = !!PAINT.doc;
+  $('#viewport').classList.toggle('pdoc', hasDoc); $('#pnHint').hidden = hasDoc; $('#pnSide').hidden = !hasDoc;
+  for (const id of ['pnBrush', 'pnSmudge', 'pnErase', 'pnLay', 'pnDot']) $('#' + id).hidden = !hasDoc;
+  $('#pnAngle').hidden = !hasDoc; $('#pnSk').innerHTML = paintSkOpts(); $('#pnSk').hidden = !((curView() || {}).paint);
+  { const sk = $('#pbSk'); if (sk) sk.innerHTML = paintSkOpts(); for (const id of ['pbAngle', 'pbDelSk']){ const b = $('#' + id); if (b) b.disabled = !hasDoc; } }
+  for (const [id, k] of [['pnBrush', 'brush'], ['pnSmudge', 'smudge'], ['pnErase', 'erase']]) $('#' + id).classList.toggle('on', !PAINT.hand && PAINT.tool === k);
+  $('#pnHand').classList.toggle('on', PAINT.hand); $('#pnPick').classList.toggle('on', PAINT.tool === 'pick');
+  $('#pnDot').style.background = PAINT.col;
+  $('#pnUndo').disabled = !PAINT.undo.length; $('#pnRedo').disabled = !PAINT.redo.length;
+  $('#pnSz .th').style.top = ((1 - szFrom(PAINT.sz[t] || 10)) * 100) + '%'; $('#pnOp .th').style.top = ((1 - (PAINT.opT[t] ?? 1)) * 100) + '%';
+  $('#viewport').classList.toggle('phand', PAINT.hand);
+  for (const [id, k] of [['pbBrush', 'brush'], ['pbSmudge', 'smudge'], ['pbErase', 'erase'], ['pbPick', 'pick']]){ const b = $('#' + id); if (b) b.setAttribute('aria-pressed', !PAINT.hand && PAINT.tool === k); }
+  const hb = $('#pbHand'); if (hb) hb.setAttribute('aria-pressed', PAINT.hand);
+  for (const k of Object.keys(PBRUSH)){ const b = $('#pbB_' + k); if (b) b.setAttribute('aria-pressed', PAINT.brush === k); }
+  if (PAINT.pop) paintPopUI();
+}
+function paintPop(k){ PAINT.pop = PAINT.pop === k ? null : k; const p = $('#pnPop'); if (!p) return; p.hidden = !PAINT.pop; if (PAINT.pop) paintPopUI(); }
+// HSV ↔ RGB
+function hsv2rgb(h, s, v){ const f = n => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); }; return [f(5) * 255, f(3) * 255, f(1) * 255]; }
+function rgb2hsv(r, g, b){ r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0; if (d){ h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; if (h < 0) h += 360; } return [h, mx ? d / mx : 0, mx]; }
+function paintPopUI(){
+  const p = $('#pnPop'); if (!p || !PAINT.pop) return;
+  if (PAINT.pop === 'brushes') return pBrushesUI(p);
+  if (PAINT.pop === 'layers') return pLayersUI(p);
+  pColorUI(p);
+}
+function pBrushesUI(p){
+  p.innerHTML = `<h3>Библиотека кистей</h3><div id="pnBl"></div><p style="color:#9a9a9e;margin:8px 0 0">Кисть общая для рисования, пальца и ластика. Нажим пера меняет толщину. Плавность линии: <input id="pnSmooth" type="range" min="0" max="0.9" step="0.05" value="${PAINT.smooth}" style="vertical-align:middle;width:110px"></p>`;
+  const bl = p.querySelector('#pnBl');
+  for (const [k, B] of Object.entries(PBRUSH)){
+    const row = document.createElement('div'); row.className = 'pn-brush' + (PAINT.brush === k ? ' on' : ''); row.innerHTML = `<canvas width="300" height="56"></canvas><span>${B.n}</span>`; bl.append(row);
+    const c = row.querySelector('canvas'), g = c.getContext('2d'), st = { B, rgb:[235, 235, 235] };
+    for (let i = 0; i <= 120; i++){ const t = i / 120, x = 14 + t * 272, y = 28 + Math.sin(t * 6.283) * 12, pr = Math.sin(t * Math.PI); pDab(g, x, y, Math.max(0.6, 7 * (B.min + (1 - B.min) * pr)), (B.flow || 1) * (B.op || 1), st); }
+    row.onclick = () => { paintSet({ brush:k }); pBrushesUI(p); };
+  }
+  p.querySelector('#pnSmooth').oninput = e => { PAINT.smooth = +e.target.value; };
+}
+function pLayersUI(p){
+  const Ls = PAINT.layers;
+  p.innerHTML = `<h3>Слои<span class="sw"><button class="pb" id="pnLAdd" title="Новый слой">＋</button></span></h3><div id="pnLL"></div>
+    <div class="row" style="flex-wrap:wrap;margin-top:6px"><button class="pb" data-lo="dup">Копия</button><button class="pb" data-lo="merge">Объединить вниз</button><button class="pb" data-lo="up">Выше</button><button class="pb" data-lo="down">Ниже</button><button class="pb" data-lo="clear">Очистить</button><button class="pb" data-lo="del">Удалить</button></div>
+    <div class="row" style="margin-top:8px"><label>Непрозрачность <input id="pnLOp" type="range" min="0" max="1" step="0.01" value="${(Ls[PAINT.cur] || {}).op ?? 1}" style="width:120px;vertical-align:middle"></label><select id="pnLBl" title="Режим наложения">${[['source-over', 'Обычный'], ['multiply', 'Умножение'], ['screen', 'Экран'], ['overlay', 'Перекрытие'], ['darken', 'Затемнение'], ['lighten', 'Осветление']].map(([k, n]) => `<option value="${k}"${(Ls[PAINT.cur] || {}).bl === k ? ' selected' : ''}>${n}</option>`).join('')}</select></div>`;
+  const LL = p.querySelector('#pnLL');
+  for (let i = Ls.length - 1; i >= 0; i--){
+    const L = Ls[i], row = document.createElement('div'); row.className = 'pn-lay' + (i === PAINT.cur ? ' on' : '');
+    const th = pCanvas(104, 68); th.className = 'th'; const g = th.getContext('2d'), k = Math.min(104 / L.cv.width, 68 / L.cv.height); g.drawImage(L.cv, (104 - L.cv.width * k) / 2, (68 - L.cv.height * k) / 2, L.cv.width * k, L.cv.height * k);
+    row.append(th); row.insertAdjacentHTML('beforeend', `<span class="nm" title="Двойной щелчок — переименовать">${esc(L.n)}</span><span style="opacity:.8">${Math.round(L.op * 100)}%</span><input type="checkbox" ${L.vis ? 'checked' : ''} title="Видимость">`);
+    row.onclick = e => { if (e.target.type === 'checkbox') return; PAINT.cur = i; pLayersUI(p); };
+    row.querySelector('input').onchange = e => { L.vis = e.target.checked; L.dirty = true; pRedraw(); paintSaveSoon(); };
+    row.querySelector('.nm').ondblclick = () => { const n = prompt('Название слоя', L.n); if (n && n.trim()){ L.n = n.trim().slice(0, 40); L.dirty = true; paintSaveSoon(); pLayersUI(p); } };
+    LL.append(row);
+  }
+  p.querySelector('#pnLAdd').onclick = () => paintLayerOp('add');
+  p.querySelectorAll('[data-lo]').forEach(b => b.onclick = () => { const o = b.dataset.lo; if (o === 'del' && !confirm('Удалить слой «' + (Ls[PAINT.cur] || {}).n + '»?')) return; paintLayerOp(o); });
+  p.querySelector('#pnLOp').oninput = e => { const L = Ls[PAINT.cur]; if (!L) return; L.op = +e.target.value; L.dirty = true; pRedraw(); };
+  p.querySelector('#pnLOp').onchange = () => { paintSaveSoon(); pLayersUI(p); };
+  p.querySelector('#pnLBl').onchange = e => { const L = Ls[PAINT.cur]; if (!L) return; L.bl = e.target.value; L.dirty = true; pRedraw(); paintSaveSoon(); };
+}
+// «Цвета» (Procreate): Круг, Классический, Гармония, Значение, Палитры; history below
+function pColorUI(p){
+  const [h0, s0, v0] = rgb2hsv(...hex2rgb(PAINT.col)); PAINT.hsv = PAINT.hsv && rgb2hex(...hsv2rgb(...PAINT.hsv)) === PAINT.col ? PAINT.hsv : [h0, s0, v0];
+  const T = PAINT.ctab, prev = PAINT.prevCol || PAINT.col;
+  const tabs = [['circle', 'Круг'], ['classic', 'Классический'], ['harm', 'Гармония'], ['value', 'Значение'], ['pal', 'Палитры']];
+  let body = '';
+  if (T === 'classic') body = `<div class="pn-sv" id="pnSV"><canvas width="320" height="210"></canvas><div class="k"></div></div><div class="pn-hs" id="pnH"><div class="k"></div></div><div class="pn-hs" id="pnS"><div class="k"></div></div><div class="pn-hs" id="pnV"><div class="k"></div></div>`;
+  else if (T === 'circle') body = `<div class="pn-wheel" id="pnW"><canvas width="480" height="480"></canvas><div class="k"></div></div><div class="pn-hs" id="pnV"><div class="k"></div></div>`;
+  else if (T === 'harm') body = `<div class="row" style="margin-bottom:6px"><select id="pnHm">${[['comp', 'Дополнительный'], ['split', 'Расщеплённый'], ['analog', 'Аналогичный'], ['triad', 'Триада'], ['tetra', 'Тетрада']].map(([k, n]) => `<option value="${k}"${PAINT.harm === k ? ' selected' : ''}>${n}</option>`).join('')}</select></div><div class="pn-wheel" id="pnW"><canvas width="480" height="480"></canvas><div class="k"></div></div><div class="pn-sws" id="pnHw" style="justify-content:center;gap:4px"></div>`;
+  else if (T === 'value') body = `<div style="display:grid;grid-template-columns:24px 1fr 56px;gap:6px;align-items:center">${['H', 'S', 'B', 'R', 'G', 'Bl'].map(k => `<span>${k === 'Bl' ? 'B' : k}</span><input type="range" data-vv="${k}" min="0" max="${k === 'H' ? 360 : k.length === 1 && 'SB'.includes(k) ? 100 : 255}"><input type="number" data-vn="${k}" min="0" max="${k === 'H' ? 360 : 'SB'.includes(k) && k.length === 1 ? 100 : 255}">`).join('')}</div><div class="row" style="margin-top:8px"><span>Шестнадцатеричный</span><input type="text" id="pnHex" value="${PAINT.col}" maxlength="7" style="width:90px"></div>`;
+  else body = PAINT_PAL.map(([n, l]) => `<div class="pn-sec"><span>${esc(n)}</span></div><div class="pn-sws">${l.map(c => `<i data-c="${c}" style="background:${c}" title="${c}"></i>`).join('')}</div>`).join('') + `<div class="pn-sec"><span>Мои цвета</span><button class="pb" id="pnPalAdd" title="Добавить текущий цвет">＋ текущий</button></div><div class="pn-sws">${pMyPal().map(c => `<i data-c="${c}" style="background:${c}" title="${c} — правая кнопка: убрать"></i>`).join('') || '<span style="color:#9a9a9e">пусто</span>'}</div>`;
+  const hist = pHist();
+  p.innerHTML = `<h3>Цвета<span class="sw"><i id="pnCur" style="background:${PAINT.col}" title="Текущий"></i><i id="pnPrev" style="background:${prev}" title="Предыдущий — щелчок: вернуть"></i></span></h3>${body}
+    <div class="pn-sec"><span>История</span><button class="pb" id="pnHClr">Очистить</button></div><div class="pn-sws">${hist.map(c => `<i data-c="${c}" style="background:${c}"></i>`).join('')}</div>
+    <div class="pn-tabs">${tabs.map(([k, n]) => `<button data-ct="${k}" class="${T === k ? 'on' : ''}">${pSvg(k)}${n}</button>`).join('')}</div>`;
+  const setHSV = (h, s, v, keep) => { PAINT.hsv = [h, s, v]; if (!PAINT.prevCol) PAINT.prevCol = PAINT.col; PAINT.col = rgb2hex(...hsv2rgb(h, s, v)); $('#pnDot').style.background = PAINT.col; const c = p.querySelector('#pnCur'); if (c) c.style.background = PAINT.col; if (!keep) paintPopUI(); else paint1(); paintPrefs(); };
+  const track = (el, f) => { if (!el) return; let d = false; const at = e => { const r = el.getBoundingClientRect(); f(clamp((e.clientX - r.left) / r.width, 0, 1), clamp((e.clientY - r.top) / r.height, 0, 1), e, r); };
+    el.onpointerdown = e => { d = true; el.setPointerCapture(e.pointerId); at(e); }; el.onpointermove = e => { if (d) at(e); }; el.onpointerup = () => { d = false; }; };
+  const [H, Sa, V] = PAINT.hsv;
+  const paint1 = () => {
+    const [h, s, v] = PAINT.hsv;
+    const sv = p.querySelector('#pnSV'); if (sv){ const c = sv.querySelector('canvas'), g = c.getContext('2d'); g.fillStyle = `hsl(${h},100%,50%)`; g.fillRect(0, 0, c.width, c.height); let gr = g.createLinearGradient(0, 0, c.width, 0); gr.addColorStop(0, '#fff'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height); gr = g.createLinearGradient(0, 0, 0, c.height); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, '#000'); g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height); const k = sv.querySelector('.k'); k.style.left = (s * 100) + '%'; k.style.top = ((1 - v) * 100) + '%'; k.style.background = PAINT.col; }
+    const bar = (id, grad, pos) => { const el = p.querySelector('#' + id); if (!el) return; el.style.background = grad; el.querySelector('.k').style.left = (pos * 100) + '%'; };
+    bar('pnH', 'linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)', h / 360);
+    bar('pnS', `linear-gradient(90deg,${rgb2hex(...hsv2rgb(h, 0, v))},${rgb2hex(...hsv2rgb(h, 1, v))})`, s);
+    bar('pnV', `linear-gradient(90deg,#000,${rgb2hex(...hsv2rgb(h, s, 1))})`, v);
+    const w = p.querySelector('#pnW'); if (w){ const c = w.querySelector('canvas'), g = c.getContext('2d'), R = c.width / 2;
+      if (!c._done){ const id = g.createImageData(c.width, c.height); for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++){ const dx = x - R, dy = y - R, d = Math.hypot(dx, dy) / R; if (d > 1) continue; const [r, gg, b] = hsv2rgb((Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360, d, 1), j = (y * c.width + x) * 4; id.data[j] = r; id.data[j + 1] = gg; id.data[j + 2] = b; id.data[j + 3] = 255; } g.putImageData(id, 0, 0); c._done = true; }
+      w.style.filter = `brightness(${0.15 + 0.85 * v})`; const k = w.querySelector('.k'); k.style.left = (50 + Math.cos(h * Math.PI / 180) * s * 50) + '%'; k.style.top = (50 + Math.sin(h * Math.PI / 180) * s * 50) + '%'; k.style.background = PAINT.col; }
+    const hw = p.querySelector('#pnHw'); if (hw){ const off = { comp:[180], split:[150, 210], analog:[-30, 30], triad:[120, 240], tetra:[90, 180, 270] }[PAINT.harm || 'comp']; hw.innerHTML = [0, ...off].map(o => { const c = rgb2hex(...hsv2rgb((h + o + 360) % 360, s, v)); return `<i data-c="${c}" style="background:${c};width:52px;height:40px;border-radius:5px" title="${c}"></i>`; }).join(''); hw.querySelectorAll('[data-c]').forEach(b => b.onclick = () => paintSet({ col:b.dataset.c })); }
+    const rgb = hsv2rgb(h, s, v), vals = { H:Math.round(h), S:Math.round(s * 100), B:Math.round(v * 100), R:Math.round(rgb[0]), G:Math.round(rgb[1]), Bl:Math.round(rgb[2]) };
+    p.querySelectorAll('[data-vv]').forEach(i => { if (document.activeElement !== i) i.value = vals[i.dataset.vv]; }); p.querySelectorAll('[data-vn]').forEach(i => { if (document.activeElement !== i) i.value = vals[i.dataset.vn]; });
+    const hx = p.querySelector('#pnHex'); if (hx && document.activeElement !== hx) hx.value = PAINT.col;
+  };
+  paint1();
+  track(p.querySelector('#pnSV'), (x, y) => setHSV(PAINT.hsv[0], x, 1 - y, true));
+  track(p.querySelector('#pnH'), x => setHSV(x * 360, PAINT.hsv[1], PAINT.hsv[2], true));
+  track(p.querySelector('#pnS'), x => setHSV(PAINT.hsv[0], x, PAINT.hsv[2], true));
+  track(p.querySelector('#pnV'), x => setHSV(PAINT.hsv[0], PAINT.hsv[1], x, true));
+  track(p.querySelector('#pnW'), (x, y) => { const dx = x - 0.5, dy = y - 0.5, d = Math.min(1, Math.hypot(dx, dy) * 2); setHSV((Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360, d, PAINT.hsv[2], true); });
+  p.querySelectorAll('[data-vv],[data-vn]').forEach(i => i.oninput = () => { const k = i.dataset.vv || i.dataset.vn, n = +i.value; if (!Number.isFinite(n)) return; let [h, s, v] = PAINT.hsv;
+    if (k === 'H') h = clamp(n, 0, 360); else if (k === 'S') s = clamp(n, 0, 100) / 100; else if (k === 'B') v = clamp(n, 0, 100) / 100; else { const c = hsv2rgb(h, s, v), j = { R:0, G:1, Bl:2 }[k]; c[j] = clamp(n, 0, 255); [h, s, v] = rgb2hsv(...c); } setHSV(h, s, v, true); });
+  const hx = p.querySelector('#pnHex'); if (hx) hx.onchange = () => { let t = hx.value.trim(); if (!t.startsWith('#')) t = '#' + t; if (/^#[0-9a-f]{3}$/i.test(t)) t = '#' + t.slice(1).split('').map(c => c + c).join(''); if (/^#[0-9a-f]{6}$/i.test(t)){ PAINT.prevCol = PAINT.col; paintSet({ col:t }); PAINT.hsv = null; paintPopUI(); } };
+  const hm = p.querySelector('#pnHm'); if (hm) hm.onchange = () => { PAINT.harm = hm.value; paint1(); };
+  p.querySelectorAll('.pn-sws [data-c]').forEach(b => { if (b.closest('#pnHw')) return; b.onclick = () => { PAINT.prevCol = PAINT.col; paintSet({ col:b.dataset.c }); PAINT.hsv = null; paintPopUI(); };
+    b.oncontextmenu = e => { e.preventDefault(); const m = pMyPal(), i = m.indexOf(b.dataset.c); if (i >= 0 && b.closest('.pn-sws') === p.querySelectorAll('.pn-sws')[PAINT_PAL.length]){ m.splice(i, 1); lsSet('kot.paint.pal', JSON.stringify(m)); paintPopUI(); } }; });
+  const pa = p.querySelector('#pnPalAdd'); if (pa) pa.onclick = () => { const m = pMyPal().filter(c => c !== PAINT.col); m.push(PAINT.col); lsSet('kot.paint.pal', JSON.stringify(m.slice(-40))); paintPopUI(); };
+  p.querySelector('#pnHClr').onclick = () => { lsSet('kot.paint.hist', '[]'); paintPopUI(); };
+  p.querySelector('#pnPrev').onclick = () => { const c = PAINT.prevCol; if (c){ PAINT.prevCol = PAINT.col; paintSet({ col:c }); PAINT.hsv = null; paintPopUI(); } };
+  p.querySelectorAll('[data-ct]').forEach(b => b.onclick = () => { PAINT.ctab = b.dataset.ct; paintPrefs(); paintPopUI(); });
+  void H; void Sa; void V;
+}
+// enter / leave
+function paintOn(){
+  if (PAINT.on) return;
+  if (S.tool !== 'select') setTool('select');
+  clearSel(); PAINT.on = true; PAINT.hand = false;
+  PAINT.back = { props:!!(LAY.p.props && LAY.p.props.show), browser:!!(LAY.p.browser && LAY.p.browser.show) };
+  lsSet('kot.paintBack', JSON.stringify(PAINT.back)); // closed while drawing → the windows come back at the next start
+  if (wide()){ if (PAINT.back.props) LAY.p.props.show = false; if (PAINT.back.browser) LAY.p.browser.show = false; applyLayout(); setTimeout(() => { resize && resize(); }, 60); }
+  $('#viewport').classList.add('painting'); $('#paintCv').hidden = false;
+  paintRibbon(); configControls();
+  const v = curView(); if (!PAINT.doc || PAINT.view !== (v && v.id)) paintLoad(v); else paintUI();
+  paintUI(); toast('Рисование: модель заморожена. Рисуйте мышью, пером или пальцем; вращать вид — правая кнопка, два пальца или «Рука»', 5000);
+}
+function paintOff(){
+  if (!PAINT.on) return;
+  if (PAINT.stroke) pEnd(false);
+  paintSave(); PAINT.on = false; PAINT.hand = false; PAINT.pop = null;
+  $('#paintUI').hidden = true; $('#viewport').classList.remove('painting', 'phand');
+  if (PAINT.back && wide()){ if (PAINT.back.props) LAY.p.props.show = true; if (PAINT.back.browser) LAY.p.browser.show = true; applyLayout(); setTimeout(() => { resize && resize(); }, 60); }
+  lsSet('kot.paintBack', ''); configControls();
+}
+try { const b = JSON.parse(lsGet('kot.paintBack') || 'null'); if (b){ if (b.props) LAY.p.props.show = true; if (b.browser) LAY.p.browser.show = true; lsSet('kot.paintBack', ''); applyLayout(); } } catch (e){}
+// every frame: the drawing of the open view, shown while the view looks as it did
+function paintTick(){
+  const pc = $('#paintCv'); if (!pc) return;
+  if (!PAINT.on){ if (!pc.hidden) pc.hidden = true; return; } // the sketches are shown only in «Рисование»
+  const v = curView(); if (v && PAINT.view !== v.id){ paintSave(); paintLoad(v); return; }
+  pc.hidden = !PAINT.doc; if (!PAINT.doc) return;
+  const px = pViewPx(); if (pc.width !== px.w || pc.height !== px.h) pRedraw();
+}
+// the pointer over the viewport (capture: before the canvas; nothing is stopped — the view controls still see the right button and two fingers)
+{
+  const vp = $('#viewport');
+  const skip = e => e.target.closest && e.target.closest('#paintUI > *, #vtabs, #uiGrip, .vbar, #vpActBar, #toast, .modal');
+  vp.addEventListener('pointerdown', e => {
+    if (!PAINT.on || skip(e)) return;
+    if (PAINT.pop && !e.target.closest('#pnPop')){ PAINT.pop = null; $('#pnPop').hidden = true; }
+    if (e.pointerType === 'touch'){ PAINT.touches.add(e.pointerId); if (PAINT.touches.size > 1){ if (PAINT.stroke) pEnd(true); return; } }
+    if (!PAINT.doc || e.button !== 0) return; // no photo yet: the view turns (choose the angle)
+    e.preventDefault(); pStart(e);
+  }, true);
+  addEventListener('pointermove', e => { const st = PAINT.stroke; if (!st || e.pointerId !== st.pid) return; const list = e.getCoalescedEvents ? e.getCoalescedEvents() : [e]; for (const q of (list.length ? list : [e])){ const p = pPt(q); if (Number.isFinite(p.x) && Number.isFinite(p.y)) pTo(p); } pRedrawSoon(); }, true);
+  const up = e => { PAINT.touches.delete(e.pointerId); const st = PAINT.stroke; if (st && e.pointerId === st.pid) pEnd(e.type === 'pointercancel'); };
+  addEventListener('pointerup', up, true); addEventListener('pointercancel', up, true);
+  vp.addEventListener('contextmenu', e => { if (PAINT.on) e.preventDefault(); }, true);
+  // the keys: Ctrl+Z / Ctrl+Shift+Z, B / S / E / I, [ ], Space — the hand; the others do not reach the model
+  document.addEventListener('keydown', e => {
+    if (!PAINT.on || (e.target && e.target.closest && e.target.closest('input,textarea,select,[contenteditable],.modal'))) return;
+    const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+    if (mod && (k === 's' || k === 'p' || k === 'o')) return; // save / print / open stay
+    if (/^f\d+$/i.test(e.key)) return;
+    e.stopImmediatePropagation();
+    if (mod && (k === 'z' || k === 'я')){ e.preventDefault(); pUndo(!e.shiftKey); return; }
+    if (mod && (k === 'y' || k === 'н')){ e.preventDefault(); pUndo(false); return; }
+    if (e.key === ' '){ e.preventDefault(); if (!PAINT.space){ PAINT.space = true; PAINT.hand0 = PAINT.hand; paintSet({ hand:true }); } return; }
+    if (e.key === 'Escape'){ if (PAINT.pop){ paintPop(PAINT.pop); return; } if (PAINT.stroke){ pEnd(true); return; } return; }
+    if (mod) return;
+    if (k === 'b' || k === 'и') paintSet({ tool:'brush' }); else if (k === 's' || k === 'ы') paintSet({ tool:'smudge' }); else if (k === 'e' || k === 'у') paintSet({ tool:'erase' }); else if (k === 'i' || k === 'ш') paintSet({ tool:'pick' });
+    else if (e.key === '[' || e.key === ']' || k === 'х' || k === 'ъ'){ const t = PAINT.tool === 'pick' ? 'brush' : PAINT.tool; paintSet({ size:Math.round((PAINT.sz[t] || 10) * (e.key === ']' || k === 'ъ' ? 1.25 : 0.8)) }); }
+  }, true);
+  document.addEventListener('keyup', e => { if (e.key === ' ' && PAINT.space){ PAINT.space = false; paintSet({ hand:!!PAINT.hand0 }); } }, true);
+  addEventListener('resize', () => { if (PAINT.doc) pRedrawSoon(); });
+}
 (function loop(){
   requestAnimationFrame(loop);
+  try { paintTick(); } catch (e){}
   if (RN_BUSY) return; // the path tracer owns the canvas while it works
   updateHandles();
   if (S.view === 'sheet') return;
