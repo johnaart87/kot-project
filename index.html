@@ -118,6 +118,7 @@ svg.mi{width:16px;height:16px;flex:none}
 #camExit:hover{background:#3b8cff}
 #viewport.hastabs #camExit{top:36px}
 #viewport.painting #camExit{top:auto;bottom:10px}
+body:has(#renderDlg:not([hidden])) #camExit,body:has(.modal:not([hidden])) #camExit{display:none} /* not over the render window and dialogs */
 #paintCv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:35;touch-action:none}
 #viewport.painting.pdoc #paintCv{pointer-events:auto}
 #viewport.painting #sheetWrap{pointer-events:none}
@@ -12906,23 +12907,33 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
   // more bounces — smaller tiles: every GPU job stays short, or Windows resets the GPU (and the frame comes back black)
   // a closed interior (a camera under a ceiling): paths bounce much longer — tiles 2.5 times smaller (Windows resets a GPU busy for ~2 s);
   // the haze (volume) — much heavier still: tiles 5 times smaller
-  const perTile = (TABLET ? 40000 : 90000) * 6 / Math.max(6, o.bounces || 6) * (o._interior ? 0.4 : 1) * (o.fog > 0 ? 0.2 : 1), tl = clamp(Math.ceil(Math.sqrt(W * H / perTile)), 2, 32); pt.tiles.set(tl, tl);
+  // no real video card (the browser draws with the processor: «Microsoft Basic Render Driver», SwiftShader) — GPU jobs 3 times smaller
+  const SWR = /Microsoft Basic|SwiftShader|llvmpipe|Software/i.test(gpuName()), out0 = document.createElement('canvas'); out0.width = W; out0.height = H; out0.sw = SWR;
+  const perTile = (TABLET ? 40000 : 90000) * 6 / Math.max(6, o.bounces || 6) * (o._interior ? 0.4 : 1) * (o.fog > 0 ? 0.2 : 1) * (SWR ? 0.33 : 1);
+  let tl = clamp(Math.ceil(Math.sqrt(W * H / perTile)), 2, 48); pt.tiles.set(tl, tl);
   RN_BUSY = true; RN_CANCEL = false;
-  const out = document.createElement('canvas'); out.width = W; out.height = H; const og = out.getContext('2d');
+  const out = out0, og = out.getContext('2d'); void og;
   try {
     pt.setScene(ptScene, pc);
+    // the auxiliary passes FIRST (a second of raster): albedo and normals for the denoiser and the masks are there even if the GPU gives up later
+    if (o.denoise){ out.alb = aovPass(pr, ptScene, pc, W, H, 'albedo'); out.nrm = aovPass(pr, ptScene, pc, W, H, 'normal'); }
+    if (!o.envBlack){ try { out.mask = aovPass(pr, ptScene, pc, W, H, 'mask'); out.zd = aovPass(pr, ptScene, pc, W, H, 'depth'); } catch (e){ console.warn('masks', e); } } // render elements for Photoshop
     const target = o.samples || 256; let last = 0; const t0 = performance.now(), tEnd = o.tmax > 0 ? t0 + o.tmax * 60000 : Infinity; // «Предел времени»
-    // «Предел шума» (Corona: Noise level limit) and the progressive picture: every ~1.5 s the accumulated image is read; the noise of the mean is
-    // estimated from the difference with the previous snapshot (Monte Carlo: σ(Aₙ) ≈ rms(Aₙ − Aₘ)·√(m / (n − m))), the render stops when it is low enough
-    const pvEvery = Math.max(1500, W * H / 1400), sub = Math.max(1, Math.round(Math.sqrt(W * H / 40000)));
-    let lastPv = t0, snap = null, snapN = 0; out.noise = null; out.eta = null;
+    // «Предел шума» (Corona: Noise level limit) and the progressive picture: every ~2–3 s the accumulated image is read; the noise of the mean is
+    // estimated from the difference with the previous snapshot (Monte Carlo: σ(Aₙ) ≈ rms(Aₙ − Aₘ)·√(m / (n − m))), the render stops when it is low enough.
+    // Reading 1920×1080 floats back stalls the GPU — not more often than every 2 s (3 s at 1080p, twice that without a video card)
+    const pvEvery = Math.max(2000, W * H / 700) * (SWR ? 2 : 1), sub = Math.max(1, Math.round(Math.sqrt(W * H / 40000)));
+    let lastPv = t0, snap = null, snapN = 0, good = null, passN = 0, passT = t0; out.noise = null; out.eta = null;
     const lumAt = (h, i) => 0.2126 * h[i] + 0.7152 * h[i + 1] + 0.0722 * h[i + 2];
     while (pt.samples < target && !RN_CANCEL && performance.now() < tEnd){
-      if (lost) throw new Error('видеокарта не справилась и сбросилась. Уменьшите размер картинки или число отскоков');
+      if (lost) break; // the GPU gave up: the last picture read back is kept (below)
       pt.renderSample();
       const now = performance.now();
+      // tiles follow the speed of the card: a tile of < 35 ms — bigger tiles (less overhead, faster), > 260 ms — smaller (Windows resets a GPU busy ~2 s)
+      { const fs = Math.floor(pt.samples); if (fs > passN){ const per = (now - passT) / Math.max(1, fs - passN) / (tl * tl); passN = fs; passT = now;
+        if (fs >= 2){ const nt = per < 35 && tl > 2 ? tl - 1 : per > 260 && tl < 48 ? tl + 1 : tl; if (nt !== tl){ tl = nt; pt.tiles.set(tl, tl); } } } }
       if ((o.preview || o.noise > 0) && now - lastPv > pvEvery && pt.samples >= 4){ lastPv = now;
-        const n = pt.samples, h = readFloatRT(pr, pt.target, W, H), L = [];
+        const n = pt.samples, h = readFloatRT(pr, pt.target, W, H), L = []; good = { h, n };
         for (let y = 0; y < H; y += sub) for (let x = 0; x < W; x += sub) L.push(lumAt(h, (y * W + x) * 4));
         if (snap && n > snapN * 1.2){ let s2 = 0, c = 0; for (let i = 0; i < L.length; i++){ const a = L[i], b = snap[i], m = (a + b) / 2; if (m < 0.002) continue; const r = (a - b) / (m + 0.02); s2 += r * r; c++; }
           const nz = c ? Math.sqrt(s2 / c) * Math.sqrt(snapN / (n - snapN)) : null; out.noise = nz;
@@ -12932,21 +12943,19 @@ async function pathTrace(o, v, camR, W, H, extra, L, prog){
       }
       if (now - last > 200){ last = now; if (prog) prog(pt.samples, target, pr.domElement, out); await new Promise(r => setTimeout(r, 0)); }
     }
-    if (lost) throw new Error('видеокарта не справилась и сбросилась. Уменьшите размер картинки или число отскоков');
     if (RN_CANCEL && pt.samples < 1 && !RN_DISCARD) throw new Error('рендер остановлен раньше первого прохода — картинки ещё нет (первый запуск готовит видеокарту до 1,5 мин)');
-    out.samples = Math.max(1, Math.floor(pt.samples)); out.stopped = RN_CANCEL;
-    // raw linear HDR image (the average of all samples), read before the tracer is disposed
-    out.hdr = readFloatRT(pr, pt.target, W, H);
+    const gl2 = pr.getContext(), dead = () => lost || (gl2.isContextLost && gl2.isContextLost());
+    const lostErr = 'видеокарта сбросилась в самом начале — картинки ещё нет. Уменьшите размер картинки или число отскоков и запустите снова (браузер может потребовать перезапуска)';
+    const keepGood = () => { if (!good || good.n < 2) throw new Error(lostErr); out.hdr = good.h; out.samples = Math.floor(good.n); out.lostAt = Math.floor(pt.samples) || out.samples; }; // what was traced before the reset
+    if (dead()) keepGood();
+    else { out.samples = Math.max(1, Math.floor(pt.samples)); out.hdr = readFloatRT(pr, pt.target, W, H); } // raw linear HDR (the average of all samples)
+    out.stopped = RN_CANCEL;
     // a few broken (NaN / ∞ / negative) pixels from the tracer: harmless alone, but the denoiser spreads one of them over the whole frame (black picture)
     { const h = out.hdr; let bad = 0; for (let i = 0; i < h.length; i++){ const x = h[i]; if (!(x >= 0) || x === Infinity){ h[i] = (i & 3) === 3 ? 1 : 0; bad++; } } out.nan = bad; }
+    // a GPU reset may leave an empty (all black) target without a «context lost» event — then the last good picture
+    if (!out.lostAt){ let nz = 0; for (let i = 0; i < out.hdr.length; i += 16) if (out.hdr[i] > 0 || out.hdr[i + 1] > 0) { nz++; if (nz > 20) break; } if (dead() || (nz <= 20 && !o.envBlack)) keepGood(); }
     if (o.ffly !== false) out.ffly = fireflyFix(out.hdr, W, H, 4);
-    // a GPU reset may leave an empty (all black) target without a «context lost» event
-    { const gl2 = pr.getContext(); if (gl2.isContextLost && gl2.isContextLost()) lost = true; let nz = 0; for (let i = 0; i < out.hdr.length; i += 16) if (out.hdr[i] > 0 || out.hdr[i + 1] > 0) { nz++; if (nz > 20) break; } if (lost || (nz <= 20 && !o.envBlack)) throw new Error('видеокарта сбросилась во время расчёта — кадр пустой. Уменьшите число отскоков света или размер картинки и запустите снова (браузер может потребовать перезапуска)'); }
-    // auxiliary passes for the denoiser: albedo (surface colour) and normals, rendered with the same camera
-    if (RN_DISCARD) return out; // «Отмена»: the picture is thrown away — no auxiliary passes
-    if (o.denoise){ out.alb = aovPass(pr, ptScene, pc, W, H, 'albedo'); out.nrm = aovPass(pr, ptScene, pc, W, H, 'normal'); }
-    if (!o.envBlack){ try { out.mask = aovPass(pr, ptScene, pc, W, H, 'mask'); out.zd = aovPass(pr, ptScene, pc, W, H, 'depth'); } catch (e){ console.warn('masks', e); } } // render elements for Photoshop
-    if (prog) prog(pt.samples, target, pr.domElement, out);
+    if (prog && !dead()) prog(pt.samples, target, pr.domElement, out);
   } finally {
     RN_BUSY = false; try { pt.dispose(); } catch (e){}
     for (const x of own) if (x.dispose) x.dispose();
@@ -13048,7 +13057,7 @@ async function renderPhoto(o, prog){
       if (pm) pm.dispose();
       let den = null, dnErr = null;
       if (o.denoise && r.hdr && r.alb){ if (prog) prog(-1, 0, null); try { den = await denoiseHDR(r.hdr, r.alb, r.nrm, W, H); } catch (e){ dnErr = (e && e.message) || String(e); console.warn('denoise', e); } }
-      return { R:{ hdr:r.hdr, den, W, H, base, ldr:false, wb:Lx ? Lx.wb : 6500, clay:!!o.clay, alb:r.alb, nrm:r.nrm, mask:r.mask, zd:r.zd, ffly:r.ffly || 0, nan:r.nan || 0, lamps:lampSpecs(o).length, noise:r.noise, byNoise:!!r.stopByNoise }, W, H, scaled:k < 1, samples:r.samples, dnErr };
+      return { R:{ hdr:r.hdr, den, W, H, base, ldr:false, wb:Lx ? Lx.wb : 6500, clay:!!o.clay, alb:r.alb, nrm:r.nrm, mask:r.mask, zd:r.zd, ffly:r.ffly || 0, nan:r.nan || 0, lamps:lampSpecs(o).length, noise:r.noise, byNoise:!!r.stopByNoise, lostAt:r.lostAt || 0, sw:!!r.sw }, W, H, scaled:k < 1, samples:r.samples, dnErr };
     }
     for (const x of lampLights(o, null)){ scene.add(x); extra.push({ dispose:() => { scene.remove(x); if (x.isMesh){ x.geometry.dispose(); x.material.dispose(); } else if (x.dispose) x.dispose(); } }); }
     const useAO = o.ao && A.EffectComposer && A.GTAOPass && !CLIP.length;
@@ -13362,7 +13371,7 @@ $('#rnCmp').onclick = () => { if (VFB.hist.length < 2) return; VFB.cmp = VFB.cmp
 // statistics (as Corona «Stats»)
 function vfbStatUI(){
   const box = $('#rnStat'), s = VFB.info; if (!s){ box.innerHTML = '<p class="libnote">Статистика появится после рендера.</p>'; return; }
-  const rows = [['Вид', s.view], ['Размер', s.size], ['Движок', s.engine], ['Проходов', s.samples + (s.target ? ' из ' + s.target : '')], ['Время', s.sec + ' с'], ['Скорость', s.sec ? (s.samples / s.sec).toFixed(1) + ' прох./с' : '—'], ['Отскоков света', s.bounces], ['Видеокарта', gpuName() + (gpuWeak(gpuName()) ? ' (встроенная — медленно)' : '')], ['Шумоподавление', s.dn], ['Шум в конце', s.noiseEnd ?? '—'], ['Убрано «светлячков»', s.ffly ?? '—'], ['Исправлено битых пикселей', s.nan ?? 0], ['LightMix', s.mix ? 'да (2 картинки)' : 'нет'], ['Светильников', s.lamps ?? 0], ['Фото-материалов', s.pbr ?? 0], ['Вертикали', s.vert ? `выпрямлены (наклон был ${s.vert}°)` : 'как в камере'], ['Предел времени', s.tmax ? s.tmax + ' мин' : 'нет']];
+  const rows = [['Вид', s.view], ['Размер', s.size], ['Движок', s.engine], ['Проходов', s.samples + (s.target ? ' из ' + s.target : '')], ['Время', s.sec + ' с'], ['Скорость', s.sec ? (s.samples / s.sec).toFixed(1) + ' прох./с' : '—'], ['Отскоков света', s.bounces], ['Видеокарта', gpuName() + (gpuWeak(gpuName()) ? ' (встроенная — медленно)' : '')], ['Шумоподавление', s.dn], ['Шум в конце', s.noiseEnd ?? '—'], ['Сбой видеокарты', s.lost || 'нет'], ['Убрано «светлячков»', s.ffly ?? '—'], ['Исправлено битых пикселей', s.nan ?? 0], ['LightMix', s.mix ? 'да (2 картинки)' : 'нет'], ['Светильников', s.lamps ?? 0], ['Фото-материалов', s.pbr ?? 0], ['Вертикали', s.vert ? `выпрямлены (наклон был ${s.vert}°)` : 'как в камере'], ['Предел времени', s.tmax ? s.tmax + ' мин' : 'нет']];
   box.innerHTML = `<div class="vstat">${rows.map(([a, b]) => `<b>${esc(a)}</b><span>${esc(String(b))}</span>`).join('')}</div>`;
 }
 const hmsTxt = s => s < 60 ? s + ' с' : Math.floor(s / 60) + ' мин ' + (s % 60) + ' с';
@@ -13486,7 +13495,10 @@ $('#rnLk').oninput = lkLabel;
 function gpuName(){ try { const gl = renderer.getContext(), e = gl.getExtension('WEBGL_debug_renderer_info'); const s = e ? gl.getParameter(e.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER); return String(s).replace(/^ANGLE \(/, '').replace(/\s*\(0x[0-9a-f]+\)/i, '').replace(/ Direct3D.*$/, '').replace(/,?\s*D3D\d+\)?$/, '').replace(/^(NVIDIA|AMD|Intel),\s*/, ''); } catch (e){ return ''; } }
 const gpuWeak = n => /Radeon\(TM\) Graphics|Radeon Vega|Vega \d+ Graphics|Intel\(R\) (?:UHD|HD|Iris)|Intel.*Graphics|Microsoft Basic|SwiftShader/i.test(n);
 function rnGpuHint(){ const el = $('#rnGpu'); if (!el) return; const n = gpuName(); if (!n){ el.hidden = true; return; }
-  el.hidden = false; el.innerHTML = gpuWeak(n) ? `⚠ Рендер считает <b>встроенная</b> видеокарта: ${esc(n)}. Если в компьютере есть NVIDIA или AMD Radeon RX — дайте браузеру мощную: <b>Параметры Windows → Система → Дисплей → Графика</b> → Google Chrome / Microsoft Edge (и Claude) → «Параметры» → <b>«Высокая производительность»</b>, затем перезапустите браузер. Рендер станет в 3–8 раз быстрее.` : `Видеокарта: ${esc(n)}`; }
+  el.hidden = false;
+  // no video card at all: the browser draws with the processor (hardware acceleration off or a broken driver) — the render is 20–100 times slower
+  if (/Microsoft Basic|SwiftShader|llvmpipe|Software/i.test(n)){ el.innerHTML = `⚠ <b>Браузер не использует видеокарту</b> (${esc(n)}) — всё считает процессор, рендер в десятки раз медленнее. Включите: <b>Настройки браузера → Система → «Использовать графическое ускорение»</b> и перезапустите браузер. Если уже включено — обновите драйвер видеокарты (NVIDIA GeForce Experience или сайт nvidia.ru) и перезагрузите компьютер. Проверка: адрес <b>chrome://gpu</b> (в Edge — edge://gpu), строка WebGL должна быть «Hardware accelerated».`; return; }
+  el.innerHTML = gpuWeak(n) ? `⚠ Рендер считает <b>встроенная</b> видеокарта: ${esc(n)}. Если в компьютере есть NVIDIA или AMD Radeon RX — дайте браузеру мощную: <b>Параметры Windows → Система → Дисплей → Графика</b> → Google Chrome / Microsoft Edge (и Claude) → «Параметры» → <b>«Высокая производительность»</b>, затем перезапустите браузер. Рендер станет в 3–8 раз быстрее.` : `Видеокарта: ${esc(n)}`; }
 function rnHint(){ const el = $('#rnHint'); if (!el) return; const v = views.find(x => x.id === $('#rnView').value), h = camHints(v); el.innerHTML = h; el.hidden = !h; }
 $('#rnView').addEventListener('change', rnHint);
 // Kot Render levels: every quality setting at once
@@ -13549,6 +13561,7 @@ $('#rnGo').onclick = async () => {
     const res = await renderPhoto(o, prog);
     vfbProg(null);
     if (RN_DISCARD){ live.hidden = true; state.hidden = false; state.textContent = 'Рендер отменён — картинка не сохранена.'; $('#vfbInfo').textContent = 'рендер отменён'; return; }
+    if (res && res.R && res.R.lostAt) toast(`Видеокарта сбросилась на проходе ${res.R.lostAt}, но посчитанное сохранено: ${res.samples} проходов, шумоподавление сделано.` + (res.R.sw ? ' Браузер рисует без видеокарты — включите «Использовать графическое ускорение» в настройках браузера.' : ' Уменьшите размер или отскоки, чтобы считать дольше.'), 9000);
     // the frame buffer: corrections are applied to the stored linear image and can be changed without rendering again
     RN_RES = res.R;
     const saved = (() => { try { return JSON.parse(lsGet('kot.post') || 'null'); } catch(e){ return null; } })();
@@ -13560,7 +13573,7 @@ $('#rnGo').onclick = async () => {
     RN_LAST = { name:vName };
     const sec = Math.round((performance.now() - t0) / 1000);
     VFB.info = { view:vName, size:`${res.W} × ${res.H}`, engine:o.engine === 'pt' ? 'трассировка лучей' : 'быстрый (растровый)', samples:res.samples || 1, target:o.engine === 'pt' ? (o.samples || 256) * (res.R.mix ? 2 : 1) : 0, sec, bounces:o.engine === 'pt' ? o.bounces : '—',
-      dn:res.R.den || (res.R.mix && res.R.mix.sky.den) ? 'Intel OIDN' : res.dnErr ? 'нет: ' + res.dnErr : 'нет', ffly:res.R.ffly, nan:res.R.nan, noiseEnd:res.R.noise != null ? (res.R.noise * 100).toFixed(1) + ' %' + (res.R.byNoise ? ' (остановлено по пределу шума)' : '') : '—', mix:!!res.R.mix, lamps:res.R.lamps, pbr:PBR_TEX.size, vert:o._vertDeg || 0, tmax:o.tmax };
+      dn:res.R.den || (res.R.mix && res.R.mix.sky.den) ? 'Intel OIDN' : res.dnErr ? 'нет: ' + res.dnErr : 'нет', ffly:res.R.ffly, nan:res.R.nan, noiseEnd:res.R.noise != null ? (res.R.noise * 100).toFixed(1) + ' %' + (res.R.byNoise ? ' (остановлено по пределу шума)' : '') : '—', mix:!!res.R.mix, lamps:res.R.lamps, pbr:PBR_TEX.size, vert:o._vertDeg || 0, tmax:o.tmax, lost:res.R.lostAt ? 'на проходе ' + res.R.lostAt + ' — сохранено ' + res.samples + ' проходов' : 'нет' };
     vfbHistPush(RN_RES, { view:vName, samples:VFB.info.samples, sec, size:VFB.info.size });
     $('#vfbInfo').textContent = `${res.W}×${res.H} px · Вид: ${vName} · ${VFB.info.samples} проходов · ${hmsTxt(sec)}`;
     if (!$('#rnStat').hidden) vfbStatUI(); if (!$('#rnHist').hidden) vfbHistUI();
@@ -15312,7 +15325,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-2356');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261025-0011');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -18105,7 +18118,7 @@ function execMore(a, ctx){
       if (a.save === 'png'){ paintSavePng(); out.push('картинка сохраняется'); } if (a.save === 'sheet'){ paintToSheet(a.sheet); out.push('на лист'); }
       if (a.cut) out.push(paintCutPhoto(a.cut));
       return 'Рисование' + (out.length ? ': ' + out.join(', ') : ': поверните вид и нажмите «Фото»'); }
-    case 'gpu': { const n = gpuName(); return n ? (gpuWeak(n) ? `Рендер считает встроенная видеокарта: ${n}. Если есть NVIDIA — Параметры Windows → Система → Дисплей → Графика → браузер → «Высокая производительность», и перезапустите браузер.` : `Рендер считает видеокарта: ${n}`) : 'Не удалось узнать видеокарту'; }
+    case 'gpu': { const n = gpuName(); if (/Microsoft Basic|SwiftShader|llvmpipe|Software/i.test(n)) return `Браузер не использует видеокарту (${n}) — считает процессор. Включите в настройках браузера «Использовать графическое ускорение» (Система) и перезапустите браузер; если не помогло — обновите драйвер видеокарты.`; return n ? (gpuWeak(n) ? `Рендер считает встроенная видеокарта: ${n}. Если есть NVIDIA — Параметры Windows → Система → Дисплей → Графика → браузер → «Высокая производительность», и перезапустите браузер.` : `Рендер считает видеокарта: ${n}`) : 'Не удалось узнать видеокарту'; }
     case 'piccut': { // the photo of the sheet: {mode:'bg'|'sam'|'lasso'} — remove the background / cut one object out
       const { v, pic } = selSheetPic(); if (!v) throw new Error('Откройте лист с фото'); if (!pic) throw new Error('Выберите фото на листе (щелчок по нему)');
       const m = ['bg', 'sam', 'lasso'].includes(a.mode) ? a.mode : 'sam'; cutSheetPic(v, pic, m);
