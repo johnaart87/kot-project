@@ -5,7 +5,7 @@
 //   kotapp-v-<ver>   — the program page (and the libraries of that update) of a version
 //   kotapp-shell     — icons and manifest of the working program
 //   kot-lib-1        — libraries from CDNs (shared with the development copy; addresses carry exact versions)
-const BUNDLED = '2026.10.24-2246';   // the version this file came with (the first installation)
+const BUNDLED = '2026.10.25-0144';   // the version this file came with (the first installation)
 const LIBS = [
   "https://cdn.jsdelivr.net/gh/pissang/oidn-web@0.5.0/weights/rt_hdr_alb_nrm.tza",
   "https://cdn.jsdelivr.net/gh/pissang/oidn-web@0.5.0/weights/rt_hdr_alb_nrm_small.tza",
@@ -193,7 +193,14 @@ const LIBS = [
   "https://fonts.googleapis.com/css2?family=Marck+Script&display=swap",
   "https://fonts.gstatic.com/s/marckscript/v22/nwpTtK2oNgBA3Or78gapdwuyzCg_WMM.woff2",
   "https://fonts.gstatic.com/s/marckscript/v22/nwpTtK2oNgBA3Or78gapdwuyxig_WMM.woff2",
-  "https://fonts.gstatic.com/s/marckscript/v22/nwpTtK2oNgBA3Or78gapdwuyyCg_.woff2"
+  "https://fonts.gstatic.com/s/marckscript/v22/nwpTtK2oNgBA3Or78gapdwuyyCg_.woff2",
+  "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs",
+  "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs",
+  "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.esm.min.js",
+  "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js",
+  "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1/tesseract-core-simd-lstm.wasm.js",
+  "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1/tesseract-core-lstm.wasm.js",
+  "https://cdn.jsdelivr.net/npm/@tesseract.js-data/rus@1.0.0/4.0.0_best_int/rus.traineddata.gz"
 ];           // the libraries of that version, cached at installation so it works offline at once
 const LOCAL = {};         // Windows installation: the same libraries lie next to the program (./lib/<file>) — taken from there, no internet
 const META = 'kotapp-meta', KEY = '/__kotapp/current', PRE = 'kotapp-v-', SHELL_C = 'kotapp-shell', LIB = 'kot-lib-1';

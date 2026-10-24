@@ -2,7 +2,7 @@
 // Two caches: VERSION — the app itself (replaced with every new build); LIB — libraries, fonts and big data files from
 // other sites (three.js, path tracer, denoiser, speech model runtime…). Their addresses carry exact versions, so LIB is kept
 // between builds: the program keeps working without the internet after an update.
-const VERSION = 'kot-20261025-0011';
+const VERSION = 'kot-20261025-0144';
 const LIB = 'kot-lib-1';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 const CDN = [
@@ -12,7 +12,13 @@ const CDN = [
   'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/LineSegmentsGeometry.js',
   'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/LineMaterial.js',
   'https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap',
-  'https://fonts.googleapis.com/css2?family=Marck+Script&display=swap'
+  'https://fonts.googleapis.com/css2?family=Marck+Script&display=swap',
+  // «Библиотека норм»: reading PDF without the internet
+  'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs',
+  'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs',
+  // reading text on photos and scans (OCR)
+  'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.esm.min.js',
+  'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js'
 ];
 const CACHEABLE = /^https:\/\/(cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;
 
