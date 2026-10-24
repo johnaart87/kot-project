@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1f6fd6">
+<meta name="theme-color" content="#3a3d41">
 <meta name="description" content="Kot project: черчение стен, дверей и окон, многослойные стены, размеры, 3D-модель и аксонометрия.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -76,7 +76,8 @@ select,input[type=text]{font-family:var(--font-ui);font-size:13px}
 /* ribbon */
 .rb{background:var(--chrome);border-bottom:1px solid var(--line);padding-top:max(0px,env(safe-area-inset-top,0px));min-width:0}
 .rb-top{display:flex;align-items:stretch;gap:2px;padding:0 max(10px,env(safe-area-inset-right,0px)) 0 max(10px,env(safe-area-inset-left,0px));min-height:34px;flex-wrap:wrap}
-.filebtn{border:0;background:var(--accent);color:var(--accent-ink);padding:0 16px;font-weight:600;cursor:pointer;border-radius:0 0 4px 4px;margin-right:6px;min-height:30px}
+.filebtn:hover,.filebtn[aria-expanded="true"]{background:#000!important}
+.filebtn{border:0;background:#111;color:#fff;padding:0 16px;font-weight:600;cursor:pointer;border-radius:0 0 4px 4px;margin-right:6px;min-height:30px}
 .qat{display:flex;align-items:center;gap:1px;margin-right:8px}
 .qat button{border:0;background:transparent;padding:5px 6px;border-radius:4px;cursor:pointer;display:flex}
 .qat button:hover{background:var(--accent-soft)}
@@ -114,6 +115,12 @@ svg.mi{width:16px;height:16px;flex:none}
 .menu-list{position:absolute;z-index:30;min-width:280px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px;display:flex;flex-direction:column;box-shadow:0 10px 30px var(--shade)}
 .menu-list button{all:unset;display:flex;justify-content:space-between;gap:16px;padding:8px 10px;border-radius:5px;cursor:pointer;color:var(--ink)}
 .menu-list button:hover,.menu-list button:focus-visible{background:var(--accent-soft)}
+.menu-list .fsub{position:relative;display:flex;flex-direction:column}
+.menu-list .fsubList{display:none;position:absolute;left:100%;top:-5px;margin-left:2px;min-width:230px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px;flex-direction:column;box-shadow:0 10px 30px var(--shade)}
+.menu-list .fsub:hover>.fsubList,.menu-list .fsub.open>.fsubList{display:flex}
+.menu-list .fsub:hover>.fsubBtn,.menu-list .fsub.open>.fsubBtn{background:var(--accent-soft)}
+.menu-list .fsubList.left{left:auto;right:100%;margin:0 2px 0 0}
+@media (max-width:640px){.menu-list .fsubList{position:static;margin:0 0 0 12px;box-shadow:none;border:0;border-left:2px solid var(--line);border-radius:0;min-width:0}.menu-list .fsub:hover:not(.open)>.fsubList{display:none}}
 .menu-list hr{border:0;border-top:1px solid var(--line);margin:4px 0;width:100%}
 .menu-list .mh{padding:6px 10px 4px;font-size:12px;color:var(--muted)}
 .menu-list button.on{background:var(--accent-soft)}
@@ -393,6 +400,8 @@ main{display:grid;grid-template-columns:var(--lw,270px) minmax(0,1fr) var(--rw,3
 .tree .node{justify-content:flex-start}.tree .node .add{margin-left:auto}
 .tree li.it{display:flex;align-items:center}
 .tree li.it>button:first-child{flex:1;min-width:0}
+/* a sheet that opens to its views (Revit) */
+.tree .node.shn{padding:0}.tree .node.shn>button[data-tree^="o:"]{flex:1;min-width:0}.tree .node.shn>.add{margin-left:0}
 .tree .x{all:unset;cursor:pointer;color:var(--muted);padding:2px 6px;border-radius:3px;font-size:12px}
 .tree .x:hover{color:var(--bad);background:var(--accent-soft)}
 .tree input{font:inherit;width:100%;padding:2px 4px;border:1px solid var(--accent);border-radius:3px;background:var(--sheet);color:var(--ink)}
@@ -1155,10 +1164,16 @@ details.more summary::-webkit-details-marker{display:none}
   <button data-act="ydLogin">Яндекс Диск: вход и выход…</button>
   <button data-act="dup">Сохранить копию проекта</button>
   <hr>
-  <button data-act="png">Картинка вида (PNG)</button>
-  <button data-act="ifc" title="Стены с проёмами, двери, окна, перекрытия, крыши, колонны, лестницы, мебель, помещения и уровни. В Revit: Открыть → IFC или Вставка → Связать IFC">Экспорт для Revit (IFC)…</button>
-  <button data-act="obj" title="Вся 3D-модель с материалами и текстурами (ZIP: model.obj, model.mtl, текстуры)">Экспорт для 3ds Max (OBJ)…</button>
-  <button data-act="glb" title="Вся 3D-модель одним файлом glTF: 3ds Max 2023+, Blender, просмотрщики">Экспорт 3D (GLB)…</button>
+  <div class="fsub" id="fileExp">
+    <button type="button" class="fsubBtn" id="fileExpBtn" aria-haspopup="menu" aria-expanded="false">Экспорт <span class="k">▸</span></button>
+    <div class="fsubList" role="menu">
+      <button data-act="png" title="Открытый вид картинкой">Картинка вида (PNG)</button>
+      <button data-act="dxf" title="Открытый вид (план, разрез, развёртка, фасад, аксонометрия) — 2D-чертёж в мм: линии по слоям категорий, размеры, тексты, марки. AutoCAD открывает DXF и сохраняет его в DWG («Сохранить как»)">AutoCAD (DXF → DWG)…</button>
+      <button data-act="ifc" title="Стены с проёмами, двери, окна, перекрытия, крыши, колонны, лестницы, мебель, помещения и уровни. В Revit: Открыть → IFC или Вставка → Связать IFC">Revit (IFC)…</button>
+      <button data-act="obj" title="Вся 3D-модель с материалами и текстурами (ZIP: model.obj, model.mtl, текстуры)">3ds Max (OBJ)…</button>
+      <button data-act="glb" title="Вся 3D-модель одним файлом glTF: 3ds Max 2023+, Blender, просмотрщики">3D-модель (GLB)…</button>
+    </div>
+  </div>
   <button data-act="print">Печать… <span class="k">Ctrl+P</span></button>
   <button data-act="offline">Скачать всё для работы без интернета…</button>
   <button data-act="install">Установить приложение…</button>
@@ -1244,6 +1259,7 @@ details.more summary::-webkit-details-marker{display:none}
     <div class="fe-top">
       <label>Имя <input id="feName" type="text" maxlength="80"></label>
       <label>Категория <select id="feCat"></select></label>
+      <label title="Подраздел в диспетчере (Стулья, Столы…); пусто — определится сам по имени">Подкатегория <input id="feSub" type="text" maxlength="60" list="feSubL" placeholder="сама"><datalist id="feSubL"></datalist></label>
       <label>Плоскость эскиза <select id="fePlane"></select></label>
       <label>Отступ плоскости, мм <input id="feOff" type="number" step="10" value="0" style="width:84px"></label>
       <label>Шаг сетки <select id="feSnap"><option value="1">1 мм</option><option value="5">5 мм</option><option value="10" selected>10 мм</option><option value="50">50 мм</option><option value="100">100 мм</option></select></label>
@@ -1780,9 +1796,11 @@ const linePx = mm => RENDER ? Math.max(1, mm * RENDER.pxmm) : (THIN.on ? 1 : Mat
 // fat lines (any width) with the dash pattern laid out on paper: pairs of points in, a LineSegments2 out
 const FATM = new Map();
 function fatMat(color, px){
-  const key = color + '|' + px.toFixed(2) + '|' + (RENDER ? 'r' + RENDER.w + 'x' + RENDER.h : 's');
+  // «Вес линий: выкл» (Revit «Тонкие линии»): every line is thin and soft on the screen — a little under a pixel, smoothed and a lighter tone
+  const soft = THIN.on && !RENDER, c = soft ? '#' + new THREE.Color(color).lerp(new THREE.Color('#ffffff'), 0.28).getHexString() : color, w = soft ? 0.8 * Math.min(devicePixelRatio, 2) : px;
+  const key = c + '|' + w.toFixed(2) + '|' + (RENDER ? 'r' + RENDER.w + 'x' + RENDER.h : 's') + (soft ? '|soft' : '');
   let m = FATM.get(key);
-  if (!m){ m = new LineMaterial({ color, linewidth:px, worldUnits:false, alphaToCoverage:false }); FATM.set(key, m); }
+  if (!m){ m = new LineMaterial({ color:c, linewidth:w, worldUnits:false, alphaToCoverage:soft, ...(soft ? { transparent:true, opacity:0.9 } : {}) }); FATM.set(key, m); }
   if (RENDER) m.resolution.set(RENDER.w, RENDER.h); else m.resolution.set(cv.width || 1, cv.height || 1);
   return m;
 }
@@ -1991,7 +2009,7 @@ function makeMaterials(){
   M.selFlat = new THREE.MeshBasicMaterial({ color:C.sel, ...po });
   M.prev = new THREE.MeshBasicMaterial({ color:C.temp, transparent:true, opacity:0.4, depthWrite:false });
   M.prevBad = new THREE.MeshBasicMaterial({ color:C.bad, transparent:true, opacity:0.45, depthWrite:false });
-  M.edge = new THREE.LineBasicMaterial({ color:C.ink });
+  M.edge = new THREE.LineBasicMaterial({ color:THIN.on ? '#' + new THREE.Color(C.ink).lerp(new THREE.Color('#ffffff'), 0.28).getHexString() : C.ink }); // «Вес линий: выкл» — softer
   M.edgeSel = new THREE.LineBasicMaterial({ color:C.sel });
   M.edgePrev = new THREE.LineBasicMaterial({ color:C.temp });
   M.edgeBad = new THREE.LineBasicMaterial({ color:C.bad });
@@ -2456,6 +2474,31 @@ function clipHalf(poly, keep, X){
   return out;
 }
 const clipX = (poly, x0, x1) => clipHalf(clipHalf(poly, q => q.x >= x0 - 1e-9, x0), q => q.x <= x1 + 1e-9, x1);
+/* a prism for an arc wall (built straight, bent afterwards): the top and bottom are triangulated in short slices along x
+   (a usual triangulation makes long fans from one corner — bent, they become chords that fill the segment of the arc),
+   the sides come from the ring split every `step`; every face is turned outwards by itself */
+function prismBand(poly, y0, y1, step){
+  if (poly.length < 3 || y1 - y0 < 1e-4) return null;
+  const xs = poly.map(p => p.x), xa = Math.min(...xs), xb = Math.max(...xs), n = Math.max(1, Math.ceil((xb - xa) / step)), pos = [];
+  const cx = poly.reduce((s, p) => s + p.x, 0) / poly.length, cz = poly.reduce((s, p) => s + p.z, 0) / poly.length;
+  const tri = (a, b, c, wantUp) => { // a, b, c: [x, y, z]; the normal must point up (+1) or down (−1)
+    const ux = b[0] - a[0], uz = b[2] - a[2], vx = c[0] - a[0], vz = c[2] - a[2], ny = uz * vx - ux * vz;
+    if (Math.abs(ny) < 1e-12) return; if (Math.sign(ny) === wantUp) pos.push(...a, ...b, ...c); else pos.push(...a, ...c, ...b); };
+  for (let i = 0; i < n; i++){
+    const s = clipX(poly, xa + (xb - xa) * i / n, xa + (xb - xa) * (i + 1) / n); if (s.length < 3) continue;
+    for (let k = 1; k + 1 < s.length; k++){ // a slice of a convex band is convex: a fan of short triangles
+      tri([s[0].x, y1, s[0].z], [s[k].x, y1, s[k].z], [s[k + 1].x, y1, s[k + 1].z], 1);
+      tri([s[0].x, y0, s[0].z], [s[k].x, y0, s[k].z], [s[k + 1].x, y0, s[k + 1].z], -1); }
+  }
+  // the sides: the outline split into short pieces, each quad facing away from the middle of the polygon
+  const ring = []; for (let i = 0; i < poly.length; i++){ const a = poly[i], b = poly[(i + 1) % poly.length], m = Math.max(1, Math.ceil(Math.abs(b.x - a.x) / step)); for (let k = 0; k < m; k++) ring.push({ x:a.x + (b.x - a.x) * k / m, z:a.z + (b.z - a.z) * k / m }); }
+  for (let i = 0; i < ring.length; i++){ const a = ring[i], b = ring[(i + 1) % ring.length], ex = b.x - a.x, ez = b.z - a.z; if (Math.hypot(ex, ez) < 1e-9) continue;
+    const nx = ez, nz = -ex, out = nx * ((a.x + b.x) / 2 - cx) + nz * ((a.z + b.z) / 2 - cz) > 0;
+    const A0 = [a.x, y0, a.z], B0 = [b.x, y0, b.z], A1 = [a.x, y1, a.z], B1 = [b.x, y1, b.z];
+    // the quad A0 B0 B1 has the normal (−ez, 0, ex) — the opposite of (nx, nz): so an outward edge takes the other winding
+    if (out) pos.push(...A0, ...B1, ...B0, ...A0, ...A1, ...B1); else pos.push(...A0, ...B0, ...B1, ...A0, ...B1, ...A1); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals(); return g;
+}
 function prism(poly, y0, y1, holes){
   if (poly.length < 3 || y1 - y0 < 1e-4) return null;
   const s = new THREE.Shape(poly.map(p => new THREE.Vector2(p.x, p.z)));
@@ -2527,7 +2570,7 @@ function buildWall(w, prevMat, prevEdge){
     const poly = [{ x:cutX(c0, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s0), z:ly.s0 }, { x:cutX(c1, ly.s1), z:ly.s1 }, { x:cutX(c0, ly.s1), z:ly.s1 }];
     if (poly[1].x - poly[0].x < 1e-4 || poly[2].x - poly[3].x < 1e-4) continue;
     const psel = pt && isSel(pt.id), mat = prevMat || (s || psel ? (plan || S.style === 'lines' ? M.selFlat : M.selShade) : phMat || layerMat(pt ? pt.m || ly.m : ly.m));
-    const add = (pp, y0, y1) => { const geo = prism(subPoly(pp), y0, y1); if (!geo) return;
+    const add = (pp, y0, y1) => { const geo = A ? prismBand(pp, y0, y1, stepX) : prism(subPoly(pp), y0, y1); if (!geo) return;
       if (A){ const pa = geo.attributes.position; for (let i = 0; i < pa.count; i++){ const q = bendP(pa.getX(i), pa.getY(i), pa.getZ(i)); pa.setXYZ(i, q.x, q.y, q.z); } geo.deleteAttribute('normal'); geo.computeVertexNormals(); geo.computeBoundingSphere(); } const m = new THREE.Mesh(geo, mat); if (w.id) m.userData.id = pt ? pt.id : w.id; m.castShadow = m.receiveShadow = !plan && S.style !== 'lines' && !mat.transparent; g.add(m); };
     const xmin = Math.min(poly[0].x, poly[3].x) - 1, xmax = Math.max(poly[1].x, poly[2].x) + 1;
     // piers between openings (full height), and the parts below and above each opening
@@ -2713,6 +2756,7 @@ function casings(g, o, T, oe, force, dm){
 // how many sashes an ordinary window has: it.sash (1–3) or by its width (up to 1,25 m — one, up to 2,1 m — two, wider — three)
 const winSashes = (it, w) => it && it.sash >= 1 && it.sash <= 3 ? Math.round(it.sash) : w < 1.25 ? 1 : w < 2.1 ? 2 : 3;
 /* a door / window on the plan: hovering ANY part (the leaf, the swing, the opening) picks it, and its own lines are highlighted (userData.hl) */
+let DET_VIEW = null; // the level of detail of the view while its elements are built (a category may override it for its own elements)
 function planSymbol(g, o, t){
   const n0 = g.children.length; planSymbol0(g, o, t);
   for (let i = n0; i < g.children.length; i++){ const c = g.children[i]; if (c.isLine && !c.userData.id){ c.userData.id = o.o.id; c.userData.hl = 1; } }
@@ -2730,7 +2774,10 @@ function planSymbol0(g, o, t){
   // demolished on this stage (Revit «Снесено»): the opening is filled with the colour of demolition and outlined with dashes
   const demo = ost === 'demo' && !s;
   if (demo){ const y = 0.43, A = o.a, B = o.b, z = t / 2; g.add(lineOf([new V3(A, y, -z), new V3(B, y, -z), new V3(B, y, -z), new V3(B, y, z), new V3(B, y, z), new V3(A, y, z), new V3(A, y, z), new V3(A, y, -z)], M.demoEdge, true)); }
-  if (S.detail === 'fine' && !demo){ planSymbolFine(g, o, t, em, s, nw); return; }
+  // the level of detail of the door / window itself (its category override, else the view's) — not the one of its wall
+  // (the survey template draws walls «Низкий», the windows still follow the view's «Высокий»)
+  const det = ((ovOf(o.o) || {}).dl) || DET_VIEW || S.detail;
+  if (det === 'fine' && !demo){ planSymbolFine(g, o, t, em, s, nw); return; }
   if (o.o.type === 'window' && !o.door){
     g.add(part(new THREE.BoxGeometry(wd, 0.4, t), s ? M.selFlat : demo ? M.demoPlan : nw ? M.newPlan : M.glassFlat, em, o.o.id, o.pos, 0.2, 0));
     const y = 0.42;
@@ -2762,7 +2809,7 @@ function planSymbolFine(g, o, t, em, s, nw){
   g.add(part(new THREE.BoxGeometry(wd, 0.4, t), s ? M.selFlat : nw ? M.newPlan : M.pick, null, o.o.id, o.pos, 0.2, 0));
   let arc = null;
   // Revit «Высокий»: the profiles are filled (frame and bars — grey, the glass unit — a darker strip, the window board — light)
-  const Fi = (x0, z0, x1, z1, c) => { const dx = Math.abs(x1 - x0), dz = Math.abs(z1 - z0); if (dx < 1e-4 || dz < 1e-4) return; const m = new THREE.Mesh(new THREE.BoxGeometry(dx, 0.004, dz), fineFill(c)); m.position.set((x0 + x1) / 2, 0.415, (z0 + z1) / 2); m.userData.id = o.o.id; m.renderOrder = 3; g.add(m); };
+  const Fi = (x0, z0, x1, z1, c) => { const dx = Math.abs(x1 - x0), dz = Math.abs(z1 - z0); if (dx < 1e-4 || dz < 1e-4) return; const m = new THREE.Mesh(new THREE.BoxGeometry(dx, 0.004, dz), fineFill(c)); m.position.set((x0 + x1) / 2, 0.415, (z0 + z1) / 2); m.userData.id = o.o.id; m.userData.keepFill = true; m.renderOrder = 3; g.add(m); };
   if (o.o.type === 'window' && !o.door){
     const F = Math.min(0.07, t * 0.6), P = Math.min(0.06, wd / 6), Gu = Math.min(0.016, F * 0.22), n = o.inner ? 1 : winSashes(o.o, wd);
     const ea = o.inner === 'a' ? 0 : 0.05, eb = o.inner === 'b' ? 0 : 0.05;       // no overhang towards the door of a balcony block
@@ -2952,6 +2999,28 @@ function buildRoof(it){
    A form is sketched with lines on one of the coordinate planes of the family (mm, origin at the insertion point):
    XY — horizontal (plan), XZ — front, YZ — side. Instances are placed in the project and share the family definition. */
 const FAM_CATS = { furniture:'Мебель', casework:'Шкафы', equipment:'Оборудование', plumbing:'Сантехника', lighting:'Осветительные приборы', electrical:'Электроустановочные изделия', generic:'Обобщённые модели' };
+/* Подкатегории семейств (Revit: Мебель → Стулья, Столы, Кровати…): у каждой категории свой список [название, слова в имени/ключе].
+   Подкатегория семейства — своя `f.sub` (задана вручную), иначе группа библиотеки (`g`), иначе по словам имени, иначе «Прочее». */
+const FAM_SUBS = {
+  furniture:[['Диваны', /диван|софа|sofa|tommy|foo-?five|cosmo|flux/i], ['Кресла', /кресл|armchair/i], ['Стулья', /стул|табурет|chair/i], ['Журнальные столики', /столик|ctable/i], ['Столы', /стол|desk|table/i], ['Кровати', /кроват|bed/i], ['Пуфы и банкетки', /пуф|банкетк/i], ['Ковры', /ков[её]р|rug/i]],
+  casework:[['Шкафы', /шкаф|wardrobe|гардероб/i], ['Тумбы и комоды', /тумб|комод|night/i], ['Стеллажи и полки', /стеллаж|полк|shelf/i], ['Кухни', /кухн|kitchen/i]],
+  equipment:[['Отопление', /радиатор|конвектор|котёл|котел|radiator/i], ['Бытовая техника', /холодильн|плит|духов|стирал|посудомо|телевиз|микроволн/i], ['Вентиляция', /вентил|вытяж|кондиц/i]],
+  plumbing:[['Унитазы и биде', /унитаз|биде|инсталляц/i], ['Раковины и мойки', /раковин|умывальн|мойк/i], ['Ванны', /ванн(?!ая)/i], ['Душевые', /душ/i], ['Смесители', /смесит/i], ['Полотенцесушители', /полотенцесуш/i]],
+  lighting:[['Точечные', /точечн|spot/i], ['Подвесные', /подвес|люстр|pendant/i], ['Накладные', /накладн|downlight/i], ['Трековые', /трек|шинопров|track/i], ['Линейные', /линейн|ledline/i], ['Настенные', /бра|настенн|sconce/i], ['Напольные', /торшер|lamp/i]],
+  electrical:[['Выключатели', /выключат|switch/i], ['Розетки', /розет|socket/i]],
+  generic:[['Растения', /растен|кашпо|plant/i], ['Декор', /ваз|скульпт|декор|картин/i], ['Ограждения и поручни', /поруч|перил|огражд/i]]
+};
+const FAM_SUB_OTHER = 'Прочее';
+function famSub(f){
+  if (!f) return FAM_SUB_OTHER;
+  if (f.sub) return f.sub;
+  const lk = f.mesh && f.mesh.kind === 'gen' ? f.mesh.g : '', L = lk && typeof FURN_LIB !== 'undefined' ? FURN_LIB[lk] : null;
+  if (L && L.g) return L.g;
+  const s = (f.name || '') + ' ' + lk;
+  for (const [n, re] of FAM_SUBS[f.cat] || []) if (re.test(s)) return n;
+  return FAM_SUB_OTHER;
+}
+const famSubList = cat => [...new Set([...(FAM_SUBS[cat] || []).map(x => x[0]), ...fams.filter(f => f.cat === cat).map(famSub)])];
 const FAM_PLANES = { XY:'Горизонтальная (XY, план)', XZ:'Фронтальная (XZ, спереди)', YZ:'Боковая (YZ, сбоку)' };
 const FORM_KINDS = { extrude:'Выдавливание', revolve:'Вращение', sweep:'Сдвиг' };
 // plane basis in the world (metres): u, v in the plane, w its normal (u × v)
@@ -2994,7 +3063,7 @@ function sanitizeFams(arr){
     if (!f || typeof f.id !== 'string' || !Array.isArray(f.forms)) continue;
     const forms = f.forms.filter(fm => fm && FORM_KINDS[fm.kind]).map(fm => ({ kind:fm.kind, plane:FAM_PLANES[fm.plane] ? fm.plane : 'XY', off:N(fm.off) ? +fm.off : 0, m:MATS[fm.m] ? fm.m : 'generic',
       ...(fm.kind === 'extrude' ? { pts:P(fm.pts), a:N(fm.a) ? +fm.a : 0, b:N(fm.b) ? +fm.b : 300 } : fm.kind === 'revolve' ? { pts:P(fm.pts), axis:P(fm.axis).slice(0, 2), ang:N(fm.ang) ? clamp(+fm.ang, 1, 360) : 360 } : { path:P(fm.path), prof:P(fm.prof) }) }));
-    out.push({ id:f.id.slice(0, 40), name:String(f.name || 'Семейство').slice(0, 80), cat:FAM_CATS[f.cat] ? f.cat : 'generic', forms, ...(sanMesh(f.mesh) ? { mesh:sanMesh(f.mesh) } : {}) });
+    out.push({ id:f.id.slice(0, 40), name:String(f.name || 'Семейство').slice(0, 80), cat:FAM_CATS[f.cat] ? f.cat : 'generic', ...(typeof f.sub === 'string' && f.sub.trim() ? { sub:f.sub.trim().slice(0, 60) } : {}), forms, ...(sanMesh(f.mesh) ? { mesh:sanMesh(f.mesh) } : {}) });
   }
   return out;
 }
@@ -3744,6 +3813,7 @@ function applyOv(obj, o){
     const base = q.material; if (!base || Array.isArray(base) || base === M.pick) return;
     if (q.isMesh && !q.isLineSegments2){
       if (!meshOv || base.opacity === 0) return;
+      if (q.userData.keepFill) return; // the fills of a door / window (high detail) keep their own greys under the cut pattern of the wall
       const mp = plan && !q.userData.proj ? o.cp : o.sp;
       if (!patsOn(mp) && !o.half && !o.tr && !(!plan && patsOn(o.cp))) return;
       const key = 'm|' + base.uuid + '|' + JSON.stringify([patsOn(mp) ? mp : 0, o.half, o.tr, !plan && patsOn(o.cp) ? o.cp : 0]);
@@ -4021,7 +4091,7 @@ function rebuild(quiet){
   for (const it of items){
     if (!shown(it) || (S.render && visState(it) === 'demo')) continue;
     // Revit «Уровень детализации» of a category (view / template override) for this element only
-    const ov0 = ovOf(it), dk = S.detail; if (ov0 && ov0.dl) S.detail = ov0.dl;
+    const ov0 = ovOf(it), dk = S.detail; DET_VIEW = dk; if (ov0 && ov0.dl) S.detail = ov0.dl;
     let obj; try { const B = BUILDERS[it.type]; obj = B ? B(it) : null; } finally { S.detail = dk; }
     if (obj){ obj.position.y += baseY(it); applyOv(obj, ov0); { const pst = !S.render && it.id ? visState(it) : 'normal'; if (pst === 'new' || pst === 'temp' || ((pst === 'exist' || pst === 'demo') && phData().gfx[pst === 'exist' ? 'exist' : 'demo'].half)) applyOv(obj, phOv(pst)); const pm = pst !== 'normal' && phData().gfx[{ exist:'exist', demo:'demo', new:'nw', temp:'temp' }[pst]]?.m; if (pm && MATS[pm] && S.view !== 'plan' && S.style !== 'lines') obj.traverse(o => { if (o.isMesh && !o.isLineSegments2 && o.material && o.material !== M.pick) o.material = layerMat(pm); }); } if (S.reveal && anyHidden(it) && !isSel(it.id)) obj.traverse(o => { if (o.material) o.material = o.isMesh ? M.revealM : M.revealL; });
       // «Показать зависимости»: pinned (locked) elements in magenta
@@ -7344,14 +7414,16 @@ function trkHide(){ trkEl.hidden = true; trkSvg.style.display = 'none'; }
 function trkUpdate(px, py){
   if (S.view !== 'plan' || !D.cur || S.trkOff){ trkHide(); return; }
   const z = Math.round((lvElev(actLv()) || 0) * 1000), fmt = (x, d = 0) => x.toLocaleString('ru-RU', { minimumFractionDigits:d, maximumFractionDigits:d });
-  const IC = { r:'<svg viewBox="0 0 12 12"><path d="M2 10A8 8 0 0 1 10 2M2 10l5-5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', d:'<svg viewBox="0 0 12 12"><path d="M2 10L10 2M6 2h4v4M2 6v4h4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', a:'<svg viewBox="0 0 12 12"><path d="M10 2L2 6l8 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', z:'<svg viewBox="0 0 12 12"><path d="M3 1v10M1 3l2-2 2 2M1 9l2 2 2-2M7 10h4M7 7h4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>' };
+  const IC = { x:'<svg viewBox="0 0 12 12"><path d="M1 6h10M1 6l2-2M1 6l2 2M11 6l-2-2M11 6l-2 2" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', y:'<svg viewBox="0 0 12 12"><path d="M6 1v10M6 1L4 3M6 1l2 2M6 11l-2-2M6 11l2-2" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', r:'<svg viewBox="0 0 12 12"><path d="M2 10A8 8 0 0 1 10 2M2 10l5-5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', d:'<svg viewBox="0 0 12 12"><path d="M2 10L10 2M6 2h4v4M2 6v4h4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', a:'<svg viewBox="0 0 12 12"><path d="M10 2L2 6l8 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>', z:'<svg viewBox="0 0 12 12"><path d="M3 1v10M1 3l2-2 2 2M1 9l2 2 2-2M7 10h4M7 7h4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>' };
   let h = '', svg = '';
   const radOnly = !!(D.arcR && (PET ? PET.k === 'arc' : S.tool === 'wall' && D.arcB)); // bending an edge / the 3rd point of an arc: only the radius
   if (radOnly) h += `<div><i>${IC.r}</i><b>Радиус дуги</b><span>${fmt(Math.round(D.arcR * 1000))}</span></div>`;
   else if (D.start){
     const dx = D.cur.x - D.start.x, dz = D.cur.z - D.start.z, L = Math.hypot(dx, dz), ang = L > 1e-6 ? ((Math.atan2(-dz, dx) * 180 / Math.PI) + 360) % 360 : 0;
     if (D.arcR) h += `<div><i>${IC.r}</i><b>Радиус дуги</b><span>${fmt(Math.round(D.arcR * 1000))}</span></div>`;
-    h += `<div><i>${IC.d}</i><b>Расстояние</b><span>${fmt(Math.round(L * 1000))}</span></div><div><i>${IC.a}</i><b>Угол</b><span>${fmt(ang, 2)}°</span></div>`;
+    h += `<div><i>${IC.d}</i><b>Расстояние</b><span>${fmt(Math.round(L * 1000))}</span></div><div><i>${IC.a}</i><b>Угол</b><span>${fmt(ang, 2)}°</span></div>`
+      // ArchiCAD: the shift from the previous point along X (east +) and Y (north +)
+      + `<div><i>${IC.x}</i><b>Координата X</b><span>${fmt(Math.round(dx * 1000))}</span></div><div><i>${IC.y}</i><b>Координата Y</b><span>${fmt(Math.round(-dz * 1000))}</span></div>`;
     const a = toScreen(D.start.x, 0, D.start.z), b = toScreen(D.cur.x, 0, D.cur.z), R = Math.min(60, Math.max(24, Math.hypot(b.x - a.x, b.y - a.y) * 0.45));
     if (a.ok && L > 1e-6){
       const sa = (Math.atan2(-(b.y - a.y), b.x - a.x) + 2 * Math.PI) % (2 * Math.PI), ex = a.x + R * Math.cos(sa), ey = a.y - R * Math.sin(sa), big = sa > Math.PI ? 1 : 0, mid = sa / 2, lx = a.x + (R + 14) * Math.cos(mid), ly = a.y - (R + 14) * Math.sin(mid);
@@ -7871,7 +7943,7 @@ function toggleGrids(){
 }
 function toggleThin(){
   THIN.on = !THIN.on; try { localStorage.setItem('kot-thin', THIN.on ? '1' : '0'); } catch (e){}
-  rebuild(); renderVbar(); toast(THIN.on ? 'Вес линий выключен: все линии тонкие' : 'Вес линий включён: толщина линий по их весу');
+  makeMaterials(); rebuild(); renderVbar(); toast(THIN.on ? 'Вес линий выключен: все линии тонкие' : 'Вес линий включён: толщина линий по их весу');
 }
 function updateScale(){
   if (S.view !== 'plan' && S.view !== 'sect'){ $('#scale').textContent = S.view === 'axo' ? 'Аксонометрия' : 'Перспектива'; return; }
@@ -8269,15 +8341,19 @@ function handleSpecs(){
   // Revit: a selected wall has a blue dot at each end — drag it to lengthen, shorten or turn the wall; joined walls follow
   const w1 = sel.size === 1 ? byId(selId) : null;
   if (w1 && w1.type === 'wall' && !w1.pin && shown(w1) && (mode === 'plan' || mode === 'd3' || mode === 'axo') && !drag){
+    // the dot stands on the wall's location line (Revit «Линия привязки»: on a face, the axis, the core) — not always on the axis
+    const off = locOffsetOf(w1), locPt = e => { const f = wallEndFrame(w1, e), P = new V3(w1['x' + (e ? 2 : 1)], 0, w1['z' + (e ? 2 : 1)]); return P.addScaledVector(f.nrm, off); };
     for (const end of [0, 1]){
-      const k = end ? 2 : 1, ko = end ? 1 : 2;
-      out.push({ key:'we' + end, pos:new V3(w1['x' + k], 0, w1['z' + k]), ground:true, model:true, tgt:w1, from:new V3(w1['x' + ko], 0, w1['z' + ko]),
+      const k = end ? 2 : 1, ko = end ? 1 : 2, oLoc = locPt(1 - end);
+      out.push({ key:'we' + end, pos:locPt(end), ground:true, model:true, tgt:w1, from:oLoc,
         onStart:() => {
           const x = w1['x' + k], z = w1['z' + k];
           const mates = w1.dj && w1.dj[end] ? [] : items.filter(o => o.type === 'wall' && o !== w1).flatMap(o => [1, 2].filter(e => !(o.dj && o.dj[e - 1]) && Math.hypot(o['x' + e] - x, o['z' + e] - z) < 2e-3).map(e => ({ o, e })));
           return { mates, skip:new Set([w1.id, ...mates.map(m => m.o.id)]) };
         },
-        apply:(s, p, ctx) => {
+        apply:(s, p0, ctx) => {
+          // p0 — the new point of the location line: the axis end is beside it, by the offset of the location line across the new direction
+          let p = p0; if (Math.abs(off) > 1e-6){ const dx = p0.x - oLoc.x, dz = p0.z - oLoc.z, L = Math.hypot(dx, dz) || 1, sg = end ? 1 : -1, nx = -dz / L * sg, nz = dx / L * sg; p = { x:r4(p0.x - nx * off), z:r4(p0.z - nz * off) }; }
           w1['x' + k] = p.x; w1['z' + k] = p.z;
           if (wallFrame(w1).L < 0.05){ w1['x' + k] = s['x' + k]; w1['z' + k] = s['z' + k]; return; }
           for (const m of ctx.mates){ m.o['x' + m.e] = p.x; m.o['z' + m.e] = p.z; }
@@ -8762,7 +8838,7 @@ function vpScreenRect(v, vp){
 function activateVp(v, vp){
   const view = views.find(x => x.id === vp.view); if (!view || view.kind === 'sheet') return;
   const R = vpScreenRect(v, vp); if (R.w < 60 || R.h < 40){ toast('Вид на листе слишком мелкий — приблизьте лист колесом мыши и щёлкните дважды ещё раз'); return; }
-  Object.assign(VPACT, { on:true, sheet:v.id, vp:vp.id, view:view.id, rect:R, entering:true });
+  Object.assign(VPACT, { on:true, sheet:v.id, vp:vp.id, view:view.id, rect:R, entering:true, base:null });
   openView(view.id); VPACT.entering = false;
   placeVpAct(R);
   const bar = $('#vpActBar'); bar.querySelector('b').textContent = view.name; bar.hidden = false;
@@ -8771,12 +8847,28 @@ function activateVp(v, vp){
 }
 // the canvas of the active view over its image on the sheet (again after the window changes its size)
 function placeVpAct(R){
-  const W = $('#sheetWrap'), L = $('#labels'); W.hidden = false; W.classList.add('act'); cv.style.visibility = '';
-  for (const el of [cv, L]) Object.assign(el.style, { inset:'auto', left:R.x + 'px', top:R.y + 'px', width:R.w + 'px', height:R.h + 'px', right:'auto', bottom:'auto' });
+  const W = $('#sheetWrap'), L = $('#labels'); W.hidden = false; W.classList.add('act');
+  // the canvas is never bigger than the window: zoomed in close, the view's rectangle R is many times the screen, and a canvas
+  // that big is more than the video card draws (the geometry vanished). The canvas takes the visible part C of R, the camera of
+  // an orthographic view is moved and zoomed so that C shows exactly its part of R.
+  const c = cam(), oc = ctl[S.view], ortho = !!(c && c.isOrthographicCamera), Vw = $('#viewport').clientWidth, Vh = $('#viewport').clientHeight;
+  let C = R;
+  if (ortho){ const x0 = Math.max(R.x, 0), y0 = Math.max(R.y, 0), x1 = Math.min(R.x + R.w, Vw), y1 = Math.min(R.y + R.h, Vh); C = { x:x0, y:y0, w:x1 - x0, h:y1 - y0 }; }
+  const off = C.w < 2 || C.h < 2; // the view is off the screen
+  cv.style.visibility = off ? 'hidden' : ''; L.style.visibility = off ? 'hidden' : '';
+  if (off) return;
+  for (const el of [cv, L]) Object.assign(el.style, { inset:'auto', left:C.x + 'px', top:C.y + 'px', width:C.w + 'px', height:C.h + 'px', right:'auto', bottom:'auto' });
   cv.style.zIndex = 5; L.style.zIndex = 6; cv.style.boxShadow = '0 0 0 2px #1a73e8'; cv.style.background = '#ffffff'; // the active view on white paper (not see-through)
   resize();
-  // a plan: exactly the region of the sheet image
-  if (R.reg && S.view === 'plan'){ const r = R.reg, a = R.w / R.h, cx = (r.x0 + r.x1) / 2, cz = (r.z0 + r.z1) / 2; planCam.position.set(cx, 200, cz); ctl.plan.target.set(cx, 0, cz); planCam.zoom = Math.min(2 * H0 * a / (r.x1 - r.x0), 2 * H0 / (r.z1 - r.z0)); planCam.updateProjectionMatrix(); ctl.plan.update(); }
+  // the framing of the whole rectangle R: a plan — exactly the region of the sheet image; other views — as they were opened
+  let base = null;
+  if (R.reg && S.view === 'plan'){ const r = R.reg, a = R.w / R.h, cx = (r.x0 + r.x1) / 2, cz = (r.z0 + r.z1) / 2; base = { pos:new THREE.Vector3(cx, 200, cz), tgt:new THREE.Vector3(cx, 0, cz), zoom:Math.min(2 * H0 * a / (r.x1 - r.x0), 2 * H0 / (r.z1 - r.z0)) }; }
+  else if (ortho){ if (!VPACT.base) VPACT.base = { pos:c.position.clone(), tgt:oc.target.clone(), zoom:c.zoom }; base = VPACT.base; }
+  if (!base || !ortho) return;
+  c.position.copy(base.pos); oc.target.copy(base.tgt); oc.update();
+  const k = 2 * H0 / base.zoom / R.h, dx = (C.x + C.w / 2) - (R.x + R.w / 2), dy = (C.y + C.h / 2) - (R.y + R.h / 2); // world per pixel; the shift of C's centre
+  const sh = new THREE.Vector3(1, 0, 0).applyQuaternion(c.quaternion).multiplyScalar(dx * k).add(new THREE.Vector3(0, 1, 0).applyQuaternion(c.quaternion).multiplyScalar(-dy * k));
+  c.position.add(sh); oc.target.add(sh); c.zoom = base.zoom * R.h / C.h; c.updateProjectionMatrix(); oc.update();
 }
 /* Revit: zooming or panning in a view active on its sheet zooms / moves the whole sheet with it (not the view inside its frame) */
 function vpActFollow(){ const s = views.find(x => x.id === VPACT.sheet), vp = s && s.vps.find(p => p.id === VPACT.vp); if (!vp) return; const R = vpScreenRect(s, vp); VPACT.rect = R; placeVpAct(R); annoDirty = true; rebuild(); }
@@ -8793,7 +8885,7 @@ window.addEventListener('resize', () => { if (!VPACT.on) return; setTimeout(() =
 function exitVpAct(keepView){
   if (!VPACT.on) return; VPACT.on = false;
   const W = $('#sheetWrap'), L = $('#labels'); W.classList.remove('act');
-  for (const el of [cv, L]) for (const k of ['left', 'top', 'width', 'height', 'right', 'bottom', 'inset', 'zIndex', 'boxShadow', 'background']) el.style[k] = '';
+  for (const el of [cv, L]) for (const k of ['left', 'top', 'width', 'height', 'right', 'bottom', 'inset', 'zIndex', 'boxShadow', 'background', 'visibility']) el.style[k] = '';
   $('#vpActBar').hidden = true;
   if (!keepView){ const s = views.find(x => x.id === VPACT.sheet); if (s) openView(s.id); }
   resize();
@@ -9946,7 +10038,9 @@ $('#sheetCv').addEventListener('contextmenu', e => { if (SHEET.colEdit && (SHEET
 $('#vpActOff').onclick = () => exitVpAct();
 /* zoom of the sheet: the wheel (to the pointer), two fingers, the middle button pans; «Вписать» — the whole sheet */
 // the sheet is moved freely (like Revit): SHEET.pan {x, y} px — a shift of the canvas (CSS transform), at any zoom
-function sheetPanApply(){ const c = $('#sheetCv'), p = SHEET.pan || (SHEET.pan = { x:0, y:0 }); c.style.transform = p.x || p.y ? `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)` : ''; }
+function sheetPanApply(){ const c = $('#sheetCv'), p = SHEET.pan || (SHEET.pan = { x:0, y:0 }); c.style.transform = p.x || p.y ? `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)` : '';
+  // a view active on the sheet follows the sheet also when the wheel / drag was over the sheet itself (its canvas is only the visible part)
+  if (typeof VPACT !== 'undefined' && VPACT.on && !VPACT._f) VPACT._f = requestAnimationFrame(() => { VPACT._f = 0; if (VPACT.on) vpActFollow(); }); }
 function sheetZoomTo(z, cx, cy){
   const wrap = $('#sheetWrap'), cv0 = $('#sheetCv'), r = cv0.getBoundingClientRect(), wr = wrap.getBoundingClientRect();
   if (cx == null){ cx = wr.left + wr.width / 2; cy = wr.top + wr.height / 2; }
@@ -11091,6 +11185,7 @@ function openFamEditor(id){
   const src = id && famById(id);
   FE.srcId = src ? src.id : null; FE.forms = src ? JSON.parse(JSON.stringify(src.forms)) : []; FE.plane = 'XY'; FE.off = 0;
   $('#feName').value = src ? src.name : 'Новое семейство'; $('#feCat').innerHTML = Object.entries(FAM_CATS).map(([k, n]) => `<option value="${k}"${k === (src ? src.cat : 'generic') ? ' selected' : ''}>${n}</option>`).join('');
+  $('#feSub').value = src && src.sub || ''; const subL = () => { $('#feSubL').innerHTML = famSubList($('#feCat').value).map(s => `<option value="${esc(s)}">`).join(''); }; subL(); $('#feCat').onchange = subL;
   $('#fePlane').innerHTML = Object.entries(FAM_PLANES).map(([k, n]) => `<option value="${k}">${n}</option>`).join(''); $('#feOff').value = 0;
   $('#famTitle').textContent = src ? `Редактор семейства: ${src.name}` : 'Новое семейство';
   famDlg.hidden = false; feCancel(); setFeView(FE.forms.length ? '3d' : 'sketch'); feResize(); feCam();
@@ -11103,7 +11198,7 @@ document.querySelectorAll('[data-fk]').forEach(b => b.onclick = () => feStart(b.
 document.querySelectorAll('#feTools [data-ft]').forEach(b => b.onclick = () => { FE.tool = b.dataset.ft; if (FE.tool !== 'line') FE.pts = []; feToolsUI(); feHint(); feDrawSketch(); });
 $('#feNext').onclick = feNext; $('#feCancel').onclick = feCancel; $('#feUndoPt').onclick = () => { FE.pts.pop(); feDrawSketch(); };
 $('#feClose').onclick = () => { famDlg.hidden = true; };
-function feRecord(){ return { name:$('#feName').value.trim() || 'Семейство', cat:$('#feCat').value, forms:JSON.parse(JSON.stringify(FE.forms)) }; }
+function feRecord(){ const sub = $('#feSub').value.trim().slice(0, 60); return { name:$('#feName').value.trim() || 'Семейство', cat:$('#feCat').value, sub:sub || undefined, forms:JSON.parse(JSON.stringify(FE.forms)) }; }
 $('#feSave').onclick = () => {
   if (!FE.forms.length){ toast('В семействе нет ни одной формы'); return; }
   const rec = feRecord(); let f = FE.srcId && famById(FE.srcId);
@@ -12845,6 +12940,8 @@ function renderPanel(_el, _it){
     const f = famById(it.f), b = famBox(it), sz = b.getSize(new V3());
     h += `<div class="typesel"><span class="tname">${esc(f ? FAM_CATS[f.cat] : 'Семейство')} ${esc(it.tag || '')} <span class="tsub">· №${it.id}</span></span><select id="fFam">${famOptions(it.f)}</select><span class="tsub">${f ? (f.mesh ? (f.mesh.kind === 'gen' ? 'модель из библиотеки' : 'модель · ' + esc(f.mesh.name)) : f.forms.length + ' форм(ы)') + ' · ' + mm(sz.x) + ' × ' + mm(sz.z) + ' × ' + mm(sz.y) + ' мм' : 'семейство не найдено'}</span>${f && f.mesh ? '' : '<button class="btn sm" id="fEdit">Изменить семейство…</button>'}</div>`
       + prow('Буква', `<input id="sTag" type="text" maxlength="3" value="${esc(it.tag || '')}" style="text-transform:uppercase">`)
+      + (f ? `<div class="pgrp">Семейство (для всех экземпляров)</div>` + prow('Категория', `<select id="fCat">${Object.entries(FAM_CATS).map(([k, n]) => `<option value="${k}"${k === f.cat ? ' selected' : ''}>${n}</option>`).join('')}</select>`)
+        + prow('Подкатегория', `<input id="fSub" type="text" maxlength="60" list="fSubL" value="${esc(f.sub || '')}" placeholder="${esc(famSub({ ...f, sub:'' }))} (сама)" title="Подраздел в диспетчере; пусто — определится сам по имени"><datalist id="fSubL">${famSubList(f.cat).map(s => `<option value="${esc(s)}">`).join('')}</datalist>`) : '')
       + `<div class="pgrp">Размещение</div>` + prow('Поворот, °', `<input id="fRot" type="number" step="15" value="${r4(it.rot || 0)}">`) + prow('Отражено', `<label class="pchk"><input type="checkbox" id="fMir"${it.mir ? ' checked' : ''}> зеркально</label>`)
       + prow('Материал', matPick('fM', it.m, f && f.mesh ? 'Как в модели' : 'По семейству'))
       + (f && f.mesh ? `<div class="pgrp">Модель (для всех экземпляров)</div>` + (f.mesh.kind === 'gen' ? prow('Ширина, мм', pnum('fMW', f.mesh.p.w / 1000, 'min="50" step="10"')) + prow('Глубина, мм', pnum('fMD', f.mesh.p.d / 1000, 'min="50" step="10"')) + prow('Высота, мм', pnum('fMH', f.mesh.p.h / 1000, 'min="5" step="10"')) + bocaSpecRows(f) : prow('Масштаб модели', `<input id="fMS" type="number" step="0.05" min="0.01" value="${f.mesh.s || 1}">`) + prow('Ось Z вверх', `<label class="pchk"><input type="checkbox" id="fMZ"${f.mesh.zUp ? ' checked' : ''}> модель лежала на боку</label>`)) : '')
@@ -12910,7 +13007,7 @@ function renderPanel(_el, _it){
   if (q('sPin')) q('sPin').onchange = e => { pushUndo(e.target.checked ? 'Прикрепить' : 'Открепить'); if (e.target.checked) it.pin = true; else delete it.pin; el.dataset.id = 'x'; rebuild(); };
   if (it && it.type === 'fam'){
     const ch = (id, fn) => { const f = q(id); if (f) f.onchange = e => { pushUndo(); markEdited(); fn(e.target); el.dataset.id = 'x'; rebuild(); }; };
-    ch('fFam', t => it.f = t.value); ch('fRot', t => it.rot = ((+t.value || 0) % 360 + 360) % 360); ch('fMir', t => { if (t.checked) it.mir = true; else delete it.mir; }); ch('fM', t => { if (t.value) it.m = t.value; else delete it.m; });
+    ch('fFam', t => it.f = t.value); { const f0 = famById(it.f); if (f0){ ch('fCat', t => { if (FAM_CATS[t.value]) f0.cat = t.value; renderTree(); }); ch('fSub', t => { const s = t.value.trim().slice(0, 60); if (s) f0.sub = s; else delete f0.sub; renderTree(); }); } }ch('fRot', t => it.rot = ((+t.value || 0) % 360 + 360) % 360); ch('fMir', t => { if (t.checked) it.mir = true; else delete it.mir; }); ch('fM', t => { if (t.value) it.m = t.value; else delete it.m; });
     if (q('fEdit')) q('fEdit').onclick = () => openFamEditor(it.f);
     const fm2 = famById(it.f);
     if (fm2 && fm2.mesh){ const mch = (id, fn) => { const x = q(id); if (x) x.onchange = e => { pushUndo('Размеры модели'); markEdited(); fn(e.target); FBOX.delete(fm2.id); el.dataset.id = 'x'; rebuild(); scheduleSave(); }; };
@@ -13088,10 +13185,12 @@ const treeKey = n => { for (const c of n.childNodes) if (c.nodeType === 3 && c.t
 function treeSave(){ try { lsSet('kot.treeClosed', JSON.stringify([...TREE_CLOSED])); } catch (e){} }
 function treeFolds(ul){
   ul.querySelectorAll('.node').forEach(n => {
-    const li = n.parentElement, k = treeKey(n); if (!li.querySelector(':scope>ul')) return;
+    const li = n.parentElement; if (!li.querySelector(':scope>ul')) return;
+    // a node closed by default (a sheet with its views): it is remembered when opened ('+key'), the others when closed
+    const inv = n.dataset.fold === 'closed', k = inv ? '+' + (n.dataset.key || treeKey(n)) : (n.dataset.key || treeKey(n)), isC = () => inv ? !TREE_CLOSED.has(k) : TREE_CLOSED.has(k);
     const tg = document.createElement('span'); tg.className = 'tg'; tg.setAttribute('aria-hidden', 'true'); n.prepend(tg);
-    n.setAttribute('role', 'button'); n.tabIndex = 0; li.classList.toggle('closed', TREE_CLOSED.has(k)); n.setAttribute('aria-expanded', !TREE_CLOSED.has(k));
-    const flip = () => { if (TREE_CLOSED.has(k)) TREE_CLOSED.delete(k); else TREE_CLOSED.add(k); li.classList.toggle('closed', TREE_CLOSED.has(k)); n.setAttribute('aria-expanded', !TREE_CLOSED.has(k)); treeSave(); };
+    n.setAttribute('role', 'button'); n.tabIndex = 0; li.classList.toggle('closed', isC()); n.setAttribute('aria-expanded', !isC());
+    const flip = () => { if (TREE_CLOSED.has(k)) TREE_CLOSED.delete(k); else TREE_CLOSED.add(k); li.classList.toggle('closed', isC()); n.setAttribute('aria-expanded', !isC()); treeSave(); };
     n.onclick = e => { if (e.target.closest('button, select')) return; flip(); };
     n.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } };
   });
@@ -13144,6 +13243,18 @@ function openFolderAdd(fid){
   d.querySelector('#fldNo').onclick = () => { d.hidden = true; };
   d.hidden = false;
 }
+// «Семейства · Компоненты» как в Revit: категория → подкатегория → семейство (пустые категории не показываются; «Прочее» — последней)
+function famTreeHtml(){
+  const ru = (a, b) => a.localeCompare(b, 'ru', { numeric:true });
+  return Object.entries(FAM_CATS).map(([ck, cn]) => {
+    const fs = fams.filter(f => f.cat === ck); if (!fs.length) return '';
+    const subs = [...new Set(fs.map(famSub))].sort((a, b) => (a === FAM_SUB_OTHER) - (b === FAM_SUB_OTHER) || ru(a, b));
+    return `<li><div class="node" data-key="fc:${ck}">${esc(cn)}<span class="ph">${fs.length}</span></div><ul>` + subs.map(sn => {
+      const ls = fs.filter(f => famSub(f) === sn).sort((a, b) => ru(a.name, b.name));
+      return `<li><div class="node" data-key="fs:${ck}:${esc(sn)}">${esc(sn)}<span class="ph">${ls.length}</span></div><ul>` + ls.map(f => `<li class="it"><button data-tree="fam:${f.id}" title="Разместить">${esc(f.name)}</button><button class="x" data-tree="famed:${f.id}" title="Редактировать семейство" aria-label="Редактировать ${esc(f.name)}">✎</button></li>`).join('') + '</ul></li>';
+    }).join('') + '</ul></li>';
+  }).join('');
+}
 function renderTree(){
   // a plan made in any way (chat, copy, older project) gets its sheet — checked when the list of plans changes
   { const sig = views.filter(v => v.kind === 'plan').map(v => v.id).join(','); if (sig !== renderTree.planSig){ renderTree.planSig = sig; if (ensurePlanSheets()) scheduleSave(); } }
@@ -13189,10 +13300,14 @@ function renderTree(){
     </ul></li>
     ${(() => { syncSheetNums(); const all = of('sheet'), pool = all.filter(x => x.pool), shown2 = sheetsInOrder();
       const pick = pool.length ? `<select class="shpool" data-shpool="1" title="Листы, которые ещё не добавлены в структуру" aria-label="Добавить лист в структуру"><option value="">Добавить лист (${pool.length})…</option>${pool.map(x => `<option value="${x.id}">${esc(x.num + ' — ' + x.name)}</option>`).join('')}</select>` : '';
-      const secHtml = sheetSecs().map(s => { const ls = shown2.filter(v => v.sec === s.k); return `<li><div class="node">${s.no ? s.no + '. ' : ''}${esc(s.n)}<button class="add" data-tree="nsh:${esc(s.k)}" title="Новый лист в разделе «${esc(s.n)}»" aria-label="Новый лист в разделе">+</button></div><ul>${ls.map(v => vItem(v)).join('') || '<li class="it"><span class="ph">пусто</span></li>'}</ul></li>`; }).join('');
+      // Revit: a sheet opens to the views placed on it (each one opens by a click)
+      const sheetItem = v => { const vs = (v.vps || []).map(p => views.find(x => x.id === p.view)).filter(Boolean); if (!vs.length) return vItem(v);
+        const inner = vItem(v).replace(/^<li class="it">/, '').replace(/<\/li>$/, '');
+        return `<li><div class="node shn" data-fold="closed" data-key="sh:${v.id}">${inner}</div><ul>${vs.map(x => vItem(x)).join('')}</ul></li>`; };
+      const secHtml = sheetSecs().map(s => { const ls = shown2.filter(v => v.sec === s.k); return `<li><div class="node">${s.no ? s.no + '. ' : ''}${esc(s.n)}<button class="add" data-tree="nsh:${esc(s.k)}" title="Новый лист в разделе «${esc(s.n)}»" aria-label="Новый лист в разделе">+</button></div><ul>${ls.map(sheetItem).join('') || '<li class="it"><span class="ph">пусто</span></li>'}</ul></li>`; }).join('');
       return `<li><div class="node">Листы (все)${pick}<button class="add" data-tree="n:sheet" title="Новый лист: выберите раздел" aria-label="Новый лист">+</button></div><ul>${secHtml}</ul></li>`; })()}
     ${grs.length ? `<li><div class="node">Оси</div><ul>${grs.map(g => btn('Ось ' + esc(g.name), 'g:' + g.id, isSel(g.id))).join('')}</ul></li>` : ''}
-    <li><div class="node">Семейства · Компоненты<button class="add" data-tree="famnew:" title="Новое семейство" aria-label="Новое семейство">+</button></div><ul>${fams.map(f => `<li class="it"><button data-tree="fam:${f.id}" title="Разместить">${esc(f.name)}<span class="ph">${esc(FAM_CATS[f.cat])}</span></button><button class="x" data-tree="famed:${f.id}" title="Редактировать семейство" aria-label="Редактировать ${esc(f.name)}">✎</button></li>`).join('')}<li class="it"><button data-tree="furnlib:">Библиотека мебели…</button></li><li class="it"><button data-tree="mdlimp:">Импорт модели (glTF, OBJ)…</button></li><li class="it"><button data-tree="famload:">Загрузить семейство…</button></li></ul></li>
+    <li><div class="node">Семейства · Компоненты<button class="add" data-tree="famnew:" title="Новое семейство" aria-label="Новое семейство">+</button></div><ul>${famTreeHtml()}<li class="it"><button data-tree="furnlib:">Библиотека мебели…</button></li><li class="it"><button data-tree="mdlimp:">Импорт модели (glTF, OBJ)…</button></li><li class="it"><button data-tree="famload:">Загрузить семейство…</button></li></ul></li>
     <li><div class="node">Семейства · Стены</div><ul>${types.map(t => btn(`<span class="swatch" style="background:${(MATS[t.layers[Math.floor(t.layers.length / 2)]?.m] || MATS.generic).c}"></span>${esc(t.name)}`, 't:' + t.id, false)).join('')}</ul></li>
     <li><div class="node">Проекты</div><ul>${btn('Мои проекты…', 'lib')}</ul></li>`;
   for (const s of views) if (s.kind === 'sheet' && s.pool && s.autoFor){ const pv = views.find(x => x.id === s.autoFor); if (pv) s.name = pv.name; } // the waiting sheet keeps the name of its plan
@@ -13816,7 +13931,7 @@ addEventListener('pagehide', () => { if (YD.lock && !QUITTING) ydLockRelease(YD.
    chosen by «kotapp-meta»; app/sw.js serves it) and changes only from an update file: «Файл → Установить обновление…».
    An update file = gzip of «KOTUPD1\n» + a JSON line {format, version, app, files:[{u, t, n}]} + the bytes of the program page and of
    every library (tools\libs.txt), so after an update everything works without the internet. tools\make-update.ps1 builds it. */
-const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-1908');
+const APP_VERSION = (v => /^__/.test(v) ? 'dev' : v)('dev-20261024-1938');
 const IS_APP = /\/app\/(?:index\.html)?$/.test(location.pathname);
 const APPV = { meta:'kotapp-meta', key:'/__kotapp/current', pre:'kotapp-v-' };
 async function appMeta(){ try { const c = await caches.open(APPV.meta), r = await c.match(APPV.key); return r ? await r.json() : null; } catch (e){ return null; } }
@@ -14050,7 +14165,15 @@ pni.onblur = () => endRename(true);
 
 const fileMenu = $('#fileMenu'), fileBtn = $('#fileBtn');
 function openFileMenu(){ const r = fileBtn.getBoundingClientRect(); fileMenu.style.left = r.left + 'px'; fileMenu.style.top = (r.bottom + 2) + 'px'; fileMenu.hidden = false; fileBtn.setAttribute('aria-expanded', 'true'); fileMenu.querySelector('button').focus(); }
-function closeFileMenu(){ if (fileMenu.hidden) return; fileMenu.hidden = true; fileBtn.setAttribute('aria-expanded', 'false'); }
+function closeFileMenu(){ if (fileMenu.hidden) return; fileMenu.hidden = true; fileBtn.setAttribute('aria-expanded', 'false'); fileExpOpen(false); }
+// «Экспорт ▸»: the formats open to the right on hover or click (left when there is no room; under it on a phone)
+function fileExpOpen(on){ const w = $('#fileExp'), b = $('#fileExpBtn'); if (!w) return; w.classList.toggle('open', on); b.setAttribute('aria-expanded', on ? 'true' : 'false');
+  const l = w.querySelector('.fsubList'); l.classList.remove('left');
+  if (on || w.matches(':hover')){ const r = w.getBoundingClientRect(); if (r.right + 240 > innerWidth) l.classList.add('left'); }
+  if (on) l.querySelector('button')?.focus(); }
+$('#fileExpBtn').onclick = e => { e.stopPropagation(); fileExpOpen(!$('#fileExp').classList.contains('open')); };
+$('#fileExp').addEventListener('pointerenter', () => { const l = $('#fileExp .fsubList'), r = $('#fileExp').getBoundingClientRect(); l.classList.toggle('left', r.right + 240 > innerWidth); });
+$('#fileExp').addEventListener('keydown', e => { if (e.key === 'ArrowRight' && e.target.id === 'fileExpBtn'){ e.preventDefault(); fileExpOpen(true); } if (e.key === 'ArrowLeft' && e.target.id !== 'fileExpBtn'){ e.preventDefault(); fileExpOpen(false); $('#fileExpBtn').focus(); } });
 fileBtn.onclick = () => fileMenu.hidden ? openFileMenu() : closeFileMenu();
 /* ---------- Export for Revit (IFC 2x3) and for 3ds Max (OBJ + MTL in a ZIP, GLB) ----------
    Coordinates: the program has X east, Y up, Z south; IFC / Revit have X east, Y north, Z up → (x, -z, y).
@@ -14175,6 +14298,53 @@ async function saveIFC(){
   toast(`IFC: стен ${n.walls}, проёмов ${n.ops}, других элементов ${n.other}, помещений ${n.rooms}. В Revit: «Открыть → IFC» или «Вставка → Связать IFC»`);
   return n;
 }
+/* ---- DXF for AutoCAD (and nanoCAD, BricsCAD, Компас): the open view as a 2D drawing in millimetres ----
+   DWG is a closed format of Autodesk; DXF is AutoCAD's own open one — AutoCAD opens it and «Сохранить как» makes a DWG.
+   Lines of the view (walls, symbols, dimensions, grids, detail lines — as drawn, dashes included) go on layers by category,
+   texts (dimension numbers, tags, room tags, texts) as TEXT with a TTF style; Cyrillic as \U+XXXX (read by every AutoCAD). */
+const DXF_LAYERS = { wall:['A-WALL', 7], door:['A-DOOR', 4], window:['A-GLAZ', 5], fam:['A-FURN', 8], column:['A-COLS', 7], box:['A-EQPM', 8], floor:['A-FLOR', 9], ceiling:['A-CLNG', 9], roof:['A-ROOF', 8], stair:['A-STRS', 7], room:['A-AREA', 3], line:['A-DETL', 7], circle:['A-DETL', 7], grid:['A-GRID', 1], dim:['A-ANNO-DIMS', 2], adim:['A-ANNO-DIMS', 2], rdim:['A-ANNO-DIMS', 2], text:['A-ANNO-TEXT', 7], tag:['A-ANNO-TAGS', 6], spot:['A-ANNO-TEXT', 7], _:['A-OTHR', 8], _txt:['A-ANNO-TEXT', 7] };
+function exportDXF(){
+  const c = cam(); if (!c || c.isPerspectiveCamera || S.view === 'sheet') throw new Error('DXF: откройте план, разрез, развёртку, фасад или аксонометрию (не перспективу и не лист)');
+  c.updateMatrixWorld(); for (const g of [model, anno, datum]) g.updateMatrixWorld(true);
+  // a plan: the project's own coordinates (X east, Y north, mm); other views — the plane of the view
+  const inv = c.matrixWorldInverse, P = S.view === 'plan' ? v => [v.x * 1000, -v.z * 1000] : v => { const q = v.clone().applyMatrix4(inv); return [q.x * 1000, q.y * 1000]; };
+  const used = new Set(['0']), ents = [], f = n => (Math.round(n * 1000) / 1000).toString();
+  const visible = o => { for (let p = o; p; p = p.parent) if (p.visible === false) return false; return true; };
+  const layerOf = (o, def) => { for (let p = o; p; p = p.parent){ const id = p.userData && (p.userData.id || p.userData.wall); if (id){ const it = byId(id); if (it) return (DXF_LAYERS[it.type] || DXF_LAYERS._)[0]; } } return def; };
+  const line = (L, a, b) => { const A = P(a), B = P(b); if (Math.hypot(A[0] - B[0], A[1] - B[1]) < 0.05) return; used.add(L); ents.push(`0\nLINE\n8\n${L}\n10\n${f(A[0])}\n20\n${f(A[1])}\n30\n0\n11\n${f(B[0])}\n21\n${f(B[1])}\n31\n0`); };
+  const walk = (g, def) => g.traverse(o => {
+    if (!visible(o) || !o.geometry) return; const L = layerOf(o, def), mw = o.matrixWorld;
+    if (o.isLineSegments2){ const s = o.geometry.attributes.instanceStart, e = o.geometry.attributes.instanceEnd; if (!s || !e) return; for (let i = 0; i < s.count; i++) line(L, new V3(s.getX(i), s.getY(i), s.getZ(i)).applyMatrix4(mw), new V3(e.getX(i), e.getY(i), e.getZ(i)).applyMatrix4(mw)); }
+    else if (o.isLine){ const pa = o.geometry.attributes.position; if (!pa) return; const st = o.isLineSegments ? 2 : 1; for (let i = 0; i + 1 < pa.count; i += st) line(L, new V3().fromBufferAttribute(pa, i).applyMatrix4(mw), new V3().fromBufferAttribute(pa, i + 1).applyMatrix4(mw)); }
+  });
+  walk(model, DXF_LAYERS._[0]); walk(anno, DXF_LAYERS.dim[0]); walk(datum, DXF_LAYERS.grid[0]);
+  // texts: dimension numbers, tags, room tags, texts, levels (the labels of the view)
+  const uni = s => [...String(s)].map(ch => { const cc = ch.codePointAt(0); return cc < 128 ? ch : '\\U+' + cc.toString(16).toUpperCase().padStart(4, '0'); }).join('');
+  const pm = paperMm() * 1000; let nT = 0;
+  for (const Lb of buildLabels()){
+    if (!Lb.t || Lb.x == null || /^(ax|live|guide|pen|lockl|we|flip|crop|doff|lvg)/.test(Lb.cls || '')) continue;
+    const cls = Lb.cls || '', lay = /^dl/.test(cls) ? DXF_LAYERS.dim[0] : /^wt/.test(cls) ? DXF_LAYERS.tag[0] : /^(rm|sv|hb)/.test(cls) ? DXF_LAYERS.room[0] : DXF_LAYERS._txt[0];
+    const h = (/^dl/.test(cls) ? STD.anno.textMm : /^tx/.test(cls) ? (Lb.mmH || 3.5) : /^wt/.test(cls) ? STD.anno.tagMm * 0.8 : 2.5) * pm, A = P(new V3(Lb.x, Lb.y || 0, Lb.z)), rot = -(Lb.rot || 0);
+    const lines = String(Lb.t).split('\n');
+    lines.forEach((tx, i) => { const y = A[1] - i * h * 1.4; used.add(lay); nT++;
+      ents.push(`0\nTEXT\n8\n${lay}\n7\nKOT\n10\n${f(A[0])}\n20\n${f(y)}\n30\n0\n40\n${f(h)}\n1\n${uni(tx)}\n50\n${f(rot)}\n72\n1\n11\n${f(A[0])}\n21\n${f(y)}\n31\n0\n73\n2`); });
+  }
+  const lay = [...used], colorOf = n => (Object.values(DXF_LAYERS).find(x => x[0] === n) || ['', 7])[1];
+  const txt = ['0', 'SECTION', '2', 'HEADER', '9', '$ACADVER', '1', 'AC1009', '9', '$INSUNITS', '70', '4', '9', '$DWGCODEPAGE', '3', 'ANSI_1251', '0', 'ENDSEC',
+    '0', 'SECTION', '2', 'TABLES',
+    '0', 'TABLE', '2', 'LTYPE', '70', '1', '0', 'LTYPE', '2', 'CONTINUOUS', '70', '0', '3', 'Solid line', '72', '65', '73', '0', '40', '0.0', '0', 'ENDTAB',
+    '0', 'TABLE', '2', 'LAYER', '70', String(lay.length), ...lay.flatMap(n => ['0', 'LAYER', '2', n, '70', '0', '62', String(colorOf(n)), '6', 'CONTINUOUS']), '0', 'ENDTAB',
+    '0', 'TABLE', '2', 'STYLE', '70', '1', '0', 'STYLE', '2', 'KOT', '70', '0', '40', '0.0', '41', '1.0', '50', '0.0', '71', '0', '42', '2.5', '3', 'arial.ttf', '4', '', '0', 'ENDTAB',
+    '0', 'ENDSEC', '0', 'SECTION', '2', 'ENTITIES'].join('\n') + '\n' + ents.join('\n') + '\n0\nENDSEC\n0\nEOF\n';
+  return { txt, nL:ents.length - nT, nT, layers:lay.length };
+}
+async function saveDXF(){
+  const v = viewNow(); toast('Готовлю DXF для AutoCAD…'); await new Promise(r => setTimeout(r, 30));
+  const { txt, nL, nT, layers } = exportDXF();
+  await saveBlob(safeName((proj0().name || 'Проект') + ' — ' + (v ? v.name : 'вид')), 'dxf', new Blob([txt], { type:'application/dxf' }), 'application/dxf', 'DXF для AutoCAD');
+  toast(`DXF: линий ${nL}, текстов ${nT}, слоёв ${layers}, единицы — мм. В AutoCAD: «Открыть» этот файл, затем «Сохранить как → DWG»`, 6000);
+  return { nL, nT };
+}
 // ---- OBJ + MTL (3ds Max, any 3D program), packed into a ZIP with the textures ----
 function crc32(b){ let c, t = crc32.t; if (!t){ t = crc32.t = new Uint32Array(256); for (let n = 0; n < 256; n++){ c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } } c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = t[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
 function zipStore(files){ // [{ name, data:Uint8Array }] → a ZIP without compression (names in UTF-8)
@@ -14242,7 +14412,7 @@ async function saveGLB(dry){
   toast(`GLB: объектов ${n}. 3ds Max 2023+: Импорт → glTF; Blender, просмотрщики — открыть файл`);
   return n;
 }
-const ACTS = { new:newProject, library:openLib, save:saveNow, saveFile:() => saveAsFile(), openFile:openFileDialog, ydOpen:() => openYdBrowser('open'), ydSave:() => openYdBrowser('save'), ydLogin:() => openYdLogin(), dup:duplicateCurrent, png:exportPNG, ifc:() => saveIFC(), obj:() => saveOBJ(), glb:() => saveGLB(), print:openPrint, offline:() => openOfflinePack(), install:openInstall, exit:() => openExit(), update:() => openUpdate(), about:() => openAbout() };
+const ACTS = { new:newProject, library:openLib, save:saveNow, saveFile:() => saveAsFile(), openFile:openFileDialog, ydOpen:() => openYdBrowser('open'), ydSave:() => openYdBrowser('save'), ydLogin:() => openYdLogin(), dup:duplicateCurrent, png:exportPNG, ifc:() => saveIFC(), dxf:() => saveDXF().catch(e => toast(e.message)), obj:() => saveOBJ(), glb:() => saveGLB(), print:openPrint, offline:() => openOfflinePack(), install:openInstall, exit:() => openExit(), update:() => openUpdate(), about:() => openAbout() };
 if (!IS_APP) fileMenu.querySelectorAll('[data-app]').forEach(b => b.hidden = true);
 if (IS_WIN){ const ib = fileMenu.querySelector('[data-act="install"]'); if (ib) ib.hidden = true; }
 fileMenu.querySelectorAll('[data-act]').forEach(b => b.onclick = () => { closeFileMenu(); ACTS[b.dataset.act](); });
@@ -15065,6 +15235,7 @@ function offlineMore(f){
   // dimension types: «типы размеров», «цвет размеров обмер красный», «тип размеров вида монтаж»
   if (/тип[а-яё]*\s+размер/.test(f) && !/цвет/.test(f)){ const m = f.match(/(обмер|демонтаж|монтаж|мебел)/); if (m && /вид|этом|здесь/.test(f)) return { a:'dimtype', type:m[1], view:true }; if (m && /выбран/.test(f)) return { a:'dimtype', type:m[1], sel:true }; return { a:'dimtype', open:true }; }
   if (/цвет[а-яё]*\s+(?:размер|размерн)/.test(f) || /размер[а-яё]*\s+(?:\S+\s+)?цвет/.test(f)){ const m = f.match(/(обмер|демонтаж|монтаж|мебел)/), c = COLOR_WORDS && Object.entries(COLOR_WORDS).find(([w]) => f.includes(w)); if (m && c) return { a:'dimtype', type:m[1], c:c[1] }; return { a:'dimtype', open:true }; }
+  if (/(?:экспорт|выгрузи|сохрани|передай|отправь|конверт|переведи)[а-яё]*/.test(f) && /(?:dwg|dxf|двг|дхф|автокад|autocad|акад|нанокад|компас)/.test(f)) return { a:'export', f:'dxf' };
   if (/(?:экспорт|выгрузи|сохрани|передай|отправь)[а-яё]*/.test(f) && /(?:ревит|revit|ifc|ифц|айэфси)/.test(f)) return { a:'export', f:'ifc' };
   if (/(?:экспорт|выгрузи|сохрани|передай|отправь)[а-яё]*/.test(f) && /(?:макс|max|3д\s*макс|obj|обж)/.test(f)) return { a:'export', f:'obj' };
   if (/(?:экспорт|выгрузи|сохрани)[а-яё]*/.test(f) && /(?:glb|gltf|глб|блендер)/.test(f)) return { a:'export', f:'glb' };
@@ -15137,6 +15308,7 @@ function parseOne(f){
   if (/что (ты )?умеешь|^помощь$|^справка$|какие команды/.test(f)) return { a:'help' };
   if (/яндекс|диск/.test(f) && /сохран|запиш/.test(f)) return { a:'ydsave' };
   if (/яндекс|диск/.test(f) && /откр|загруз/.test(f)) return { a:'ydopen' };
+  if (/(?:dwg|dxf|двг|дхф|автокад|autocad|нанокад)/.test(f) && /(?:сохран|экспорт|выгрузи|конверт|переведи|передай)/.test(f)) return { a:'export', f:'dxf' }; // before «сохрани»
   if (/^(?:сохрани|сохранить|сохран[а-я]* проект)/.test(f)) return { a:'save' };
   if (/распечат|^печат/.test(f)) return { a:'print' };
   if (/визуализ|рендер/.test(f) && !/стил/.test(f)) return { a:'render' };
@@ -15159,7 +15331,12 @@ function parseOne(f){
   // a fill on a material: «штриховка дуб для материала дерево», «материал паркет штриховка орех», «у материала дерево штриховка сечения венге»
   { const m = f.match(/штриховк[а-яё]*\s+(?:(сечени[а-яё]*|разрез[а-яё]*|поверхност[а-яё]*)\s+)?(дуб|ясен[а-яё]*|бук|сосн[а-яё]*|орех[а-яё]*|тик|венге|шпон[а-яё]*)\s+(?:для|у|на)\s+материал[а-яё]*\s+(.+)$/) || f.match(/(?:у\s+)?материал[а-яё]*\s+(.+?)\s+штриховк[а-яё]*\s+(?:(сечени[а-яё]*|разрез[а-яё]*|поверхност[а-яё]*)\s+)?(дуб|ясен[а-яё]*|бук|сосн[а-яё]*|орех[а-яё]*|тик|венге|шпон[а-яё]*)$/);
     if (m){ const first = /^штриховк/.test(m[0]) || m[0].indexOf('штриховк') < m[0].indexOf('материал'); const lay = first ? m[1] : m[2], sp = first ? m[2] : m[3], mat = first ? m[3] : m[1];
-      return { a:'matfill', mat:mat.trim(), fill:sp, layer:lay && /сечени|разрез/.test(lay) ? 'cut' : 'surf' }; } }  if (/трекер|подсказк[а-яё]*\s+(?:у\s+курсора|при\s+построени)/.test(f)) return { a:'tracker', on:!/(?:скро|убер|выключ|отключ|не\s+показ)/.test(f) };
+      return { a:'matfill', mat:mat.trim(), fill:sp, layer:lay && /сечени|разрез/.test(lay) ? 'cut' : 'surf' }; } }  if (/подкатегори/.test(f)){ // «семейство ваза в подкатегорию декор», «подкатегория стулья для семейства табурет», «подкатегория сама у семейства ваза»
+    let m = f.match(/семейств[а-яё]*\s+(.+?)\s+(?:в|во|на)?\s*подкатегори[а-яё]*\s+(.+)$/);
+    if (m) return { a:'famsub', name:m[1].trim(), sub:/^(?:сама|сам|авто)/.test(m[2]) ? 'auto' : m[2].trim() };
+    m = f.match(/подкатегори[а-яё]*\s+(.+?)\s+(?:для|у)\s+(?:семейств[а-яё]*\s+)?(.+)$/);
+    if (m) return { a:'famsub', name:m[2].trim(), sub:/^(?:сама|сам|авто)/.test(m[1]) ? 'auto' : m[1].trim() }; }
+  if (/трекер|подсказк[а-яё]*\s+(?:у\s+курсора|при\s+построени)/.test(f)) return { a:'tracker', on:!/(?:скро|убер|выключ|отключ|не\s+показ)/.test(f) };
   // arc walls and the wall palette: «стену Б дугой радиус 3000», «выпрями стену Б», «стена дугой», «стена по касательной», «прямая стена»,
   // «вставь узел в стену Б», «сместить стену Б на 200», «подними стену Б на 100», «палитра стены»
   { const T = f.match(/стен[а-яё]*\s+([а-яёa-z])(?:\s|$)/i), wall = T ? { wall:T[1] } : {}, num = x => { const v = +String(x).replace(',', '.'); return Math.abs(v) > 50 ? v / 1000 : v; };
@@ -16072,6 +16249,12 @@ function execMore(a, ctx){
         famFitWalls(it); famMount(it); items.push(it); return it; });
       setSel(made.map(x => x.id)); return made.length > 1 ? `${f.name}: ${made.length} шт. в помещении ${a.room}` : `${f.name} ${made[0].tag} поставлено${a.room ? ' в помещении ' + a.room : ''}`;
     }
+    case 'famsub': { // подкатегория (и категория) семейства — раздел в диспетчере
+      const nm = lc(a.name || ''), f = fams.find(x => lc(x.name) === nm) || fams.find(x => nm && lc(x.name).includes(nm)); if (!f) throw new Error('Нет семейства «' + (a.name || '') + '»');
+      pushUndo('Подкатегория семейства');
+      if (a.cat){ const ck = FAM_CATS[a.cat] ? a.cat : Object.keys(FAM_CATS).find(k => lc(FAM_CATS[k]).startsWith(lc(a.cat).slice(0, 5))); if (ck) f.cat = ck; }
+      if (a.sub === '' || a.sub === 'auto') delete f.sub; else if (a.sub){ const s = String(a.sub).trim(), hit = famSubList(f.cat).find(x => lc(x) === lc(s) || lc(x).startsWith(lc(s).slice(0, 5))); f.sub = (hit || s.charAt(0).toUpperCase() + s.slice(1)).slice(0, 60); }
+      renderTree(); scheduleSave(); return `${f.name}: ${FAM_CATS[f.cat]} → ${famSub(f)}`; }
     case 'famplace': { const f = fams.find(x => lc(x.name) === lc(a.name)) || fams.find(x => lc(x.name).includes(lc(a.name))); if (!f) throw new Error('Нет семейства «' + a.name + '»'); const q = a.x != null ? { x:+a.x, z:+a.z } : penPoint(); const it = { id:nextId++, type:'fam', f:f.id, x:r4(q.x), z:r4(q.z), rot:Number(a.rot) || 0, tag:nextTag('fam'), ph:newPhase(), lv:actLv() }; famFitWalls(it); famMount(it); items.push(it); return `${f.name} ${it.tag} поставлено`; }
     case 'roomset': { const r = roomBy(a.num); if (!r) throw new Error('Нет помещения ' + a.num); if (a.name) r.name = String(a.name).slice(0, 60); if (a.newnum) r.num = String(a.newnum).slice(0, 10); if (a.hc != null) r.hc = r4(+a.hc); if (a.ph && PH_IDX[a.ph] != null){ r.ph = a.ph; RPH.v++; } return `Помещение ${r.num} «${r.name}»`; }
     case 'levelset': {
@@ -16222,7 +16405,7 @@ function execMore(a, ctx){
     case 'sheetpic': { const sh = viewBy(a.sheet || 'current'); if (!sh || sh.kind !== 'sheet') throw new Error('Откройте или назовите лист'); if (S.viewId !== sh.id) openView(sh.id); if (a.del){ const pc = (sh.pics || []).slice(-1)[0]; if (!pc) return 'На листе нет фото'; delSheetPic(sh, pc.id); return 'Последнее фото убрано с листа'; } pickSheetPics(); return 'Выберите фото — оно ляжет на лист ' + (sh.num || sh.name); }
     case 'sheetarea': { const sh = viewBy(a.sheet || 'current'); if (!sh || sh.kind !== 'sheet') throw new Error('Откройте или назовите лист'); if (a.reset){ delete sh.area; } else { const A = { x:+a.x, y:+a.y, w:+a.w, h:+a.h }; if (![A.x, A.y, A.w, A.h].every(Number.isFinite) || A.w < 20 || A.h < 20) throw new Error('Нужны x, y, ширина и высота области в мм'); sh.area = A; } scheduleSave(); if (S.viewId === sh.id){ SHEET.areaShow = true; drawSheet(); renderOptbar(); } return a.reset ? 'Область размещения — по умолчанию' : `Область размещения листа ${sh.num}: ${sh.area.w} × ${sh.area.h} мм`; }
     case 'expl': { const sh = viewBy(a.sheet || 'current'); if (!sh || sh.kind !== 'sheet') throw new Error('Откройте или назовите лист'); if (a.on === false){ sh.expl = false; } else { const [Wm] = SHEET_SIZES[sh.size] || SHEET_SIZES.A3, pl = explPlan(sh); sh.expl = { x:Wm - frameOf(sh).r - EXPL_W, y:frameOf(sh).t + 5, manual:true, ...(pl ? { view:pl.id } : {}) }; } scheduleSave(); if (S.viewId === sh.id) drawSheet(); return a.on === false ? 'Экспликация убрана' : 'Экспликация на листе ' + sh.num; }
-    case 'export': { const f = String(a.f || a.format || '').toLowerCase(); if (f === 'ifc' || /revit|ревит/.test(f)){ saveIFC(); return 'Сохраняю IFC для Revit'; } if (f === 'obj' || /max|макс/.test(f)){ saveOBJ(); return 'Сохраняю OBJ для 3ds Max'; } if (f === 'glb' || f === 'gltf'){ saveGLB(); return 'Сохраняю GLB'; } throw new Error('В какой формат: IFC (Revit), OBJ (3ds Max) или GLB?'); }    case 'print': openPrint(); return 'Окно печати открыто';
+    case 'export': { const f = String(a.f || a.format || '').toLowerCase(); if (f === 'ifc' || /revit|ревит/.test(f)){ saveIFC(); return 'Сохраняю IFC для Revit'; } if (f === 'obj' || /max|макс/.test(f)){ saveOBJ(); return 'Сохраняю OBJ для 3ds Max'; } if (f === 'glb' || f === 'gltf'){ saveGLB(); return 'Сохраняю GLB'; } if (f === 'dxf' || f === 'dwg' || /autocad|автокад|акад/.test(f)){ exportDXF(); saveDXF().catch(e => toast(e.message)); return 'Сохраняю открытый вид в DXF для AutoCAD (в AutoCAD: «Сохранить как → DWG»)'; } throw new Error('В какой формат: DXF/DWG (AutoCAD), IFC (Revit), OBJ (3ds Max) или GLB?'); }    case 'print': openPrint(); return 'Окно печати открыто';
     case 'png': exportPNG(); return 'Картинка вида сохраняется';
     case 'render': openRender(); return 'Окно визуализации открыто';
     case 'savecam': saveCamFromView(); return null;
@@ -16433,11 +16616,12 @@ const ACTIONS_DOC = `Все размеры в метрах. Ось X напра�
 Разделы диспетчера: {"a":"folder","name":"02_Обмерный план","views":["Обмерный план"]} — создать раздел и положить в него виды; {"a":"delfolder","name":"…"}.
 Видимость/графика вида: {"a":"vg","view":"current","cat":"door","vis":false,"half":false} — категории: wall, door, window, floor, ceiling, roof, column, stair, box, room, fam, grid, dim, line, text, spot, ceilh (высоты потолков), winh (высоты окон).
 Мебель: {"a":"furn","k":"<ключ или часть названия из списка мебели>","room":"1","x":0,"z":0,"rot":90,"w":3.2,"d":1.6,"h":0.68,"bo":0} — поставить модель (в центр помещения или в точку; в стены не встанет); w/d/h меняют размер модели для всех её экземпляров; {"a":"famplace","name":"Стол","x":0,"z":0}.
+Подкатегория семейства (раздел в диспетчере: Мебель → Стулья, Столы, Кровати…): {"a":"famsub","name":"Ваза","sub":"Декор","cat":"generic"}; "sub":"auto" — определить по имени.
 Помещения: у каждой стадии свои помещения и нумерация (обмер, монтаж); {"a":"roomset","num":"1","name":"Кухня","newnum":"101","hc":2.7,"ph":"montazh"}.
 Уровни: {"a":"levelset","lv":"Этаж 2","elev":3.3,"rename":"2 этаж","pin":true}. Высотная отметка на плане: {"a":"spot","room":"1"} или {"a":"spot","x":0,"z":0}.
 Листы: {"a":"sheetadd","sheet":"А101","view":"Обмерный план","scale":50}; {"a":"sheetnew","sec":"obmer","name":"Обмерный план 2"} — новый лист в разделе (cover — обложка без номера, gen — общие данные 1-…, obmer — обмер 2-…, dem — демонтаж 3-…, mont — монтаж 4-…; или название раздела); номера листов ставятся сами; {"a":"sheetmove","sheet":"2-3","dir":"up"} — сдвинуть лист в своём разделе; {"a":"sheetset","sheet":"2-1","sec":"mont","name":"…","size":"A3"|"A4"|"A4p"|"A2"|"A1","pool":false}; {"a":"expl","sheet":"А101","on":true} — экспликация помещений. {"a":"frame","sheet":"А101","l":20,"t":5,"r":5,"b":5,"lw":0.6,"all":true} — рамка листа (all — для всех листов; reset:true — по ГОСТ; open:true — окно); {"a":"explcfg","sheet":"А101", "addcol":{"k":"num|name|area|perim|h|txt","n":"Примечание","w":30}, "delcol":"Примечание", "colw":{"col":"Наименование","w":50}, "colname":{"col":"№","n":"Поз."}, "rh":8, "hh":15, "fs":2.8, "ttl":"…"|false, "tot":true, "addrow":{"cells":{"Наименование":"Балкон","Площадь":"3,20"}}, "delrow":"last", "cell":{"room":"3","col":"Наименование","text":"Кухня-гостиная"}, "reset":true, "open":true} — настройка экспликации (любые поля вместе); {"a":"stampcell","op":"rowAbove|rowBelow|rowDel|colLeft|colRight|colDel|splitH|splitV|text","x":30,"y":12,"size":5,"text":"…"} — строки/столбцы/текст штампа листа по ячейке в точке x, y мм от левого верхнего угла штампа (open:true — редактор); {"a":"side","sheet":"4-1","on":true,"w":80,"notes":"пункт 1; пункт 2","addnote":"новый пункт","parts":{"ved":false,"legend":true,"notes":true,"expl":true,"own":true},"own":true,"all":true,"edit":true,"text":{"t":"Текст","x":2,"y":150,"s":2.6},"line":[0,150,80,150],"table":{"rows":4,"cols":3,"h":7,"y":160}} — боковая колонка листа справа (edit — редактирование прямо на листе: линии, прямоугольники, тексты, таблицы; text/line/table — в мм от левого верхнего угла колонки) (экспликация, ведомость монтажа, условные обозначения, примечание, свой блок — own:true открывает его в редакторе: тексты, линии, таблицы; внизу узкий штамп); {"a":"stampline","x":0,"y":10,"x2":65,"y2":10,"lw":0.5} — линия в штампе (мм от левого верхнего угла штампа; без координат или draw:true — открыть редактор в режиме «Чертить линии»); штамп стоит в углу рамки по своим линиям;{"a":"phf","view":"План монтажа","f":"allnew"} — фильтр стадий вида (all — «Показать все», allnew — «Показать все, новое зелёным» (так у планов монтажа по умолчанию), done, demo, new, prevdemo, prevnew, prev, none или название); {"a":"vptitle","sheet":"2-1","view":"Обмерный план","text":"План квартиры","on":true} — название вида на листе (по умолчанию названия выключены; on:true — показать, on:false — скрыть; text — свой текст (и показать), "" — как у вида; без view — все виды листа или выбранный); {"a":"stampfield","sheet":"2-1","k":"author|checker|nk|gip|obj|code|stage|date|org|proj|sheet","val":"Иванов"} — вписать поле в штамп листа (proj — название проекта, sheet — название листа; номер листа считается сам);{"a":"sheetaxo","sheet":"2-1"} — поставить на лист обмерного плана две аксонометрии обмера (создаются, если нет); {"a":"sheetpic","sheet":"А101"} — добавить фото на лист (откроется выбор файла; del:true — убрать последнее фото); {"a":"sheetlayout","sheet":"А101","auto":true,"mode":"zones"|"rows","zk":"b3"|"b2"|"l2"|"l3"} — (zk — вариант зон: b3 план сверху 3 снизу, b2 план сверху 2 снизу, l2 план по центру 2 слева, l3 план по центру 3 слева; масштаб видов любой 1:N под окно)разложить виды листа в области размещения (zones — сетка: главный план сверху, снизу три зоны для аксонометрий и фото, всё масштабируется под свою ячейку; линии сетки тянутся мышью, вид, брошенный в ячейку, встаёт в неё; сетка видна только на экране; rows — рядами; auto — делать это само при добавлении видов); {"a":"sheetzoom","z":150|"in":true,"out":true,"fit":true} — масштаб листа на экране; {"a":"vpact","view":"Обмерный план"} — активировать вид прямо на листе (в нём работают все инструменты; off:true — деактивировать, вернуться к листу); {"a":"wizard","obj":"ЖК …, кв. 5","addr":"г. Саранск, ул. …","org":"…","author":"Иванов","st":["obmer","demontazh","montazh","otdelka","mebel"],"zk":"b3"} — «Мастер проекта» (а также {"a":"vbar","k":"sun"|"shadows"|"crop"|"cropshow"|"isocat"|"hidecat"|"iso"|"hide"|"reset"|"apply"|"tvp"|"tvpoff"|"cons","on":true,"tpl":"План мебели"} — нижняя строка вида как в Revit: траектория солнца, тени, обрезать вид, граница обрезки, временно скрыть/изолировать категорию или элемент, восстановить, применить к виду, временные свойства вида (шаблон на время), показать зависимости; {"a":"viewcrop","crop":true,"show":true,"anno":true,"off":15} — «Границы» плана: обрезать вид, показать границу обрезки (тогда она видна и на листе), обрезать аннотации со смещением в мм бумаги; {"a":"viewsub","view":"current","sub":"Потолки"} — подвид вида или листа (лист отдаёт его своим видам): у подвида свои размеры и свой тип размеров; open:true — список подвидов; {"a":"newview2","kind":"rcp"|"light"} — план потолка / план освещения; {"a":"plankind","k":"rcp"|"light"|"plan"} — сделать открытый план планом потолка, освещения или этажа; {"a":"viewrange","cut":1500,"top":"above","bot":0,"depth":0} — секущий диапазон плана в мм от его уровня (open:true — окно, reset:true — по умолчанию); {"a":"furn","k":"spot","room":"3","n":6} — светильники сеткой в помещении (k: spot, downlight, pendant, track, ledline, sconce, switch1, switch2, socket — под потолком или на стене сами); {"a":"dimoff","mm":300} — выбранные размерные линии дальше от элемента на 300 мм, −200 — ближе; {"a":"dimoff","off":600} — на 600 мм от элемента): из обмера сам делает стадии, планы, помещения, размеры, развёртки, аксонометрии, листы, экспликацию и поля штампа (open:true — открыть окно мастера);{"a":"vpscale","view":"план","scale":27} — масштаб вида на листе, любой 1:N; {"a":"vpscale","fit":true} — вписать виды в их окна (зоны) листа: масштаб 1:N сам под размер окна;{"a":"sheetarea","sheet":"А101","x":25,"y":10,"w":230,"h":220} — область размещения видов в мм от левого верхнего угла листа (reset:true — по умолчанию).
 Экспорт: {"a":"export","f":"ifc"} — для Revit (IFC: стены с проёмами, двери, окна, перекрытия, крыши, колонны, лестницы, мебель, помещения, уровни), "obj" — для 3ds Max (ZIP с OBJ, MTL и текстурами), "glb" — glTF.
-Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"matfill","mat":"Дерево (брус)","fill":"oak","layer":"surf"} — штриховка материала: породы дерева oak/ash/beech/pine/walnut/teak/wenge/veneer (дуб, ясень, бук, сосна, орех, тик, венге, шпон) или название штриховки; layer surf — поверхность, cut — сечение; role fg/bg; {"a":"tracker","on":false} — скрыть трекер у курсора при построении (расстояние, угол, координата Z; true — показать); {"a":"wallform","f":"3p"} — инструмент «Стена» дугой по 3 точкам ("tan" — по касательной к предыдущей стене, "line" — прямая); {"a":"wall","len":4,"dir":"E","r":3} — стена дугой радиусом 3 м ("arc":0.5 — стрелой дуги, "side":"r" — выпуклая вправо); {"a":"wallarc","wall":"Б","r":3} — изогнуть стену Б (радиус, м; "off":true — выпрямить); {"a":"wallnode","wall":"Б","off":0.5} — вставить узел в середину стены и выдвинуть его на 0,5 м; {"a":"walloffset","wall":"Б","d":0.2} — сместить стену параллельно (соседние следуют); {"a":"wallelev","wall":"Б","mm":100} — поднять стену; {"a":"wallpet"} — палитра выбранной стены (как в ArchiCAD); {"a":"textset","ff":"arial","mm":3,"b":true,"i":false,"u":false,"st":false,"col":"#1b252c","lh":120} — шрифт (golos, arial, times, gost, mono, hand), высота букв в мм бумаги, жирный, курсив, подчёркнутый, зачёркнутый, цвет, межстрочный интервал %; {"a":"textset","ha":"c","va":"m","leader":{"side":"l","arc":true},"at":{"side":"l","pos":"m"}} — текст как в Revit (выбранный или последний): выравнивание ha l|c|r и va t|m|b, добавить выноску слева/справа (arc — дугой), "unleader":true — убрать последнюю, at — откуда выноска (t верхняя строка, m середина, b нижняя); {"a":"textfont","f":"hand"} — рукописный шрифт (Marck Script, русские и латинские буквы) для выбранных текстов и новых ("all":true — для всех текстов, "f":"" — обычный); у "text2d" поле "font":"hand"; {"a":"matchprop","from":"window:Б","to":["window:В","window:Г"]} — копировать свойства (Revit «Сопоставить свойства типа»): элементы одного вида получают всё своё (стена — тип, толщину, высоту; дверь — размер, отделку, наличники; текст — вид), разных видов — общее (материал: стол → шкаф); без "to" — включить инструмент (образец — выбранный); {"a":"viewscale","scale":50} — масштаб вида (Revit): под него подстраиваются размеры, тексты и марки; {"a":"viewscale","sheet":true} — по листу (масштаб, с которым вид стоит на своём листе; по умолчанию); {"a":"tag","cats":["door","window"],"tt":"Размер","ld":true} — марки (Revit): поставить марки всем элементам категорий (wall, door, window, fam, column, box, floor, ceiling, stair, roof) в этом виде, tt — тип марки (название или часть: «Размер», «Материал», «Наименование»…), ld — с выносками; {"a":"tag","el":"window:Б"} — одному элементу; {"a":"tag","del":["door"]} или "all" — убрать марки; {"a":"tag"} — инструмент «Марка по категории»; {"a":"tagtype","cat":"door","n":"Размер и материал","txt":"{wh} {mat}","sh":"round","ld":true} — тип марки категории (поля {mark} {name} {w} {h} {wh} {t} {sill} {area} {mat} {cmt}, рамки rect round circle double hex dashed under none), становится типом по умолчанию; {"a":"tagtype","open":true} — окно «Типы марок»; {"a":"tmod","ortho":true} — построение по осям (как Shift; кнопка «Оси» внизу слева на планшете), {"a":"tmod","step":15} — шаг угла 15/30/45°, {"a":"tmod","fix":60} — строить под углом 60°, {"a":"tmod","off":true} — свободное построение; {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"paper","on":true} — фон рабочего поля «мятая бумага» (false — ровный цвет);{"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
+Прочее: {"a":"print"}, {"a":"png"}, {"a":"render"}, {"a":"savecam"} — камера из текущего 3D-ракурса, {"a":"save"}, {"a":"ydsave"}, {"a":"ydopen"} — Яндекс Диск, {"a":"offline"} — скачать всё для работы без интернета (включая голос); {"a":"exit"} — выйти из программы (спросит про сохранение); {"a":"update"} — установить обновление программы из файла .kotupd; {"a":"ribbon","on":false} — свернуть (false) или показать ленту инструментов; {"a":"ydtake"} — перехватить файл Яндекс Диска, открытый на другом устройстве; {"a":"devname","name":"Телефон S26"} — имя этого устройства (видно другим, когда файл открыт); {"a":"matfill","mat":"Дерево (брус)","fill":"oak","layer":"surf"} — штриховка материала: породы дерева oak/ash/beech/pine/walnut/teak/wenge/veneer (дуб, ясень, бук, сосна, орех, тик, венге, шпон) или название штриховки; layer surf — поверхность, cut — сечение; role fg/bg; {"a":"tracker","on":false} — скрыть трекер у курсора при построении (расстояние, угол, координата Z; true — показать); {"a":"wallform","f":"3p"} — инструмент «Стена» дугой по 3 точкам ("tan" — по касательной к предыдущей стене, "line" — прямая); {"a":"wall","len":4,"dir":"E","r":3} — стена дугой радиусом 3 м ("arc":0.5 — стрелой дуги, "side":"r" — выпуклая вправо); {"a":"wallarc","wall":"Б","r":3} — изогнуть стену Б (радиус, м; "off":true — выпрямить); {"a":"wallnode","wall":"Б","off":0.5} — вставить узел в середину стены и выдвинуть его на 0,5 м; {"a":"walloffset","wall":"Б","d":0.2} — сместить стену параллельно (соседние следуют); {"a":"wallelev","wall":"Б","mm":100} — поднять стену; {"a":"wallpet"} — палитра выбранной стены (как в ArchiCAD); {"a":"textset","ff":"arial","mm":3,"b":true,"i":false,"u":false,"st":false,"col":"#1b252c","lh":120} — шрифт (golos, arial, times, gost, mono, hand), высота букв в мм бумаги, жирный, курсив, подчёркнутый, зачёркнутый, цвет, межстрочный интервал %; {"a":"textset","ha":"c","va":"m","leader":{"side":"l","arc":true},"at":{"side":"l","pos":"m"}} — текст как в Revit (выбранный или последний): выравнивание ha l|c|r и va t|m|b, добавить выноску слева/справа (arc — дугой), "unleader":true — убрать последнюю, at — откуда выноска (t верхняя строка, m середина, b нижняя); {"a":"textfont","f":"hand"} — рукописный шрифт (Marck Script, русские и латинские буквы) для выбранных текстов и новых ("all":true — для всех текстов, "f":"" — обычный); у "text2d" поле "font":"hand"; {"a":"matchprop","from":"window:Б","to":["window:В","window:Г"]} — копировать свойства (Revit «Сопоставить свойства типа»): элементы одного вида получают всё своё (стена — тип, толщину, высоту; дверь — размер, отделку, наличники; текст — вид), разных видов — общее (материал: стол → шкаф); без "to" — включить инструмент (образец — выбранный); {"a":"viewscale","scale":50} — масштаб вида (Revit): под него подстраиваются размеры, тексты и марки; {"a":"viewscale","sheet":true} — по листу (масштаб, с которым вид стоит на своём листе; по умолчанию); {"a":"tag","cats":["door","window"],"tt":"Размер","ld":true} — марки (Revit): поставить марки всем элементам категорий (wall, door, window, fam, column, box, floor, ceiling, stair, roof) в этом виде, tt — тип марки (название или часть: «Размер», «Материал», «Наименование»…), ld — с выносками; {"a":"tag","el":"window:Б"} — одному элементу; {"a":"tag","del":["door"]} или "all" — убрать марки; {"a":"tag"} — инструмент «Марка по категории»; {"a":"tagtype","cat":"door","n":"Размер и материал","txt":"{wh} {mat}","sh":"round","ld":true} — тип марки категории (поля {mark} {name} {w} {h} {wh} {t} {sill} {area} {mat} {cmt}, рамки rect round circle double hex dashed under none), становится типом по умолчанию; {"a":"tagtype","open":true} — окно «Типы марок»; {"a":"export","f":"dxf"} — открытый вид в DXF для AutoCAD (DWG — закрытый формат: AutoCAD открывает DXF и «Сохранить как → DWG»), 2D в мм, слои по категориям, тексты; {"a":"tmod","ortho":true} — построение по осям (как Shift; кнопка «Оси» внизу слева на планшете), {"a":"tmod","step":15} — шаг угла 15/30/45°, {"a":"tmod","fix":60} — строить под углом 60°, {"a":"tmod","off":true} — свободное построение; {"a":"fullscreen","on":true} — рабочее поле на весь экран: скрыть ленту, панели и все окна (false — вернуть); {"a":"paper","on":true} — фон рабочего поля «мятая бумага» (false — ровный цвет);{"a":"about"} — версия программы; {"a":"autocopy"} — сейчас записать автокопию рядом с файлом; {"a":"opendlg","d":"levels"|"phases"|"mats"|"furnlib"|"tpl"|"lib"}, {"a":"help"}.
 Если просят то, что делается мышью (нарисовать произвольный контур, щёлкнуть по месту), включи нужный инструмент действием tool и в reply объясни, куда щёлкнуть.`;
 function commandPrompt(text){
   return `Ты переводишь команду пользователя для программы архитектурного черчения «Kot project» в список действий JSON.
@@ -16562,7 +16746,7 @@ const LLM_CMDS = `комната 5 на 4 | стена 3 метра вправо
 покажи план | покажи 3д | покажи аксонометрию | покажи южный фасад | разрез | разрез от 0 2 до 8 2 | развёртки помещения 1 | камера из 1 5 на 4 1 | узел от 1 1 до 2 2
 стадия демонтаж (обмер, монтаж, мебель, все) | снеси стену Б | открой план демонтажа | новый лист | размести виды | экспликация помещений | рамка листа
 скрой буквы | покажи буквы | скрытые линии | тонированный | графичный | на весь экран | покажи панели | фон бумага | ровный фон | отмени | верни | сохрани | распечатай | визуализация | что умеешь
-экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | балконный блок в южной стене | балконный блок 1720 дверь 740 справа в северной стене | в окне Б балконный блок дверь 800 | в окне Б балконный блок низ двери глухой | у окна Б две створки | у окна Б створки сами | дверь А гладкая | у двери А филёнки | активируй вид Обмерный план | деактивируй вид | масштаб плана на листе 1:27 | впиши виды в окна | создай план мебели | примени шаблон план мебели | создай план отделки | стадия отделка | создай план потолка | создай план освещения | секущая плоскость 1500 | секущий диапазон | сделай этот план планом потолка | поставь 6 точечных светильников в помещении 3 | поставь выключатель | подвид потолки | подвиды | обрежь вид | скрой границу обрезки | обрезать аннотации | покажи траекторию солнца | выключи тени | изолируй категорию | восстанови скрытые | примени скрытие к виду | временно примени шаблон план мебели | восстанови свойства вида | покажи зависимости | построение по осям | замаркируй двери и окна | марки всех элементов | поставь марку на окно Б | убери марки окон | типы марок | марка по категории | масштаб вида 1:50 | масштаб вида по листу | копировать свойства | скопируй свойства с окна Б на окно В | рукописный шрифт | выровняй текст по центру | текст жирный | текст курсивом | подчеркни текст | высота текста 5 мм | шрифт arial | текст по правому краю | добавь выноску слева | добавь выноску справа дугой | убери выноску | обычный шрифт | стиль эскиз | стена дугой | стена по касательной | прямая стена | стену Б дугой радиус 3000 | выпрями стену Б | вставь узел в стену Б | сместить стену Б на 200 | подними стену Б на 100 | скрой трекер | покажи трекер | штриховка дуб для материала дерево | рисуй под углом 45 | шаг угла 15 | свободное построение | у окна Б зависимость сверху Этаж 2 | окно Б смещение сверху -200 | у двери Б отделка спереди дуб | наличники у двери А с двух сторон | наличник у двери А шириной 90 | толщина наличника у двери А 16 | материал наличников у двери А дерево | у двери Б каркас белый | у двери Б комментарий 900 | мастер проекта | собери проект из обмера | размер дальше на 300 | размерную линию ближе на 200 | выход размерной линии на 1 мм |раскладка план сверху два снизу | раскладка план по центру два слева | раскладка план по центру три слева | разложи виды по зонам | разложи виды рядами | приблизь лист | отдали лист | лист целиком | боковая колонка | убери боковую колонку | редактировать колонку | в колонке напиши Отделка по проекту | в колонке таблица 4 на 3 | боковая колонка на всех листах | в примечание добавь Пол выровнять | свой блок на листе | начерти штамп линиями | линия в штампе от 0 10 до 65 10 | в штампе разработал Иванов | в штампе объект Саранск | засечки меньше | засечки 2 мм | текст размеров 2,5 мм | детализация высокая | детализация средняя | детализация низкая | проставь обмерные размеры | новое зелёным | новое обычным цветом | фильтр стадий показать все | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
+экспорт в ревит | экспорт в 3д макс | экспорт в glb | добавь фото на лист | рамка листа слева 25 | балконный блок в южной стене | балконный блок 1720 дверь 740 справа в северной стене | в окне Б балконный блок дверь 800 | в окне Б балконный блок низ двери глухой | у окна Б две створки | у окна Б створки сами | дверь А гладкая | у двери А филёнки | активируй вид Обмерный план | деактивируй вид | масштаб плана на листе 1:27 | впиши виды в окна | создай план мебели | примени шаблон план мебели | создай план отделки | стадия отделка | создай план потолка | создай план освещения | секущая плоскость 1500 | секущий диапазон | сделай этот план планом потолка | поставь 6 точечных светильников в помещении 3 | поставь выключатель | подвид потолки | подвиды | обрежь вид | скрой границу обрезки | обрезать аннотации | покажи траекторию солнца | выключи тени | изолируй категорию | восстанови скрытые | примени скрытие к виду | временно примени шаблон план мебели | восстанови свойства вида | покажи зависимости | построение по осям | экспорт в dwg | сохрани в dxf | замаркируй двери и окна | марки всех элементов | поставь марку на окно Б | убери марки окон | типы марок | марка по категории | масштаб вида 1:50 | масштаб вида по листу | копировать свойства | скопируй свойства с окна Б на окно В | рукописный шрифт | выровняй текст по центру | текст жирный | текст курсивом | подчеркни текст | высота текста 5 мм | шрифт arial | текст по правому краю | добавь выноску слева | добавь выноску справа дугой | убери выноску | обычный шрифт | стиль эскиз | стена дугой | стена по касательной | прямая стена | стену Б дугой радиус 3000 | выпрями стену Б | вставь узел в стену Б | сместить стену Б на 200 | подними стену Б на 100 | скрой трекер | покажи трекер | семейство ваза в подкатегорию декор | подкатегория сама для семейства ваза | штриховка дуб для материала дерево | рисуй под углом 45 | шаг угла 15 | свободное построение | у окна Б зависимость сверху Этаж 2 | окно Б смещение сверху -200 | у двери Б отделка спереди дуб | наличники у двери А с двух сторон | наличник у двери А шириной 90 | толщина наличника у двери А 16 | материал наличников у двери А дерево | у двери Б каркас белый | у двери Б комментарий 900 | мастер проекта | собери проект из обмера | размер дальше на 300 | размерную линию ближе на 200 | выход размерной линии на 1 мм |раскладка план сверху два снизу | раскладка план по центру два слева | раскладка план по центру три слева | разложи виды по зонам | разложи виды рядами | приблизь лист | отдали лист | лист целиком | боковая колонка | убери боковую колонку | редактировать колонку | в колонке напиши Отделка по проекту | в колонке таблица 4 на 3 | боковая колонка на всех листах | в примечание добавь Пол выровнять | свой блок на листе | начерти штамп линиями | линия в штампе от 0 10 до 65 10 | в штампе разработал Иванов | в штампе объект Саранск | засечки меньше | засечки 2 мм | текст размеров 2,5 мм | детализация высокая | детализация средняя | детализация низкая | проставь обмерные размеры | новое зелёным | новое обычным цветом | фильтр стадий показать все | скрой названия видов на листе | покажи названия видов на листе | измени название вида на План квартиры | добавь столбец примечание в экспликацию | ширина столбца наименование 55 в экспликации | высота строки 7 в экспликации | измени штамп
 выбери все экземпляры | выбери предыдущий | скрой категорию | графика элемента | полутона для выбранного | сдвинь выбранное вправо на 100 | поверни выбранное на 90 | скопируй выбранное вправо на 1000 | скрой выбранное
 открой обмерный план | новый план | новый 3д вид | новый лист | размести виды | тип размеров вида монтаж | скачай ии | обучение ии | слушай всегда | найди в интернете высота подоконника | сохрани на яндекс диск | версия программы
 посчитай объём всех стен | посчитай площадь всех помещений | добавь аксонометрии на лист | калькулятор | закрой калькулятор | посчитай 3,5 * 4,2 | сколько будет 12 + 15% | посчитай сколько плитки на пол 3 на 4 с запасом 10%`;
@@ -16623,7 +16807,7 @@ const LEARN_BUILTIN = [
   ['покажи сверху', 'покажи план'], ['давай в объёме', 'покажи 3д'], ['в три дэ', 'покажи 3д'], ['аксонометрию покажи', 'покажи аксонометрию'], ['фасад с юга', 'покажи южный фасад'], ['сделай разрез', 'разрез'], ['развёртку первой комнаты', 'развёртки помещения 1'],
   ['включи демонтаж', 'стадия демонтаж'], ['перейди на обмер', 'стадия обмер'], ['покажи все стадии', 'стадия все'], ['снеси стену бэ', 'снеси стену Б'], ['открой план демонтажа', 'открой план демонтажа'],
   ['новый лист', 'новый лист'], ['разложи виды на листе', 'размести виды'], ['таблицу помещений на лист', 'экспликация помещений'], ['поля листа', 'рамка листа'],
-  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['сделай окно Б двустворчатым', 'у окна Б две створки'], ['выдели всё новое зелёным', 'новое зелёным'], ['нарисуй план подробно, со всеми деталями', 'детализация высокая'], ['засечки на размерах слишком большие', 'засечки меньше'], ['сделай засечки покрупнее', 'засечки больше'],['сделай план попроще, только заливка стен', 'детализация низкая'],['на обмере поставь все размеры автоматически', 'проставь обмерные размеры'], ['я удалил размеры, верни обмерные', 'проставь обмерные размеры'], ['размеры на обмерном плане пусть стоят сами', 'проставь обмерные размеры'],['не надо зелёного, покажи как обычно', 'новое обычным цветом'],['хочу дверь А без рисунка, ровную', 'дверь А гладкая'], ['верни у двери А филенки', 'у двери А филёнки'],['пусть окно Б будет на три створки', 'у окна Б 3 створки'], ['поставь окно с балконной дверью на юге','балконный блок в южной стене'], ['у балконной двери в окне Б внизу филёнка, не стекло', 'в окне Б балконный блок низ двери глухой'],['выход на балкон с окном в северной стене, дверь слева', 'балконный блок дверь слева в северной стене'], ['впиши в штамп что разработал петров','в штампе разработал Петров'], ['хочу сам нарисовать штамп линиями', 'начерти штамп линиями'], ['оформи лист как у меня, справа блок с экспликацией, примечанием и штампом', 'боковая колонка'], ['хочу добавить на лист свою таблицу', 'свой блок на листе'], ['план сверху крупно, а внизу аксонометрии', 'разложи виды по зонам'], ['покажи лист поближе', 'приблизь лист'], ['хочу поправить план прямо на листе', 'активируй вид Обмерный план'], ['вернись на лист', 'деактивируй вид'], ['пусть план займёт всё окно на листе', 'впиши виды в окна'], ['нужен план с расстановкой мебели', 'создай план мебели'], ['нужен чертёж чистовой отделки', 'создай план отделки'], ['нужен чертёж потолков', 'создай план потолка'], ['этот лист относится к освещению', 'подвид освещение'], ['не показывай рамку обрезки', 'скрой границу обрезки'], ['оставь на экране только эту категорию', 'изолируй категорию'], ['где солнце ходит', 'покажи траекторию солнца'], ['посмотрю как будет с шаблоном мебели, не насовсем', 'временно примени шаблон план мебели'], ['что тут закреплено', 'покажи зависимости'], ['хочу рисовать стены только ровно по горизонтали и вертикали', 'построение по осям'], ['подпиши все двери и окна буквами', 'замаркируй двери и окна'], ['подпиши у мебели материал со стрелочками', 'замаркируй мебель по материалу с выносками'], ['убери все марки', 'убери марки'], ['какие бывают марки', 'типы марок'], ['размеры слишком крупные, план будет в пятидесятом масштабе', 'масштаб вида 1:50'], ['пусть размеры подстраиваются под лист', 'масштаб вида по листу'], ['сделай окно В таким же как окно Б', 'скопируй свойства с окна Б на окно В'], ['шкаф пусть будет из того же материала что стол', 'копировать свойства'], ['напиши подписи красивым почерком', 'рукописный шрифт'], ['поставь надпись посередине', 'выровняй текст по центру'], ['сделай надпись пожирнее', 'текст жирный'], ['буквы текста по пять миллиметров', 'высота текста 5 мм'], ['надпись наклонным шрифтом', 'текст курсивом'], ['от текста стрелочку влево', 'добавь выноску слева'], ['стрелку к тексту справа плавной линией', 'добавь выноску справа дугой'], ['пусть все надписи будут как от руки', 'все тексты рукописным шрифтом'], ['верни нормальные буквы', 'обычный шрифт'], ['сделай аксонометрию как рисунок для презентации', 'стиль эскиз'], ['покажи 3д в стиле скетча', 'стиль эскиз'], ['хочу полукруглую стену', 'стена дугой'], ['стена плавно продолжает предыдущую', 'стена по касательной'], ['сделай стену Б закруглённой, радиус три метра', 'стену Б дугой радиус 3000'], ['стену Б обратно ровной', 'выпрями стену Б'], ['сломай стену Б посередине уголком на полметра', 'вставь узел в стену Б на 500'], ['перенеси стену Б на 20 сантиметров параллельно', 'сместить стену Б на 200'], ['убери цифры возле курсора когда рисую', 'скрой трекер'], ['верни длину и угол у курсора', 'покажи трекер'], ['сделай дерево с рисунком дуба', 'штриховка дуб для материала дерево'], ['пусть брус в разрезе будет как венге', 'штриховка сечения венге для материала дерево'], ['стену надо под сорок пять градусов', 'рисуй под углом 45'], ['пусть линии ложатся через каждые пятнадцать градусов', 'шаг угла 15'], ['хватит углов, рисую как хочу', 'свободное построение'], ['привяжи верх окна Б ко второму этажу', 'у окна Б зависимость сверху Этаж 2'], ['сделай полотно двери Б с лицевой стороны дубовым', 'у двери Б отделка спереди дуб'], ['поставь наличники на окно Б изнутри', 'у окна Б наличники со стороны комнаты'], ['наличники у двери А пошире, сантиметров девять', 'наличник у двери А шириной 90'], ['у двери А наличников не надо', 'убери наличники у двери А'], ['коробку двери Б сделай белой', 'у двери Б каркас белый'], ['подпиши у двери Б комментарий без порога', 'у двери Б комментарий без порога'], ['пусть размеры за рамкой тоже обрезаются', 'обрезать аннотации'],['пусть этот план будет для розеток', 'подвид розетки'],['сделай схему освещения', 'создай план освещения'], ['подними секущую плоскость до полутора метров', 'секущая плоскость 1500'], ['точечные светильники в кухне, шесть штук', 'поставь 6 точечных светильников в помещении 3'],['переключи на отделку', 'стадия отделка'],['обмер готов, сделай остальное сам', 'собери проект из обмера'], ['оформи весь проект по обмеру со всеми листами', 'собери проект из обмера'], ['открой мастер', 'мастер проекта'], ['отодвинь размер подальше от стены', 'размер дальше на 300'], ['придвинь размерную линию к стене', 'размерную линию ближе на 200'], ['уменьши длину линий после засечек', 'выход размерной линии на 1 мм'],['оформи этот план как план мебели', 'примени шаблон план мебели'],['аксонометрии поставь слева от плана, две штуки', 'раскладка план по центру два слева'], ['под планом только две ячейки', 'раскладка план сверху два снизу'], ['хочу три окна слева а план в середине', 'раскладка план по центру три слева'],['сделай план на листе в масштабе 28', 'масштаб плана на листе 1:28'],['хочу поправить блок справа прямо на листе', 'редактировать колонку'], ['добавь в правый блок таблицу на 4 строки и 3 столбца', 'в колонке таблица 4 на 3'],['покажи весь лист', 'лист целиком'], ['проведи в штампе черту от 0 10 до 65 10', 'линия в штампе от 0 10 до 65 10'],['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
+  ['убери буквы', 'скрой буквы'], ['покажи буквы стен', 'покажи буквы'], ['контурами', 'скрытые линии'], ['с заливкой', 'тонированный'], ['сделай аксонометрию красивой как в ревите', 'графичный'], ['светлый стиль с тёмным разрезом', 'графичный'],['рабочее поле на весь экран', 'на весь экран'], ['сделай окно Б двустворчатым', 'у окна Б две створки'], ['выдели всё новое зелёным', 'новое зелёным'], ['нарисуй план подробно, со всеми деталями', 'детализация высокая'], ['засечки на размерах слишком большие', 'засечки меньше'], ['сделай засечки покрупнее', 'засечки больше'],['сделай план попроще, только заливка стен', 'детализация низкая'],['на обмере поставь все размеры автоматически', 'проставь обмерные размеры'], ['я удалил размеры, верни обмерные', 'проставь обмерные размеры'], ['размеры на обмерном плане пусть стоят сами', 'проставь обмерные размеры'],['не надо зелёного, покажи как обычно', 'новое обычным цветом'],['хочу дверь А без рисунка, ровную', 'дверь А гладкая'], ['верни у двери А филенки', 'у двери А филёнки'],['пусть окно Б будет на три створки', 'у окна Б 3 створки'], ['поставь окно с балконной дверью на юге','балконный блок в южной стене'], ['у балконной двери в окне Б внизу филёнка, не стекло', 'в окне Б балконный блок низ двери глухой'],['выход на балкон с окном в северной стене, дверь слева', 'балконный блок дверь слева в северной стене'], ['впиши в штамп что разработал петров','в штампе разработал Петров'], ['хочу сам нарисовать штамп линиями', 'начерти штамп линиями'], ['оформи лист как у меня, справа блок с экспликацией, примечанием и штампом', 'боковая колонка'], ['хочу добавить на лист свою таблицу', 'свой блок на листе'], ['план сверху крупно, а внизу аксонометрии', 'разложи виды по зонам'], ['покажи лист поближе', 'приблизь лист'], ['хочу поправить план прямо на листе', 'активируй вид Обмерный план'], ['вернись на лист', 'деактивируй вид'], ['пусть план займёт всё окно на листе', 'впиши виды в окна'], ['нужен план с расстановкой мебели', 'создай план мебели'], ['нужен чертёж чистовой отделки', 'создай план отделки'], ['нужен чертёж потолков', 'создай план потолка'], ['этот лист относится к освещению', 'подвид освещение'], ['не показывай рамку обрезки', 'скрой границу обрезки'], ['оставь на экране только эту категорию', 'изолируй категорию'], ['где солнце ходит', 'покажи траекторию солнца'], ['посмотрю как будет с шаблоном мебели, не насовсем', 'временно примени шаблон план мебели'], ['что тут закреплено', 'покажи зависимости'], ['хочу рисовать стены только ровно по горизонтали и вертикали', 'построение по осям'], ['нужен файл для автокада', 'экспорт в dwg'], ['конвертируй план в двг', 'экспорт в dwg'], ['подпиши все двери и окна буквами', 'замаркируй двери и окна'], ['подпиши у мебели материал со стрелочками', 'замаркируй мебель по материалу с выносками'], ['убери все марки', 'убери марки'], ['какие бывают марки', 'типы марок'], ['размеры слишком крупные, план будет в пятидесятом масштабе', 'масштаб вида 1:50'], ['пусть размеры подстраиваются под лист', 'масштаб вида по листу'], ['сделай окно В таким же как окно Б', 'скопируй свойства с окна Б на окно В'], ['шкаф пусть будет из того же материала что стол', 'копировать свойства'], ['напиши подписи красивым почерком', 'рукописный шрифт'], ['поставь надпись посередине', 'выровняй текст по центру'], ['сделай надпись пожирнее', 'текст жирный'], ['буквы текста по пять миллиметров', 'высота текста 5 мм'], ['надпись наклонным шрифтом', 'текст курсивом'], ['от текста стрелочку влево', 'добавь выноску слева'], ['стрелку к тексту справа плавной линией', 'добавь выноску справа дугой'], ['пусть все надписи будут как от руки', 'все тексты рукописным шрифтом'], ['верни нормальные буквы', 'обычный шрифт'], ['сделай аксонометрию как рисунок для презентации', 'стиль эскиз'], ['покажи 3д в стиле скетча', 'стиль эскиз'], ['хочу полукруглую стену', 'стена дугой'], ['стена плавно продолжает предыдущую', 'стена по касательной'], ['сделай стену Б закруглённой, радиус три метра', 'стену Б дугой радиус 3000'], ['стену Б обратно ровной', 'выпрями стену Б'], ['сломай стену Б посередине уголком на полметра', 'вставь узел в стену Б на 500'], ['перенеси стену Б на 20 сантиметров параллельно', 'сместить стену Б на 200'], ['убери цифры возле курсора когда рисую', 'скрой трекер'], ['верни длину и угол у курсора', 'покажи трекер'], ['перенеси вазу в диспетчере в раздел декор', 'семейство ваза в подкатегорию декор'], ['табурет это стулья, положи его к стульям', 'семейство табурет в подкатегорию стулья'], ['пусть программа сама решит куда отнести вазу', 'подкатегория сама для семейства ваза'], ['сделай дерево с рисунком дуба', 'штриховка дуб для материала дерево'], ['пусть брус в разрезе будет как венге', 'штриховка сечения венге для материала дерево'], ['стену надо под сорок пять градусов', 'рисуй под углом 45'], ['пусть линии ложатся через каждые пятнадцать градусов', 'шаг угла 15'], ['хватит углов, рисую как хочу', 'свободное построение'], ['привяжи верх окна Б ко второму этажу', 'у окна Б зависимость сверху Этаж 2'], ['сделай полотно двери Б с лицевой стороны дубовым', 'у двери Б отделка спереди дуб'], ['поставь наличники на окно Б изнутри', 'у окна Б наличники со стороны комнаты'], ['наличники у двери А пошире, сантиметров девять', 'наличник у двери А шириной 90'], ['у двери А наличников не надо', 'убери наличники у двери А'], ['коробку двери Б сделай белой', 'у двери Б каркас белый'], ['подпиши у двери Б комментарий без порога', 'у двери Б комментарий без порога'], ['пусть размеры за рамкой тоже обрезаются', 'обрезать аннотации'],['пусть этот план будет для розеток', 'подвид розетки'],['сделай схему освещения', 'создай план освещения'], ['подними секущую плоскость до полутора метров', 'секущая плоскость 1500'], ['точечные светильники в кухне, шесть штук', 'поставь 6 точечных светильников в помещении 3'],['переключи на отделку', 'стадия отделка'],['обмер готов, сделай остальное сам', 'собери проект из обмера'], ['оформи весь проект по обмеру со всеми листами', 'собери проект из обмера'], ['открой мастер', 'мастер проекта'], ['отодвинь размер подальше от стены', 'размер дальше на 300'], ['придвинь размерную линию к стене', 'размерную линию ближе на 200'], ['уменьши длину линий после засечек', 'выход размерной линии на 1 мм'],['оформи этот план как план мебели', 'примени шаблон план мебели'],['аксонометрии поставь слева от плана, две штуки', 'раскладка план по центру два слева'], ['под планом только две ячейки', 'раскладка план сверху два снизу'], ['хочу три окна слева а план в середине', 'раскладка план по центру три слева'],['сделай план на листе в масштабе 28', 'масштаб плана на листе 1:28'],['хочу поправить блок справа прямо на листе', 'редактировать колонку'], ['добавь в правый блок таблицу на 4 строки и 3 столбца', 'в колонке таблица 4 на 3'],['покажи весь лист', 'лист целиком'], ['проведи в штампе черту от 0 10 до 65 10', 'линия в штампе от 0 10 до 65 10'],['убери подписи под видами на листе', 'скрой названия видов на листе'], ['подпиши вид на листе как план квартиры', 'измени название вида на План квартиры'],['поменяй в штампе объект на квартира на ленина', 'в штампе объект Квартира на Ленина'],['сделай фон как мятая бумага', 'фон бумага'], ['хочу обычный фон без бумаги', 'ровный фон'],['верни панели', 'покажи панели'],
   ['отмени последнее', 'отмени'], ['верни как было', 'верни'], ['сохрани проект', 'сохрани'], ['напечатай', 'распечатай'], ['сделай красивую картинку', 'визуализация'], ['что ты умеешь', 'что умеешь'],
   ['сделай нормальную спальню', 'комната 3500 на 4'], ['нужна детская', 'комната 3 на 3500'], ['гостиную побольше', 'комната 5 на 4'], ['маленькую кухню', 'комната 3 на 3'], ['кухню гостиную', 'комната 6 на 4'],
   ['совмещённый санузел', 'комната 2 на 1700'], ['ванную комнату', 'комната 2 на 1700'], ['прихожую', 'комната 2500 на 1500'], ['кладовку', 'комната 1500 на 1200'], ['гардеробную', 'комната 2 на 1500'],
